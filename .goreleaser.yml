@@ -1,0 +1,27 @@
+# Official documentation at http://goreleaser.com
+project_name: opscli
+builds:
+- env:
+  - CGO_ENABLED=0
+  main: ./main.go
+  binary: opscli
+  goarch:
+    - amd64
+  goos:
+    - linux
+  tags:
+    containers_image_openpgp
+  ldflags:
+    - -w
+    - -s
+dist: bin
+archives:
+- name_template: "opscli-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+  replacements:
+    amd64: amd64
+  files:
+    - none*
+snapshot:
+  name_template: "{{ .Version }}"
+changelog:
+  skip: true
