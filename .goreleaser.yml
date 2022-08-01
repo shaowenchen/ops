@@ -1,0 +1,27 @@
+project_name: opscli
+builds:
+-
+  env:
+  - CGO_ENABLED=0
+  main: ./main.go
+  binary: opscli
+  goarch:
+    - amd64
+  goos:
+    - linux
+    - darwin
+  tags:
+    containers_image_openpgp
+  ldflags:
+    - -X "github.com/shaowenchen/opscli/cmd.buildVersion={{ .Version }}"
+    - -X "github.com/shaowenchen/opscli/cmd.buildDate={{ .Date }}"
+    - -X "github.com/shaowenchen/opscli/cmd.gicommitID={{ .ShortCommit }}"
+    - -w
+    - -s
+  hooks:
+    post: 'upx --lzma {{ .Path }}'
+dist: bin
+archives:
+- name_template: "opscli-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+changelog:
+  skip: true

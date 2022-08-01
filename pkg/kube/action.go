@@ -1,0 +1,153 @@
+package kube
+
+import (
+	"fmt"
+	"github.com/shaowenchen/opscli/pkg/script"
+	"strings"
+)
+
+func ActionClear(option ClearOption) (err error) {
+	client, err := NewKubernetesClient(option.Kubeconfig)
+	if client == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	namespaces := SplitStr(option.Namespace)
+	if option.All {
+		namespaces, err = GetAllNamespaces(client)
+		if err != nil {
+			return
+		}
+	}
+	for _, namespace := range namespaces {
+		err = ClearPod(client, namespace, SplitStr(option.Status))
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	return
+}
+
+func ActionDescheduler(option DeschedulerOption) (err error) {
+	config, err := GetRestConfig(option.Kubeconfig)
+	if config == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	client, err := NewKubernetesClient(option.Kubeconfig)
+	err = RunDeScheduler(config, client, option.RemoveDuplicates, option.NodeUtilization)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return
+}
+
+func ActionEtcHostsOnEachNode(option EtcHostsOption) (err error) {
+	client, err := NewKubernetesClient(option.Kubeconfig)
+	if client == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	if option.Clear {
+		namespacedName, err := GetOpscliNamespacedName(client, fmt.Sprintf("deleteetchosts-%s", option.Domain))
+		if err != nil {
+			return PrintError(ErrorMsgRunScriptOnNode(err))
+		}
+		err = RunScriptOnEachNode(client, namespacedName, script.DeleteHost(option.Domain))
+	} else {
+		namespacedName, err := GetOpscliNamespacedName(client, fmt.Sprintf("addetchosts-%s-%s", option.Domain, strings.ReplaceAll(option.IP, ".", "-")))
+		if err != nil {
+			return PrintError(ErrorMsgRunScriptOnNode(err))
+		}
+		err = RunScriptOnEachNode(client, namespacedName, script.AddHost(option.IP, option.Domain))
+	}
+	if err != nil {
+		return PrintError(ErrorMsgRunScriptOnNode(err))
+	}
+	return
+}
+
+func ActionImagePullSecret(option ImagePulllSecretOption) (err error) {
+	client, err := NewKubernetesClient(option.Kubeconfig)
+	if client == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+
+	namespacedNames := SplitNamespacedName(option.Name)
+	if option.All {
+		namespacedNames, err = SplitAllNamespacedName(client, option.Name)
+		if err != nil {
+			PrintError(err.Error())
+		}
+	}
+
+	for _, namespacedName := range namespacedNames {
+		if option.Clear {
+			_, err = DeleteSecret(client, namespacedName)
+		} else {
+			_, err = CreateImagePullSecret(client, namespacedName, option.Host, option.Username, option.Password)
+		}
+		if err != nil {
+			PrintError(ErrorMsgImagePullSecret(err))
+		}
+	}
+	return
+}
+
+func ActionNodeSelector(option NodeSelectorOption) (err error) {
+	client, err := NewKubernetesClient(option.Kubeconfig)
+	if client == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	namespacedNames := SplitNamespacedName(option.Name)
+	for _, namespacedName := range namespacedNames {
+		if option.Clear {
+			option.KeyLabels = ""
+		}
+		labePairs := SplitKeyValues(option.KeyLabels)
+		err = SetDeploymentNodeSelector(client, namespacedName, labePairs)
+		if err != nil {
+			return PrintError(ErrorMsgNodeSelector(err))
+		}
+	}
+	return
+}
+
+func ActionNodeName(option NodeNameOption) (err error) {
+	client, err := NewKubernetesClient(option.Kubeconfig)
+	if client == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	for _, namespacedName := range SplitNamespacedName(option.Name) {
+		if option.Clear {
+			option.NodeName = ""
+		}
+		err = SetDeploymentNodeName(client, option.NodeName, namespacedName)
+		if err != nil {
+			return PrintError(ErrorMsgNodeName(err))
+		}
+	}
+	return
+}
+
+func ActionLimitRange(option LimitRangeOption) (err error) {
+	client, err := NewKubernetesClient(option.Kubeconfig)
+	if client == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	namespacedNames := SplitNamespacedName(option.Name)
+	if option.All {
+		namespacedNames, err = SplitAllNamespacedName(client, option.Name)
+		if err != nil {
+			PrintError(err.Error())
+		}
+	}
+	for _, namespacedName := range namespacedNames {
+		if option.Clear {
+			err = DeleteLimitRange(client, namespacedName)
+		} else {
+			err = CreateLimitRange(client, namespacedName, option.ReqMem, option.LimitMem, option.ReqCPU, option.LimitCPU)
+		}
+		if err != nil {
+			return PrintError(ErrorMsgLimitRange(err))
+		}
+	}
+	return
+}

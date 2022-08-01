@@ -1,0 +1,47 @@
+#!/bin/sh
+case "$(uname -m)" in
+  x86_64)
+    ARCH=amd64
+    ;;
+  *)
+    echo "ARCH isn't supported"
+    exit 1
+    ;;
+esac
+
+case "$(uname)" in
+  Linux)
+    OSTYPE=linux
+    ;;
+  Darwin)
+    OSTYPE=darwin
+    ;;
+  *)
+    echo "OS isn't supported"
+    exit 1
+    ;;
+esac
+
+if [ "x${VERSION}" = "x" ]; then
+  VERSION="$(curl -sL https://api.github.com/repos/shaowenchen/opscli/releases |
+    grep -o 'download/v[0-9]*.[0-9]*.[0-9]*/' |
+    sort --version-sort |
+    tail -1 | awk -F'/' '{ print $2}')"
+  VERSION="${VERSION##*/}"
+fi
+
+FILENAME="opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
+DOWNLOAD_URL="https://github.com/shaowenchen/opscli/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
+http_code=$(curl --connect-timeout 3 -s -o temp.out -w '%{http_code}'  https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh;)
+rm -rf temp.out || true
+if [[ $http_code -ne 200 ]]; then
+    DOWNLOAD_URL="https://ghproxy.com/${DOWNLOAD_URL}"
+fi
+echo $DOWNLOAD_URL
+curl -fsLO "$DOWNLOAD_URL"
+
+tar -xzf "${FILENAME}"
+chmod +x opscli
+mv -f opscli /usr/local/bin/
+rm -rf "${FILENAME}"
+echo "Congratulations! You have successfully installed Opscli in /usr/local/bin/opscli"
