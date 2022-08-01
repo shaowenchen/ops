@@ -19,12 +19,3 @@ tag:
 	git push -d origin v1.0.0 || true
 	git tag v1.0.0
 	git push origin v1.0.0
-
-clearhistory:
-	git checkout main
-	git checkout --orphan new_main
-	git add -A
-	git commit -m "init"
-	git branch -D main
-	git branch -m main
-	git push -f origin main
