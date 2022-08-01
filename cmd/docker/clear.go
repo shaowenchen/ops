@@ -18,6 +18,6 @@ var clearCmd = &cobra.Command{
 func init() {
 	clearCmd.Flags().StringVarP(&clearOpt.Input, "input", "", "", "")
 	clearCmd.Flags().StringVarP(&clearOpt.NameRegx, "nameregx", "", "", "")
-	clearCmd.Flags().StringVarP(&clearOpt.TagRegx, "tagregex", "", "master|main|gray|test|dev|feature|rc|issue", "")
+	clearCmd.Flags().StringVarP(&clearOpt.TagRegx, "tagregx", "", "master|main|gray|test|dev|feature|rc|issue", "")
 	clearCmd.Flags().BoolVarP(&clearOpt.Force, "force", "", false, "")
 }

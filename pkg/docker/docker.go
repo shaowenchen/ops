@@ -32,6 +32,9 @@ func ImageClear(dockerCli *client.Client, force bool, nameRegx, tagRegx string) 
 				if err != nil {
 					return
 				}
+				if !needDelete {
+					continue
+				}
 			}
 			if len(tagRegx) > 0 {
 				needDelete = false
@@ -42,7 +45,7 @@ func ImageClear(dockerCli *client.Client, force bool, nameRegx, tagRegx string) 
 			}
 			if needDelete {
 				logsList = append(logsList, fmt.Sprintf("Deleting image %s:%s", splitImageTag[0], splitImageTag[1]))
-				_, err = dockerCli.ImageRemove(context.TODO(), image.ID, types.ImageRemoveOptions{
+				_, err = dockerCli.ImageRemove(context.TODO(), imageTag, types.ImageRemoveOptions{
 					Force:         force,
 					PruneChildren: true,
 				})
@@ -55,7 +58,7 @@ func ImageClear(dockerCli *client.Client, force bool, nameRegx, tagRegx string) 
 	return strings.Join(logsList, "\n"), err
 }
 
-func ImagesPrune(dockerCli *client.Client)(report types.ImagesPruneReport, err error){
+func ImagesPrune(dockerCli *client.Client) (report types.ImagesPruneReport, err error) {
 	report, err = dockerCli.ImagesPrune(context.TODO(), filters.NewArgs())
 	return
 }
