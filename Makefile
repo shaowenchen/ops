@@ -1,12 +1,10 @@
 BIN             = ./bin/opscli
 
 format:
-	go fmt $(go list ./... | grep -v /vendor/)
-	go test $(go list ./... | grep -v /vendor/)
-
-vendor:
 	go mod tidy
 	go mod vendor
+	go fmt $(go list ./... | grep -v /vendor/)
+	go test $(go list ./... | grep -v /vendor/)
 
 run:
 	go run main.go
