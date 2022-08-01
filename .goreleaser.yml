@@ -18,8 +18,6 @@ builds:
     - -X "github.com/shaowenchen/opscli/cmd.gicommitID={{ .ShortCommit }}"
     - -w
     - -s
-  hooks:
-    post: 'upx --lzma {{ .Path }}'
 dist: bin
 archives:
 - name_template: "opscli-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
