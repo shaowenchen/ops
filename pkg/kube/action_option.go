@@ -7,11 +7,11 @@ type ClearOption struct {
 	All        bool
 }
 type DeschedulerOption struct {
-	Kubeconfig string
-	Namespace  string
+	Kubeconfig       string
+	Namespace        string
 	RemoveDuplicates bool
-	NodeUtilization bool
-	All        bool
+	NodeUtilization  bool
+	All              bool
 }
 
 type EtcHostsOption struct {
@@ -19,6 +19,13 @@ type EtcHostsOption struct {
 	Domain     string
 	IP         string
 	Clear      bool
+}
+
+type HostRunOption struct {
+	Kubeconfig string
+	NodeName   string
+	All        bool
+	Script     string
 }
 
 type ImagePulllSecretOption struct {

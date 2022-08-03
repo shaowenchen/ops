@@ -2,8 +2,10 @@ package kube
 
 import (
 	"fmt"
-	"github.com/shaowenchen/opscli/pkg/script"
 	"strings"
+	"time"
+
+	"github.com/shaowenchen/opscli/pkg/script"
 )
 
 func ActionClear(option ClearOption) (err error) {
@@ -36,6 +38,32 @@ func ActionDescheduler(option DeschedulerOption) (err error) {
 	err = RunDeScheduler(config, client, option.RemoveDuplicates, option.NodeUtilization)
 	if err != nil {
 		fmt.Println(err.Error())
+	}
+	return
+}
+
+func ActionHostRun(option HostRunOption) (err error) {
+	client, err := NewKubernetesClient(option.Kubeconfig)
+	if client == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	nodeNames := []string{}
+	if len(option.NodeName) > 0 {
+		nodeNames = []string{option.NodeName}
+	}
+	if option.All {
+		nodeNames, err = GetAllNodeNames(client)
+	}
+	for _, nodeName := range nodeNames {
+		time.Sleep(time.Second * 1)
+		namespacedName, err := GetOpscliNamespacedName(client, fmt.Sprintf("script-runhost-%s", time.Now().Format("2006-01-02-15-04-05")))
+		if err != nil {
+			PrintError(ErrorMsgRunScriptOnNode(err))
+		}
+		_, err = RunScriptOnNode(client, nodeName, namespacedName, option.Script)
+		if err != nil {
+			PrintError(ErrorMsgRunScriptOnNode(err))
+		}
 	}
 	return
 }
