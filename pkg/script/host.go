@@ -1,11 +1,37 @@
 package script
 
-import "fmt"
+import (
+	"fmt"
 
+	"net/http"
+	"time"
+)
+
+func InstallOpscli() string {
+	return fmt.Sprintf("bash -c `%s`", GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh"))
+}
+
+func InstallMetricsServer(clear bool) string {
+	if clear {
+		return fmt.Sprintf("bash -c `kubectl delete -f %s`", GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
+	}
+	return fmt.Sprintf("bash -c `kubectl apply -f %s`", GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
+}
 func AddHost(ip, domain string) string {
-	return fmt.Sprintf(`sudo bash -c "echo '%s %s' >> /etc/hosts"`, ip, domain)
+	return fmt.Sprintf(`bash -c "echo '%s %s' >> /etc/hosts"`, ip, domain)
 }
 
 func DeleteHost(domain string) string {
-	return fmt.Sprintf(`sudo bash -c "sed -i '/%s/d' /etc/hosts "`, domain)
+	return fmt.Sprintf(`bash -c "sed -i '/%s/d' /etc/hosts "`, domain)
+}
+
+func GetAvailableUrl(url string) string {
+	httpClient := http.Client{
+		Timeout: 3 * time.Second,
+	}
+	_, err := httpClient.Get(url)
+	if err != nil {
+		url = "https://ghproxy.com/" + url
+	}
+	return url
 }

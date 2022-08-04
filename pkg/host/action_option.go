@@ -9,6 +9,15 @@ type EtcHostsOption struct {
 	Clear          bool
 }
 
+type InstallOption struct {
+	Input          string
+	Username       string
+	Password       string
+	PrivateKeyPath string
+	Name           string
+	Clear          bool
+}
+
 type KubeconfigOption struct {
 	Input          string
 	Username       string

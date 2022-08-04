@@ -45,7 +45,7 @@ func RunScriptOnNode(client *kubernetes.Clientset, nodeName string, namespacedNa
 								Name:    "etchosts",
 								Image:   "docker.io/library/alpine:latest",
 								Command: []string{"sh"},
-								Args:    []string{"-c", "echo '" + script + "' | nsenter -t 1 -m -u -i -n"},
+								Args:    []string{"-c", "echo 'sudo " + script + "' | nsenter -t 1 -m -u -i -n"},
 								SecurityContext: &corev1.SecurityContext{
 									Privileged: &priviBool,
 								},

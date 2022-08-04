@@ -1,8 +1,12 @@
 package host
 
 import (
-	"github.com/shaowenchen/opscli/pkg/script"
+	"bytes"
 	"os"
+	"os/exec"
+	"strings"
+
+	"github.com/shaowenchen/opscli/pkg/script"
 )
 
 func ActionGetKubeconfig(option KubeconfigOption) (err error) {
@@ -37,6 +41,23 @@ func ActionEtcHosts(option EtcHostsOption) (err error) {
 		if err != nil {
 			PrintError(ErrorEtcHosts(err))
 		}
+	}
+	return nil
+}
+
+func ActionInstall(option InstallOption) (err error) {
+	installShell := ""
+	if strings.ToLower(option.Name) == "metrics-server" {
+		installShell = script.InstallMetricsServer(option.Clear)
+	}
+	installCmd := exec.Command("sudo", "bash", "-c", installShell)
+	var stdout, stderr bytes.Buffer
+	installCmd.Stdout = &stdout
+	installCmd.Stderr = &stderr
+	err = installCmd.Run()
+	PrintError(stdout.String())
+	if err != nil {
+		return PrintError(stderr.String())
 	}
 	return nil
 }
