@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 
@@ -14,10 +15,13 @@ var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade opscli version to latest",
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		upgrade := exec.Command("sudo", "bash", "-c", script.GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh"))
-		_, err = upgrade.Output()
+		upgrade := exec.Command("sh", "-c", script.InstallOpscli())
+		var stderr bytes.Buffer
+		upgrade.Stderr = &stderr
+		err = upgrade.Run()
 		if err != nil {
-			fmt.Println("Upgrade failed!")
+			fmt.Println("Upgrade failed! %s", stderr.String())
+			return err
 		}
 		fmt.Println("Upgrade success!")
 		return nil

@@ -50,7 +50,7 @@ func ActionInstall(option InstallOption) (err error) {
 	if strings.ToLower(option.Name) == "metrics-server" {
 		installShell = script.InstallMetricsServer(option.Clear)
 	}
-	installCmd := exec.Command("sudo", "bash", "-c", installShell)
+	installCmd := exec.Command("sh", "-c", installShell)
 	var stdout, stderr bytes.Buffer
 	installCmd.Stdout = &stdout
 	installCmd.Stderr = &stderr

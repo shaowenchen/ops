@@ -8,21 +8,21 @@ import (
 )
 
 func InstallOpscli() string {
-	return fmt.Sprintf("bash -c `%s`", GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh"))
+	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh"))
 }
 
 func InstallMetricsServer(clear bool) string {
 	if clear {
-		return fmt.Sprintf("bash -c `kubectl delete -f %s`", GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
+		return fmt.Sprintf(`kubectl delete -f %s`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
 	}
-	return fmt.Sprintf("bash -c `kubectl apply -f %s`", GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
+	return fmt.Sprintf(`kubectl apply -f %s`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
 }
 func AddHost(ip, domain string) string {
-	return fmt.Sprintf(`bash -c "echo '%s %s' >> /etc/hosts"`, ip, domain)
+	return fmt.Sprintf(`sh -c "echo '%s %s' >> /etc/hosts"`, ip, domain)
 }
 
 func DeleteHost(domain string) string {
-	return fmt.Sprintf(`bash -c "sed -i '/%s/d' /etc/hosts "`, domain)
+	return fmt.Sprintf(`sh -c "sed -i '/%s/d' /etc/hosts "`, domain)
 }
 
 func GetAvailableUrl(url string) string {
