@@ -12,6 +12,15 @@ esac
 case "$(uname)" in
   Linux)
     OSTYPE=linux
+    OS=$(cat /etc/os-release 2>/dev/null | grep ^ID= | awk -F= '{print $2}')
+    case "$OS" in
+      alpine)
+          apk add coreutils
+          ;;
+      *)
+          echo OS is $OS, 
+          ;;
+    esac
     ;;
   Darwin)
     OSTYPE=darwin
