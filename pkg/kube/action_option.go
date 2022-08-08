@@ -18,6 +18,8 @@ type EtcHostsOption struct {
 	Kubeconfig string
 	Domain     string
 	IP         string
+	NodeName   string
+	All        bool
 	Clear      bool
 }
 

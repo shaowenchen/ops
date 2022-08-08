@@ -68,23 +68,30 @@ func ActionHostRun(option HostRunOption) (err error) {
 	return
 }
 
-func ActionEtcHostsOnEachNode(option EtcHostsOption) (err error) {
+func ActionEtcHostsOnNode(option EtcHostsOption) (err error) {
 	client, err := NewKubernetesClient(option.Kubeconfig)
 	if client == nil || err != nil {
 		return PrintError(ErrorMsgGetClient(err))
+	}
+	nodeNames := []string{}
+	if len(option.NodeName) > 0 {
+		nodeNames = []string{option.NodeName}
+	}
+	if option.All {
+		nodeNames, err = GetAllNodeNames(client)
 	}
 	if option.Clear {
 		namespacedName, err := GetOpscliNamespacedName(client, fmt.Sprintf("deleteetchosts-%s", option.Domain))
 		if err != nil {
 			return PrintError(ErrorMsgRunScriptOnNode(err))
 		}
-		err = RunScriptOnEachNode(client, namespacedName, script.DeleteHost(option.Domain))
+		err = RunScriptOnNodes(client, nodeNames, namespacedName, script.DeleteHost(option.Domain))
 	} else {
 		namespacedName, err := GetOpscliNamespacedName(client, fmt.Sprintf("addetchosts-%s-%s", option.Domain, strings.ReplaceAll(option.IP, ".", "-")))
 		if err != nil {
 			return PrintError(ErrorMsgRunScriptOnNode(err))
 		}
-		err = RunScriptOnEachNode(client, namespacedName, script.AddHost(option.IP, option.Domain))
+		err = RunScriptOnNodes(client, nodeNames, namespacedName, script.AddHost(option.IP, option.Domain))
 	}
 	if err != nil {
 		return PrintError(ErrorMsgRunScriptOnNode(err))
