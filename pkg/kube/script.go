@@ -42,6 +42,7 @@ func RunScriptOnNode(client *kubernetes.Clientset, nodeName string, namespacedNa
 						SecurityContext: &corev1.SecurityContext{
 							Privileged: &priviBool,
 						},
+						ImagePullPolicy: corev1.PullIfNotPresent,
 					},
 				},
 				HostIPC:       true,
