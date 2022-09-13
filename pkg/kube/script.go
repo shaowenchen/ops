@@ -5,16 +5,17 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 )
 
-func RunScriptOnNodes(client *kubernetes.Clientset, nodeNames []string, namespacedName types.NamespacedName, script string) (err error) {
-	for index, nodeName := range nodeNames {
+func RunScriptOnNodes(client *kubernetes.Clientset, nodes []v1.Node, namespacedName types.NamespacedName, script string) (err error) {
+	for index, node := range nodes {
 		currentNameSpacedName := namespacedName
 		currentNameSpacedName.Name = fmt.Sprintf("node%d-%s", index, currentNameSpacedName.Name)
-		_, err = RunScriptOnNode(client, nodeName, currentNameSpacedName, script)
+		_, err = RunScriptOnNode(client, node, currentNameSpacedName, script)
 		if err != nil {
 			PrintError(err.Error())
 		}
@@ -22,8 +23,17 @@ func RunScriptOnNodes(client *kubernetes.Clientset, nodeNames []string, namespac
 	return
 }
 
-func RunScriptOnNode(client *kubernetes.Clientset, nodeName string, namespacedName types.NamespacedName, script string) (pod *corev1.Pod, err error) {
+func RunScriptOnNode(client *kubernetes.Clientset, node v1.Node, namespacedName types.NamespacedName, script string) (pod *corev1.Pod, err error) {
 	priviBool := true
+	tolerations := []v1.Toleration{}
+	for _, taint := range node.Spec.Taints {
+		tolerations = append(tolerations, v1.Toleration{
+			Key:      taint.Key,
+			Value:    "",
+			Operator: v1.TolerationOperator(v1.TolerationOpExists),
+			Effect:   taint.Effect,
+		})
+	}
 	pod, err = client.CoreV1().Pods(namespacedName.Namespace).Create(
 		context.TODO(),
 		&corev1.Pod{
@@ -32,7 +42,7 @@ func RunScriptOnNode(client *kubernetes.Clientset, nodeName string, namespacedNa
 				Namespace: namespacedName.Namespace,
 			},
 			Spec: corev1.PodSpec{
-				NodeName: nodeName,
+				NodeName: node.Name,
 				Containers: []corev1.Container{
 					{
 						Name:    "etchosts",
@@ -49,6 +59,7 @@ func RunScriptOnNode(client *kubernetes.Clientset, nodeName string, namespacedNa
 				HostNetwork:   true,
 				HostPID:       true,
 				RestartPolicy: corev1.RestartPolicyNever,
+				Tolerations:   tolerations,
 			},
 		},
 		metav1.CreateOptions{},

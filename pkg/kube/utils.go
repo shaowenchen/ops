@@ -119,15 +119,8 @@ func GetAllNamespaces(client *kubernetes.Clientset) (namespaces []string, err er
 	return
 }
 
-func GetAllNodeNames(client *kubernetes.Clientset) (nodeNames []string, err error) {
-	nodes, err := client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		return
-	}
-	for _, node := range nodes.Items {
-		nodeNames = append(nodeNames, node.Name)
-	}
-	return
+func GetAllNodes(client *kubernetes.Clientset) (nodes *corev1.NodeList, err error) {
+	return client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 }
 
 func NewKubernetesClient(kubeconfigpath string) (client *kubernetes.Clientset, err error) {

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/shaowenchen/opscli/pkg/script"
+	v1 "k8s.io/api/core/v1"
 )
 
 func ActionClear(option ClearOption) (err error) {
@@ -47,20 +48,28 @@ func ActionHostRun(option HostRunOption) (err error) {
 	if client == nil || err != nil {
 		return PrintError(ErrorMsgGetClient(err))
 	}
-	nodeNames := []string{}
+	nodes, err := GetAllNodes(client)
+	if err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	nodeList := []v1.Node{}
 	if len(option.NodeName) > 0 {
-		nodeNames = []string{option.NodeName}
+		for _, node := range nodes.Items {
+			if node.Name == option.NodeName {
+				nodeList = append(nodeList, node)
+			}
+		}
 	}
 	if option.All {
-		nodeNames, err = GetAllNodeNames(client)
+		nodeList = nodes.Items
 	}
-	for _, nodeName := range nodeNames {
+	for _, node := range nodeList {
 		time.Sleep(time.Second * 1)
 		namespacedName, err := GetOpscliNamespacedName(client, fmt.Sprintf("script-runhost-%s", time.Now().Format("2006-01-02-15-04-05")))
 		if err != nil {
 			PrintError(ErrorMsgRunScriptOnNode(err))
 		}
-		_, err = RunScriptOnNode(client, nodeName, namespacedName, option.Script)
+		_, err = RunScriptOnNode(client, node, namespacedName, option.Script)
 		if err != nil {
 			PrintError(ErrorMsgRunScriptOnNode(err))
 		}
@@ -73,25 +82,33 @@ func ActionEtcHostsOnNode(option EtcHostsOption) (err error) {
 	if client == nil || err != nil {
 		return PrintError(ErrorMsgGetClient(err))
 	}
-	nodeNames := []string{}
+	nodes, err := GetAllNodes(client)
+	if err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	nodeList := []v1.Node{}
 	if len(option.NodeName) > 0 {
-		nodeNames = []string{option.NodeName}
+		for _, node := range nodes.Items {
+			if node.Name == option.NodeName {
+				nodeList = append(nodeList, node)
+			}
+		}
 	}
 	if option.All {
-		nodeNames, err = GetAllNodeNames(client)
+		nodeList = nodes.Items
 	}
 	if option.Clear {
 		namespacedName, err := GetOpscliNamespacedName(client, fmt.Sprintf("deleteetchosts-%s", option.Domain))
 		if err != nil {
 			return PrintError(ErrorMsgRunScriptOnNode(err))
 		}
-		err = RunScriptOnNodes(client, nodeNames, namespacedName, script.DeleteHost(option.Domain))
+		err = RunScriptOnNodes(client, nodeList, namespacedName, script.DeleteHost(option.Domain))
 	} else {
 		namespacedName, err := GetOpscliNamespacedName(client, fmt.Sprintf("addetchosts-%s-%s", option.Domain, strings.ReplaceAll(option.IP, ".", "-")))
 		if err != nil {
 			return PrintError(ErrorMsgRunScriptOnNode(err))
 		}
-		err = RunScriptOnNodes(client, nodeNames, namespacedName, script.AddHost(option.IP, option.Domain))
+		err = RunScriptOnNodes(client, nodeList, namespacedName, script.AddHost(option.IP, option.Domain))
 	}
 	if err != nil {
 		return PrintError(ErrorMsgRunScriptOnNode(err))
