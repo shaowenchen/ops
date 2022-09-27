@@ -36,7 +36,7 @@ func ActionDescheduler(option DeschedulerOption) (err error) {
 		return PrintError(ErrorMsgGetClient(err))
 	}
 	client, err := NewKubernetesClient(option.Kubeconfig)
-	err = RunDeScheduler(config, client, option.RemoveDuplicates, option.NodeUtilization)
+	err = RunDeScheduler(config, client, option.RemoveDuplicates, option.NodeUtilization, option.HighPercent)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

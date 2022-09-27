@@ -11,6 +11,7 @@ type DeschedulerOption struct {
 	Namespace        string
 	RemoveDuplicates bool
 	NodeUtilization  bool
+	HighPercent      int16
 	All              bool
 }
 

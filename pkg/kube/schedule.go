@@ -124,7 +124,7 @@ func DeleteLimitRange(client *kubernetes.Clientset, namespacedName types.Namespa
 	)
 }
 
-func RunDeScheduler(config *rest.Config, client *kubernetes.Clientset, removeDuplicates, nodeUtilization bool) (err error) {
+func RunDeScheduler(config *rest.Config, client *kubernetes.Clientset, removeDuplicates, nodeUtilization bool, highpercent int16) (err error) {
 	rs, err := deschedulerapioptions.NewDeschedulerServer()
 	if err != nil {
 		return
@@ -152,9 +152,9 @@ func RunDeScheduler(config *rest.Config, client *kubernetes.Clientset, removeDup
 						corev1.ResourcePods: deschedulerapi.Percentage(20),
 					},
 					TargetThresholds: deschedulerapi.ResourceThresholds{
-						corev1.ResourceCPU: deschedulerapi.Percentage(70),
-						corev1.ResourceMemory: deschedulerapi.Percentage(70),
-						corev1.ResourcePods: deschedulerapi.Percentage(70),
+						corev1.ResourceCPU: deschedulerapi.Percentage(highpercent),
+						corev1.ResourceMemory: deschedulerapi.Percentage(highpercent),
+						corev1.ResourcePods: deschedulerapi.Percentage(highpercent),
 					},
 				},
 			},
@@ -164,9 +164,9 @@ func RunDeScheduler(config *rest.Config, client *kubernetes.Clientset, removeDup
 			Params:  &deschedulerapi.StrategyParameters{
 				NodeResourceUtilizationThresholds: &deschedulerapi.NodeResourceUtilizationThresholds{
 					Thresholds: deschedulerapi.ResourceThresholds{
-						corev1.ResourceCPU: deschedulerapi.Percentage(80),
-						corev1.ResourceMemory: deschedulerapi.Percentage(80),
-						corev1.ResourcePods: deschedulerapi.Percentage(80),
+						corev1.ResourceCPU: deschedulerapi.Percentage(highpercent),
+						corev1.ResourceMemory: deschedulerapi.Percentage(highpercent),
+						corev1.ResourcePods: deschedulerapi.Percentage(highpercent),
 					},
 				},
 			},

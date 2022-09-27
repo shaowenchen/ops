@@ -20,5 +20,6 @@ func init() {
 	deschedulerCmd.Flags().StringVarP(&deschedulerOption.Namespace, "namespace", "", "default", "")
 	deschedulerCmd.Flags().BoolVarP(&deschedulerOption.RemoveDuplicates, "removeduplicates", "d", true, "")
 	deschedulerCmd.Flags().BoolVarP(&deschedulerOption.NodeUtilization, "nodeutilization", "n", true, "")
+	deschedulerCmd.Flags().Int16VarP(&deschedulerOption.HighPercent, "highpercent", "", 80, "")
 	deschedulerCmd.Flags().BoolVarP(&deschedulerOption.All, "all", "", false, "")
 }
