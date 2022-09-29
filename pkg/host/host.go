@@ -43,7 +43,7 @@ func newHost(name string, address string, internalAddress string, port int, user
 	}
 
 	if len(user) == 0 {
-		user = "root"
+		user = GetCurrentUser()
 	}
 
 	if timeout == 0 {
@@ -61,14 +61,14 @@ func newHost(name string, address string, internalAddress string, port int, user
 		Timeout:         timeout,
 	}
 	if err := host.connecting(); err != nil {
-		fmt.Println("Failed to connect to host:", host.Address, err.Error())
+		fmt.Println("Failed connect host:", host.Address, err.Error())
 		return nil, err
 	}
 	return host, nil
 }
 
 func (host *Host) connecting() error {
-	fmt.Println("Connecting to host:", host.Address)
+	fmt.Println("Connecting host:", host.Address)
 	authMethods := make([]ssh.AuthMethod, 0)
 	if len(host.Password) > 0 {
 		authMethods = append(authMethods, ssh.Password(host.Password))
@@ -77,7 +77,7 @@ func (host *Host) connecting() error {
 	if len(host.PrivateKey) == 0 && len(host.PrivateKeyPath) > 0 {
 		content, err := ioutil.ReadFile(host.PrivateKeyPath)
 		if err != nil {
-			return errors.Wrapf(err, "Failed to read keyfile %q", host.PrivateKeyPath)
+			return errors.Wrapf(err, "Failed read keyfile %q", host.PrivateKeyPath)
 		}
 		host.PrivateKey = string(content)
 	}

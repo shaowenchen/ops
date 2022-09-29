@@ -2,6 +2,7 @@ package host
 
 import (
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
@@ -11,6 +12,14 @@ func GetCurrentUserHomeDir() string {
 		panic(err)
 	}
 	return homeDirectory
+}
+
+func GetCurrentUser() string {
+	currentUser, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	return currentUser.Username
 }
 
 func GetCurrentUserPrivateKeyPath() string {
