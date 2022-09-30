@@ -77,7 +77,7 @@ func newHost(name string, address string, internalAddress string, port int, user
 	return host, nil
 }
 
-func (host *Host) connecting() error {
+func (host *Host) connecting() (err error) {
 	authMethods := make([]ssh.AuthMethod, 0)
 	if len(host.Password) > 0 {
 		authMethods = append(authMethods, ssh.Password(host.Password))
@@ -103,29 +103,14 @@ func (host *Host) connecting() error {
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
-	targetHost := host.Address
-	targetPort := strconv.Itoa(host.Port)
-
-	endpoint := net.JoinHostPort(targetHost, targetPort)
-
-	client, err := ssh.Dial("tcp", endpoint, sshConfig)
-	if err != nil {
-		return errors.Wrapf(err, "ssh.Dial failed %s", endpoint)
-	}
 
 	endpointBehindBastion := net.JoinHostPort(host.Address, strconv.Itoa(host.Port))
 
-	conn, err := client.Dial("tcp", endpointBehindBastion)
-	if err != nil {
-		return errors.Wrapf(err, "client.Dial failed %s", endpointBehindBastion)
-	}
-
-	ncc, chans, reqs, err := ssh.NewClientConn(conn, endpointBehindBastion, sshConfig)
-	if err != nil {
-		return errors.Wrapf(err, "ssh.NewClientConn failed %s", endpointBehindBastion)
-	}
 	host.Conn = &HostConnection{}
-	host.Conn.sshclient = ssh.NewClient(ncc, chans, reqs)
+	host.Conn.sshclient, err = ssh.Dial("tcp", endpointBehindBastion, sshConfig)
+	if err != nil {
+		return errors.Wrapf(err, "client.Dial failed %s", host.Address)
+	}
 	sftpClient, err := sftp.NewClient(host.Conn.sshclient)
 	if err != nil {
 		fmt.Printf("sftp.NewClient failed: %v\n", err)
