@@ -14,4 +14,5 @@ func init() {
 	HostCmd.AddCommand(kubeconfigCmd)
 	HostCmd.AddCommand(installCmd)
 	HostCmd.AddCommand(scriptCmd)
+	HostCmd.AddCommand(fileCmd)
 }

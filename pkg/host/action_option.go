@@ -1,5 +1,4 @@
 package host
-
 type HostOption struct {
 	Hosts          string
 	Username       string
@@ -24,4 +23,12 @@ type InstallOption struct {
 
 type KubeconfigOption struct {
 	HostOption
+}
+
+type FileOption struct {
+	HostOption
+	LocalFile string
+	RemoteFile string
+	Direction string
+	Overwrite bool
 }

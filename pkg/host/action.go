@@ -19,20 +19,37 @@ func ActionGetKubeconfig(option KubeconfigOption) (err error) {
 	if err != nil {
 		return PrintError(ErrorConnect(err))
 	}
-	err = host.Fetch(GetAdminKubeConfigPath(), GetCurrentUserKubeConfigPath())
+	_, err = host.pullContent(GetAdminKubeConfigPath(), GetCurrentUserKubeConfigPath())
 	if err != nil {
 		PrintError(err.Error())
 	}
 	return
 }
 
-func ActionEtcHosts(option EtcHostsOption) (err error) {
-	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, script.AddHost(option.IP, option.Domain), script.DeleteHost(option.Domain), option.Clear)
-	return nil
+func ActionFile(option FileOption) (err error) {
+	if len(option.Hosts) == 0 {
+		fmt.Println("remote hosts is empty")
+		return
+	}
+	host, err := newHost("", option.Hosts, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
+	if err != nil {
+		return PrintError(ErrorConnect(err))
+	}
+	var size string
+	if strings.ToLower(option.Direction) == "download" {
+		size, err = host.pull(option.RemoteFile, option.LocalFile)
+	} else {
+		size, err = host.push(option.LocalFile, option.RemoteFile)
+	}
+	if err != nil {
+		PrintError(err.Error())
+	}
+	PrintInfo(size)
+	return
 }
 
-func ActionScript(option ScriptOption) (err error) {
-	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, script.GetExecutableScript(option.Content), "", false)
+func ActionEtcHosts(option EtcHostsOption) (err error) {
+	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, script.AddHost(option.IP, option.Domain), script.DeleteHost(option.Domain), option.Clear)
 	return nil
 }
 
@@ -43,6 +60,11 @@ func ActionInstall(option InstallOption) (err error) {
 		batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, addShell, removeShell, option.Clear)
 	}
 	return
+}
+
+func ActionScript(option ScriptOption) (err error) {
+	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, script.GetExecutableScript(option.Content), "", false)
+	return nil
 }
 
 func batchRunHost(hosts, username, privatekeypath, addshell, removeshell string, clear bool) {

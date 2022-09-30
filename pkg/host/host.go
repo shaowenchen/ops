@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"time"
 
+	humanize "github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -206,57 +207,74 @@ func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 	return strings.TrimSpace(outStr), exitCode, errors.Wrapf(err, "Failed to exec command: %s \n%s", cmd, strings.TrimSpace(outStr))
 }
 
-func (host *Host) scp(src, dst string) error {
-	srcFile, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-	dstFile, err := host.Conn.sftpclient.Create(dst)
-	if err != nil {
-		return err
-	}
-	fileStat, err := srcFile.Stat()
-	if err != nil {
-		return fmt.Errorf("get file stat failed %v", err)
-	}
-	if err := dstFile.Chmod(fileStat.Mode()); err != nil {
-		return fmt.Errorf("chmod remote file failed %v", err)
-	}
-	defer dstFile.Close()
-	_, err = io.Copy(dstFile, srcFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (host *Host) Fetch(src, dst string) error {
+func (host *Host) pullContent(src, dst string) (size string, err error) {
 	output, _, err := host.exec(fmt.Sprintf("sudo cat %s | base64 -w 0", src))
 	if err != nil {
-		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
+		return "", fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
 	dstDir := filepath.Dir(dst)
 	if isExist, _ := isExistsFile(dstDir); !isExist {
 		err = os.MkdirAll(dstDir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("create dst dir failed %v, dst dir: %s", err, dstDir)
+			return "", fmt.Errorf("create dst dir failed %v, dst dir: %s", err, dstDir)
 		}
 	}
 
 	dstFile, err := os.Create(dst)
 	if err != nil {
-		return fmt.Errorf("create dst file failed %v", err)
+		return "", fmt.Errorf("create dst file failed %v", err)
 	}
 	defer dstFile.Close()
 
 	if base64Str, err := base64.StdEncoding.DecodeString(output); err != nil {
-		return err
+		return "", err
 	} else {
 		if _, err = dstFile.WriteString(string(base64Str)); err != nil {
-			return err
+			return "", err
 		}
 	}
 
-	return nil
+	return "", nil
+}
+
+func (host *Host) pull(src, dst string) (size string, err error) {
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer dstFile.Close()
+
+	srcFile, err := host.Conn.sftpclient.Open(src)
+	if err != nil {
+		return
+	}
+
+	transferBytes, err := io.Copy(dstFile, srcFile)
+	if err != nil {
+		size = humanize.Bytes(uint64(transferBytes))
+		return
+	}
+
+	err = dstFile.Sync()
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (host *Host) push(src, dst string) (size string, err error) {
+	dstFile, err := host.Conn.sftpclient.Create(dst)
+	if err != nil {
+		return
+	}
+	defer dstFile.Close()
+
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return
+	}
+
+	transferBytes, err := io.Copy(dstFile, srcFile)
+	size = humanize.Bytes(uint64(transferBytes))
+	return
 }

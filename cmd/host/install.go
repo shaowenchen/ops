@@ -17,9 +17,9 @@ var installCmd = &cobra.Command{
 
 func init() {
 	installCmd.Flags().StringVarP(&installOpt.Name, "name", "", "", "")
-	installCmd.Flags().StringVarP(&etcHostsOpt.Username, "username", "", "", "")
-	installCmd.Flags().StringVarP(&etcHostsOpt.Password, "password", "", "", "")
-	installCmd.Flags().StringVarP(&etcHostsOpt.PrivateKeyPath, "privatekeypath", "", "", "")
-	installCmd.Flags().StringVarP(&etcHostsOpt.Hosts, "hosts", "", "", "")
-	installCmd.Flags().BoolVarP(&etcHostsOpt.Clear, "clear", "", false, "")
+	installCmd.Flags().StringVarP(&installOpt.Username, "username", "", "", "")
+	installCmd.Flags().StringVarP(&installOpt.Password, "password", "", "", "")
+	installCmd.Flags().StringVarP(&installOpt.PrivateKeyPath, "privatekeypath", "", "", "")
+	installCmd.Flags().StringVarP(&installOpt.Hosts, "hosts", "", "", "")
+	installCmd.Flags().BoolVarP(&installOpt.Clear, "clear", "", false, "")
 }
