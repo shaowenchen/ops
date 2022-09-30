@@ -2,6 +2,9 @@ package host
 
 import (
 	"bufio"
+	"crypto/md5"
+	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -54,4 +57,19 @@ func RemoveDuplicates(origin []string) []string {
 		}
 	}
 	return result
+}
+
+func FileMD5(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+
+	m := md5.New()
+	if _, err := io.Copy(m, file); err != nil {
+		return "", err
+	}
+
+	fileMd5 := fmt.Sprintf("%x", m.Sum(nil))
+	return fileMd5, nil
 }

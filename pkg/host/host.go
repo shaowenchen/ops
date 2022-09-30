@@ -237,7 +237,7 @@ func (host *Host) pullContent(src, dst string) (size string, err error) {
 	return "", nil
 }
 
-func (host *Host) pull(src, dst string) (size string, err error) {
+func (host *Host) pull(src, dst, md5 string) (size string, err error) {
 	dstFile, err := os.Create(dst)
 	if err != nil {
 		return
@@ -250,8 +250,8 @@ func (host *Host) pull(src, dst string) (size string, err error) {
 	}
 
 	transferBytes, err := io.Copy(dstFile, srcFile)
+	size = humanize.Bytes(uint64(transferBytes))
 	if err != nil {
-		size = humanize.Bytes(uint64(transferBytes))
 		return
 	}
 
@@ -259,10 +259,18 @@ func (host *Host) pull(src, dst string) (size string, err error) {
 	if err != nil {
 		return
 	}
+	dstmd5, err := FileMD5(dst)
+	if err != nil {
+		return
+	}
+	if dstmd5 != md5 {
+		err = errors.New(fmt.Sprintf("MD5: dstfile is %s, srcfile is %s", dstmd5, md5))
+		return
+	}
 	return
 }
 
-func (host *Host) push(src, dst string) (size string, err error) {
+func (host *Host) push(src, dst, md5 string) (size string, err error) {
 	dstFile, err := host.Conn.sftpclient.Create(dst)
 	if err != nil {
 		return
@@ -276,5 +284,22 @@ func (host *Host) push(src, dst string) (size string, err error) {
 
 	transferBytes, err := io.Copy(dstFile, srcFile)
 	size = humanize.Bytes(uint64(transferBytes))
+	dstmd5, err := host.fileMd5(dst)
+	if err != nil {
+		return
+	}
+	if dstmd5 != md5 {
+		return size, errors.New(fmt.Sprintf("MD5: dstfile is %s, srcfile is %s", dstmd5, md5))
+	}
+	return
+}
+
+func (host *Host) fileMd5(path string) (md5 string, err error) {
+	cmd := fmt.Sprintf("sudo md5sum %s | cut -d\" \" -f1", path)
+	stdout, _, err := host.exec(cmd)
+	if err != nil {
+		return
+	}
+	md5 = strings.TrimSpace(stdout)
 	return
 }

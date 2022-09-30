@@ -27,26 +27,43 @@ func ActionGetKubeconfig(option KubeconfigOption) (err error) {
 }
 
 func ActionFile(option FileOption) (err error) {
-	if len(option.Hosts) == 0 {
-		fmt.Println("remote hosts is empty")
-		return
-	}
-	for _, addr := range RemoveDuplicates(GetSliceFromFileOrString(option.Hosts)) {
-		fmt.Printf("host -> %s\n", addr)
-		host, err := newHost("", addr, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
+	hosts := RemoveDuplicates(GetSliceFromFileOrString(option.Hosts))
+	if strings.ToLower(option.Direction) == "download" {
+		hosts := RemoveDuplicates(GetSliceFromFileOrString(option.Hosts))
+		if len(hosts) != 1 {
+			fmt.Println("need only one target host")
+			return
+		}
+		host, err := newHost("", hosts[0], "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
 		if err != nil {
 			return PrintError(ErrorConnect(err))
 		}
-		var size string
-		if strings.ToLower(option.Direction) == "download" {
-			size, err = host.pull(option.RemoteFile, option.LocalFile)
-		} else {
-			size, err = host.push(option.LocalFile, option.RemoteFile)
-		}
+		md5, err := host.fileMd5(option.RemoteFile)
 		if err != nil {
-			PrintError(err.Error())
+			return PrintError(ErrorCommon(err))
 		}
-		PrintInfo(size)
+		size, err := host.pull(option.RemoteFile, option.LocalFile, md5)
+		if err != nil {
+			return PrintError(ErrorCommon(err))
+		}
+		PrintInfo("FileSize: " + size + ", Md5: " + md5)
+	} else {
+		md5, err := FileMD5(option.LocalFile)
+		if err != nil {
+			return PrintError(ErrorCommon(err))
+		}
+		for _, addr := range hosts {
+			fmt.Printf("host -> %s\n", addr)
+			host, err := newHost("", addr, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
+			if err != nil {
+				return PrintError(ErrorConnect(err))
+			}
+			size, err := host.push(option.LocalFile, option.RemoteFile, md5)
+			if err != nil {
+				PrintError(err.Error())
+			}
+			PrintInfo("FileSize: " + size + ", Md5: " + md5)
+		}
 	}
 	return
 }
@@ -79,7 +96,8 @@ func batchRunHost(hosts, username, privatekeypath, addshell, removeshell string,
 		fmt.Printf("host -> %s\n", addr)
 		host, err := newHost("", addr, "", 22, username, "", "", privatekeypath, 0)
 		if err != nil {
-			panic(err)
+			PrintError(ErrorCommon(err))
+			continue
 		}
 		if clear {
 			stdout, _, err = host.exec(removeshell)

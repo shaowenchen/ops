@@ -16,8 +16,8 @@ var scriptCmd = &cobra.Command{
 }
 
 func init() {
-	scriptCmd.Flags().StringVarP(&scriptOpt.Username, "username", "", "root", "")
-	scriptCmd.Flags().StringVarP(&scriptOpt.Username, "password", "", "", "")
+	scriptCmd.Flags().StringVarP(&scriptOpt.Username, "username", "", "", "")
+	scriptCmd.Flags().StringVarP(&scriptOpt.Password, "password", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.PrivateKeyPath, "privatekeypath", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.Content, "content", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.Hosts, "hosts", "", "", "")
