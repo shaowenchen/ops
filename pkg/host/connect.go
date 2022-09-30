@@ -1,8 +1,6 @@
 package host
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -17,7 +15,6 @@ func (c *HostConnection) session() (*ssh.Session, error) {
 	if c.sshclient == nil {
 		return nil, errors.New("connection closed")
 	}
-	fmt.Println("Creating Session to host")
 	sess, err := c.sshclient.NewSession()
 	if err != nil {
 		return nil, err
@@ -33,6 +30,5 @@ func (c *HostConnection) session() (*ssh.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Created Session to host")
 	return sess, nil
 }

@@ -7,6 +7,14 @@ func PrintError(errMsg string) (err error) {
 	return fmt.Errorf(errMsg)
 }
 
+func PrintInfo(infoMsg string){
+	fmt.Println(infoMsg)
+}
+
+func ErrorCommon(err error) string {
+	return fmt.Sprintf("err: %v", err)
+}
+
 func ErrorConnect(err error) string {
 	return fmt.Sprintf("could not connect host: %v", err)
 }

@@ -16,10 +16,11 @@ var etcHostsCmd = &cobra.Command{
 }
 
 func init() {
-	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.Username, "username", "", "", "")
-	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.PrivateKeyPath, "privatekeypath", "", "", "")
 	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.Domain, "domain", "", "", "")
 	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.IP, "ip", "", "", "")
-	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.Input, "input", "i", "", "resource list")
+	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.Username, "username", "", "", "")
+	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.Password, "password", "", "", "")
+	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.PrivateKeyPath, "privatekeypath", "", "", "")
+	etcHostsCmd.Flags().StringVarP(&etcHostsOpt.Hosts, "hosts", "", "", "")
 	etcHostsCmd.Flags().BoolVarP(&etcHostsOpt.Clear, "clear", "", false, "")
 }

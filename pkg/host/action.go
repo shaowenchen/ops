@@ -1,9 +1,8 @@
 package host
 
 import (
-	"bytes"
+	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/shaowenchen/opscli/pkg/script"
@@ -16,7 +15,7 @@ func ActionGetKubeconfig(option KubeconfigOption) (err error) {
 			return PrintError(err.Error())
 		}
 	}
-	host, err := newHost("", option.Input, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
+	host, err := newHost("", option.Hosts, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
 	if err != nil {
 		return PrintError(ErrorConnect(err))
 	}
@@ -28,36 +27,45 @@ func ActionGetKubeconfig(option KubeconfigOption) (err error) {
 }
 
 func ActionEtcHosts(option EtcHostsOption) (err error) {
-	for _, addr := range SplitStr(option.Input) {
-		host, err := newHost("", addr, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
-		if err != nil {
-			return PrintError(ErrorConnect(err))
-		}
-		if option.Clear {
-			_, _, err = host.exec(script.DeleteHost(option.Domain))
-		} else {
-			_, _, err = host.exec(script.AddHost(option.IP, option.Domain))
-		}
-		if err != nil {
-			PrintError(ErrorEtcHosts(err))
-		}
-	}
+	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, script.AddHost(option.IP, option.Domain), script.DeleteHost(option.Domain), option.Clear)
+	return nil
+}
+
+func ActionScript(option ScriptOption) (err error) {
+	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, script.GetExecutableScript(option.Content), "", false)
 	return nil
 }
 
 func ActionInstall(option InstallOption) (err error) {
-	installShell := ""
 	if strings.ToLower(option.Name) == "metrics-server" {
-		installShell = script.InstallMetricsServer(option.Clear)
+		addShell := script.AddlMetricsServer()
+		removeShell := script.RemoveMetricsServer()
+		batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, addShell, removeShell, option.Clear)
 	}
-	installCmd := exec.Command("sh", "-c", installShell)
-	var stdout, stderr bytes.Buffer
-	installCmd.Stdout = &stdout
-	installCmd.Stderr = &stderr
-	err = installCmd.Run()
-	PrintError(stdout.String())
-	if err != nil {
-		return PrintError(stderr.String())
+	return
+}
+
+func batchRunHost(hosts, username, privatekeypath, addshell, removeshell string, clear bool) {
+	if len(hosts) == 0 {
+		hosts = LocalHostIP
 	}
-	return nil
+	var stdout string
+	for _, addr := range RemoveDuplicates(GetSliceFromFileOrString(hosts)) {
+		fmt.Printf("host -> %s\n", addr)
+		host, err := newHost("", addr, "", 22, username, "", "", privatekeypath, 0)
+		if err != nil {
+			panic(err)
+		}
+		if clear {
+			stdout, _, err = host.exec(removeshell)
+		} else {
+			stdout, _, err = host.exec(addshell)
+		}
+		if len(stdout) != 0 {
+			PrintInfo(stdout)
+		}
+		if err != nil {
+			PrintError(ErrorCommon(err))
+		}
+	}
 }

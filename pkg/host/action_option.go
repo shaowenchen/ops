@@ -1,27 +1,27 @@
 package host
 
-type EtcHostsOption struct {
-	Input          string
+type HostOption struct {
+	Hosts          string
 	Username       string
-	Domain         string
-	IP             string
+	Password       string
 	PrivateKeyPath string
 	Clear          bool
+}
+type ScriptOption struct {
+	HostOption
+	Content string
+}
+type EtcHostsOption struct {
+	HostOption
+	Domain string
+	IP     string
 }
 
 type InstallOption struct {
-	Input          string
-	Username       string
-	Password       string
-	PrivateKeyPath string
-	Name           string
-	Clear          bool
+	HostOption
+	Name string
 }
 
 type KubeconfigOption struct {
-	Input          string
-	Username       string
-	Password       string
-	PrivateKeyPath string
-	Clear          bool
+	HostOption
 }

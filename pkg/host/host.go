@@ -12,14 +12,18 @@ import (
 	"io"
 	"net"
 
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"strconv"
 	"strings"
 )
+
+const LocalHostIP = "127.0.0.1"
 
 type Host struct {
 	Name            string `yaml:"name,omitempty" json:"name,omitempty"`
@@ -60,6 +64,11 @@ func newHost(name string, address string, internalAddress string, port int, user
 		PrivateKeyPath:  privateKeyPath,
 		Timeout:         timeout,
 	}
+	// local host
+	if name == LocalHostIP || address == LocalHostIP {
+		return host, nil
+	}
+	// remote host
 	if err := host.connecting(); err != nil {
 		fmt.Println("Failed connect host:", host.Address, err.Error())
 		return nil, err
@@ -68,7 +77,6 @@ func newHost(name string, address string, internalAddress string, port int, user
 }
 
 func (host *Host) connecting() error {
-	fmt.Println("Connecting host:", host.Address)
 	authMethods := make([]ssh.AuthMethod, 0)
 	if len(host.Password) > 0 {
 		authMethods = append(authMethods, ssh.Password(host.Password))
@@ -122,11 +130,24 @@ func (host *Host) connecting() error {
 		fmt.Printf("sftp.NewClient failed: %v\n", err)
 	}
 	host.Conn.sftpclient = sftpClient
-	fmt.Println("Connected to host:", host.Address)
 	return nil
 }
 
 func (host *Host) exec(cmd string) (stdout string, code int, err error) {
+	// run in localhost
+	if host.Name == LocalHostIP || host.Address == LocalHostIP || host.InternalAddress == LocalHostIP {
+		runner := exec.Command("sh", "-c", cmd)
+		var out, errout bytes.Buffer
+		runner.Stdout = &out
+		runner.Stderr = &errout
+		err = runner.Run()
+		if err != nil {
+			stdout = errout.String()
+			return
+		}
+		stdout = out.String()
+		return
+	}
 	sess, err := host.Conn.session()
 	if err != nil {
 		return "", 1, errors.Wrap(err, "failed to get SSH session")
@@ -137,7 +158,6 @@ func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 
 	in, _ := sess.StdinPipe()
 	out, _ := sess.StdoutPipe()
-
 	err = sess.Start(strings.TrimSpace(cmd))
 	if err != nil {
 		exitCode = -1
@@ -152,13 +172,11 @@ func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 		line   = ""
 		r      = bufio.NewReader(out)
 	)
-
 	for {
 		b, err := r.ReadByte()
 		if err != nil {
 			break
 		}
-
 		output = append(output, b)
 
 		if b == byte('\n') {
@@ -219,7 +237,7 @@ func (host *Host) Fetch(src, dst string) error {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
 	dstDir := filepath.Dir(dst)
-	if isExist, _ := PathExists(dstDir); !isExist {
+	if isExist, _ := isExistsFile(dstDir); !isExist {
 		err = os.MkdirAll(dstDir, os.ModePerm)
 		if err != nil {
 			return fmt.Errorf("create dst dir failed %v, dst dir: %s", err, dstDir)

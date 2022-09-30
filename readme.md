@@ -27,6 +27,7 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
+  docker      config docker with this command
   help        Help about any command
   host        config host with this command
   kube        use kubeconfig to config kubernetes

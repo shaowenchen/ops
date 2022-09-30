@@ -19,6 +19,6 @@ func init() {
 	kubeconfigCmd.Flags().StringVarP(&kubeconfigOpt.Username, "username", "", "", "")
 	kubeconfigCmd.Flags().StringVarP(&kubeconfigOpt.Password, "password", "", "", "")
 	kubeconfigCmd.Flags().StringVarP(&kubeconfigOpt.PrivateKeyPath, "privatekeypath", "", "", "")
-	kubeconfigCmd.Flags().StringVarP(&kubeconfigOpt.Input, "input", "i", "", "host addr")
+	kubeconfigCmd.Flags().StringVarP(&kubeconfigOpt.Hosts, "hosts", "", "", "")
 	kubeconfigCmd.Flags().BoolVarP(&kubeconfigOpt.Clear, "clear", "", false, "")
 }
