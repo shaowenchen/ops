@@ -31,20 +31,23 @@ func ActionFile(option FileOption) (err error) {
 		fmt.Println("remote hosts is empty")
 		return
 	}
-	host, err := newHost("", option.Hosts, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
-	if err != nil {
-		return PrintError(ErrorConnect(err))
+	for _, addr := range RemoveDuplicates(GetSliceFromFileOrString(option.Hosts)) {
+		fmt.Printf("host -> %s\n", addr)
+		host, err := newHost("", addr, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
+		if err != nil {
+			return PrintError(ErrorConnect(err))
+		}
+		var size string
+		if strings.ToLower(option.Direction) == "download" {
+			size, err = host.pull(option.RemoteFile, option.LocalFile)
+		} else {
+			size, err = host.push(option.LocalFile, option.RemoteFile)
+		}
+		if err != nil {
+			PrintError(err.Error())
+		}
+		PrintInfo(size)
 	}
-	var size string
-	if strings.ToLower(option.Direction) == "download" {
-		size, err = host.pull(option.RemoteFile, option.LocalFile)
-	} else {
-		size, err = host.push(option.LocalFile, option.RemoteFile)
-	}
-	if err != nil {
-		PrintError(err.Error())
-	}
-	PrintInfo(size)
 	return
 }
 
