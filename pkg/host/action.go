@@ -19,7 +19,7 @@ func ActionGetKubeconfig(option KubeconfigOption) (err error) {
 	if err != nil {
 		return PrintError(ErrorConnect(err))
 	}
-	_, err = host.pullContent(GetAdminKubeConfigPath(), GetCurrentUserKubeConfigPath())
+	err = host.pullContent(GetAdminKubeConfigPath(), GetCurrentUserKubeConfigPath())
 	if err != nil {
 		PrintError(err.Error())
 	}
@@ -42,11 +42,11 @@ func ActionFile(option FileOption) (err error) {
 		if err != nil {
 			return PrintError(ErrorCommon(err))
 		}
-		size, err := host.pull(option.RemoteFile, option.LocalFile, md5)
+		err = host.pull(option.RemoteFile, option.LocalFile, md5)
 		if err != nil {
 			return PrintError(ErrorCommon(err))
 		}
-		PrintInfo("FileSize: " + size + ", Md5: " + md5)
+		PrintInfo("Md5: " + md5)
 	} else {
 		md5, err := FileMD5(option.LocalFile)
 		if err != nil {
@@ -58,11 +58,11 @@ func ActionFile(option FileOption) (err error) {
 			if err != nil {
 				return PrintError(ErrorConnect(err))
 			}
-			size, err := host.push(option.LocalFile, option.RemoteFile, md5)
+			err = host.push(option.LocalFile, option.RemoteFile, md5)
 			if err != nil {
 				PrintError(err.Error())
 			}
-			PrintInfo("FileSize: " + size + ", Md5: " + md5)
+			PrintInfo("Md5: " + md5)
 		}
 	}
 	return

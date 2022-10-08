@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/pkg/errors v0.9.1
-	github.com/pkg/sftp v1.13.5
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be
@@ -12,6 +11,7 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go v1.44.64
+	github.com/bramvdbogaerde/go-scp v1.2.0
 	github.com/docker/docker v20.10.17+incompatible
 	k8s.io/api v0.24.3
 	k8s.io/apimachinery v0.24.3
@@ -45,7 +45,6 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/emicklei/go-restful v2.15.0+incompatible // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d // indirect
@@ -76,7 +75,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kr/fs v0.1.0 // indirect
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect

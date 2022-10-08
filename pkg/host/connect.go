@@ -2,13 +2,13 @@ package host
 
 import (
 	"github.com/pkg/errors"
-	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
+	scp "github.com/bramvdbogaerde/go-scp"
 )
 
 type HostConnection struct {
-	sftpclient *sftp.Client
-	sshclient  *ssh.Client
+	scpclient scp.Client
+	sshclient *ssh.Client
 }
 
 func (c *HostConnection) session() (*ssh.Session, error) {
