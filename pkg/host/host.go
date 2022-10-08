@@ -111,6 +111,7 @@ func (host *Host) connecting() (err error) {
 	if err != nil {
 		return errors.Wrapf(err, "client.Dial failed %s", host.Address)
 	}
+	fmt.Println("sftp.NewClient")
 	sftpClient, err := sftp.NewClient(host.Conn.sshclient)
 	if err != nil {
 		fmt.Printf("sftp.NewClient failed: %v\n", err)

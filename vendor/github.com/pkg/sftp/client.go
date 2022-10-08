@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+	"fmt"
 
 	"github.com/kr/fs"
 	"golang.org/x/crypto/ssh"
@@ -178,19 +179,24 @@ type Client struct {
 // NewClient creates a new SFTP client on conn, using zero or more option
 // functions.
 func NewClient(conn *ssh.Client, opts ...ClientOption) (*Client, error) {
+	fmt.Println("stfp NewClient")
 	s, err := conn.NewSession()
+	fmt.Println("stfp NewSession")
 	if err != nil {
 		return nil, err
 	}
 	if err := s.RequestSubsystem("sftp"); err != nil {
+		fmt.Println("stfp RequestSubsystem")
 		return nil, err
 	}
 	pw, err := s.StdinPipe()
 	if err != nil {
+		fmt.Println("stfp StdinPipe")
 		return nil, err
 	}
 	pr, err := s.StdoutPipe()
 	if err != nil {
+		fmt.Println("stfp StdoutPipe")
 		return nil, err
 	}
 
@@ -201,6 +207,7 @@ func NewClient(conn *ssh.Client, opts ...ClientOption) (*Client, error) {
 // This can be used for connecting to an SFTP server over TCP/TLS or by using
 // the system's ssh client program (e.g. via exec.Command).
 func NewClientPipe(rd io.Reader, wr io.WriteCloser, opts ...ClientOption) (*Client, error) {
+	fmt.Println("stfp NewClientPipe")
 	sftp := &Client{
 		clientConn: clientConn{
 			conn: conn{
@@ -226,13 +233,15 @@ func NewClientPipe(rd io.Reader, wr io.WriteCloser, opts ...ClientOption) (*Clie
 
 	if err := sftp.sendInit(); err != nil {
 		wr.Close()
+		fmt.Println("stfp sendInit")
 		return nil, err
 	}
 	if err := sftp.recvVersion(); err != nil {
 		wr.Close()
+		fmt.Println("stfp recvVersion")
 		return nil, err
 	}
-
+	fmt.Println("stfp clientConn")
 	sftp.clientConn.wg.Add(1)
 	go sftp.loop()
 
