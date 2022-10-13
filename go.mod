@@ -13,6 +13,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.64
 	github.com/bramvdbogaerde/go-scp v1.2.0
 	github.com/docker/docker v20.10.17+incompatible
+	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.24.3
 	k8s.io/apimachinery v0.24.3
 	k8s.io/apiserver v0.24.0
@@ -133,7 +134,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/cli-runtime v0.24.3 // indirect
 	k8s.io/component-base v0.24.3 // indirect
 	k8s.io/component-helpers v0.24.3 // indirect

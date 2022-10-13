@@ -1,0 +1,11 @@
+variables:
+  filter: latest
+name: docker clear
+steps:
+  - name: echo some
+    script: echo "{latest}"
+
+  - name: copy file
+    src: "/myfile"
+    dest: "/tmp/myfile"
+    remote_src: true

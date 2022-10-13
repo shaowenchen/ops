@@ -1,0 +1,12 @@
+variables:
+  filter: latest
+name: hosts uname
+steps:
+  - name: OS Type 
+    script: cat /etc/os-release 2>/dev/null | grep ^ID= | awk -F= '{print $2}'
+
+  - name: Kernel Version
+    script: uname -r
+
+  - name: CPU Core
+    script: cat /proc/cpuinfo |grep "processor"|wc -l
