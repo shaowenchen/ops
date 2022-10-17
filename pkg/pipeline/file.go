@@ -14,12 +14,11 @@ type Pipeline struct {
 }
 
 type Step struct {
-	Name      string
-	Script    string
-	Src       string
-	Dst       string
-	RemoteSrc bool
-	RemoteDst bool
+	Name          string
+	Script        string
+	LocalFile         string
+	RemoteFile    string
+	Direction string
 }
 
 func readPipelineYaml(filePath string) (pipelines []Pipeline, err error) {

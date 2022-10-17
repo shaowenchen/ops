@@ -1,12 +1,10 @@
-variables:
-  filter: latest
-name: hosts uname
+name: Get OS Info
 steps:
-  - name: OS Type 
-    script: cat /etc/os-release 2>/dev/null | grep ^ID= | awk -F= '{print $2}'
-
   - name: Kernel Version
     script: uname -r
-
-  - name: CPU Core
-    script: cat /proc/cpuinfo |grep "processor"|wc -l
+  - name: CPU Usage Percent/Total
+    script: echo `grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {printf ("%.2f",usage)}'`%/`grep -c "model name" /proc/cpuinfo`
+  - name: Mem Usage/Total
+    script: echo `free -h | awk '/^Mem:/{print $3}'`/`free -h | awk '/^Mem:/{print $2}'`
+  - name: NF_Conntrack Usage/Total
+    script: echo `cat /proc/sys/net/netfilter/nf_conntrack_count`/`cat /proc/sys/net/netfilter/nf_conntrack_max`

@@ -222,6 +222,10 @@ func (host *Host) pullContent(src, dst string) (err error) {
 }
 
 func (host *Host) pull(src, dst, md5 string) (err error) {
+	if strings.HasPrefix(dst, "~/") {
+		dirname, _ := os.UserHomeDir()
+		dst = filepath.Join(dirname, dst[2:])
+	}
 	dstFile, err := os.Create(dst)
 	if err != nil {
 		return
@@ -246,6 +250,10 @@ func (host *Host) pull(src, dst, md5 string) (err error) {
 }
 
 func (host *Host) push(src, dst, md5 string) (err error) {
+	if strings.HasPrefix(src, "~/") {
+		dirname, _ := os.UserHomeDir()
+		src = filepath.Join(dirname, src[2:])
+	}
 	srcFile, err := os.Open(src)
 	err = host.Conn.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
 

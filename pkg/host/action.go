@@ -53,7 +53,6 @@ func ActionFile(option FileOption) (err error) {
 			return PrintError(ErrorCommon(err))
 		}
 		for _, addr := range hosts {
-			fmt.Printf("host -> %s\n", addr)
 			host, err := newHost("", addr, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
 			if err != nil {
 				return PrintError(ErrorConnect(err))
@@ -93,7 +92,6 @@ func batchRunHost(hosts, username, privatekeypath, addshell, removeshell string,
 	}
 	var stdout string
 	for _, addr := range RemoveDuplicates(GetSliceFromFileOrString(hosts)) {
-		fmt.Printf("host -> %s\n", addr)
 		host, err := newHost("", addr, "", 22, username, "", "", privatekeypath, 0)
 		if err != nil {
 			PrintError(ErrorCommon(err))
@@ -105,7 +103,7 @@ func batchRunHost(hosts, username, privatekeypath, addshell, removeshell string,
 			stdout, _, err = host.exec(addshell)
 		}
 		if len(stdout) != 0 {
-			PrintInfo(stdout)
+			PrintInfo(fmt.Sprintf("[%s] %s", addr, stdout))
 		}
 		if err != nil {
 			PrintError(ErrorCommon(err))
