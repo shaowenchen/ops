@@ -1,11 +1,10 @@
-variables:
-  filter: latest
-name: docker clear
+name: Docker Clear
 steps:
-  - name: echo some
-    script: echo "{latest}"
+  - name: Docker system prune
+    script: docker system prune -f
 
-  - name: copy file
-    src: "/myfile"
-    dest: "/tmp/myfile"
-    remote_src: true
+  - name: Clear none image
+    script: docker images | grep none | awk '{print $3}' | xargs /usr/bin/docker rmi
+
+  - name: Clear biz image
+    script: docker images |grep -E "([0-9a-z]+[-]){3,}[0-9]{9}" |awk '{print $3}' | xargs /usr/bin/docker rmi
