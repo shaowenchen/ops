@@ -11,13 +11,19 @@ func ActionPipeline(option PipelineOption) (err error) {
 		fmt.Println(err)
 	}
 	for _, p := range pipelines {
+		// override Variables
+		for key, value := range option.Variables {
+			p.Variables[key] = value
+		}
+		p.Variables = renderVarsVariables(p.Variables)
+		fmt.Println(p.Variables)
 		fmt.Println("[pipeline] " + p.Name)
 		if len(option.Hosts) == 0 {
 			option.Hosts = host.LocalHostIP
 		}
 		for _, addr := range host.RemoveDuplicates(host.GetSliceFromFileOrString(option.Hosts)) {
 			for _, s := range p.Steps {
-				s = renderVariables(s, p.Variables)
+				s = renderStepVariables(s, p.Variables)
 				if option.Debug {
 					fmt.Println(s.Script)
 				}

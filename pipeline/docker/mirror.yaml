@@ -1,0 +1,4 @@
+name: Set Docker Mirror
+steps:
+  - name: Set Docker live-restore
+    script: "jq '. + {\"live-restore\": true}' /etc/docker/daemon.json > /etc/docker/daemon.json"

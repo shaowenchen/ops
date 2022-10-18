@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
@@ -22,17 +23,25 @@ type Step struct {
 	Direction  string
 }
 
-func renderVariables(step Step, vars map[string]string) Step {
+func renderStepVariables(step Step, vars map[string]string) Step {
 	for key, value := range vars {
-		vars[key] = strings.ReplaceAll(vars[key], "$"+key, value)
-	}
-	for key, value := range vars {
-		step.Name = strings.ReplaceAll(step.Name, "$"+key, value)
-		step.Script = strings.ReplaceAll(step.Script, "$"+key, value)
-		step.LocalFile = strings.ReplaceAll(step.LocalFile, "$"+key, value)
-		step.RemoteFile = strings.ReplaceAll(step.RemoteFile, "$"+key, value)
+		step.Name = strings.ReplaceAll(step.Name, fmt.Sprintf("${%s}", key), value)
+		step.Script = strings.ReplaceAll(step.Script, fmt.Sprintf("${%s}", key), value)
+		step.LocalFile = strings.ReplaceAll(step.LocalFile, fmt.Sprintf("${%s}", key), value)
+		step.RemoteFile = strings.ReplaceAll(step.RemoteFile, fmt.Sprintf("${%s}", key), value)
 	}
 	return step
+}
+
+func renderVarsVariables(vars map[string]string) map[string]string {
+	for valueKey, value := range vars {
+		for key, keyValue := range vars {
+			if strings.Contains(value, key) {
+				vars[valueKey] = strings.ReplaceAll(value, fmt.Sprintf("${%s}", key), keyValue)
+			}
+		}
+	}
+	return vars
 }
 
 func readPipelineYaml(filePath string) (pipelines []Pipeline, err error) {

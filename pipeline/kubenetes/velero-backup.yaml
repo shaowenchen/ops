@@ -1,0 +1,8 @@
+name: Backup Kubernetes Using Velero
+variables:
+  ClusterName: test
+  Version: 4
+  VeleroVersion: v1.9.2
+steps:
+  - name: Backup all
+    script: ./velero-${VeleroVersion}-linux-amd64/velero backup create ${ClusterName}-${Version}

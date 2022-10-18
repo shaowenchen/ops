@@ -1,0 +1,8 @@
+name: Restore Kubernetes Using Velero
+variables:
+  ClusterName: test
+  Version: 2
+  VeleroVersion: v1.9.2
+steps:
+  - name: Restore all
+    script: ./velero-${VeleroVersion}-linux-amd64/velero restore create  ${ClusterName}-${Version}-restore --from-backup  ${ClusterName}-${Version}

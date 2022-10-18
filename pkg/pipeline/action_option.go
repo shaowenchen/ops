@@ -6,5 +6,6 @@ import (
 type PipelineOption struct{
 	Debug bool
 	FilePath string
+	Variables map[string]string
 	host.HostOption
 }
