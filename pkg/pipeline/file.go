@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Pipeline struct {
@@ -14,11 +15,24 @@ type Pipeline struct {
 }
 
 type Step struct {
-	Name          string
-	Script        string
-	LocalFile         string
-	RemoteFile    string
-	Direction string
+	Name       string
+	Script     string
+	LocalFile  string
+	RemoteFile string
+	Direction  string
+}
+
+func renderVariables(step Step, vars map[string]string) Step {
+	for key, value := range vars {
+		vars[key] = strings.ReplaceAll(vars[key], "$"+key, value)
+	}
+	for key, value := range vars {
+		step.Name = strings.ReplaceAll(step.Name, "$"+key, value)
+		step.Script = strings.ReplaceAll(step.Script, "$"+key, value)
+		step.LocalFile = strings.ReplaceAll(step.LocalFile, "$"+key, value)
+		step.RemoteFile = strings.ReplaceAll(step.RemoteFile, "$"+key, value)
+	}
+	return step
 }
 
 func readPipelineYaml(filePath string) (pipelines []Pipeline, err error) {

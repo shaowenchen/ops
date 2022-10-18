@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/md5"
 	"fmt"
+	"github.com/shaowenchen/opscli/pkg/kube"
 	"io"
 	"os"
 	"strings"
@@ -31,6 +32,12 @@ func GetSliceFromFileOrString(str string) []string {
 	}
 	var result []string
 	if isExist {
+		// try kubeconfig
+		node_ips, err := kube.GetAllNodesFromKubeconfig(str)
+		if err == nil {
+			return node_ips
+		}
+		//try readfile
 		readFile, err := os.Open(str)
 		if err != nil {
 			panic(err)

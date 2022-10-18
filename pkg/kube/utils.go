@@ -81,7 +81,7 @@ func SplitAllNamespacedName(client *kubernetes.Clientset, namespacedNamesStr str
 	return
 }
 
-func SplitStr(str string)(strList []string){
+func SplitStr(str string) (strList []string) {
 	return strings.Split(str, ",")
 }
 
@@ -115,6 +115,31 @@ func GetAllNamespaces(client *kubernetes.Clientset) (namespaces []string, err er
 	}
 	for _, namespace := range allNamespaces.Items {
 		namespaces = append(namespaces, namespace.Name)
+	}
+	return
+}
+
+func GetAllNodesFromKubeconfig(kubeconfigpath string) (nodes_ips []string, err error) {
+	client, err := NewKubernetesClient(kubeconfigpath)
+	if err != nil {
+		return
+	}
+	nodes, err := GetAllNodes(client)
+	if err != nil {
+		return
+	}
+	for _, node := range nodes.Items {
+		node_ip := GetInterlIPFromKubeNode(node)
+		nodes_ips = append(nodes_ips, node_ip)
+	}
+	return
+}
+
+func GetInterlIPFromKubeNode(node corev1.Node) (ip string) {
+	for _, addr := range node.Status.Addresses {
+		if addr.Type == "InternalIP" {
+			return addr.Address
+		}
 	}
 	return
 }
