@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/shaowenchen/opscli/pkg/script"
+	"github.com/shaowenchen/opscli/pkg/utils"
 )
 
 func ActionGetKubeconfig(option KubeconfigOption) (err error) {
@@ -68,21 +68,21 @@ func ActionFile(option FileOption) (err error) {
 }
 
 func ActionEtcHosts(option EtcHostsOption) (err error) {
-	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, script.AddHost(option.IP, option.Domain), script.DeleteHost(option.Domain), option.Clear)
+	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, utils.AddHost(option.IP, option.Domain), utils.DeleteHost(option.Domain), option.Clear)
 	return nil
 }
 
 func ActionInstall(option InstallOption) (err error) {
 	if strings.ToLower(option.Name) == "metrics-server" {
-		addShell := script.AddlMetricsServer()
-		removeShell := script.RemoveMetricsServer()
+		addShell := utils.AddlMetricsServer()
+		removeShell := utils.RemoveMetricsServer()
 		batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, addShell, removeShell, option.Clear)
 	}
 	return
 }
 
 func ActionScript(option ScriptOption) (err error) {
-	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, script.GetExecutableScript(option.Content), "", false)
+	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, utils.GetExecutableScript(option.Content), "", false)
 	return nil
 }
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/shaowenchen/opscli/pkg/script"
+	"github.com/shaowenchen/opscli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade opscli version to latest",
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		upgrade := exec.Command("sh", "-c", script.InstallOpscli())
+		upgrade := exec.Command("sh", "-c", utils.InstallOpscli())
 		var stderr bytes.Buffer
 		upgrade.Stderr = &stderr
 		err = upgrade.Run()

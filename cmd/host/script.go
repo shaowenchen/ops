@@ -16,10 +16,10 @@ var scriptCmd = &cobra.Command{
 }
 
 func init() {
+	scriptCmd.Flags().StringVarP(&scriptOpt.Content, "content", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.Username, "username", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.Password, "password", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.PrivateKeyPath, "privatekeypath", "", "", "")
-	scriptCmd.Flags().StringVarP(&scriptOpt.Content, "content", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.Hosts, "hosts", "", "", "")
 	scriptCmd.Flags().BoolVarP(&scriptOpt.Clear, "clear", "", false, "")
 }
