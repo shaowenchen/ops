@@ -16,13 +16,13 @@ func ActionPipeline(option PipelineOption) (err error) {
 			p.Variables[key] = value
 		}
 		p.Variables = renderVarsVariables(p.Variables)
-		fmt.Println(p.Variables)
 		fmt.Println("[pipeline] " + p.Name)
 		if len(option.Hosts) == 0 {
 			option.Hosts = host.LocalHostIP
 		}
 		for _, addr := range host.RemoveDuplicates(host.GetSliceFromFileOrString(option.Hosts)) {
 			for _, s := range p.Steps {
+				fmt.Println(fmt.Sprintf("[%s] %s", addr, s.Name))
 				s = renderStepVariables(s, p.Variables)
 				if option.Debug {
 					fmt.Println(s.Script)

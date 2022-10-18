@@ -3,8 +3,10 @@ steps:
   - name: Make Docker Etc Dir
     script: mkdir -p /etc/docker
   - name: Make Daemon.json
-    script: test -f /etc/docker/daemon.json || touch /etc/docker/daemon.json
+    script: test -f /etc/docker/daemon.json || echo '{}' > /etc/docker/daemon.json
   - name: Set Docker live-restore
-    script: jq '. + {"live-restore": true}' <<< $(cat /etc/docker/daemon.json ) > /etc/docker/daemon.json
-  - name: Show Docker cinfig
+    script: 'jq ". + {\"live-restore\": true}" <<< $(cat /etc/docker/daemon.json ) > /etc/docker/daemon.json'
+  - name: Reload Docker
+    script: systemctl reload docker
+  - name: Show Docker config
     script: cat /etc/docker/daemon.json

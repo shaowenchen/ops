@@ -72,15 +72,6 @@ func ActionEtcHosts(option EtcHostsOption) (err error) {
 	return nil
 }
 
-func ActionInstall(option InstallOption) (err error) {
-	if strings.ToLower(option.Name) == "metrics-server" {
-		addShell := utils.AddlMetricsServer()
-		removeShell := utils.RemoveMetricsServer()
-		batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, addShell, removeShell, option.Clear)
-	}
-	return
-}
-
 func ActionScript(option ScriptOption) (err error) {
 	batchRunHost(option.Hosts, option.Username, option.PrivateKeyPath, utils.GetExecutableScript(option.Content), "", false)
 	return nil

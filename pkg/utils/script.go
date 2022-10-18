@@ -28,7 +28,7 @@ func DeleteHost(domain string) string {
 }
 
 func GetExecutableScript(script string) string {
-	return fmt.Sprintf(`sh -c "%s"`, script)
+	return fmt.Sprintf("sh -c '%s'", script)
 }
 
 func GetAvailableUrl(url string) string {
