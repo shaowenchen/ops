@@ -18,7 +18,9 @@ func ActionPipeline(option PipelineOption) (err error) {
 		for _, addr := range host.RemoveDuplicates(host.GetSliceFromFileOrString(option.Hosts)) {
 			for _, s := range p.Steps {
 				s = renderVariables(s, p.Variables)
-				fmt.Println(s.Script)
+				if option.Debug {
+					fmt.Println(s.Script)
+				}
 				stepFunc, err1 := getStepFunc(s)
 				if err != nil {
 					fmt.Println(err)
