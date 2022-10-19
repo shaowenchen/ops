@@ -1,6 +1,6 @@
 package utils
 
-import 	"strings"
+import "strings"
 
 func SplitStr(str string) (strList []string) {
 	return strings.Split(str, ",")

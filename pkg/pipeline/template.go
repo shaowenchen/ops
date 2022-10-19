@@ -55,6 +55,7 @@ func readPipelineYaml(filePath string) (pipelines []Pipeline, err error) {
 			return nil, err1
 		}
 		pipeline := Pipeline{}
+		pipeline.Variables = make(map[string]string, 0)
 		err = yaml.Unmarshal(yfile, &pipeline)
 		if err != nil {
 			return

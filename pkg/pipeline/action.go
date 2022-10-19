@@ -3,6 +3,7 @@ package pipeline
 import (
 	"fmt"
 	"github.com/shaowenchen/opscli/pkg/host"
+	"github.com/shaowenchen/opscli/pkg/utils"
 )
 
 func ActionPipeline(option PipelineOption) (err error) {
@@ -12,6 +13,9 @@ func ActionPipeline(option PipelineOption) (err error) {
 	}
 	for _, p := range pipelines {
 		// override Variables
+		for key, value := range utils.GetAllOsEnv() {
+			p.Variables[key] = value
+		}
 		for key, value := range option.Variables {
 			p.Variables[key] = value
 		}
