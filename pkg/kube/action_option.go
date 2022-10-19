@@ -28,11 +28,12 @@ type ScriptOption struct {
 	Kubeconfig string
 	NodeName   string
 	All        bool
-	Content     string
+	Content    string
 }
 
 type ImagePulllSecretOption struct {
 	Kubeconfig string
+	Namespace  string
 	Name       string
 	Host       string
 	Username   string
@@ -43,6 +44,7 @@ type ImagePulllSecretOption struct {
 
 type LimitRangeOption struct {
 	Kubeconfig string
+	Namespace  string
 	Name       string
 	ReqMem     string
 	LimitMem   string

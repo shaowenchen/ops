@@ -7,6 +7,7 @@ import (
 
 	"github.com/shaowenchen/opscli/pkg/utils"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 func ActionClear(option ClearOption) (err error) {
@@ -65,7 +66,7 @@ func ActionScript(option ScriptOption) (err error) {
 	}
 	for _, node := range nodeList {
 		time.Sleep(time.Second * 1)
-		namespacedName, err := utils.BuildNamespacedName(client, OpsCliNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
+		namespacedName, err := utils.GetOrCreateNamespacedName(client, OpsCliNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
 		if err != nil {
 			PrintError(ErrorMsgRunScriptOnNode(err))
 		}
@@ -98,13 +99,13 @@ func ActionEtcHostsOnNode(option EtcHostsOption) (err error) {
 		nodeList = nodes.Items
 	}
 	if option.Clear {
-		namespacedName, err := utils.BuildNamespacedName(client, OpsCliNamespace, fmt.Sprintf("deleteetchosts-%s", option.Domain))
+		namespacedName, err := utils.GetOrCreateNamespacedName(client, OpsCliNamespace, fmt.Sprintf("deleteetchosts-%s", option.Domain))
 		if err != nil {
 			return PrintError(ErrorMsgRunScriptOnNode(err))
 		}
 		err = RunScriptOnNodes(client, nodeList, namespacedName, utils.DeleteHost(option.Domain))
 	} else {
-		namespacedName, err := utils.BuildNamespacedName(client, OpsCliNamespace, fmt.Sprintf("addetchosts-%s-%s", option.Domain, strings.ReplaceAll(option.IP, ".", "-")))
+		namespacedName, err := utils.GetOrCreateNamespacedName(client, OpsCliNamespace, fmt.Sprintf("addetchosts-%s-%s", option.Domain, strings.ReplaceAll(option.IP, ".", "-")))
 		if err != nil {
 			return PrintError(ErrorMsgRunScriptOnNode(err))
 		}
@@ -121,8 +122,7 @@ func ActionImagePullSecret(option ImagePulllSecretOption) (err error) {
 	if client == nil || err != nil {
 		return PrintError(ErrorMsgGetClient(err))
 	}
-
-	namespacedNames := utils.SplitNamespacedName(option.Name)
+	namespacedNames := []types.NamespacedName{utils.BuildNamespacedName(option.Namespace, option.Name)}
 	if option.All {
 		namespacedNames, err = utils.SplitAllNamespacedName(client, option.Name)
 		if err != nil {

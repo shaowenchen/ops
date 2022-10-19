@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func BuildNamespacedName(client *kubernetes.Clientset, namespace, name string) (namespacedName types.NamespacedName, err error) {
+func GetOrCreateNamespacedName(client *kubernetes.Clientset, namespace, name string) (namespacedName types.NamespacedName, err error) {
 	ns, err := client.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 	if err != nil {
 		ns, err = client.CoreV1().Namespaces().Create(
@@ -36,6 +36,16 @@ func BuildNamespacedName(client *kubernetes.Clientset, namespace, name string) (
 		Name:      name,
 	}
 	return
+}
+
+func BuildNamespacedName(namespace, name string)(namespacedName types.NamespacedName) {
+	namespacedName.Name = name
+	if len(namespace) == 0{
+		namespacedName.Namespace = corev1.NamespaceDefault
+	}else{
+		namespacedName.Namespace = namespace
+	}
+	return namespacedName
 }
 
 func SplitNamespacedName(namespacedNamesStr string) (namespacedNames []types.NamespacedName) {
