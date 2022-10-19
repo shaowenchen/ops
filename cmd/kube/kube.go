@@ -18,5 +18,5 @@ func init() {
 	KubeCmd.AddCommand(nodeSelectorCmd)
 	KubeCmd.AddCommand(clearCmd)
 	KubeCmd.AddCommand(deschedulerCmd)
-	KubeCmd.AddCommand(hostRunCmd)
+	KubeCmd.AddCommand(scriptCmd)
 }

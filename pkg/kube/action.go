@@ -43,7 +43,7 @@ func ActionDescheduler(option DeschedulerOption) (err error) {
 	return
 }
 
-func ActionHostRun(option HostRunOption) (err error) {
+func ActionScript(option ScriptOption) (err error) {
 	client, err := utils.NewKubernetesClient(option.Kubeconfig)
 	if client == nil || err != nil {
 		return PrintError(ErrorMsgGetClient(err))
@@ -65,11 +65,11 @@ func ActionHostRun(option HostRunOption) (err error) {
 	}
 	for _, node := range nodeList {
 		time.Sleep(time.Second * 1)
-		namespacedName, err := utils.BuildNamespacedName(client, OpsCliNamespace, fmt.Sprintf("script-runhost-%s", time.Now().Format("2006-01-02-15-04-05")))
+		namespacedName, err := utils.BuildNamespacedName(client, OpsCliNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
 		if err != nil {
 			PrintError(ErrorMsgRunScriptOnNode(err))
 		}
-		_, err = RunScriptOnNode(client, node, namespacedName, option.Script)
+		_, err = RunScriptOnNode(client, node, namespacedName, option.Content)
 		if err != nil {
 			PrintError(ErrorMsgRunScriptOnNode(err))
 		}

@@ -34,6 +34,7 @@ func RunScriptOnNode(client *kubernetes.Clientset, node v1.Node, namespacedName 
 			Effect:   taint.Effect,
 		})
 	}
+	automountSA := false
 	pod, err = client.CoreV1().Pods(namespacedName.Namespace).Create(
 		context.TODO(),
 		&corev1.Pod{
@@ -42,13 +43,14 @@ func RunScriptOnNode(client *kubernetes.Clientset, node v1.Node, namespacedName 
 				Namespace: namespacedName.Namespace,
 			},
 			Spec: corev1.PodSpec{
-				NodeName: node.Name,
+				AutomountServiceAccountToken: &automountSA,
+				NodeName:                     node.Name,
 				Containers: []corev1.Container{
 					{
 						Name:    "etchosts",
 						Image:   "docker.io/library/alpine:latest",
 						Command: []string{"sh"},
-						Args:    []string{"-c", "echo 'sudo " + script + "' | nsenter -t 1 -m -u -i -n"},
+						Args:    []string{"-c", "echo \"sudo " + script + "\" | nsenter -t 1 -m -u -i -n"},
 						SecurityContext: &corev1.SecurityContext{
 							Privileged: &priviBool,
 						},

@@ -24,11 +24,11 @@ type EtcHostsOption struct {
 	Clear      bool
 }
 
-type HostRunOption struct {
+type ScriptOption struct {
 	Kubeconfig string
 	NodeName   string
 	All        bool
-	Script     string
+	Content     string
 }
 
 type ImagePulllSecretOption struct {
