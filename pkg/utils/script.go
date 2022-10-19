@@ -20,7 +20,7 @@ func RemoveMetricsServer() string {
 }
 
 func AddHost(ip, domain string) string {
-	return GetExecutableScript(fmt.Sprintf("echo '%s %s' >> /etc/hosts", ip, domain))
+	return GetExecutableScript(fmt.Sprintf("echo \"%s %s\" >> /etc/hosts", ip, domain))
 }
 
 func DeleteHost(domain string) string {
