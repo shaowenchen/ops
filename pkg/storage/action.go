@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/shaowenchen/opscli/pkg/utils"
 	"os"
 )
 
@@ -14,9 +15,9 @@ func ActionS3File(option S3FileOption) (err error) {
 			err = s3Download(ak, sk, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
 		}
 		if err != nil {
-			err = PrintError(ErrorMsgS3File(err))
+			err = utils.PrintError(err)
 		}
 		return
 	}
-	return PrintError(ErrorMsgS3AKSK(nil))
+	return nil
 }

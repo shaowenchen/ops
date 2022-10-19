@@ -12,16 +12,16 @@ func ActionGetKubeconfig(option KubeconfigOption) (err error) {
 	if option.Clear {
 		err = os.Remove(GetCurrentUserKubeConfigPath())
 		if err != nil {
-			return PrintError(err.Error())
+			return utils.PrintError(err)
 		}
 	}
 	host, err := newHost("", option.Hosts, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
 	if err != nil {
-		return PrintError(ErrorConnect(err))
+		return utils.PrintError(err.Error())
 	}
 	err = host.pullContent(GetAdminKubeConfigPath(), GetCurrentUserKubeConfigPath())
 	if err != nil {
-		PrintError(err.Error())
+		utils.PrintError(err)
 	}
 	return
 }
@@ -36,32 +36,32 @@ func ActionFile(option FileOption) (err error) {
 		}
 		host, err := newHost("", hosts[0], "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
 		if err != nil {
-			return PrintError(ErrorConnect(err))
+			return utils.PrintError(err)
 		}
 		md5, err := host.fileMd5(option.RemoteFile)
 		if err != nil {
-			return PrintError(ErrorCommon(err))
+			return utils.PrintError(err)
 		}
 		err = host.pull(option.RemoteFile, option.LocalFile, md5)
 		if err != nil {
-			return PrintError(ErrorCommon(err))
+			return utils.PrintError(err)
 		}
-		PrintInfo("Md5: " + md5)
+		utils.PrintInfo("Md5: ", md5)
 	} else {
 		md5, err := FileMD5(option.LocalFile)
 		if err != nil {
-			return PrintError(ErrorCommon(err))
+			return utils.PrintError(err)
 		}
 		for _, addr := range hosts {
 			host, err := newHost("", addr, "", 22, option.Username, "", "", option.PrivateKeyPath, 0)
 			if err != nil {
-				return PrintError(ErrorConnect(err))
+				return utils.PrintError(err)
 			}
 			err = host.push(option.LocalFile, option.RemoteFile, md5)
 			if err != nil {
-				PrintError(err.Error())
+				utils.PrintError(err)
 			}
-			PrintInfo("Md5: " + md5)
+			utils.PrintInfo("Md5: ", md5)
 		}
 	}
 	return
@@ -85,7 +85,7 @@ func batchRunHost(hosts, username, privatekeypath, addshell, removeshell string,
 	for _, addr := range RemoveDuplicates(GetSliceFromFileOrString(hosts)) {
 		host, err := newHost("", addr, "", 22, username, "", "", privatekeypath, 0)
 		if err != nil {
-			PrintError(ErrorCommon(err))
+			utils.PrintError(err)
 			continue
 		}
 		if clear {
@@ -94,10 +94,10 @@ func batchRunHost(hosts, username, privatekeypath, addshell, removeshell string,
 			stdout, _, err = host.exec(addshell)
 		}
 		if len(stdout) != 0 {
-			PrintInfo(fmt.Sprintf("[%s] %s", addr, stdout))
+			utils.PrintInfo(fmt.Sprintf("[%s] %s", addr, stdout))
 		}
 		if err != nil {
-			PrintError(ErrorCommon(err))
+			utils.PrintError(err)
 		}
 	}
 }
