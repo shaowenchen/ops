@@ -2,9 +2,9 @@ package utils
 
 import (
 	"os"
+	"runtime"
 	"strings"
 )
-
 
 func GetAllOsEnv() (envs map[string]string) {
 	envs = make(map[string]string, 0)
@@ -16,5 +16,12 @@ func GetAllOsEnv() (envs map[string]string) {
 			envs[pair[0]] = pair[1]
 		}
 	}
+	return
+}
+
+func GetRuntimeInfo() (info map[string]string) {
+	info = make(map[string]string, 0)
+	info["ARCH"] = runtime.GOARCH
+	info["OS"] = runtime.GOOS
 	return
 }

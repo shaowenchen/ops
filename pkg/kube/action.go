@@ -203,3 +203,32 @@ func ActionLimitRange(option LimitRangeOption) (err error) {
 	}
 	return
 }
+
+func ActionAnnotate(option AnnotateOption) (err error) {
+	client, err := utils.NewKubernetesClient(option.Kubeconfig)
+	if client == nil || err != nil {
+		return PrintError(ErrorMsgGetClient(err))
+	}
+	if option.Type != "velero" {
+		fmt.Println("not support this types")
+		return
+	}
+	namespaces := []string{option.Namespace}
+	if option.All {
+		namespaces, err = utils.GetAllNamespaces(client)
+		if err != nil {
+			PrintError(err.Error())
+		}
+	}
+
+	for _, namespace := range namespaces {
+		updatedPodNames, err := AnnotateVeleroPod(client, namespace, option.Clear)
+		if len(updatedPodNames) > 0 {
+			fmt.Println("updated pod list:\n", strings.Join(updatedPodNames, "\n"))
+		}
+		if err != nil {
+			PrintError(err.Error())
+		}
+	}
+	return
+}

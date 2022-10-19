@@ -16,6 +16,9 @@ func ActionPipeline(option PipelineOption) (err error) {
 		for key, value := range utils.GetAllOsEnv() {
 			p.Variables[key] = value
 		}
+		for key, value := range utils.GetRuntimeInfo() {
+			p.Variables[key] = value
+		}
 		for key, value := range option.Variables {
 			p.Variables[key] = value
 		}

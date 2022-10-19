@@ -1,0 +1,4 @@
+name: Set Path
+steps:
+  - name: Set /usr/local/bin to PATH
+    script: echo "export PATH=$PATH:/usr/local/bin" >> /etc/profile

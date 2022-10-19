@@ -52,6 +52,14 @@ type LimitRangeOption struct {
 	All        bool
 }
 
+type AnnotateOption struct {
+	Kubeconfig string
+	Type       string
+	Namespace  string
+	Clear      bool
+	All        bool
+}
+
 type NodeNameOption struct {
 	Kubeconfig string
 	NodeName   string

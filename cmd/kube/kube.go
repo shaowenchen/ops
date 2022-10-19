@@ -12,6 +12,7 @@ var KubeCmd = &cobra.Command{
 func init() {
 	KubeCmd.AddCommand(etcHostsCmd)
 	KubeCmd.AddCommand(imagePulllSecretCmd)
+	KubeCmd.AddCommand(annotationCmd)
 	KubeCmd.AddCommand(limitRangeCmd)
 	KubeCmd.AddCommand(nodeNameCmd)
 	KubeCmd.AddCommand(nodeSelectorCmd)
