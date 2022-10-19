@@ -11,8 +11,8 @@ var nodeNameOption kube.NodeNameOption
 var nodeNameCmd = &cobra.Command{
 	Use:   "nodename",
 	Short: "config nodeName for kubernetes deployment",
-	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		return kube.ActionNodeName(nodeNameOption)
+	Run: func(cmd *cobra.Command, args []string) {
+		kube.ActionNodeName(nodeNameOption)
 	},
 }
 

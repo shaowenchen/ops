@@ -28,3 +28,19 @@ func SplitKeyValues(str string) (pair map[string]string) {
 	}
 	return
 }
+
+func SplitStrings(str string) []string {
+	return strings.Split(str, ",")
+}
+
+func RemoveDuplicates(origin []string) []string {
+	var result []string
+	status := make(map[string]string, len(origin))
+	for _, key := range origin {
+		if _, ok := status[key]; !ok {
+			result = append(result, key)
+			status[key] = key
+		}
+	}
+	return result
+}

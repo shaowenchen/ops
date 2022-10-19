@@ -12,9 +12,9 @@ var PipelineCmd = &cobra.Command{
 	Use:                "pipeline",
 	Short:              "run pipeline with this command",
 	DisableFlagParsing: true,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		pipelineOption = parseArgs(args)
-		return pipeline.ActionPipeline(pipelineOption)
+		pipeline.ActionPipeline(pipelineOption)
 	},
 }
 

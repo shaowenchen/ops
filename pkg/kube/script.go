@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/shaowenchen/opscli/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
-	"github.com/shaowenchen/opscli/pkg/utils"
 )
 
 func RunScriptOnNodes(client *kubernetes.Clientset, nodes []v1.Node, namespacedName types.NamespacedName, script string) (err error) {
@@ -18,7 +18,7 @@ func RunScriptOnNodes(client *kubernetes.Clientset, nodes []v1.Node, namespacedN
 		currentNameSpacedName.Name = fmt.Sprintf("node%d-%s", index, currentNameSpacedName.Name)
 		_, err = RunScriptOnNode(client, node, currentNameSpacedName, script)
 		if err != nil {
-			utils.PrintError(err)
+			return utils.LogError(err)
 		}
 	}
 	return

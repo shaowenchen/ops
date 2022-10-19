@@ -14,6 +14,7 @@ var url = ""
 var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade opscli version to latest",
+	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		upgrade := exec.Command("sh", "-c", utils.InstallOpscli())
 		var stderr bytes.Buffer

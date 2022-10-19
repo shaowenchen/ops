@@ -10,8 +10,8 @@ var fileOpt host.FileOption
 var fileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "file Component on host",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return host.ActionFile(fileOpt)
+	Run: func(cmd *cobra.Command, args []string) {
+		host.ActionFile(fileOpt)
 	},
 }
 

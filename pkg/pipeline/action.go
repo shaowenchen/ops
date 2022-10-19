@@ -27,7 +27,7 @@ func ActionPipeline(option PipelineOption) (err error) {
 		if len(option.Hosts) == 0 {
 			option.Hosts = host.LocalHostIP
 		}
-		for _, addr := range host.RemoveDuplicates(host.GetSliceFromFileOrString(option.Hosts)) {
+		for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
 			for _, s := range p.Steps {
 				fmt.Println(fmt.Sprintf("[%s] %s", addr, s.Name))
 				s = renderStepVariables(s, p.Variables)

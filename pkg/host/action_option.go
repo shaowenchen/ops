@@ -1,6 +1,7 @@
 package host
 type HostOption struct {
 	Hosts          string
+	Port           int
 	Username       string
 	Password       string
 	PrivateKeyPath string

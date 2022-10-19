@@ -5,13 +5,16 @@ import (
 	"fmt"
 )
 
-func PrintError(errs ...interface{}) (err error) {
-	errMsg := fmt.Sprint(errs)
-	fmt.Println(errMsg)
-	return errors.New(errMsg)
+func LogError(errs ...interface{}) error {
+	if len(errs) == 1 && errs[0] == nil {
+		return nil
+	}
+	msg := fmt.Sprint(errs...)
+	fmt.Println(msg)
+	return errors.New(msg)
 }
 
-func PrintInfo(infos ...interface{}) {
-	errMsg := fmt.Sprint(infos)
-	fmt.Println(errMsg)
+func LogInfo(infos ...interface{}) {
+	msg := fmt.Sprint(infos...)
+	fmt.Println(msg)
 }

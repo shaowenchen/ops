@@ -10,8 +10,8 @@ var etcHostsOption kube.EtcHostsOption
 var etcHostsCmd = &cobra.Command{
 	Use:   "etchosts",
 	Short: "config /etc/hosts on host",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return kube.ActionEtcHostsOnNode(etcHostsOption)
+	Run: func(cmd *cobra.Command, args []string) {
+		kube.ActionEtcHostsOnNode(etcHostsOption)
 	},
 }
 

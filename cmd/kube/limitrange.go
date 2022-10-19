@@ -10,8 +10,8 @@ var limitRangeOption kube.LimitRangeOption
 var limitRangeCmd = &cobra.Command{
 	Use:   "limitrange",
 	Short: "config limitRange for kubernetes",
-	RunE: func(cmd *cobra.Command, args []string)(err error) {
-		return kube.ActionLimitRange(limitRangeOption)
+	Run: func(cmd *cobra.Command, args []string) {
+		kube.ActionLimitRange(limitRangeOption)
 	},
 }
 

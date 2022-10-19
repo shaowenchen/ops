@@ -1,23 +1,35 @@
 package storage
 
 import (
-	"github.com/shaowenchen/opscli/pkg/utils"
 	"os"
+
+	"github.com/shaowenchen/opscli/pkg/utils"
 )
 
 func ActionS3File(option S3FileOption) (err error) {
-	ak := os.Getenv(EnvS3AsKey)
-	sk := os.Getenv(EnvS3SkKey)
-	if len(ak) > 0 && len(sk) > 0 {
-		if IsS3UploadFlag(option.Direction) {
-			_, err = s3Upload(ak, sk, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
-		} else {
-			err = s3Download(ak, sk, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
-		}
-		if err != nil {
-			err = utils.PrintError(err)
-		}
-		return
+	if len(option.AK) == 0 {
+		option.AK = os.Getenv("ak")
 	}
-	return nil
+	if len(option.SK) == 0 {
+		option.SK = os.Getenv("sk")
+	}
+	if len(option.AK) == 0 || len(option.SK) == 0 {
+		return utils.LogError("Please provide ak sk in params or env")
+	}
+	if IsS3UploadFlag(option.Direction) {
+		_, err = s3Upload(option.AK, option.SK, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
+	} else if IsS3DownloadFlag(option.Direction) {
+		err = s3Download(option.AK, option.SK, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
+	} else {
+		return utils.LogError("direction must is download or upload")
+	}
+	return utils.LogError(err)
+}
+
+func IsS3DownloadFlag(flag string) bool {
+	return flag == "download"
+}
+
+func IsS3UploadFlag(flag string) bool {
+	return flag == "upload"
 }

@@ -10,8 +10,8 @@ var deschedulerOption kube.DeschedulerOption
 var deschedulerCmd = &cobra.Command{
 	Use:   "descheduler",
 	Short: "descheduler resource",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return kube.ActionDescheduler(deschedulerOption)
+	Run: func(cmd *cobra.Command, args []string) {
+		kube.ActionDescheduler(deschedulerOption)
 	},
 }
 

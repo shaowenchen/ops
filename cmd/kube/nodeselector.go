@@ -10,8 +10,8 @@ var nodeSelectorOption kube.NodeSelectorOption
 var nodeSelectorCmd = &cobra.Command{
 	Use:   "nodeselector",
 	Short: "config nodeSelector for kubernetes deployment",
-	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		return kube.ActionNodeSelector(nodeSelectorOption)
+	Run: func(cmd *cobra.Command, args []string) {
+		kube.ActionNodeSelector(nodeSelectorOption)
 	},
 }
 

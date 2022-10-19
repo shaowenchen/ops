@@ -9,6 +9,7 @@ import (
 
 	"github.com/bramvdbogaerde/go-scp"
 	"github.com/pkg/errors"
+	"github.com/shaowenchen/opscli/pkg/utils"
 	"golang.org/x/crypto/ssh"
 
 	"net"
@@ -31,7 +32,7 @@ type Host struct {
 	Address         string `yaml:"address,omitempty" json:"address,omitempty"`
 	InternalAddress string `yaml:"internalAddress,omitempty" json:"internalAddress,omitempty"`
 	Port            int    `yaml:"port,omitempty" json:"port,omitempty"`
-	User            string `yaml:"user,omitempty" json:"user,omitempty"`
+	Username        string `yaml:"user,omitempty" json:"username,omitempty"`
 	Password        string `yaml:"password,omitempty" json:"password,omitempty"`
 	PrivateKey      string `yaml:"privateKey,omitempty" json:"privateKey,omitempty"`
 	PrivateKeyPath  string `yaml:"privateKeyPath,omitempty" json:"privateKeyPath,omitempty"`
@@ -39,34 +40,27 @@ type Host struct {
 	Conn            *HostConnection
 }
 
-func newHost(name string, address string, internalAddress string, port int, user string, password string, privateKey string, privateKeyPath string, timeout int64) (*Host, error) {
+func newHost(internalAddress string, port int, username string, password string, privateKeyPath string) (*Host, error) {
 	if len(privateKeyPath) == 0 {
-		privateKeyPath = GetCurrentUserPrivateKeyPath()
+		privateKeyPath = utils.GetCurrentUserPrivateKeyPath()
 	}
-	if port == 0 {
-		port = 22
-	}
-
-	if len(user) == 0 {
-		user = GetCurrentUser()
-	}
-
-	if timeout == 0 {
-		timeout = 10
+	port = 22
+	if len(username) == 0 {
+		username = utils.GetCurrentUser()
 	}
 	host := &Host{
-		Name:            name,
-		Address:         address,
+		Name:            "",
+		Address:         "",
 		InternalAddress: internalAddress,
 		Port:            port,
-		User:            user,
+		Username:        username,
 		Password:        password,
-		PrivateKey:      privateKey,
+		PrivateKey:      "",
 		PrivateKeyPath:  privateKeyPath,
-		Timeout:         timeout,
+		Timeout:         10,
 	}
 	// local host
-	if name == LocalHostIP || address == LocalHostIP {
+	if internalAddress == LocalHostIP {
 		return host, nil
 	}
 	// remote host
@@ -98,18 +92,18 @@ func (host *Host) connecting() (err error) {
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	}
 	sshConfig := &ssh.ClientConfig{
-		User:            host.User,
+		User:            host.Username,
 		Timeout:         time.Duration(host.Timeout) * time.Second,
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	endpointBehindBastion := net.JoinHostPort(host.Address, strconv.Itoa(host.Port))
+	endpointBehindBastion := net.JoinHostPort(host.InternalAddress, strconv.Itoa(host.Port))
 
 	host.Conn = &HostConnection{}
 	host.Conn.sshclient, err = ssh.Dial("tcp", endpointBehindBastion, sshConfig)
 	if err != nil {
-		return errors.Wrapf(err, "client.Dial failed %s", host.Address)
+		return errors.Wrapf(err, "client.Dial failed %s", host.InternalAddress)
 	}
 	host.Conn.scpclient, err = scp.NewClientBySSH(host.Conn.sshclient)
 	if err != nil {
@@ -185,7 +179,7 @@ func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 			exitCode = exitErr.ExitStatus()
 		}
 	}
-	outStr := strings.TrimPrefix(string(output), fmt.Sprintf("[sudo] password for %s:", host.User))
+	outStr := strings.TrimPrefix(string(output), fmt.Sprintf("[sudo] password for %s:", host.Username))
 
 	// preserve original error
 	return strings.TrimSpace(outStr), exitCode, errors.Wrapf(err, "Failed to exec command: %s \n%s", cmd, strings.TrimSpace(outStr))
@@ -197,7 +191,7 @@ func (host *Host) pullContent(src, dst string) (err error) {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
 	dstDir := filepath.Dir(dst)
-	if isExist, _ := isExistsFile(dstDir); !isExist {
+	if isExist, _ := utils.IsExistsFile(dstDir); !isExist {
 		err = os.MkdirAll(dstDir, os.ModePerm)
 		if err != nil {
 			return fmt.Errorf("create dst dir failed %v, dst dir: %s", err, dstDir)
@@ -238,7 +232,7 @@ func (host *Host) pull(src, dst, md5 string) (err error) {
 		return
 	}
 
-	dstmd5, err := FileMD5(dst)
+	dstmd5, err := utils.FileMD5(dst)
 	if err != nil {
 		return
 	}

@@ -10,8 +10,8 @@ var scriptOption kube.ScriptOption
 var scriptCmd = &cobra.Command{
 	Use:   "script",
 	Short: "run script on host",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return kube.ActionScript(scriptOption)
+	Run: func(cmd *cobra.Command, args []string) {
+		kube.ActionScript(scriptOption)
 	},
 }
 

@@ -10,8 +10,8 @@ var kubeconfigOpt host.KubeconfigOption
 var kubeconfigCmd = &cobra.Command{
 	Use:   "kubeconfig",
 	Short: "get kubeconfig from remote host",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return host.ActionGetKubeconfig(kubeconfigOpt)
+	Run: func(cmd *cobra.Command, args []string) {
+		host.ActionGetKubeconfig(kubeconfigOpt)
 	},
 }
 

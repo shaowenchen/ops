@@ -10,8 +10,8 @@ var clearOption kube.ClearOption
 var clearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "clear resource",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return kube.ActionClear(clearOption)
+	Run: func(cmd *cobra.Command, args []string) {
+		kube.ActionClear(clearOption)
 	},
 }
 

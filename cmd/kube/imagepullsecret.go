@@ -5,14 +5,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 var imagePulllSecretOption kube.ImagePulllSecretOption
 
 var imagePulllSecretCmd = &cobra.Command{
 	Use:   "imagepulllsecret",
 	Short: "config ImagePullSecret to kubernetes",
-	RunE: func(cmd *cobra.Command, args []string)(err error) {
-		return kube.ActionImagePullSecret(imagePulllSecretOption)
+	Run: func(cmd *cobra.Command, args []string) {
+		kube.ActionImagePullSecret(imagePulllSecretOption)
 	},
 }
 

@@ -10,8 +10,8 @@ var scriptOpt host.ScriptOption
 var scriptCmd = &cobra.Command{
 	Use:   "script",
 	Short: "run script on hosts",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return host.ActionScript(scriptOpt)
+	Run: func(cmd *cobra.Command, args []string) {
+		host.ActionScript(scriptOpt)
 	},
 }
 

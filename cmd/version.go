@@ -22,6 +22,7 @@ type BuildInfo struct {
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "get current opscli version",
+	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		versionBytes, err := json.Marshal(
 			BuildInfo{

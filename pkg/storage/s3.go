@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -47,7 +46,7 @@ func s3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile stri
 	downloader := s3manager.NewDownloader(sess)
 	file, err := os.Create(localFilePath)
 	if err != nil {
-		return fmt.Errorf("create file error")
+		return
 	}
 	params := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
@@ -55,7 +54,7 @@ func s3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile stri
 	}
 	_, err = downloader.Download(file, params)
 	if err != nil {
-		return fmt.Errorf("download file error, %v", err)
+		return
 	}
 	return
 }
