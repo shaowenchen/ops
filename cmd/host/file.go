@@ -23,5 +23,6 @@ func init() {
 	fileCmd.Flags().StringVarP(&fileOpt.Password, "password", "", "", "")
 	fileCmd.Flags().StringVarP(&fileOpt.PrivateKeyPath, "privatekeypath", "", "", "")
 	fileCmd.Flags().StringVarP(&fileOpt.Hosts, "hosts", "", "", "")
+	fileCmd.Flags().IntVar(&fileOpt.Port, "port", 22, "")
 	fileCmd.Flags().BoolVarP(&fileOpt.Clear, "clear", "", false, "")
 }

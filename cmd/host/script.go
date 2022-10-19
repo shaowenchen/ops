@@ -21,5 +21,6 @@ func init() {
 	scriptCmd.Flags().StringVarP(&scriptOpt.Password, "password", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.PrivateKeyPath, "privatekeypath", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOpt.Hosts, "hosts", "", "", "")
+	scriptCmd.Flags().IntVar(&scriptOpt.Port, "port", 22, "")
 	scriptCmd.Flags().BoolVarP(&scriptOpt.Clear, "clear", "", false, "")
 }

@@ -15,5 +15,5 @@
 # vendor/
 bin/
 .idea/
-temp
 .env
+.test-*

@@ -1,4 +1,5 @@
 package host
+
 type HostOption struct {
 	Hosts          string
 	Port           int
@@ -28,8 +29,8 @@ type KubeconfigOption struct {
 
 type FileOption struct {
 	HostOption
-	LocalFile string
+	LocalFile  string
 	RemoteFile string
-	Direction string
-	Overwrite bool
+	Direction  string
+	Overwrite  bool
 }

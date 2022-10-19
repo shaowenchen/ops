@@ -10,7 +10,7 @@ var annotateOption kube.AnnotateOption
 var annotationCmd = &cobra.Command{
 	Use:   "annotate",
 	Short: "annotate pod for kubernetes",
-	Run: func(cmd *cobra.Command, args []string){
+	Run: func(cmd *cobra.Command, args []string) {
 		kube.ActionAnnotate(annotateOption)
 	},
 }

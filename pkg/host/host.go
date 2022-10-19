@@ -44,7 +44,9 @@ func newHost(internalAddress string, port int, username string, password string,
 	if len(privateKeyPath) == 0 {
 		privateKeyPath = utils.GetCurrentUserPrivateKeyPath()
 	}
-	port = 22
+	if port == 0 {
+		port = 22
+	}
 	if len(username) == 0 {
 		username = utils.GetCurrentUser()
 	}
