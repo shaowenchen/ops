@@ -224,7 +224,7 @@ func ActionAnnotate(option AnnotateOption) (err error) {
 	for _, namespace := range namespaces {
 		updatedPodNames, err := AnnotateVeleroPod(client, namespace, option.Clear)
 		if len(updatedPodNames) > 0 {
-			fmt.Println("updated pod list:\n", strings.Join(updatedPodNames, "\n"))
+			fmt.Println("updatedPodNames:\n", strings.Join(updatedPodNames, "\n"))
 		}
 		if err != nil {
 			PrintError(err.Error())
