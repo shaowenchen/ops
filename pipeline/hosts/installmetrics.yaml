@@ -1,4 +1,0 @@
-name: Install Metrics
-steps:
-  - name: Install Metrics
-    script: ScriptInstallMetricsServer()

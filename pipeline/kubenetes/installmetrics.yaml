@@ -1,0 +1,6 @@
+name: Install MetricsServer
+variables:
+  Clear: false
+steps:
+  - name: Install MetricsServer
+    script: ScriptInstallMetricsServer(${Clear})
