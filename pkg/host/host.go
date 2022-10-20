@@ -117,7 +117,7 @@ func (host *Host) connecting() (err error) {
 func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 	// run in localhost
 	if host.Name == LocalHostIP || host.Address == LocalHostIP || host.InternalAddress == LocalHostIP {
-		runner := exec.Command("base64", "-d", "<<<", utils.EncodingBase64(cmd), "|", "sh")
+		runner := exec.Command("sudo", "sh", "-c", cmd)
 		var out, errout bytes.Buffer
 		runner.Stdout = &out
 		runner.Stderr = &errout

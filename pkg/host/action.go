@@ -73,7 +73,7 @@ func ActionEtcHosts(option EtcHostsOption) (err error) {
 }
 
 func ActionScript(option ScriptOption) (err error) {
-	batchRunHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, utils.BuildBase64Cmd(option.Content), "", false)
+	batchRunHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, option.Content, "", false)
 	return nil
 }
 
