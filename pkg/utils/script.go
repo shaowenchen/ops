@@ -7,28 +7,24 @@ import (
 	"time"
 )
 
-func InstallOpscli() string {
+func ScriptInstallOpscli() string {
 	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh"))
 }
 
-func AddlMetricsServer() string {
+func ScriptInstallMetricsServer() string {
 	return fmt.Sprintf(`kubectl apply -f %s`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
 }
 
-func RemoveMetricsServer() string {
+func ScriptRemoveMetricsServer() string {
 	return fmt.Sprintf(`kubectl delete -f %s`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
 }
 
-func AddHost(ip, domain string) string {
-	return GetExecutableScript(fmt.Sprintf("echo \"%s %s\" >> /etc/hosts", ip, domain))
+func ScriptAddHost(ip, domain string) string {
+	return BuildBase64Cmd(fmt.Sprintf("echo \"%s %s\" >> /etc/hosts", ip, domain))
 }
 
-func DeleteHost(domain string) string {
-	return GetExecutableScript(fmt.Sprintf("sed -i '/%s/d' /etc/hosts", domain))
-}
-
-func GetExecutableScript(script string) string {
-	return fmt.Sprintf("sh -c '%s'", script)
+func ScriptDeleteHost(domain string) string {
+	return BuildBase64Cmd(fmt.Sprintf("sed -i '/%s/d' /etc/hosts", domain))
 }
 
 func GetAvailableUrl(url string) string {

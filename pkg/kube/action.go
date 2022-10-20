@@ -103,13 +103,13 @@ func ActionEtcHostsOnNode(option EtcHostsOption) (err error) {
 		if err != nil {
 			return utils.LogError(err)
 		}
-		err = RunScriptOnNodes(client, nodeList, namespacedName, utils.DeleteHost(option.Domain))
+		err = RunScriptOnNodes(client, nodeList, namespacedName, utils.ScriptDeleteHost(option.Domain))
 	} else {
 		namespacedName, err := utils.GetOrCreateNamespacedName(client, OpsCliNamespace, fmt.Sprintf("addetchosts-%s-%s", option.Domain, strings.ReplaceAll(option.IP, ".", "-")))
 		if err != nil {
 			return utils.LogError(err)
 		}
-		err = RunScriptOnNodes(client, nodeList, namespacedName, utils.AddHost(option.IP, option.Domain))
+		err = RunScriptOnNodes(client, nodeList, namespacedName, utils.ScriptAddHost(option.IP, option.Domain))
 	}
 	if err != nil {
 		return utils.LogError(err)

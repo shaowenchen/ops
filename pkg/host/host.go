@@ -117,7 +117,7 @@ func (host *Host) connecting() (err error) {
 func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 	// run in localhost
 	if host.Name == LocalHostIP || host.Address == LocalHostIP || host.InternalAddress == LocalHostIP {
-		runner := exec.Command("sh", "-c", cmd)
+		runner := exec.Command("base64", "-d", "<<<", utils.EncodingBase64(cmd), "|", "sh")
 		var out, errout bytes.Buffer
 		runner.Stdout = &out
 		runner.Stderr = &errout
@@ -139,7 +139,7 @@ func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 
 	in, _ := sess.StdinPipe()
 	out, _ := sess.StdoutPipe()
-	err = sess.Start(strings.TrimSpace(cmd))
+	err = sess.Start(utils.BuildBase64Cmd(cmd))
 	if err != nil {
 		exitCode = -1
 		if exitErr, ok := err.(*ssh.ExitError); ok {

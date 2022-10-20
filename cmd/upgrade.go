@@ -16,7 +16,7 @@ var upgradeCmd = &cobra.Command{
 	Short: "upgrade opscli version to latest",
 	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		upgrade := exec.Command("sh", "-c", utils.InstallOpscli())
+		upgrade := exec.Command("sh", "-c", utils.ScriptInstallOpscli())
 		var stderr bytes.Buffer
 		upgrade.Stderr = &stderr
 		err = upgrade.Run()

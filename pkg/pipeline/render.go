@@ -2,11 +2,14 @@ package pipeline
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
+	"regexp"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Pipeline struct {
@@ -21,6 +24,35 @@ type Step struct {
 	LocalFile  string
 	RemoteFile string
 	Direction  string
+}
+
+func renderFunc(step *Step) (err error) {
+	reg := regexp.MustCompile(`([a-zA-Z])+(\([^\)]*\))`)
+	funcStrList := reg.FindAllString(step.Script, -1)
+	for _, item := range funcStrList {
+		funcResult := []reflect.Value{}
+		funcInfo := strings.Split(item, "(")
+		// there is no param
+		if strings.HasPrefix(funcInfo[1], ")") {
+			funcResult, err = CallMap(funcInfo[0])
+		} else {
+			funcParams := strings.Split(funcInfo[1], ")")
+			params := strings.Split(funcParams[0], ",")
+			var paramsi []interface{}
+			for _, param := range params {
+				paramsi = append(paramsi, param)
+			}
+			funcResult, err = CallMap(funcInfo[0], paramsi...)
+		}
+		if len(funcResult) > 0 {
+			step.Script = strings.ReplaceAll(step.Script, item, funcResult[0].String())
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+	return
 }
 
 func renderStepVariables(step Step, vars map[string]string) Step {

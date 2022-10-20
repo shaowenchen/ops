@@ -31,6 +31,10 @@ func ActionPipeline(option PipelineOption) (err error) {
 			for _, s := range p.Steps {
 				fmt.Println(fmt.Sprintf("[%s] %s", addr, s.Name))
 				s = renderStepVariables(s, p.Variables)
+				err = renderFunc(&s)
+				if err != nil {
+					return utils.LogError(err)
+				}
 				if option.Debug {
 					fmt.Println(s.Script)
 				}
@@ -44,7 +48,7 @@ func ActionPipeline(option PipelineOption) (err error) {
 				err1 = stepFunc(s, tempOption)
 				if err != nil {
 					fmt.Println(err)
-					return err1
+					return utils.LogError(err1)
 				}
 			}
 		}

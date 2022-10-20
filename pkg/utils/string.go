@@ -1,6 +1,10 @@
 package utils
 
-import "strings"
+import (
+	"encoding/base64"
+	"fmt"
+	"strings"
+)
 
 func SplitStr(str string) (strList []string) {
 	return strings.Split(str, ",")
@@ -43,4 +47,12 @@ func RemoveDuplicates(origin []string) []string {
 		}
 	}
 	return result
+}
+
+func EncodingBase64(rawCmd string) string {
+	return base64.StdEncoding.EncodeToString([]byte(rawCmd))
+}
+
+func BuildBase64Cmd(rawCmd string) string {
+	return fmt.Sprintf("base64 -d <<< %s | sudo sh", EncodingBase64(rawCmd))
 }

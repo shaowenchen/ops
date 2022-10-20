@@ -68,12 +68,12 @@ func ActionFile(option FileOption) (err error) {
 }
 
 func ActionEtcHosts(option EtcHostsOption) (err error) {
-	batchRunHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, utils.AddHost(option.IP, option.Domain), utils.DeleteHost(option.Domain), option.Clear)
+	batchRunHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, utils.ScriptAddHost(option.IP, option.Domain), utils.ScriptDeleteHost(option.Domain), option.Clear)
 	return nil
 }
 
 func ActionScript(option ScriptOption) (err error) {
-	batchRunHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, utils.GetExecutableScript(option.Content), "", false)
+	batchRunHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, utils.BuildBase64Cmd(option.Content), "", false)
 	return nil
 }
 
