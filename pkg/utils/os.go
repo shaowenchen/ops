@@ -1,15 +1,15 @@
 package utils
 
 import (
+	"bufio"
+	"crypto/md5"
+	"fmt"
+	"io"
 	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
-	"bufio"
 	"strings"
-	"crypto/md5"
-	"fmt"
-	"io"
 )
 
 func GetAllOsEnv() (envs map[string]string) {
@@ -62,7 +62,6 @@ func GetAdminKubeConfigPath() string {
 	return "/etc/kubernetes/admin.conf"
 }
 
-
 func IsExistsFile(filepath string) (bool, error) {
 	_, err := os.Stat(filepath)
 	if err == nil {
@@ -109,7 +108,10 @@ func GetSliceFromFileOrString(str string) []string {
 		fileScanner := bufio.NewScanner(readFile)
 		fileScanner.Split(bufio.ScanLines)
 		for fileScanner.Scan() {
-			result = append(result, strings.TrimSpace(fileScanner.Text()))
+			line := strings.TrimSpace(fileScanner.Text())
+			if len(line) > 0 {
+				result = append(result, line)
+			}
 		}
 		readFile.Close()
 	} else {
