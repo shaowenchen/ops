@@ -1,8 +1,8 @@
 name: Status Velero
 variables:
-  VeleroVersion: v1.9.2
+  velero_version: v1.9.2
 steps:
   - name: Backup Status
-    script: ./velero-${VeleroVersion}-linux-amd64/velero get backup
+    script: ./velero-${velero_version}-linux-amd64/velero get backup
   - name: Restore Status
-    script: ./velero-${VeleroVersion}-linux-amd64/velero get restore
+    script: ./velero-${velero_version}-linux-amd64/velero get restore
