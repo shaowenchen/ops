@@ -3,6 +3,7 @@ package pipeline
 import (
 	"github.com/shaowenchen/opscli/pkg/pipeline"
 	"github.com/spf13/cobra"
+	"strconv"
 	"strings"
 )
 
@@ -28,10 +29,12 @@ func parseArgs(args []string) (pipelineOption pipeline.PipelineOption) {
 				continue
 			}
 			fieldValue := args[i+1]
-			if fieldName == "hosts" {
-				pipelineOption.Hosts = fieldValue
-			} else if fieldName == "filepath" || fieldName == "f" {
+			if fieldName == "filepath" || fieldName == "f" {
 				pipelineOption.FilePath = fieldValue
+			} else if fieldName == "hosts" {
+				pipelineOption.Hosts = fieldValue
+			} else if fieldName == "port" {
+				pipelineOption.Port, _ = strconv.Atoi(fieldValue)
 			} else if fieldName == "username" {
 				pipelineOption.Username = fieldValue
 			} else if fieldName == "password" {
@@ -57,9 +60,10 @@ func getArgName(arg string) string {
 
 func init() {
 	PipelineCmd.Flags().BoolVarP(&pipelineOption.Debug, "debug", "", true, "")
-	PipelineCmd.Flags().StringVarP(&pipelineOption.Hosts, "hosts", "", "", "")
 	PipelineCmd.Flags().StringVarP(&pipelineOption.FilePath, "filepath", "f", "", "")
 	PipelineCmd.MarkFlagRequired("filepath")
+	PipelineCmd.Flags().StringVarP(&pipelineOption.Hosts, "hosts", "", "", "")
+	PipelineCmd.Flags().IntVarP(&pipelineOption.Port, "port", "", 22, "")
 	PipelineCmd.Flags().StringVarP(&pipelineOption.Username, "username", "", "", "")
 	PipelineCmd.Flags().StringVarP(&pipelineOption.Password, "password", "", "", "")
 	PipelineCmd.Flags().StringVarP(&pipelineOption.PrivateKeyPath, "privatekeypath", "", "", "")

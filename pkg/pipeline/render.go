@@ -19,6 +19,7 @@ type Pipeline struct {
 }
 
 type Step struct {
+	When       string
 	Name       string
 	Script     string
 	LocalFile  string
@@ -74,6 +75,15 @@ func renderVarsVariables(vars map[string]string) map[string]string {
 		}
 	}
 	return vars
+}
+
+func renderWhen(when string, vars map[string]string) string {
+	for key, value := range vars {
+		if strings.Contains(when, key) {
+			when = strings.ReplaceAll(when, fmt.Sprintf("${%s}", key), value)
+		}
+	}
+	return when
 }
 
 func readPipelineYaml(filePath string) (pipelines []Pipeline, err error) {

@@ -30,6 +30,11 @@ func ActionPipeline(option PipelineOption) (err error) {
 		for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
 			for _, s := range p.Steps {
 				fmt.Println(fmt.Sprintf("[%s] %s", addr, s.Name))
+				s.When = renderWhen(s.When, renderVarsVariables(p.Variables))
+				if !CheckWhen(s.When) {
+					fmt.Println("Skip!")
+					continue
+				}
 				s = renderStepVariables(s, p.Variables)
 				err = renderFunc(&s)
 				if err != nil {

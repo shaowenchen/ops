@@ -27,8 +27,8 @@ func GetAllOsEnv() (envs map[string]string) {
 
 func GetRuntimeInfo() (info map[string]string) {
 	info = make(map[string]string, 0)
-	info["ARCH"] = runtime.GOARCH
-	info["OS"] = runtime.GOOS
+	info["arch"] = runtime.GOARCH
+	info["os"] = runtime.GOOS
 	return
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/shaowenchen/opscli/pkg/utils"
 	"reflect"
+	"strings"
 )
 
 var internalFuncMap = map[string]interface{}{
@@ -24,4 +25,16 @@ func CallMap(funcName string, params ...interface{}) (result []reflect.Value, er
 	}
 	result = f.Call(in)
 	return
+}
+
+func CheckWhen(when string) (needRun bool) {
+	when = strings.TrimSpace(when)
+	if len(when) == 0 {
+		return true
+	}
+	whenPair := strings.Split(when, "==")
+	if len(whenPair) == 2 {
+		return strings.ToLower(utils.RemoveStartEndMark(whenPair[0])) == strings.ToLower(utils.RemoveStartEndMark(whenPair[1]))
+	}
+	return false
 }
