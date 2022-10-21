@@ -14,18 +14,16 @@ var url = ""
 var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade opscli version to latest",
-	SilenceErrors: true,
-	RunE: func(cmd *cobra.Command, args []string) (err error) {
+	Run: func(cmd *cobra.Command, args []string) {
 		upgrade := exec.Command("sh", "-c", utils.ScriptInstallOpscli())
 		var stderr bytes.Buffer
 		upgrade.Stderr = &stderr
-		err = upgrade.Run()
+		err := upgrade.Run()
 		if err != nil {
 			fmt.Println("Upgrade failed! %s", stderr.String())
-			return err
+		} else {
+			fmt.Println("Upgrade success!")
 		}
-		fmt.Println("Upgrade success!")
-		return nil
 	},
 }
 
