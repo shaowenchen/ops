@@ -3,13 +3,13 @@
 - China
 
 ```bash
-curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh | sh -
+curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh |VERSION=v1.0.0 sudo sh -
 ```
 
 - Not in China
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh | sh -
+curl -sfL https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh | VERSION=v1.0.0 sudo sh -
 ```
 
 Supported OS
