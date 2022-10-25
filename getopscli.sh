@@ -1,4 +1,9 @@
 #!/bin/sh
+if [ `id -u` -ne 0 ]; then
+  echo "please run with root"
+  exit 1
+fi
+
 case "$(uname -m)" in
   x86_64)
     ARCH=amd64
