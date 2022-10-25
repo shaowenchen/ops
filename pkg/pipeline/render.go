@@ -24,7 +24,6 @@ type Step struct {
 	Script     string
 	LocalFile  string
 	RemoteFile string
-	Direction  string
 }
 
 func renderFunc(step *Step) (err error) {

@@ -3,4 +3,3 @@ steps:
   - name: Pull /etc/hosts File
     remotefile: "/etc/hosts"
     localfile: "./hosts"
-    direction: download

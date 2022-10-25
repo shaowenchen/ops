@@ -3,4 +3,3 @@ steps:
   - name: Push Readme To Remote
     remotefile: "/tmp/readme.md"
     localfile: "./readme.md"
-    direction: upload

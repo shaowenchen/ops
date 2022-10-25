@@ -21,7 +21,6 @@ func runStepScript(step Step, option PipelineOption) (err error) {
 
 func runStepCopy(step Step, option PipelineOption) (err error) {
 	fileOption := host.FileOption{
-		Direction:  step.Direction,
 		LocalFile:  step.LocalFile,
 		RemoteFile: step.RemoteFile,
 		HostOption: option.HostOption,

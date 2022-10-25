@@ -8,5 +8,4 @@ type S3FileOption struct {
 	SK         string
 	LocalFile  string
 	RemoteFile string
-	Direction  string
 }

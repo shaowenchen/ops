@@ -26,5 +26,4 @@ func init() {
 	s3FileCmd.MarkFlagRequired("localfile")
 	s3FileCmd.Flags().StringVarP(&s3FileOption.RemoteFile, "remotefile", "", "", "e.g.,archived/myfile.zip")
 	s3FileCmd.MarkFlagRequired("remotefile")
-	s3FileCmd.Flags().StringVarP(&s3FileOption.Direction, "direction", "", "", "download or upload")
 }

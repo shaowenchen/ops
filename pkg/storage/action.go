@@ -16,20 +16,18 @@ func ActionS3File(option S3FileOption) (err error) {
 	if len(option.AK) == 0 || len(option.SK) == 0 {
 		return utils.LogError("Please provide ak sk in params or env")
 	}
-	if IsS3UploadFlag(option.Direction) {
+	if IsUpload(option.LocalFile) {
 		_, err = s3Upload(option.AK, option.SK, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
-	} else if IsS3DownloadFlag(option.Direction) {
-		err = s3Download(option.AK, option.SK, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
 	} else {
-		return utils.LogError("direction must is download or upload")
+		err = s3Download(option.AK, option.SK, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
 	}
 	return utils.LogError(err)
 }
 
-func IsS3DownloadFlag(flag string) bool {
-	return flag == "download"
-}
-
-func IsS3UploadFlag(flag string) bool {
-	return flag == "upload"
+func IsUpload(localfile string) bool {
+	isExist, err := utils.IsExistsFile(localfile)
+	if err != nil && isExist {
+		return true
+	}
+	return false
 }
