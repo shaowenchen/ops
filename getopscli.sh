@@ -58,3 +58,4 @@ chmod +x opscli
 mv -f opscli /usr/local/bin/
 rm -rf "${FILENAME}"
 echo "Congratulations! You have successfully installed Opscli in /usr/local/bin/opscli"
+/usr/local/bin/opscli version
