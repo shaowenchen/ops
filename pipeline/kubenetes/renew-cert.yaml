@@ -1,0 +1,10 @@
+name: Renew Cert
+steps:
+  - name: Check
+    script: kubeadm certs check-expiration
+  - name: Backup
+    script: cp -r /etc/kubernetes /etc/kubernetes.bak
+  - name: Renew
+    script: kubeadm certs renew all
+  - name: Check
+    script: kubeadm certs check-expiration
