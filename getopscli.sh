@@ -56,6 +56,10 @@ if [ ! -f "${FILENAME}" ]; then
    echo "Download error."
 fi
 
+if [ -d "pipeline"]; then
+  mv pipeline .pipeline_$(date +%F_%R)
+fi
+
 tar -xzf "${FILENAME}"
 chmod +x opscli
 mv -f opscli /usr/local/bin/

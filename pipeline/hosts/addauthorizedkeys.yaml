@@ -1,6 +1,6 @@
 name: Add Key
 variables:
-  key_content: 
+  key_content:
 steps:
   - name: Add Key to ~/.ssh/authorized_keys
     script: echo "${key_content}" >> ~/.ssh/authorized_keys

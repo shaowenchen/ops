@@ -4,14 +4,14 @@ steps:
     script: timedatectl set-timezone Asia/Shanghai
   - name: Close Selinux
     script: systemctl stop firewalld && systemctl disable firewalld ;
-            sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config ;
+      sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config ;
   - name: Clear History
     script: history -c ;
-            echo "" > /root/.bash_history
+      echo "" > /root/.bash_history
   - name: Clear Log
     script: cd /var/log/;
-            echo "" > dmesg;
-            chattr -a /var/log/messages;
-            echo "" > messages;
-            chattr +a /var/log/messages;
-            rm -f cron-* maillog-*  boot.log-*  btmp-* messages-*  spooler-*  secure-*  wtmp-*  dmesg.old;
+      echo "" > dmesg;
+      chattr -a /var/log/messages;
+      echo "" > messages;
+      chattr +a /var/log/messages;
+      rm -f cron-* maillog-*  boot.log-*  btmp-* messages-*  spooler-*  secure-*  wtmp-*  dmesg.old;
