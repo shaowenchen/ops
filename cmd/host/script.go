@@ -11,7 +11,7 @@ var scriptCmd = &cobra.Command{
 	Use:   "script",
 	Short: "run script on hosts",
 	Run: func(cmd *cobra.Command, args []string) {
-		host.ActionScript(scriptOpt)
+		host.ActionBatchScript(scriptOpt)
 	},
 }
 

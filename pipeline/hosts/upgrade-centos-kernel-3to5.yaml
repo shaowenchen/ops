@@ -1,0 +1,24 @@
+name: Upgrade Kernel 3 to 5
+steps:
+  - name: Show Kernel Verion
+    script: uname -r
+  - name: Check Kernel Verion is 3
+    script: "export kversion=`uname -r`; if [ ${kversion: 0: 1} == '3' ]; then echo 'ok'; else exit 1; fi;"
+  - name: Import Key
+    script: rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+  - name: Install ELRepo
+    script: rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+  - name: List available version
+    script: yum --disablerepo="*" --enablerepo="elrepo-kernel" list available
+  - name: Install kernel-lt
+    script: yum -y --enablerepo=elrepo-kernel install kernel-lt
+  - name: Check installed version
+    script: awk -F\' '$1=="menuentry " {print $2}' /etc/grub2.cfg
+  - name: Set Default Kernel
+    script: grub2-set-default "`awk -F\' '$1=="menuentry " {print $2}' /etc/grub2.cfg | head -n 1`"
+  - name: Change Boot Config
+    script: grub2-editenv list
+  - name: Rebuild Kernel Config
+    script: grub2-mkconfig -o /boot/grub2/grub.cfg
+  - name: Reboot
+    script: reboot

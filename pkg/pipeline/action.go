@@ -39,22 +39,17 @@ func ActionPipeline(option PipelineOption) (err error) {
 				s = renderStepVariables(s, p.Variables)
 				err = renderFunc(&s)
 				if err != nil {
-					return utils.LogError(err)
+					utils.LogError(err)
 				}
 				if option.Debug {
 					fmt.Println(s.Script)
 				}
-				stepFunc, err1 := getStepFunc(s)
-				if err != nil {
-					fmt.Println(err)
-					return err1
-				}
+				stepFunc := getStepFunc(s)
 				var tempOption = option
 				tempOption.Hosts = addr
-				err1 = stepFunc(s, tempOption)
-				if err != nil {
-					fmt.Println(err)
-					return utils.LogError(err1)
+				isSuccessed := stepFunc(s, tempOption)
+				if s.AllowFailure == false && isSuccessed == false {
+					break
 				}
 			}
 		}

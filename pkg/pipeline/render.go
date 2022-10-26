@@ -19,11 +19,12 @@ type Pipeline struct {
 }
 
 type Step struct {
-	When       string
-	Name       string
-	Script     string
-	LocalFile  string
-	RemoteFile string
+	When         string `json:"when"`
+	Name         string `json:"name"`
+	Script       string `json:"script"`
+	LocalFile    string `json:"localfile"`
+	RemoteFile   string `json:"remotefile"`
+	AllowFailure bool   `json:"allow_failure"`
 }
 
 func renderFunc(step *Step) (err error) {

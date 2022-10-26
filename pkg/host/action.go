@@ -67,37 +67,34 @@ func ActionFile(option FileOption) (err error) {
 	return
 }
 
-func ActionEtcHosts(option EtcHostsOption) (err error) {
-	batchRunHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, utils.ScriptAddHost(option.IP, option.Domain), utils.ScriptDeleteHost(option.Domain), option.Clear)
-	return nil
+func ActionBatchScript(option ScriptOption) (err error) {
+	if len(option.Hosts) == 0 {
+		option.Hosts = LocalHostIP
+	}
+	for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
+		_, _, err = runHost(addr, option.Port, option.Username, option.Password, option.PrivateKeyPath, option.Content)
+	}
+	return
 }
 
-func ActionScript(option ScriptOption) (err error) {
-	batchRunHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, option.Content, "", false)
-	return nil
+func ActionScript(option ScriptOption) (stdout string, exit int, err error) {
+	if len(option.Hosts) == 0 {
+		option.Hosts = LocalHostIP
+	}
+	return runHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, option.Content)
 }
 
-func batchRunHost(hosts string, port int, username, password, privatekeypath, addshell, removeshell string, clear bool) {
-	if len(hosts) == 0 {
-		hosts = LocalHostIP
+func runHost(addr string, port int, username, password, privatekeypath, shell string) (stdout string, exit int, err error) {
+	host, err := newHost(addr, port, username, password, privatekeypath)
+	if err != nil {
+		utils.LogError(err)
 	}
-	var stdout string
-	for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(hosts)) {
-		host, err := newHost(addr, port, username, password, privatekeypath)
-		if err != nil {
-			utils.LogError(err)
-			continue
-		}
-		if clear {
-			stdout, _, err = host.exec(removeshell)
-		} else {
-			stdout, _, err = host.exec(addshell)
-		}
-		if len(stdout) != 0 {
-			utils.LogInfo(fmt.Sprintf("[%s] %s", addr, stdout))
-		}
-		if err != nil {
-			utils.LogError(err)
-		}
+	stdout, exit, err = host.exec(shell)
+	if len(stdout) != 0 {
+		utils.LogInfo(fmt.Sprintf("[%s] %s", addr, stdout))
 	}
+	if err != nil {
+		utils.LogError(err)
+	}
+	return
 }
