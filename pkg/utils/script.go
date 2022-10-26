@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"net/http"
-	"time"
 	"strings"
+	"time"
 )
 
 func ScriptInstallOpscli() string {
@@ -13,7 +13,7 @@ func ScriptInstallOpscli() string {
 }
 
 func ScriptInstallMetricsServer(clear string) string {
-	if  strings.ToLower(clear) == "true" {
+	if strings.ToLower(clear) == "true" {
 		return fmt.Sprintf(`kubectl delete -f %s`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
 	}
 	return fmt.Sprintf(`kubectl apply -f %s`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))

@@ -45,17 +45,20 @@ fi
 
 FILENAME="opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 DOWNLOAD_URL="https://github.com/shaowenchen/opscli/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
-http_code=$(curl --connect-timeout 3 -s -o temp.out -w '%{http_code}'  https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh)
+http_code=$(curl --connect-timeout 3 -s -o temp.out -w '%{http_code}' ${DOWNLOAD_URL})
 rm -rf temp.out || true
-if [ $http_code -ne 200 ]; then
+if [ $http_code -ne 302 ]; then
     DOWNLOAD_URL="https://ghproxy.com/${DOWNLOAD_URL}"
 fi
-echo $DOWNLOAD_URL
 curl -fsLO "$DOWNLOAD_URL"
+
+if [ ! -f "${FILENAME}" ]; then
+   echo "Download error."
+fi
 
 tar -xzf "${FILENAME}"
 chmod +x opscli
 mv -f opscli /usr/local/bin/
 rm -rf "${FILENAME}"
-echo "Congratulations! You have successfully installed Opscli in /usr/local/bin/opscli"
+echo "Congratulations! Opscli live in /usr/local/bin/opscli"
 /usr/local/bin/opscli version

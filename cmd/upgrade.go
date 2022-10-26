@@ -19,12 +19,16 @@ var upgradeCmd = &cobra.Command{
 			fmt.Println("please run with root")
 			return
 		}
-		upgrade := exec.Command("sh", "-c", utils.ScriptInstallOpscli())
+		upgrade := exec.Command("sudo", "sh", "-c", utils.ScriptInstallOpscli())
 		var stderr bytes.Buffer
+		var stdout bytes.Buffer
 		upgrade.Stderr = &stderr
+		upgrade.Stdout = &stdout
 		err := upgrade.Run()
+		fmt.Println(string(stderr.Bytes()))
+		fmt.Println(string(stdout.Bytes()))
 		if err != nil {
-			fmt.Println("Upgrade failed!\n", stderr.String())
+			fmt.Println("Upgrade failed!")
 		} else {
 			fmt.Println("Upgrade success!")
 		}
