@@ -2,9 +2,10 @@ package pipeline
 
 import (
 	"errors"
-	"github.com/shaowenchen/opscli/pkg/utils"
 	"reflect"
 	"strings"
+
+	"github.com/shaowenchen/opscli/pkg/utils"
 )
 
 var internalFuncMap = map[string]interface{}{

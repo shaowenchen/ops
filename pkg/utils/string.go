@@ -57,8 +57,8 @@ func BuildBase64Cmd(rawCmd string) string {
 	return fmt.Sprintf("base64 -d <<< %s | sudo sh", EncodingBase64(rawCmd))
 }
 
-func RemoveStartEndMark(raw string) string{
-	for _, item := range []string{" ", "'", "\""}{
+func RemoveStartEndMark(raw string) string {
+	for _, item := range []string{" ", "'", "\""} {
 		raw = strings.Trim(raw, item)
 	}
 	return raw

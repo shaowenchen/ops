@@ -9,8 +9,8 @@ import (
 var s3FileOption storage.S3FileOption
 
 var s3FileCmd = &cobra.Command{
-	Use:           "s3file",
-	Short:         "operate file in S3",
+	Use:   "s3file",
+	Short: "operate file in S3",
 	Run: func(cmd *cobra.Command, args []string) {
 		storage.ActionS3File(s3FileOption)
 	},

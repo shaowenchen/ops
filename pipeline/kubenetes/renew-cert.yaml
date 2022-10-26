@@ -4,7 +4,11 @@ steps:
     script: kubeadm certs check-expiration
   - name: Backup
     script: cp -r /etc/kubernetes /etc/kubernetes.bak
-  - name: Renew
-    script: kubeadm certs renew all
+  - name: Renew Cert
+    script: kubeadm certs renew all /etc/kubernetes/kubeadm-config.yaml
   - name: Check
     script: kubeadm certs check-expiration
+  - name: Restart Service
+    script: docker ps |grep -E 'k8s_kube-apiserver|k8s_kube-controller-manager|k8s_kube-scheduler' | awk -F ' ' '{print $1}' |xargs docker restart;
+            systemctl restart kubelet
+  - 

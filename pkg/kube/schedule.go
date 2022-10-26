@@ -144,29 +144,29 @@ func RunDeScheduler(config *rest.Config, client *kubernetes.Clientset, removeDup
 	if nodeUtilization {
 		strategList["LowNodeUtilization"] = deschedulerapi.DeschedulerStrategy{
 			Enabled: true,
-			Params:  &deschedulerapi.StrategyParameters{
+			Params: &deschedulerapi.StrategyParameters{
 				NodeResourceUtilizationThresholds: &deschedulerapi.NodeResourceUtilizationThresholds{
 					Thresholds: deschedulerapi.ResourceThresholds{
-						corev1.ResourceCPU: deschedulerapi.Percentage(20),
+						corev1.ResourceCPU:    deschedulerapi.Percentage(20),
 						corev1.ResourceMemory: deschedulerapi.Percentage(20),
-						corev1.ResourcePods: deschedulerapi.Percentage(20),
+						corev1.ResourcePods:   deschedulerapi.Percentage(20),
 					},
 					TargetThresholds: deschedulerapi.ResourceThresholds{
-						corev1.ResourceCPU: deschedulerapi.Percentage(highpercent),
+						corev1.ResourceCPU:    deschedulerapi.Percentage(highpercent),
 						corev1.ResourceMemory: deschedulerapi.Percentage(highpercent),
-						corev1.ResourcePods: deschedulerapi.Percentage(highpercent),
+						corev1.ResourcePods:   deschedulerapi.Percentage(highpercent),
 					},
 				},
 			},
 		}
 		strategList["HighNodeUtilization"] = deschedulerapi.DeschedulerStrategy{
 			Enabled: true,
-			Params:  &deschedulerapi.StrategyParameters{
+			Params: &deschedulerapi.StrategyParameters{
 				NodeResourceUtilizationThresholds: &deschedulerapi.NodeResourceUtilizationThresholds{
 					Thresholds: deschedulerapi.ResourceThresholds{
-						corev1.ResourceCPU: deschedulerapi.Percentage(highpercent),
+						corev1.ResourceCPU:    deschedulerapi.Percentage(highpercent),
 						corev1.ResourceMemory: deschedulerapi.Percentage(highpercent),
-						corev1.ResourcePods: deschedulerapi.Percentage(highpercent),
+						corev1.ResourcePods:   deschedulerapi.Percentage(highpercent),
 					},
 				},
 			},

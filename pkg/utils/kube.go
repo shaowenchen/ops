@@ -3,16 +3,17 @@ package utils
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/user"
+	"path/filepath"
+	"strings"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"os/user"
-	"path/filepath"
-	"strings"
 )
 
 func GetOrCreateNamespacedName(client *kubernetes.Clientset, namespace, name string) (namespacedName types.NamespacedName, err error) {
@@ -38,11 +39,11 @@ func GetOrCreateNamespacedName(client *kubernetes.Clientset, namespace, name str
 	return
 }
 
-func BuildNamespacedName(namespace, name string)(namespacedName types.NamespacedName) {
+func BuildNamespacedName(namespace, name string) (namespacedName types.NamespacedName) {
 	namespacedName.Name = name
-	if len(namespace) == 0{
+	if len(namespace) == 0 {
 		namespacedName.Namespace = corev1.NamespaceDefault
-	}else{
+	} else {
 		namespacedName.Namespace = namespace
 	}
 	return namespacedName
@@ -90,7 +91,6 @@ func SplitAllNamespacedName(client *kubernetes.Clientset, namespacedNamesStr str
 	}
 	return
 }
-
 
 func GetAllNamespaces(client *kubernetes.Clientset) (namespaces []string, err error) {
 	allNamespaces, err := client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})

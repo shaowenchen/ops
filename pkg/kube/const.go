@@ -7,22 +7,22 @@ const OpsCliNamespace = "opscli"
 const NodeKeyRoleMaster = "node-role.kubernetes.io/master"
 const NodeKeyRoleWorker = "node-role.kubernetes.io/worker"
 
-func IsAllNamespacesFlag(flag string) bool{
-	if strings.ToLower(flag) == AllNamespacesFlag{
+func IsAllNamespacesFlag(flag string) bool {
+	if strings.ToLower(flag) == AllNamespacesFlag {
 		return true
 	}
 	return false
 }
 
 const (
-    ContainersReady string = "ContainersReady"
-    PodInitialized  string = "Initialized"
-    PodReady   string = "Ready"
-    PodScheduled  string = "PodScheduled"
+	ContainersReady string = "ContainersReady"
+	PodInitialized  string = "Initialized"
+	PodReady        string = "Ready"
+	PodScheduled    string = "PodScheduled"
 )
 
 const (
-    ConditionTrue    string = "True"
-    ConditionFalse   string = "False"
-    ConditionUnknown string = "Unknown"
+	ConditionTrue    string = "True"
+	ConditionFalse   string = "False"
+	ConditionUnknown string = "Unknown"
 )

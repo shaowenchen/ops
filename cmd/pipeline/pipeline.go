@@ -1,10 +1,11 @@
 package pipeline
 
 import (
-	"github.com/shaowenchen/opscli/pkg/pipeline"
-	"github.com/spf13/cobra"
 	"strconv"
 	"strings"
+
+	"github.com/shaowenchen/opscli/pkg/pipeline"
+	"github.com/spf13/cobra"
 )
 
 var pipelineOption pipeline.PipelineOption

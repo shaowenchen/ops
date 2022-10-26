@@ -5,7 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 var nodeNameOption kube.NodeNameOption
 
 var nodeNameCmd = &cobra.Command{

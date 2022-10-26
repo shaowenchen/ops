@@ -1,9 +1,9 @@
 package host
 
 import (
+	scp "github.com/bramvdbogaerde/go-scp"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
-	scp "github.com/bramvdbogaerde/go-scp"
 )
 
 type HostConnection struct {

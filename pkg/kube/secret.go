@@ -8,9 +8,9 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	cmdcreate "k8s.io/kubectl/pkg/cmd/create"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 func CreateImagePullSecret(client *kubernetes.Clientset, namespacedName types.NamespacedName, hosts, username, password string) (secret *corev1.Secret, err error) {
@@ -36,7 +36,6 @@ func CreateImagePullSecret(client *kubernetes.Clientset, namespacedName types.Na
 	)
 	return
 }
-
 
 func DeleteSecret(client *kubernetes.Clientset, namespacedName types.NamespacedName) (secret *corev1.Secret, err error) {
 	err = client.CoreV1().Secrets(namespacedName.Namespace).Delete(

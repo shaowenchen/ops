@@ -1,12 +1,13 @@
 package storage
 
 import (
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"os"
 )
 
 func s3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (location string, err error) {
