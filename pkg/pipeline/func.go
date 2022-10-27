@@ -33,9 +33,17 @@ func CheckWhen(when string) (needRun bool) {
 	if len(when) == 0 {
 		return true
 	}
-	whenPair := strings.Split(when, "==")
-	if len(whenPair) == 2 {
-		return strings.ToLower(utils.RemoveStartEndMark(whenPair[0])) == strings.ToLower(utils.RemoveStartEndMark(whenPair[1]))
+	if strings.Contains(when, "==") {
+		whenPair := strings.Split(when, "==")
+		if len(whenPair) == 2 {
+			return strings.ToLower(utils.RemoveStartEndMark(whenPair[0])) == strings.ToLower(utils.RemoveStartEndMark(whenPair[1]))
+		}
+	} else if strings.Contains(when, "!=") {
+		whenPair := strings.Split(when, "!=")
+		if len(whenPair) == 2 {
+			return strings.ToLower(utils.RemoveStartEndMark(whenPair[0])) != strings.ToLower(utils.RemoveStartEndMark(whenPair[1]))
+		}
 	}
+
 	return false
 }

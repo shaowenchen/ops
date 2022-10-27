@@ -54,9 +54,10 @@ curl -fsLO "$DOWNLOAD_URL"
 
 if [ ! -f "${FILENAME}" ]; then
    echo "Download error."
+   exit 1
 fi
 
-if [ -d "pipeline"]; then
+if [ -d "pipeline" ]; then
   mv pipeline .pipeline_$(date +%F_%R)
 fi
 

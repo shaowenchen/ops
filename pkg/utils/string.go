@@ -63,3 +63,10 @@ func RemoveStartEndMark(raw string) string {
 	}
 	return raw
 }
+
+func MergeMap(target map[string]string, needMerge map[string]string) map[string]string {
+	for key, value := range needMerge {
+		target[key] = value
+	}
+	return target
+}
