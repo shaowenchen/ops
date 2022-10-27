@@ -87,14 +87,14 @@ func ActionScript(option ScriptOption) (stdout string, exit int, err error) {
 func runHost(addr string, port int, username, password, privatekeypath, shell string) (stdout string, exit int, err error) {
 	host, err := newHost(addr, port, username, password, privatekeypath)
 	if err != nil {
-		utils.LogError(err)
+		return "", 1, utils.LogError(err)
 	}
 	stdout, exit, err = host.exec(shell)
 	if len(stdout) != 0 {
 		utils.LogInfo(fmt.Sprintf("[%s] %s", addr, stdout))
 	}
-	if err != nil {
-		utils.LogError(err)
+	if exit != 0 {
+		return "", 1, utils.LogError(err)
 	}
 	return
 }
