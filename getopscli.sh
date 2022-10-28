@@ -38,41 +38,47 @@ fi
 FILENAME="opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 DOWNLOAD_URL="https://github.com/shaowenchen/opscli/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 
-http_code=$(curl --connect-timeout 3 -s -o temp.out -w '%{http_code}' ${DOWNLOAD_URL})
+http_code=$(curl --connect-timeout 3 -s -o temp.out -w '%{http_code}' https://github.com)
 rm -rf temp.out || true
 
 if [ $http_code -ne 302 ]; then
-    DOWNLOAD_URL="https://ghproxy.com/${DOWNLOAD_URL}"
+  DOWNLOAD_URL="https://ghproxy.com/${DOWNLOAD_URL}"
 fi
 
 curl -fsLO "$DOWNLOAD_URL"
 
 if [ ! -f "${FILENAME}" ]; then
-   echo "Download error."
-   exit 1
+  echo "Download error."
+  exit 1
 fi
 
 # install
-if [ -d "~/.opscli/" ];then
-    mkdir ~/.opscli/
-fi
-
-if [ -d "~/.opscli/pipeline" ]; then
-  mv ~/.opscli/pipeline ~/.opscli/.pipeline_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
-fi
-
 tar -xzf "${FILENAME}"
 chmod +x opscli
 
-mv pipeline ~/.opscli/
+`pwd`/opscli version
+
+if [ $? -ne 0 ]; then
+    echo "Opscli file error"
+    exit 1
+fi
+
+OPSCLIDIR="~/.opscli/"
+if [ ! -d "${OPSCLIDIR}" ]; then
+  mkdir "${OPSCLIDIR}"
+fi
+
+if [ -d "${OPSCLIDIR}pipeline" ]; then
+  mv ${OPSCLIDIR}pipeline ${OPSCLIDIR}.pipeline_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+fi
+
+mv pipeline ${OPSCLIDIR}
 
 if [ `id -u` -eq 0 ]; then
   mv -f opscli /usr/local/bin/
-  /usr/local/bin/opscli version
   echo "Congratulations! Opscli live in /usr/local/bin/opscli"
 else
-  `pwd`/opscli version
-  echo "Congratulations! Please mv `pwd`opscli to /usr/local/bin/opscli"
+  echo "Congratulations! Please run 'sudo mv `pwd`/opscli /usr/local/bin/' to install."
 fi
 
 # clear
