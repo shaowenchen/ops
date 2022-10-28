@@ -119,7 +119,3 @@ func GetSliceFromFileOrString(str string) []string {
 	}
 	return result
 }
-
-func IsSudoUser() bool {
-	return os.Geteuid() == 0
-}

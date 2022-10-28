@@ -2,26 +2,43 @@ name: release
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - main
+  schedule:
+    - cron: "0 20 * * *"
+  workflow_dispatch:
 
 jobs:
   GoReleaser:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Delete Latest Tag And Release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout Main
+        uses: actions/checkout@v3
+      - name: Tag Repo
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout Latest
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1
-      - name: Unshallow
-        run: git fetch --prune --unshallow
-      - name: Set up Go 1.17
+          ref: latest
+      - name: Set Up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.19
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
         with:
-          args: release --rm-dist
+          version: v0.173.2
+          args: release --rm-dist --skip-validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

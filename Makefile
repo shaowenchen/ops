@@ -13,7 +13,7 @@ binary:
 	go build -ldflags "-w -s" -o $(BIN) ./main.go
 
 tag:
-	git tag -d v1.0.0 || true
-	git push -d origin v1.0.0 || true
-	git tag v1.0.0
-	git push origin v1.0.0
+	git tag -d latest || true
+	git push -d origin latest || true
+	git tag latest
+	git push origin latest

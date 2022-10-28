@@ -1,21 +1,21 @@
 ## Quick install
 
-- China
+- Good network connections to GitHub
 
 ```bash
-curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh |VERSION=v1.0.0 sudo sh -
+curl -sfL https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh | VERSION=latest sh -
 ```
 
-- Not in China
+- Poor network connections to GitHub
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh | VERSION=v1.0.0 sudo sh -
+curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh |VERSION=latest sh -
 ```
 
-Supported OS
+## Supported OS
 
 - Linux
-- Macos
+- macOS
 
 ## Usage
 

@@ -15,11 +15,7 @@ var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade opscli version to latest",
 	Run: func(cmd *cobra.Command, args []string) {
-		if !utils.IsSudoUser() {
-			fmt.Println("please run with root")
-			return
-		}
-		upgrade := exec.Command("sudo", "sh", "-c", utils.ScriptInstallOpscli())
+		upgrade := exec.Command("sh", "-c", utils.ScriptInstallOpscli())
 		var stderr bytes.Buffer
 		var stdout bytes.Buffer
 		upgrade.Stderr = &stderr
