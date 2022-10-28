@@ -1,10 +1,9 @@
 #!/bin/sh
 
 # check dependence
-if ! command -v curl &> /dev/null
-then
-    echo "could't find curl"
-    exit 1
+if ! [ -x "$(command -v curl)" ]; then
+  echo 'not found curl' >&2
+  exit 1
 fi
 
 case "$(uname -m)" in
@@ -54,19 +53,26 @@ if [ ! -f "${FILENAME}" ]; then
 fi
 
 # install
-if [ -d "pipeline" ]; then
-  mv pipeline .pipeline_$(date +%F_%R)
+if [ -d "~/.opscli/" ];then
+    mkdir ~/.opscli/
 fi
+
+if [ -d "~/.opscli/pipeline" ]; then
+  mv ~/.opscli/pipeline ~/.opscli/.pipeline_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+fi
+
 tar -xzf "${FILENAME}"
 chmod +x opscli
 
-if [ `id -u` -ne 0 ]; then
+mv pipeline ~/.opscli/
+
+if [ `id -u` -eq 0 ]; then
   mv -f opscli /usr/local/bin/
   /usr/local/bin/opscli version
   echo "Congratulations! Opscli live in /usr/local/bin/opscli"
 else
   `pwd`/opscli version
-  echo "Congratulations! Opscli live in `pwd`opscli"
+  echo "Congratulations! Please mv `pwd`opscli to /usr/local/bin/opscli"
 fi
 
 # clear

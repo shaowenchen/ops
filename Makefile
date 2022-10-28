@@ -1,4 +1,4 @@
-BIN             = ./bin/opscli
+BIN = ./bin/opscli
 
 format:
 	go mod tidy
@@ -11,9 +11,3 @@ run:
 
 binary:
 	go build -ldflags "-w -s" -o $(BIN) ./main.go
-
-tag:
-	git tag -d latest || true
-	git push -d origin latest || true
-	git tag latest
-	git push origin latest
