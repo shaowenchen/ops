@@ -63,13 +63,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-OPSCLIDIR="~/.opscli/"
+OPSCLIDIR="${HOME}/.opscli/"
 if [ ! -d "${OPSCLIDIR}" ]; then
   mkdir "${OPSCLIDIR}"
 fi
 
 if [ -d "${OPSCLIDIR}pipeline" ]; then
-  mv ${OPSCLIDIR}pipeline ${OPSCLIDIR}.pipeline_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+  mv ${OPSCLIDIR}pipeline ${OPSCLIDIR}.pipeline_upgrade_$(date +%Y_%m_%d_%H_%M_%S)
 fi
 
 mv pipeline ${OPSCLIDIR}
