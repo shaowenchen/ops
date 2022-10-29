@@ -35,3 +35,10 @@ Available Commands:
   upgrade     upgrade opscli version to latest
   version     get current opscli version
 ```
+
+## Auto Completion
+
+```bash
+echo 'source <(opscli completion bash)' >>~/.bashrc
+source ~/.bashrc
+```
