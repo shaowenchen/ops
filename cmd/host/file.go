@@ -9,7 +9,7 @@ var fileOpt host.FileOption
 
 var fileCmd = &cobra.Command{
 	Use:   "file",
-	Short: "transfer file between local and remeote",
+	Short: "transfer between local and remote file",
 	Run: func(cmd *cobra.Command, args []string) {
 		host.ActionFile(fileOpt)
 	},
