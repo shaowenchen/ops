@@ -3,79 +3,86 @@ package host
 import (
 	"fmt"
 
+	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/utils"
 )
 
-func ActionFile(option FileOption) (err error) {
+func ActionFile(logger *log.Logger, option FileOption) (err error) {
 	hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
 	isExist, _ := utils.IsExistsFile(option.LocalFile)
 	if !isExist {
 		hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
 		if len(hosts) != 1 {
-			return utils.LogError("need only one target host")
+			logger.Error.Println("need only one target host")
+			return
 		}
 		host, err := newHost(hosts[0], option.Port, option.Username, option.Password, option.PrivateKeyPath)
 
 		if err != nil {
-			return utils.LogError(err)
+			logger.Error.Println(err)
+			return err
 		}
 		md5, err := host.fileMd5(option.RemoteFile)
 		if err != nil {
-			return utils.LogError(err)
+			logger.Error.Println(err)
+			return err
 		}
 		err = host.pull(option.RemoteFile, option.LocalFile, md5)
 		if err != nil {
-			return utils.LogError(err)
+			logger.Error.Println(err)
+			return err
 		}
-		utils.LogInfo("Md5: ", md5)
+		logger.Info.Println("Md5: ", md5)
 	} else {
 		md5, err := utils.FileMD5(option.LocalFile)
 		if err != nil {
-			return utils.LogError(err)
+			logger.Error.Println(err)
+			return err
 		}
 		for _, addr := range hosts {
 			host, err := newHost(addr, option.Port, option.Username, option.Password, option.PrivateKeyPath)
 			if err != nil {
-				return utils.LogError(err)
+				logger.Error.Println(err)
+				return err
 			}
 			err = host.push(option.LocalFile, option.RemoteFile, md5)
 			if err != nil {
-				utils.LogError(err)
+				logger.Error.Println(err)
 			}
-			utils.LogInfo("Md5: ", md5)
+			logger.Info.Println("Md5: ", md5)
 		}
 	}
 	return
 }
 
-func ActionBatchScript(option ScriptOption) (err error) {
+func ActionBatchScript(logger *log.Logger, option ScriptOption) (err error) {
 	if len(option.Hosts) == 0 {
 		option.Hosts = LocalHostIP
 	}
 	for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
-		_, _, err = runHost(addr, option.Port, option.Username, option.Password, option.PrivateKeyPath, option.Content)
+		scriptOption := option
+		scriptOption.Hosts = addr
+		_, _, err = ActionScript(logger, scriptOption)
 	}
 	return
 }
 
-func ActionScript(option ScriptOption) (stdout string, exit int, err error) {
+func ActionScript(logger *log.Logger, option ScriptOption) (stdout string, exit int, err error) {
 	if len(option.Hosts) == 0 {
 		option.Hosts = LocalHostIP
 	}
-	return runHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath, option.Content)
-}
-
-func runHost(addr string, port int, username, password, privatekeypath, shell string) (stdout string, exit int, err error) {
-	host, err := newHost(addr, port, username, password, privatekeypath)
+	host, err := newHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath)
 	if err != nil {
-		return "", 1, utils.LogError(err)
+		logger.Error.Println(err)
+		return "", 1, err
 	}
-	stdout, exit, err = host.exec(shell)
+	stdout, exit, err = host.exec(option.Content)
 	if len(stdout) != 0 {
-		utils.LogInfo(fmt.Sprintf("[%s] %s", addr, stdout))
+		logger.Info.Println(fmt.Sprintf("[%s] %s", option.Hosts, stdout))
 	}
 	if exit != 0 {
-		return "", 1, utils.LogError(err)
+		logger.Error.Println(err)
+		return "", 1, err
 	}
 	return
 }

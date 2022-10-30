@@ -1,7 +1,10 @@
 package kube
 
 import (
+	"fmt"
+
 	"github.com/shaowenchen/opscli/pkg/kube"
+	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +14,12 @@ var fileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "transfer file between local and remote file in container image",
 	Run: func(cmd *cobra.Command, args []string) {
-		kube.ActionFile(fileOption)
+		logger, err := log.NewDefaultLogger(true)
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
+		kube.ActionFile(logger, fileOption)
 	},
 }
 

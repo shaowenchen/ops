@@ -3,17 +3,21 @@ package pipeline
 import (
 	"fmt"
 
-	"github.com/shaowenchen/opscli/pkg/host"
-	"github.com/shaowenchen/opscli/pkg/utils"
 	"strings"
+
+	"github.com/shaowenchen/opscli/pkg/host"
+	"github.com/shaowenchen/opscli/pkg/log"
+	"github.com/shaowenchen/opscli/pkg/utils"
 )
 
-func ActionPipeline(option PipelineOption) (err error) {
+func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 	pipelines, err := readPipelineYaml(option.FilePath)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error.Println(err)
+		return err
 	}
 	for _, p := range pipelines {
+		p.Logger = logger
 		globalVariables := make(map[string]string)
 		// override Variables
 		utils.MergeMap(globalVariables, p.Variables)
@@ -21,8 +25,8 @@ func ActionPipeline(option PipelineOption) (err error) {
 		utils.MergeMap(globalVariables, utils.GetRuntimeInfo())
 		utils.MergeMap(globalVariables, option.Variables)
 
-		globalVariables = renderVarsVariables(globalVariables)
-		fmt.Println("[pipeline] " + p.Name)
+		globalVariables = p.renderVarsVariables(globalVariables)
+		logger.Info.Println("[pipeline] " + p.Name)
 		if len(option.Hosts) == 0 {
 			option.Hosts = host.LocalHostIP
 		}
@@ -35,28 +39,28 @@ func ActionPipeline(option PipelineOption) (err error) {
 			}
 		}
 		if len(emptyVariable) > 0 {
-			fmt.Println("please set variable: ", emptyVariable)
+			logger.Info.Println("please set variable: ", emptyVariable)
 			break
 		}
 		// run every pipeline
 		for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
 			globalVariables["result"] = ""
 			for _, s := range p.Steps {
-				fmt.Println(fmt.Sprintf("[%s] %s", addr, s.Name))
-				s.When = renderWhen(s.When, renderVarsVariables(globalVariables))
+				logger.Info.Println(fmt.Sprintf("[%s] %s", addr, s.Name))
+				s.When = p.renderWhen(s.When, p.renderVarsVariables(globalVariables))
 				if !CheckWhen(s.When) {
-					fmt.Println("Skip!")
+					logger.Info.Println("Skip!")
 					continue
 				}
-				s = renderStepVariables(s, globalVariables)
-				err = renderFunc(&s)
+				s = p.renderStepVariables(s, globalVariables)
+				err = p.renderFunc(&s)
 				if err != nil {
-					utils.LogError(err)
+					logger.Error.Println(err)
 				}
 				if option.Debug {
-					fmt.Println(s.Script)
+					logger.Info.Println(s.Script)
 				}
-				stepFunc := getStepFunc(s)
+				stepFunc := p.getStepFunc(s)
 				var tempOption = option
 				tempOption.Hosts = addr
 				stepResult, isSuccessed := stepFunc(s, tempOption)

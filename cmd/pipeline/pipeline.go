@@ -1,9 +1,11 @@
 package pipeline
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
+	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/pipeline"
 	"github.com/spf13/cobra"
 )
@@ -15,8 +17,13 @@ var PipelineCmd = &cobra.Command{
 	Short:              "command about pipeline",
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger, err := log.NewDefaultLogger(true)
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
 		pipelineOption = parseArgs(args)
-		pipeline.ActionPipeline(pipelineOption)
+		pipeline.ActionPipeline(logger, pipelineOption)
 	},
 }
 

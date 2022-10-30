@@ -38,10 +38,10 @@ func GetAvailableUrl(url string) string {
 	return url
 }
 
-func ClearOpscliPipelibeBackupDir() string{
+func ClearOpscliPipelibeBackupDir() string {
 	return "rm -rf ~/.opscli/.pipeline*"
 }
 
-func ClearOpscliLogDir()string{
+func ClearOpscliLogDir() string {
 	return "rm -rf ~/.opscli/logs/*"
 }

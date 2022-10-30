@@ -1,16 +1,14 @@
 package constants
 
+import "path/filepath"
+
 const AllNamespaces = "all"
 const OpsCliNamespace = "opscli"
 
 const NodeKeyRoleMaster = "node-role.kubernetes.io/master"
 const NodeKeyRoleWorker = "node-role.kubernetes.io/worker"
 
-
-const (
-	KubeAdminConfigPath =  "/etc/kubernetes/admin.conf"
-	CurrentUserConfigPath =  "~/.kube/config"
-)
+const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
 const (
 	ContainersReady string = "ContainersReady"
@@ -25,4 +23,6 @@ const (
 	ConditionUnknown string = "Unknown"
 )
 
-const HostMountDir = "/tmp/opscli"
+func GetCurrentUserConfigPath() string {
+	return filepath.Join(GetCurrentUserHomeDir(), ".kube", "config")
+}

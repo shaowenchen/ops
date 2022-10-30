@@ -1,7 +1,10 @@
 package kube
 
 import (
+	"fmt"
+
 	"github.com/shaowenchen/opscli/pkg/kube"
+	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +14,12 @@ var scriptCmd = &cobra.Command{
 	Use:   "script",
 	Short: "run script on hosts",
 	Run: func(cmd *cobra.Command, args []string) {
-		kube.ActionScript(scriptOption)
+		logger, err := log.NewDefaultLogger(true)
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
+		kube.ActionScript(logger, scriptOption)
 	},
 }
 

@@ -5,18 +5,21 @@ import (
 	"time"
 
 	"github.com/shaowenchen/opscli/pkg/constants"
+	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/utils"
 	v1 "k8s.io/api/core/v1"
 )
 
-func ActionScript(option ScriptOption) (err error) {
+func ActionScript(logger *log.Logger, option ScriptOption) (err error) {
 	client, err := utils.NewKubernetesClient(option.Kubeconfig)
 	if client == nil || err != nil {
-		return utils.LogError(err)
+		logger.Error.Println(err)
+		return err
 	}
 	nodes, err := utils.GetAllNodes(client)
 	if err != nil {
-		return utils.LogError(err)
+		logger.Error.Println(err)
+		return err
 	}
 	nodeList := []v1.Node{}
 	if len(option.NodeName) > 0 {
@@ -33,24 +36,26 @@ func ActionScript(option ScriptOption) (err error) {
 		time.Sleep(time.Second * 1)
 		namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsCliNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
 		if err != nil {
-			utils.LogError(err)
+			logger.Error.Println(err)
 		}
 		_, err = RunScriptOnNode(client, node, namespacedName, option.Image, option.Content)
 		if err != nil {
-			utils.LogError(err)
+			logger.Error.Println(err)
 		}
 	}
 	return
 }
 
-func ActionFile(option FileOption) (err error) {
+func ActionFile(logger *log.Logger, option FileOption) (err error) {
 	client, err := utils.NewKubernetesClient(option.Kubeconfig)
 	if client == nil || err != nil {
-		return utils.LogError(err)
+		logger.Error.Println(err)
+		return err
 	}
 	nodes, err := utils.GetAllNodes(client)
 	if err != nil {
-		return utils.LogError(err)
+		logger.Error.Println(err)
+		return err
 	}
 	nodeList := []v1.Node{}
 	if len(option.NodeName) > 0 {
@@ -67,11 +72,11 @@ func ActionFile(option FileOption) (err error) {
 		time.Sleep(time.Second * 1)
 		namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsCliNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
 		if err != nil {
-			utils.LogError(err)
+			logger.Error.Println(err)
 		}
 		_, err = DownloadFileOnNode(client, node, namespacedName, option.Image, option.RemoteFile, option.LocalFile)
 		if err != nil {
-			utils.LogError(err)
+			logger.Error.Println(err)
 		}
 	}
 	return

@@ -9,6 +9,7 @@ import (
 
 	"github.com/bramvdbogaerde/go-scp"
 	"github.com/pkg/errors"
+	"github.com/shaowenchen/opscli/pkg/constants"
 	"github.com/shaowenchen/opscli/pkg/utils"
 	"golang.org/x/crypto/ssh"
 
@@ -42,13 +43,13 @@ type Host struct {
 
 func newHost(internalAddress string, port int, username string, password string, privateKeyPath string) (*Host, error) {
 	if len(privateKeyPath) == 0 {
-		privateKeyPath = utils.GetCurrentUserPrivateKeyPath()
+		privateKeyPath = constants.GetCurrentUserPrivateKeyPath()
 	}
 	if port == 0 {
 		port = 22
 	}
 	if len(username) == 0 {
-		username = utils.GetCurrentUser()
+		username = constants.GetCurrentUser()
 	}
 	host := &Host{
 		Name:            "",

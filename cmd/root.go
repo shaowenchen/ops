@@ -8,10 +8,11 @@ import (
 	"github.com/shaowenchen/opscli/cmd/kube"
 	"github.com/shaowenchen/opscli/cmd/pipeline"
 	"github.com/shaowenchen/opscli/cmd/storage"
+	"github.com/shaowenchen/opscli/pkg/constants"
+	"github.com/shaowenchen/opscli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-// Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
 	rootCmd.AddCommand(host.HostCmd)
 	rootCmd.AddCommand(kube.KubeCmd)
@@ -27,4 +28,8 @@ var rootCmd = &cobra.Command{
 	Use:   "opscli",
 	Short: "a cli tool",
 	Long:  `This is a cli tool for ops.`,
+}
+
+func init() {
+	utils.CreateDir(constants.GetOpscliLogsDir())
 }

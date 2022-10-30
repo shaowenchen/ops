@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/user"
 	"runtime"
 	"strings"
 )
@@ -31,26 +30,6 @@ func GetRuntimeInfo() (info map[string]string) {
 	return
 }
 
-func GetCurrentUserHomeDir() string {
-	homeDirectory, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-	return homeDirectory
-}
-
-func GetCurrentUser() string {
-	currentUser, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-	return currentUser.Username
-}
-
-func GetCurrentUserPrivateKeyPath() string {
-	return GetCurrentUserHomeDir() + "/.ssh/id_rsa"
-}
-
 func IsExistsFile(filepath string) (bool, error) {
 	_, err := os.Stat(filepath)
 	if err == nil {
@@ -60,6 +39,10 @@ func IsExistsFile(filepath string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func CreateDir(dirpath string) error {
+	return os.MkdirAll(dirpath, os.ModePerm)
 }
 
 func FileMD5(path string) (string, error) {

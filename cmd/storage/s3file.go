@@ -1,6 +1,10 @@
 package storage
 
 import (
+	"fmt"
+
+	"github.com/shaowenchen/opscli/pkg/constants"
+	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/storage"
 	"github.com/spf13/cobra"
 )
@@ -12,7 +16,12 @@ var s3FileCmd = &cobra.Command{
 	Use:   "s3",
 	Short: "transfer file between local and remote file in S3",
 	Run: func(cmd *cobra.Command, args []string) {
-		storage.ActionS3File(s3FileOption)
+		logger, err := log.NewLogger(constants.GetOpscliLogFile(), true)
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
+		storage.ActionS3File(logger, s3FileOption)
 	},
 }
 

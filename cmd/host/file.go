@@ -1,7 +1,10 @@
 package host
 
 import (
+	"fmt"
+
 	"github.com/shaowenchen/opscli/pkg/host"
+	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +14,12 @@ var fileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "transfer between local and remote file",
 	Run: func(cmd *cobra.Command, args []string) {
-		host.ActionFile(fileOpt)
+		logger, err := log.NewDefaultLogger(true)
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
+		host.ActionFile(logger, fileOpt)
 	},
 }
 
