@@ -20,7 +20,7 @@ builds:
     - -s
 dist: bin
 archives:
-- name_template: "opscli-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+- name_template: "opscli-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
   files:
     - pipeline/*
 changelog:
