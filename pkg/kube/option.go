@@ -3,6 +3,7 @@ package kube
 type KubeOption struct {
 	Kubeconfig string
 	NodeName   string
+	Image      string
 	All        bool
 }
 
@@ -15,5 +16,4 @@ type FileOption struct {
 	KubeOption
 	LocalFile  string
 	RemoteFile string
-	Image      string
 }

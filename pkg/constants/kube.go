@@ -12,7 +12,6 @@ const (
 	CurrentUserConfigPath =  "~/.kube/config"
 )
 
-
 const (
 	ContainersReady string = "ContainersReady"
 	PodInitialized  string = "Initialized"
@@ -25,3 +24,5 @@ const (
 	ConditionFalse   string = "False"
 	ConditionUnknown string = "Unknown"
 )
+
+const HostMountDir = "/tmp/opscli"

@@ -18,6 +18,7 @@ var scriptCmd = &cobra.Command{
 func init() {
 	scriptCmd.Flags().StringVarP(&scriptOption.Kubeconfig, "kubeconfig", "", "", "")
 	scriptCmd.Flags().StringVarP(&scriptOption.NodeName, "nodename", "", "", "")
+	scriptCmd.Flags().StringVarP(&scriptOption.Image, "image", "", "docker.io/library/alpine:latest", "")
 	scriptCmd.Flags().StringVarP(&scriptOption.Content, "content", "", "", "")
 	scriptCmd.MarkFlagRequired("content")
 	scriptCmd.Flags().BoolVarP(&scriptOption.All, "all", "", false, "")

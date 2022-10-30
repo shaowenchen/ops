@@ -22,7 +22,7 @@ func init() {
 	fileCmd.MarkFlagRequired("image")
 	fileCmd.Flags().StringVarP(&fileOption.LocalFile, "localfile", "", "", "")
 	fileCmd.MarkFlagRequired("localfile")
-	fileCmd.Flags().StringVarP(&fileOption.Image, "remotefile", "", "", "")
+	fileCmd.Flags().StringVarP(&fileOption.RemoteFile, "remotefile", "", "", "")
 	fileCmd.MarkFlagRequired("remotefile")
 	fileCmd.Flags().BoolVarP(&fileOption.All, "all", "", false, "")
 }
