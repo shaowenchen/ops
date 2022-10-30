@@ -69,3 +69,7 @@ func RunScriptOnNode(client *kubernetes.Clientset, node v1.Node, namespacedName 
 	)
 	return
 }
+
+func DownloadFileOnNode(client *kubernetes.Clientset, node v1.Node, namespacedName types.NamespacedName, script string) (pod *corev1.Pod, err error) {
+	return
+}

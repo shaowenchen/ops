@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"os/user"
-	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -49,17 +48,7 @@ func GetCurrentUser() string {
 }
 
 func GetCurrentUserPrivateKeyPath() string {
-	homeDirectory := GetCurrentUserHomeDir()
-	return filepath.Join(homeDirectory, ".ssh", "id_rsa")
-}
-
-func GetCurrentUserKubeConfigPath() string {
-	homeDirectory := GetCurrentUserHomeDir()
-	return filepath.Join(homeDirectory, ".kube", "config")
-}
-
-func GetAdminKubeConfigPath() string {
-	return "/etc/kubernetes/admin.conf"
+	return GetCurrentUserHomeDir() + "/.ssh/id_rsa"
 }
 
 func IsExistsFile(filepath string) (bool, error) {

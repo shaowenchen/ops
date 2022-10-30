@@ -2,33 +2,14 @@ package host
 
 import (
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/shaowenchen/opscli/pkg/utils"
 )
 
-func ActionGetKubeconfig(option KubeconfigOption) (err error) {
-	if option.Clear {
-		err = os.Remove(utils.GetCurrentUserKubeConfigPath())
-		if err != nil {
-			return
-		}
-	}
-	host, err := newHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath)
-	if err != nil {
-		return
-	}
-	err = host.pullContent(utils.GetAdminKubeConfigPath(), utils.GetCurrentUserKubeConfigPath())
-	if err != nil {
-		return
-	}
-	return
-}
-
 func ActionFile(option FileOption) (err error) {
 	hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
-	if strings.ToLower(option.Direction) == "download" {
+	isExist, _ := utils.IsExistsFile(option.LocalFile)
+	if !isExist {
 		hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
 		if len(hosts) != 1 {
 			return utils.LogError("need only one target host")

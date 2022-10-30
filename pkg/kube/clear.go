@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/shaowenchen/opscli/pkg/constants"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -27,14 +28,14 @@ func ClearPod(client *kubernetes.Clientset, namespace string, statusList []strin
 
 func GetPodStatus(pod *corev1.Pod) string {
 	for _, cond := range pod.Status.Conditions {
-		if string(cond.Type) == ContainersReady {
-			if string(cond.Status) != ConditionTrue {
+		if string(cond.Type) == constants.ContainersReady {
+			if string(cond.Status) != constants.ConditionTrue {
 				return "Unavailable"
 			}
-		} else if string(cond.Type) == PodInitialized && string(cond.Status) != ConditionTrue {
+		} else if string(cond.Type) == constants.PodInitialized && string(cond.Status) != constants.ConditionTrue {
 			return "Initializing"
-		} else if string(cond.Type) == PodReady {
-			if string(cond.Status) != ConditionTrue {
+		} else if string(cond.Type) == constants.PodReady {
+			if string(cond.Status) != constants.ConditionTrue {
 				return "Unavailable"
 			}
 			for _, containerState := range pod.Status.ContainerStatuses {
@@ -42,7 +43,7 @@ func GetPodStatus(pod *corev1.Pod) string {
 					return "Unavailable"
 				}
 			}
-		} else if string(cond.Type) == PodScheduled && string(cond.Status) != ConditionTrue {
+		} else if string(cond.Type) == constants.PodScheduled && string(cond.Status) != constants.ConditionTrue {
 			return "Scheduling"
 		}
 	}

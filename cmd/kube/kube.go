@@ -6,17 +6,10 @@ import (
 
 var KubeCmd = &cobra.Command{
 	Use:   "kube",
-	Short: "use kubeconfig to config kubernetes",
+	Short: "command about kubernetes",
 }
 
 func init() {
-	KubeCmd.AddCommand(etcHostsCmd)
-	KubeCmd.AddCommand(imagePulllSecretCmd)
-	KubeCmd.AddCommand(annotationCmd)
-	KubeCmd.AddCommand(limitRangeCmd)
-	KubeCmd.AddCommand(nodeNameCmd)
-	KubeCmd.AddCommand(nodeSelectorCmd)
-	KubeCmd.AddCommand(clearCmd)
-	KubeCmd.AddCommand(deschedulerCmd)
 	KubeCmd.AddCommand(scriptCmd)
+	KubeCmd.AddCommand(fileCmd)
 }

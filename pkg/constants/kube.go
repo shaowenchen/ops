@@ -1,18 +1,17 @@
-package kube
+package constants
 
-import "strings"
-
-const AllNamespacesFlag = "all"
+const AllNamespaces = "all"
 const OpsCliNamespace = "opscli"
+
 const NodeKeyRoleMaster = "node-role.kubernetes.io/master"
 const NodeKeyRoleWorker = "node-role.kubernetes.io/worker"
 
-func IsAllNamespacesFlag(flag string) bool {
-	if strings.ToLower(flag) == AllNamespacesFlag {
-		return true
-	}
-	return false
-}
+
+const (
+	KubeAdminConfigPath =  "/etc/kubernetes/admin.conf"
+	CurrentUserConfigPath =  "~/.kube/config"
+)
+
 
 const (
 	ContainersReady string = "ContainersReady"

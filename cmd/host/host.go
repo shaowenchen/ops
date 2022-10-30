@@ -6,11 +6,10 @@ import (
 
 var HostCmd = &cobra.Command{
 	Use:   "host",
-	Short: "config host with this command",
+	Short: "command about host",
 }
 
 func init() {
-	HostCmd.AddCommand(kubeconfigCmd)
-	HostCmd.AddCommand(scriptCmd)
 	HostCmd.AddCommand(fileCmd)
+	HostCmd.AddCommand(scriptCmd)
 }
