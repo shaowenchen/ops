@@ -11,7 +11,7 @@ import (
 )
 
 func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
-	pipelines, err := readPipelineYaml(option.FilePath)
+	pipelines, err := readPipelineYaml(utils.GetAbsoluteFilePath(option.FilePath))
 	if err != nil {
 		logger.Error.Println(err)
 		return err
@@ -57,7 +57,7 @@ func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 				if err != nil {
 					logger.Error.Println(err)
 				}
-				if option.Debug {
+				if option.Debug && len(s.Script) > 0 {
 					logger.Info.Println(s.Script)
 				}
 				stepFunc := p.getStepFunc(s)

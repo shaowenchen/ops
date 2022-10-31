@@ -1,5 +1,5 @@
-name: Push To Remote File
+name: Push Local To Remote File
 steps:
-  - name: Push Readme To Remote
-    remotefile: "/tmp/readme.md"
-    localfile: "./readme.md"
+  - name: Push To Remote
+    remotefile: "/etc/hosts"
+    localfile: "/etc/hosts"

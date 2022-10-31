@@ -9,6 +9,7 @@ import (
 
 func ActionFile(logger *log.Logger, option FileOption) (err error) {
 	hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
+	option.LocalFile = utils.GetAbsoluteFilePath(option.LocalFile)
 	isExist, _ := utils.IsExistsFile(option.LocalFile)
 	if !isExist {
 		hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))

@@ -23,6 +23,10 @@ var PipelineCmd = &cobra.Command{
 			return
 		}
 		pipelineOption = parseArgs(args)
+		if len(pipelineOption.FilePath) == 0 {
+			fmt.Printf("--filepath is must provided")
+			return
+		}
 		pipeline.ActionPipeline(logger, pipelineOption)
 	},
 }

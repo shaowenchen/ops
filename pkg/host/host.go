@@ -219,10 +219,7 @@ func (host *Host) pullContent(src, dst string) (err error) {
 }
 
 func (host *Host) pull(src, dst, md5 string) (err error) {
-	if strings.HasPrefix(dst, "~/") {
-		dirname, _ := os.UserHomeDir()
-		dst = filepath.Join(dirname, dst[2:])
-	}
+	dst = utils.GetAbsoluteFilePath(dst)
 	dstFile, err := os.Create(dst)
 	if err != nil {
 		return
@@ -247,10 +244,7 @@ func (host *Host) pull(src, dst, md5 string) (err error) {
 }
 
 func (host *Host) push(src, dst, md5 string) (err error) {
-	if strings.HasPrefix(src, "~/") {
-		dirname, _ := os.UserHomeDir()
-		src = filepath.Join(dirname, src[2:])
-	}
+	src = utils.GetAbsoluteFilePath(src)
 	srcFile, err := os.Open(src)
 	err = host.Conn.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
 
@@ -267,8 +261,9 @@ func (host *Host) push(src, dst, md5 string) (err error) {
 	return
 }
 
-func (host *Host) fileMd5(path string) (md5 string, err error) {
-	cmd := fmt.Sprintf("sudo md5sum %s | cut -d\" \" -f1", path)
+func (host *Host) fileMd5(filepath string) (md5 string, err error) {
+	filepath = utils.GetAbsoluteFilePath(filepath)
+	cmd := fmt.Sprintf("sudo md5sum %s | cut -d\" \" -f1", filepath)
 	stdout, _, err := host.exec(cmd)
 	if err != nil {
 		return

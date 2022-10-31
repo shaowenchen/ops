@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -46,6 +47,7 @@ func CreateDir(dirpath string) error {
 }
 
 func FileMD5(path string) (string, error) {
+	path = GetAbsoluteFilePath(path)
 	file, err := os.Open(path)
 	if err != nil {
 		return "", err
@@ -61,7 +63,7 @@ func FileMD5(path string) (string, error) {
 }
 
 func GetSliceFromFileOrString(str string) []string {
-	isExist, err := IsExistsFile(str)
+	isExist, err := IsExistsFile(GetAbsoluteFilePath(str))
 	if err != nil {
 		return nil
 	}
@@ -90,4 +92,21 @@ func GetSliceFromFileOrString(str string) []string {
 		result = SplitStrings(str)
 	}
 	return result
+}
+
+func GetAbsoluteFilePath(path string) string {
+	if strings.HasPrefix(path, "~/") {
+		dirname, _ := os.UserHomeDir()
+		path = filepath.Join(dirname, path[2:])
+		return path
+	} else if strings.HasPrefix(path, ".") {
+		dirname, _ := os.Getwd()
+		path = filepath.Join(dirname, path[1:])
+		return path
+	} else if !strings.HasPrefix(path, "/") {
+		dirname, _ := os.Getwd()
+		path = filepath.Join(dirname, path)
+		return path
+	}
+	return path
 }
