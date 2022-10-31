@@ -1,4 +1,4 @@
-name: Upgrade Kernel 3 to 5
+name: Upgrade Centos Kernel 3 to 5
 steps:
   - name: Show Kernel Verion
     script: uname -r
