@@ -10,7 +10,6 @@ import (
 
 var internalFuncMap = map[string]interface{}{
 	"GetAvailableUrl":            utils.GetAvailableUrl,
-	"ScriptInstallMetricsServer": utils.ScriptInstallMetricsServer,
 	"ScriptInstallOpscli":        utils.ScriptInstallOpscli,
 }
 

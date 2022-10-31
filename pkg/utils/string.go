@@ -66,7 +66,9 @@ func RemoveStartEndMark(raw string) string {
 
 func MergeMap(target map[string]string, needMerge map[string]string) map[string]string {
 	for key, value := range needMerge {
-		target[key] = value
+		if len(strings.TrimSpace(value)) > 0 {
+			target[key] = value
+		}
 	}
 	return target
 }

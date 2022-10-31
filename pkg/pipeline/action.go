@@ -19,10 +19,10 @@ func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 	for _, p := range pipelines {
 		p.Logger = logger
 		globalVariables := make(map[string]string)
-		// override Variables
+		// cli > env > yaml
 		utils.MergeMap(globalVariables, p.Variables)
-		utils.MergeMap(globalVariables, utils.GetAllOsEnv())
 		utils.MergeMap(globalVariables, utils.GetRuntimeInfo())
+		utils.MergeMap(globalVariables, utils.GetAllOsEnv())
 		utils.MergeMap(globalVariables, option.Variables)
 
 		globalVariables = p.renderVarsVariables(globalVariables)

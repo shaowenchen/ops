@@ -4,19 +4,11 @@ import (
 	"fmt"
 
 	"net/http"
-	"strings"
 	"time"
 )
 
 func ScriptInstallOpscli() string {
 	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh"))
-}
-
-func ScriptInstallMetricsServer(clear string) string {
-	if strings.ToLower(clear) == "true" {
-		return fmt.Sprintf(`kubectl delete -f %s`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
-	}
-	return fmt.Sprintf(`kubectl apply -f %s`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml"))
 }
 
 func ScriptAddHost(ip, domain string) string {

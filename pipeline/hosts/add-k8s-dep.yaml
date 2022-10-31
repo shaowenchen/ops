@@ -4,7 +4,7 @@ steps:
     script: echo ${os}
   - name: Install for CentOS
     script: yum install -y openssl ebtables ethtool socat ipset ipvsadm conntrack chrony
-    when: ${os} == "centos"
+    when: ${os} == centos
   - name: Install for Ubuntu
     script: apt-get install -y openssl ebtables ethtool socat ipset ipvsadm conntrack chrony
-    when: ${os} == "ubuntu"
+    when: ${os} == ubuntu

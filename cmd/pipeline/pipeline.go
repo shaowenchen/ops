@@ -28,16 +28,22 @@ var PipelineCmd = &cobra.Command{
 }
 
 func parseArgs(args []string) (pipelineOption pipeline.PipelineOption) {
-	pipelineOption.Variables = make(map[string]string, 0)
+	pipelineOption.Variables = make(map[string]string)
 	for i := 0; i < len(args); i++ {
 		fieldName := getArgName(args[i])
 		if len(fieldName) > 0 {
-			if fieldName == "debug" {
-				pipelineOption.Debug = true
-				continue
+			fieldValue := "true"
+			if (i + 1) == len(args) {
+				// --clear
+			} else if (i+1) < len(args) && len(getArgName(args[i+1])) > 0 {
+				// --clear --username root
+			} else {
+				// --username root
+				fieldValue = args[i+1]
 			}
-			fieldValue := args[i+1]
-			if fieldName == "filepath" || fieldName == "f" {
+			if fieldName == "debug" {
+				pipelineOption.Debug = fieldValue == "true"
+			} else if fieldName == "filepath" {
 				pipelineOption.FilePath = fieldValue
 			} else if fieldName == "hosts" {
 				pipelineOption.Hosts = fieldValue
@@ -54,21 +60,20 @@ func parseArgs(args []string) (pipelineOption pipeline.PipelineOption) {
 			}
 		}
 	}
+	fmt.Println(pipelineOption.Variables)
 	return
 }
 
 func getArgName(arg string) string {
 	if strings.HasPrefix(arg, "--") {
 		return arg[2:]
-	} else if strings.HasPrefix(arg, "-") {
-		return arg[1:]
 	}
 	return ""
 }
 
 func init() {
-	PipelineCmd.Flags().BoolVarP(&pipelineOption.Debug, "debug", "", true, "")
-	PipelineCmd.Flags().StringVarP(&pipelineOption.FilePath, "filepath", "f", "", "")
+	PipelineCmd.Flags().BoolVarP(&pipelineOption.Debug, "debug", "", false, "")
+	PipelineCmd.Flags().StringVarP(&pipelineOption.FilePath, "filepath", "", "", "")
 	PipelineCmd.MarkFlagRequired("filepath")
 	PipelineCmd.Flags().StringVarP(&pipelineOption.Hosts, "hosts", "", "", "")
 	PipelineCmd.Flags().IntVarP(&pipelineOption.Port, "port", "", 22, "")
