@@ -60,7 +60,6 @@ func parseArgs(args []string) (pipelineOption pipeline.PipelineOption) {
 			}
 		}
 	}
-	fmt.Println(pipelineOption.Variables)
 	return
 }
 
