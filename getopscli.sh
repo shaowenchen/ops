@@ -69,7 +69,7 @@ if [ ! -d "${OPSCLIDIR}" ]; then
 fi
 
 if [ -d "${OPSCLIDIR}pipeline" ]; then
-  mv ${OPSCLIDIR}pipeline ${OPSCLIDIR}.pipeline_upgrade_$(date +%Y_%m_%d_%H_%M_%S)
+  mv ${OPSCLIDIR}pipeline ${OPSCLIDIR}.pipeline_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
 mv pipeline ${OPSCLIDIR}

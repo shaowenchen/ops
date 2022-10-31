@@ -29,7 +29,7 @@ func GetOpsDir() string {
 }
 
 func GetOpscliLogFile() string {
-	return filepath.Join(GetOpscliLogsDir(), fmt.Sprintf("%d_%d_%d.log", time.Now().Year(), time.Now().Month(), time.Now().Day()))
+	return filepath.Join(GetOpscliLogsDir(), fmt.Sprintf("%d-%d-%d.log", time.Now().Year(), time.Now().Month(), time.Now().Day()))
 }
 
 func GetOpscliPipelineDir() string {
