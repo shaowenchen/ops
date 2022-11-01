@@ -190,7 +190,7 @@ func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 	return strings.TrimSpace(outStr), exitCode, errors.Wrapf(err, "Failed to exec command: %s \n%s", cmd, strings.TrimSpace(outStr))
 }
 
-func (host *Host) pullContent(src, dst string) (err error) {
+func (host *Host) pullContent(src, dst, md5 string) (err error) {
 	output, _, err := host.exec(fmt.Sprintf("sudo cat %s | base64 -w 0", src))
 	if err != nil {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
@@ -202,7 +202,6 @@ func (host *Host) pullContent(src, dst string) (err error) {
 			return fmt.Errorf("create dst dir failed %v, dst dir: %s", err, dstDir)
 		}
 	}
-
 	dstFile, err := os.Create(dst)
 	if err != nil {
 		return fmt.Errorf("create dst file failed %v", err)
@@ -215,6 +214,15 @@ func (host *Host) pullContent(src, dst string) (err error) {
 		if _, err = dstFile.WriteString(string(base64Str)); err != nil {
 			return err
 		}
+	}
+
+	dstmd5, err := utils.FileMD5(dst)
+	if err != nil {
+		return
+	}
+
+	if dstmd5 != md5 {
+		return errors.New(fmt.Sprintf("MD5: dstfile is %s, srcfile is %s", dstmd5, md5))
 	}
 
 	return nil

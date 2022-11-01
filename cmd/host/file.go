@@ -26,6 +26,7 @@ var fileCmd = &cobra.Command{
 func init() {
 	fileCmd.Flags().StringVarP(&fileOpt.LocalFile, "localfile", "", "", "")
 	fileCmd.Flags().StringVarP(&fileOpt.RemoteFile, "remotefile", "", "", "")
+	fileCmd.Flags().StringVarP(&fileOpt.Direction, "direction", "d", "", "")
 	fileCmd.Flags().StringVarP(&fileOpt.Username, "username", "", "", "")
 	fileCmd.Flags().StringVarP(&fileOpt.Password, "password", "", "", "")
 	fileCmd.Flags().StringVarP(&fileOpt.PrivateKeyPath, "privatekeypath", "", "", "")

@@ -69,6 +69,7 @@ type Step struct {
 	Script       string `json:"script"`
 	LocalFile    string `json:"localfile"`
 	RemoteFile   string `json:"remotefile"`
+	Direction    string `json:"direction"`
 	AllowFailure bool   `json:"allow_failure"`
 }
 
@@ -152,6 +153,7 @@ func (p Pipeline) runStepCopy(step Step, option PipelineOption) (result string, 
 		LocalFile:  step.LocalFile,
 		RemoteFile: step.RemoteFile,
 		HostOption: option.HostOption,
+		Direction:  step.Direction,
 	}
 	return "", host.ActionFile(p.Logger, fileOption) == nil
 }

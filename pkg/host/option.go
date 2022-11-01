@@ -16,4 +16,5 @@ type FileOption struct {
 	HostOption
 	LocalFile  string
 	RemoteFile string
+	Direction  string
 }

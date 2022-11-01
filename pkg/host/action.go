@@ -3,13 +3,13 @@ package host
 import (
 	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/utils"
+	"strings"
 )
 
 func ActionFile(logger *log.Logger, option FileOption) (err error) {
 	hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
 	option.LocalFile = utils.GetAbsoluteFilePath(option.LocalFile)
-	isExist, _ := utils.IsExistsFile(option.LocalFile)
-	if !isExist {
+	if strings.Contains(option.Direction, "down") {
 		hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
 		if len(hosts) != 1 {
 			logger.Error.Println("need only one target host")
@@ -26,13 +26,13 @@ func ActionFile(logger *log.Logger, option FileOption) (err error) {
 			logger.Error.Println(err)
 			return err
 		}
-		err = host.pull(option.RemoteFile, option.LocalFile, md5)
+		err = host.pullContent(option.RemoteFile, option.LocalFile, md5)
 		if err != nil {
 			logger.Error.Println(err)
 			return err
 		}
 		logger.Info.Println("Md5: ", md5)
-	} else {
+	} else if strings.Contains(option.Direction, "up") {
 		md5, err := utils.FileMD5(option.LocalFile)
 		if err != nil {
 			logger.Error.Println(err)
@@ -50,6 +50,8 @@ func ActionFile(logger *log.Logger, option FileOption) (err error) {
 			}
 			logger.Info.Println("Md5: ", md5)
 		}
+	} else {
+		logger.Error.Println("invalid file transfer direction")
 	}
 	return
 }
