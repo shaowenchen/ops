@@ -38,7 +38,10 @@ Available Commands:
 
 ## Auto Completion
 
+After install `bash-completion` package, run script:
+
 ```bash
+echo "source /usr/share/bash-completion/bash_completion" >>~/.bashrc
 echo 'source <(opscli completion bash)' >>~/.bashrc
 source ~/.bashrc
 ```
