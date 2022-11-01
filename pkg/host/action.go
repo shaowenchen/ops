@@ -1,6 +1,7 @@
 package host
 
 import (
+	"fmt"
 	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/utils"
 	"strings"
@@ -63,6 +64,7 @@ func ActionBatchScript(logger *log.Logger, option ScriptOption) (err error) {
 	for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
 		scriptOption := option
 		scriptOption.Hosts = addr
+		logger.Info.Print(utils.PlaceMiddle(fmt.Sprintf("[%s]", addr), "*"))
 		_, _, err = ActionScript(logger, scriptOption)
 	}
 	return
