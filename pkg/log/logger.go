@@ -16,20 +16,20 @@ type Logger struct {
 	Error   *log.Logger
 }
 
-func NewDefaultLogger(print bool) (*Logger, error) {
-	return NewLogger(constants.GetOpscliLogFile(), true)
+func NewDefaultLogger(print bool, file bool) (*Logger, error) {
+	return NewLogger(constants.GetOpscliLogFile(), true, true)
 }
 
-func NewLogger(logFile string, print bool) (*Logger, error) {
+func NewLogger(logFile string, print bool, file bool) (*Logger, error) {
 	logger := &Logger{
 		LogFile: logFile,
 		Print:   print,
 	}
-	err := logger.init()
+	err := logger.init("")
 	return logger, err
 }
 
-func (logger *Logger) init() error {
+func (logger *Logger) init(prefix string) error {
 	file, err := os.OpenFile(logger.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return err
@@ -38,8 +38,8 @@ func (logger *Logger) init() error {
 	if logger.Print {
 		multiWriter = io.MultiWriter(file, os.Stdout)
 	}
-	logger.Info = log.New(multiWriter, "[INFO]", log.Ldate|log.Ltime|log.Lshortfile)
-	logger.Warning = log.New(multiWriter, "[WARNING]", log.Ldate|log.Ltime|log.Lshortfile)
-	logger.Error = log.New(multiWriter, "[ERROR]", log.Ldate|log.Ltime|log.Lshortfile)
+	logger.Info = log.New(multiWriter, prefix, 0)
+	logger.Warning = log.New(multiWriter, "", 0)
+	logger.Error = log.New(multiWriter, "", 0)
 	return err
 }

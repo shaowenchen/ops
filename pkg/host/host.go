@@ -10,6 +10,7 @@ import (
 	"github.com/bramvdbogaerde/go-scp"
 	"github.com/pkg/errors"
 	"github.com/shaowenchen/opscli/pkg/constants"
+	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/utils"
 	"golang.org/x/crypto/ssh"
 
@@ -39,6 +40,7 @@ type Host struct {
 	PrivateKeyPath  string `yaml:"privateKeyPath,omitempty" json:"privateKeyPath,omitempty"`
 	Timeout         int64  `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 	Conn            *HostConnection
+	Logger          *log.Logger
 }
 
 func newHost(internalAddress string, port int, username string, password string, privateKeyPath string) (*Host, error) {

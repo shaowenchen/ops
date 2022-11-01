@@ -72,3 +72,15 @@ func MergeMap(target map[string]string, needMerge map[string]string) map[string]
 	}
 	return target
 }
+
+func PlaceMiddle(text string, fill string) string {
+	total := 50
+	if len(text)+1 >= total {
+		return text
+	}
+	if len(fill) != 1 {
+		return text
+	}
+	leftLen := (total - len(text)) / 2
+	return fmt.Sprintf("%s%s%s", strings.Repeat(fill, leftLen), text, strings.Repeat(fill, (total-leftLen-len(text))))
+}

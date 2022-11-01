@@ -1,8 +1,6 @@
 package host
 
 import (
-	"fmt"
-
 	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/utils"
 )
@@ -79,7 +77,7 @@ func ActionScript(logger *log.Logger, option ScriptOption) (stdout string, exit 
 	}
 	stdout, exit, err = host.exec(option.Content)
 	if len(stdout) != 0 {
-		logger.Info.Println(fmt.Sprintf("[%s] %s", option.Hosts, stdout))
+		logger.Info.Println(stdout)
 	}
 	if exit != 0 {
 		logger.Error.Println(err)

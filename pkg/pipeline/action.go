@@ -5,6 +5,7 @@ import (
 
 	"strings"
 
+	"github.com/kyokomi/emoji/v2"
 	"github.com/shaowenchen/opscli/pkg/host"
 	"github.com/shaowenchen/opscli/pkg/log"
 	"github.com/shaowenchen/opscli/pkg/utils"
@@ -26,7 +27,7 @@ func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 		utils.MergeMap(globalVariables, option.Variables)
 
 		globalVariables = p.renderVarsVariables(globalVariables)
-		logger.Info.Println("[pipeline] " + p.Name)
+		logger.Info.Println(emoji.Sprint(":pizza:") + "[pipeline] " + p.Name)
 		if len(option.Hosts) == 0 {
 			option.Hosts = host.LocalHostIP
 		}
@@ -45,8 +46,9 @@ func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 		// run every pipeline
 		for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
 			globalVariables["result"] = ""
-			for _, s := range p.Steps {
-				logger.Info.Println(fmt.Sprintf("[%s] %s", addr, s.Name))
+			logger.Info.Print(utils.PlaceMiddle(fmt.Sprintf("[%s]", addr), "*"))
+			for si, s := range p.Steps {
+				logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(p.Steps), s.Name))
 				s.When = p.renderWhen(s.When, p.renderVarsVariables(globalVariables))
 				if !CheckWhen(s.When) {
 					logger.Info.Println("Skip!")

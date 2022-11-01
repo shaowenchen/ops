@@ -14,7 +14,7 @@ var scriptCmd = &cobra.Command{
 	Use:   "script",
 	Short: "run script on hosts",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewDefaultLogger(true)
+		logger, err := log.NewDefaultLogger(true, true)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return

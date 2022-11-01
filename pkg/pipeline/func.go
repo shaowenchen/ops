@@ -9,8 +9,8 @@ import (
 )
 
 var internalFuncMap = map[string]interface{}{
-	"GetAvailableUrl":            utils.GetAvailableUrl,
-	"ScriptInstallOpscli":        utils.ScriptInstallOpscli,
+	"GetAvailableUrl":     utils.GetAvailableUrl,
+	"ScriptInstallOpscli": utils.ScriptInstallOpscli,
 }
 
 func CallMap(funcName string, params ...interface{}) (result []reflect.Value, err error) {

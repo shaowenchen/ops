@@ -7,6 +7,6 @@ steps:
   - name: Mem Usage Percent/Total
     script: echo `free -m | awk 'NR==2{printf "%.2f%%\n", $3*100/$2 }'`/`free -h | awk '/^Mem:/{print $2}'`
   - name: Disk Usage Percent/Total
-    script: echo `df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/`
+    script: df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/
   - name: NF_Conntrack Usage/Total
     script: echo `cat /proc/sys/net/netfilter/nf_conntrack_count`/`cat /proc/sys/net/netfilter/nf_conntrack_max`

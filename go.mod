@@ -12,6 +12,7 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.44.64
 	github.com/bramvdbogaerde/go-scp v1.2.0
+	github.com/kyokomi/emoji/v2 v2.2.10
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.24.3
 	k8s.io/apimachinery v0.24.3
