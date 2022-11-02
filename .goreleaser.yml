@@ -11,9 +11,9 @@ builds:
       - darwin
     tags: containers_image_openpgp
     ldflags:
-      - -X "github.com/shaowenchen/ops/cmd/cli.buildVersion={{ .Version }}"
-      - -X "github.com/shaowenchen/ops/cmd/cli.buildDate={{ .Date }}"
-      - -X "github.com/shaowenchen/ops/cmd/cli.gicommitID={{ .ShortCommit }}"
+      - -X "github.com/shaowenchen/ops/cmd/cli/version.buildVersion={{ .Version }}"
+      - -X "github.com/shaowenchen/ops/cmd/cli/version.buildDate={{ .Date }}"
+      - -X "github.com/shaowenchen/ops/cmd/cli/version.gicommitID={{ .ShortCommit }}"
       - -w
       - -s
 dist: bin

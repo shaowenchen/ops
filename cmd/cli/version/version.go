@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/shaowenchen/ops/cmd/cli/root"
 )
 
 var (
@@ -20,7 +19,7 @@ type BuildInfo struct {
 	GitCommit string `json:"GitCommit,omitempty"`
 }
 
-var versionCmd = &cobra.Command{
+var VersionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "get current opscli version",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -35,8 +34,4 @@ var versionCmd = &cobra.Command{
 		}
 		fmt.Println(string(versionBytes))
 	},
-}
-
-func init() {
-	root.RootCmd.AddCommand(versionCmd)
 }

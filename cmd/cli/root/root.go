@@ -8,6 +8,8 @@ import (
 	"github.com/shaowenchen/ops/cmd/cli/kube"
 	"github.com/shaowenchen/ops/cmd/cli/pipeline"
 	"github.com/shaowenchen/ops/cmd/cli/storage"
+	"github.com/shaowenchen/ops/cmd/cli/upgrade"
+	"github.com/shaowenchen/ops/cmd/cli/version"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
@@ -18,6 +20,8 @@ func Execute() {
 	RootCmd.AddCommand(kube.KubeCmd)
 	RootCmd.AddCommand(storage.StorageCmd)
 	RootCmd.AddCommand(pipeline.PipelineCmd)
+	RootCmd.AddCommand(version.VersionCmd)
+	RootCmd.AddCommand(upgrade.UpgradeCmd)
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

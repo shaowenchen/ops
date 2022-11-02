@@ -6,13 +6,12 @@ import (
 	"os/exec"
 
 	"github.com/shaowenchen/ops/pkg/utils"
-	"github.com/shaowenchen/ops/cmd/cli/root"
 	"github.com/spf13/cobra"
 )
 
 var url = ""
 
-var upgradeCmd = &cobra.Command{
+var UpgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade opscli version to latest",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -22,8 +21,4 @@ var upgradeCmd = &cobra.Command{
 		upgrade.Run()
 		fmt.Println(string(stdout.Bytes()))
 	},
-}
-
-func init() {
-	root.RootCmd.AddCommand(upgradeCmd)
 }
