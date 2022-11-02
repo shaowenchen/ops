@@ -3,8 +3,8 @@ package kube
 import (
 	"fmt"
 
-	"github.com/shaowenchen/opscli/pkg/kube"
-	"github.com/shaowenchen/opscli/pkg/log"
+	"github.com/shaowenchen/ops/pkg/kube"
+	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/spf13/cobra"
 )
 

@@ -8,7 +8,7 @@ import (
 )
 
 func ScriptInstallOpscli() string {
-	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh"))
+	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh"))
 }
 
 func ScriptAddHost(ip, domain string) string {

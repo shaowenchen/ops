@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/shaowenchen/opscli/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/constants"
 )
 
 type Logger struct {

@@ -36,7 +36,7 @@ fi
 
 # download file
 FILENAME="opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
-DOWNLOAD_URL="https://github.com/shaowenchen/opscli/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
+DOWNLOAD_URL="https://github.com/shaowenchen/ops/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 
 http_code=$(curl --connect-timeout 3 -s -o temp.out -w '%{http_code}' https://github.com)
 rm -rf temp.out || true

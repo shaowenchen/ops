@@ -1,10 +1,11 @@
-package cmd
+package version
 
 import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/shaowenchen/ops/cmd/cli/root"
 )
 
 var (
@@ -37,5 +38,5 @@ var versionCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	root.RootCmd.AddCommand(versionCmd)
 }

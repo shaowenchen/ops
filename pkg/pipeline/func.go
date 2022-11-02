@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/shaowenchen/opscli/pkg/utils"
+	"github.com/shaowenchen/ops/pkg/utils"
 )
 
 var internalFuncMap = map[string]interface{}{

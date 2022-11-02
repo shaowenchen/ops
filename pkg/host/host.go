@@ -9,9 +9,9 @@ import (
 
 	"github.com/bramvdbogaerde/go-scp"
 	"github.com/pkg/errors"
-	"github.com/shaowenchen/opscli/pkg/constants"
-	"github.com/shaowenchen/opscli/pkg/log"
-	"github.com/shaowenchen/opscli/pkg/utils"
+	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"golang.org/x/crypto/ssh"
 
 	"net"

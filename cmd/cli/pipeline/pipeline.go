@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/shaowenchen/opscli/pkg/log"
-	"github.com/shaowenchen/opscli/pkg/pipeline"
+	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/pipeline"
 	"github.com/spf13/cobra"
 )
 

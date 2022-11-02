@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"github.com/shaowenchen/opscli/pkg/host"
+	"github.com/shaowenchen/ops/pkg/host"
 )
 
 type PipelineOption struct {

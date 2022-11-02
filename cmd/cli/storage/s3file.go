@@ -3,8 +3,8 @@ package storage
 import (
 	"fmt"
 
-	"github.com/shaowenchen/opscli/pkg/log"
-	"github.com/shaowenchen/opscli/pkg/storage"
+	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/storage"
 	"github.com/spf13/cobra"
 )
 

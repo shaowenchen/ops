@@ -1,4 +1,4 @@
-module github.com/shaowenchen/opscli
+module github.com/shaowenchen/ops
 
 go 1.19
 

@@ -3,13 +3,13 @@
 - Good network connections to GitHub
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh | VERSION=latest sh -
+curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
 ```
 
 - Poor network connections to GitHub
 
 ```bash
-curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/opscli/main/getopscli.sh |VERSION=latest sh -
+curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -
 ```
 
 ## Supported OS

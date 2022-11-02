@@ -3,8 +3,8 @@ package storage
 import (
 	"os"
 
-	"github.com/shaowenchen/opscli/pkg/log"
-	"github.com/shaowenchen/opscli/pkg/utils"
+	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/utils"
 )
 
 func ActionS3File(logger *log.Logger, option S3FileOption) (err error) {

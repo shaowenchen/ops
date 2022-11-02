@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/kyokomi/emoji/v2"
-	"github.com/shaowenchen/opscli/pkg/host"
-	"github.com/shaowenchen/opscli/pkg/log"
-	"github.com/shaowenchen/opscli/pkg/utils"
+	"github.com/shaowenchen/ops/pkg/host"
+	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/utils"
 )
 
 func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {

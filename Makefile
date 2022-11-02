@@ -6,8 +6,5 @@ format:
 	go fmt $(go list ./... | grep -v /vendor/)
 	go test $(go list ./... | grep -v /vendor/)
 
-run:
-	go run main.go
-
-binary:
-	go build -ldflags "-w -s" -o $(BIN) ./main.go
+cli:
+	go build -ldflags "-w -s" -o $(BIN) ./cli.go

@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/shaowenchen/opscli/pkg/host"
-	"github.com/shaowenchen/opscli/pkg/log"
+	"github.com/shaowenchen/ops/pkg/host"
+	"github.com/shaowenchen/ops/pkg/log"
 	"gopkg.in/yaml.v3"
 )
 

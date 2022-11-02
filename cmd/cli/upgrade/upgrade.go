@@ -1,11 +1,12 @@
-package cmd
+package upgrade
 
 import (
 	"bytes"
 	"fmt"
 	"os/exec"
 
-	"github.com/shaowenchen/opscli/pkg/utils"
+	"github.com/shaowenchen/ops/pkg/utils"
+	"github.com/shaowenchen/ops/cmd/cli/root"
 	"github.com/spf13/cobra"
 )
 
@@ -24,5 +25,5 @@ var upgradeCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(upgradeCmd)
+	root.RootCmd.AddCommand(upgradeCmd)
 }
