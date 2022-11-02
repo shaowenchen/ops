@@ -1,6 +1,6 @@
 name: Clear
 steps:
   - name: Clear Bacup Pipeline
-    script: rm -rf ~/.opscli/.pipeline*
+    script: rm -rf ~/.ops/.pipeline*
   - name: Clear Log
-    script: rm -rf ~/.opscli/logs/*
+    script: rm -rf ~/.ops/logs/*

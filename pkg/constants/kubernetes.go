@@ -3,7 +3,7 @@ package constants
 import "path/filepath"
 
 const AllNamespaces = "all"
-const OpsCliNamespace = "opscli"
+const OpsNamespace = "ops"
 
 const NodeKeyRoleMaster = "node-role.kubernetes.io/master"
 const NodeKeyRoleWorker = "node-role.kubernetes.io/worker"

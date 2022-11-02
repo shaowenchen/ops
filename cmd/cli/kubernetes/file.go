@@ -1,14 +1,14 @@
-package kube
+package kubernetes
 
 import (
 	"fmt"
 
-	"github.com/shaowenchen/ops/pkg/kube"
+	"github.com/shaowenchen/ops/pkg/kubernetes"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/spf13/cobra"
 )
 
-var fileOption kube.FileOption
+var fileOption kubernetes.FileOption
 
 var fileCmd = &cobra.Command{
 	Use:   "file",
@@ -19,7 +19,7 @@ var fileCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		kube.ActionFile(logger, fileOption)
+		kubernetes.ActionFile(logger, fileOption)
 	},
 }
 

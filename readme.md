@@ -28,11 +28,11 @@ Usage:
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
-  host        config host with this command
-  kube        use kubeconfig to config kubernetes
-  pipeline    run pipeline with this command
-  storage     config storage with this command
-  upgrade     upgrade opscli version to latest
+  host        command about host
+  kubernetes  command about kubernetes
+  pipeline    command about pipeline
+  storage     command about remote storage
+  upgrade     upgrade to latest version
   version     get current opscli version
 ```
 

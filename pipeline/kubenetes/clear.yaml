@@ -1,4 +1,0 @@
-name: Clear
-steps:
-  - name: Clear Opscli
-    script: kubectl delete ns opscli

@@ -1,4 +1,4 @@
-package kube
+package kubernetes
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func ActionScript(logger *log.Logger, option ScriptOption) (err error) {
 	}
 	for _, node := range nodeList {
 		time.Sleep(time.Second * 1)
-		namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsCliNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
+		namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
 		if err != nil {
 			logger.Error.Println(err)
 		}
@@ -70,7 +70,7 @@ func ActionFile(logger *log.Logger, option FileOption) (err error) {
 	}
 	for _, node := range nodeList {
 		time.Sleep(time.Second * 1)
-		namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsCliNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
+		namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
 		if err != nil {
 			logger.Error.Println(err)
 		}

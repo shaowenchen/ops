@@ -6,7 +6,7 @@ import (
 
 var StorageCmd = &cobra.Command{
 	Use:   "storage",
-	Short: "config storage with this command",
+	Short: "command about remote storage",
 }
 
 func init() {

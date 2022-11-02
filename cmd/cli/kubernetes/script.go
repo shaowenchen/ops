@@ -1,14 +1,14 @@
-package kube
+package kubernetes
 
 import (
 	"fmt"
 
-	"github.com/shaowenchen/ops/pkg/kube"
+	"github.com/shaowenchen/ops/pkg/kubernetes"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/spf13/cobra"
 )
 
-var scriptOption kube.ScriptOption
+var scriptOption kubernetes.ScriptOption
 
 var scriptCmd = &cobra.Command{
 	Use:   "script",
@@ -19,7 +19,7 @@ var scriptCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		kube.ActionScript(logger, scriptOption)
+		kubernetes.ActionScript(logger, scriptOption)
 	},
 }
 
