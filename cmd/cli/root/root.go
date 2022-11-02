@@ -35,5 +35,5 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
-	utils.CreateDir(constants.GetOpscliLogsDir())
+	utils.CreateDir(constants.GetOpsLogsDir())
 }

@@ -63,7 +63,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-OPSCLIDIR="${HOME}/.opscli/"
+OPSCLIDIR="${HOME}/.ops/"
 if [ ! -d "${OPSCLIDIR}" ]; then
   mkdir "${OPSCLIDIR}"
 fi

@@ -17,7 +17,7 @@ type Logger struct {
 }
 
 func NewDefaultLogger(print bool, file bool) (*Logger, error) {
-	return NewLogger(constants.GetOpscliLogFile(), true, true)
+	return NewLogger(constants.GetOpsLogFile(), true, true)
 }
 
 func NewLogger(logFile string, print bool, file bool) (*Logger, error) {

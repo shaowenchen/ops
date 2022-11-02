@@ -25,19 +25,19 @@ func GetCurrentUser() string {
 }
 
 func GetOpsDir() string {
-	return filepath.Join(GetCurrentUserHomeDir(), ".opscli")
+	return filepath.Join(GetCurrentUserHomeDir(), ".ops")
 }
 
-func GetOpscliLogFile() string {
-	return filepath.Join(GetOpscliLogsDir(), fmt.Sprintf("%d-%d-%d.log", time.Now().Year(), time.Now().Month(), time.Now().Day()))
+func GetOpsLogFile() string {
+	return filepath.Join(GetOpsLogsDir(), fmt.Sprintf("%d-%d-%d.log", time.Now().Year(), time.Now().Month(), time.Now().Day()))
 }
 
-func GetOpscliPipelineDir() string {
-	return filepath.Join(GetCurrentUserHomeDir(), ".opscli", "pipeline")
+func GetOpsPipelineDir() string {
+	return filepath.Join(GetOpsDir(), "pipeline")
 }
 
-func GetOpscliLogsDir() string {
-	return filepath.Join(GetCurrentUserHomeDir(), ".opscli", "logs")
+func GetOpsLogsDir() string {
+	return filepath.Join(GetOpsDir(), "logs")
 }
 
 func GetCurrentUserPrivateKeyPath() string {
