@@ -10,6 +10,7 @@ type HostOption struct {
 type ScriptOption struct {
 	HostOption
 	Content string
+	Sudo    bool
 }
 
 type FileOption struct {
@@ -17,4 +18,5 @@ type FileOption struct {
 	LocalFile  string
 	RemoteFile string
 	Direction  string
+	Sudo       bool
 }

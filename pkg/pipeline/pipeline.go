@@ -132,28 +132,18 @@ func (p Pipeline) renderWhen(when string, vars map[string]string) string {
 	return when
 }
 
-func (p Pipeline) getStepFunc(step Step) func(Step, PipelineOption) (string, bool) {
+func (p Pipeline) getStepFunc(step Step) func(*host.Host, Step, PipelineOption) (string, bool) {
 	if len(step.Script) > 0 {
 		return p.runStepScript
 	}
 	return p.runStepCopy
 }
 
-func (p Pipeline) runStepScript(step Step, option PipelineOption) (result string, isSuccessed bool) {
-	scriptOption := host.ScriptOption{
-		Content:    step.Script,
-		HostOption: option.HostOption,
-	}
-	stdout, exit, _ := host.ActionScript(p.Logger, scriptOption)
+func (p Pipeline) runStepScript(host *host.Host, step Step, option PipelineOption) (result string, isSuccessed bool) {
+	stdout, exit, _ := host.Script(p.Logger, option.Sudo, step.Script)
 	return stdout, exit == 0
 }
 
-func (p Pipeline) runStepCopy(step Step, option PipelineOption) (result string, isSuccessed bool) {
-	fileOption := host.FileOption{
-		LocalFile:  step.LocalFile,
-		RemoteFile: step.RemoteFile,
-		HostOption: option.HostOption,
-		Direction:  step.Direction,
-	}
-	return "", host.ActionFile(p.Logger, fileOption) == nil
+func (p Pipeline) runStepCopy(host *host.Host, step Step, option PipelineOption) (result string, isSuccessed bool) {
+	return "", host.File(p.Logger, option.Sudo, step.Direction, step.LocalFile, step.RemoteFile) == nil
 }

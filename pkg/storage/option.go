@@ -6,6 +6,7 @@ type S3FileOption struct {
 	Bucket     string
 	AK         string
 	SK         string
+	Direction  string
 	LocalFile  string
 	RemoteFile string
 }

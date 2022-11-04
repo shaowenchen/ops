@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const LocalHostIP = "127.0.0.1"
+
 func GetCurrentUserHomeDir() string {
 	homeDirectory, err := os.UserHomeDir()
 	if err != nil {

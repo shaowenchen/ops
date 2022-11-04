@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/user"
-	"path/filepath"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -155,12 +153,6 @@ func GetRestConfig(kubeconfigPath string) (*rest.Config, error) {
 	}
 	if c, err := rest.InClusterConfig(); err == nil {
 		return c, nil
-	}
-	if usr, err := user.Current(); err == nil {
-		if c, err := clientcmd.BuildConfigFromFlags(
-			"", filepath.Join(usr.HomeDir, ".kube", "config")); err == nil {
-			return c, nil
-		}
 	}
 
 	return nil, fmt.Errorf("could not locate a kubeconfig")

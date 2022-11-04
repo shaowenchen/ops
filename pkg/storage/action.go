@@ -18,18 +18,11 @@ func ActionS3File(logger *log.Logger, option S3FileOption) (err error) {
 		logger.Error.Println("Please provide ak sk in params or env")
 		return
 	}
-	if IsUploadAction(option.LocalFile) {
+	if utils.IsUploadDirection(option.Direction) {
 		_, err = s3Upload(option.AK, option.SK, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
-	} else {
+	} else if utils.IsDownloadDirection(option.Direction) {
 		err = s3Download(option.AK, option.SK, option.Region, option.Endpoint, option.Bucket, option.LocalFile, option.RemoteFile)
 	}
-	return err
-}
-
-func IsUploadAction(localfile string) bool {
-	isExist, err := utils.IsExistsFile(localfile)
-	if err != nil && isExist {
-		return true
-	}
-	return false
+	logger.Error.Println("direction is not correct")
+	return
 }

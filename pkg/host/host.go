@@ -27,23 +27,20 @@ import (
 	"strings"
 )
 
-const LocalHostIP = "127.0.0.1"
-
 type Host struct {
-	Name            string `yaml:"name,omitempty" json:"name,omitempty"`
-	Address         string `yaml:"address,omitempty" json:"address,omitempty"`
-	InternalAddress string `yaml:"internalAddress,omitempty" json:"internalAddress,omitempty"`
-	Port            int    `yaml:"port,omitempty" json:"port,omitempty"`
-	Username        string `yaml:"user,omitempty" json:"username,omitempty"`
-	Password        string `yaml:"password,omitempty" json:"password,omitempty"`
-	PrivateKey      string `yaml:"privateKey,omitempty" json:"privateKey,omitempty"`
-	PrivateKeyPath  string `yaml:"privateKeyPath,omitempty" json:"privateKeyPath,omitempty"`
-	Timeout         int64  `yaml:"timeout,omitempty" json:"timeout,omitempty"`
-	Conn            *HostConnection
-	Logger          *log.Logger
+	Name           string `yaml:"name,omitempty" json:"name,omitempty"`
+	Address        string `yaml:"address,omitempty" json:"address,omitempty"`
+	Port           int    `yaml:"port,omitempty" json:"port,omitempty"`
+	Username       string `yaml:"user,omitempty" json:"username,omitempty"`
+	Password       string `yaml:"password,omitempty" json:"password,omitempty"`
+	PrivateKey     string `yaml:"privateKey,omitempty" json:"privateKey,omitempty"`
+	PrivateKeyPath string `yaml:"privateKeyPath,omitempty" json:"privateKeyPath,omitempty"`
+	Timeout        int64  `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	Conn           *HostConnection
+	Logger         *log.Logger
 }
 
-func newHost(internalAddress string, port int, username string, password string, privateKeyPath string) (*Host, error) {
+func NewHost(address string, port int, username string, password string, privateKeyPath string) (*Host, error) {
 	if len(privateKeyPath) == 0 {
 		privateKeyPath = constants.GetCurrentUserPrivateKeyPath()
 	}
@@ -54,18 +51,17 @@ func newHost(internalAddress string, port int, username string, password string,
 		username = constants.GetCurrentUser()
 	}
 	host := &Host{
-		Name:            "",
-		Address:         "",
-		InternalAddress: internalAddress,
-		Port:            port,
-		Username:        username,
-		Password:        password,
-		PrivateKey:      "",
-		PrivateKeyPath:  privateKeyPath,
-		Timeout:         10,
+		Name:           "",
+		Address:        address,
+		Port:           port,
+		Username:       username,
+		Password:       password,
+		PrivateKey:     "",
+		PrivateKeyPath: privateKeyPath,
+		Timeout:        10,
 	}
 	// local host
-	if internalAddress == LocalHostIP {
+	if address == constants.LocalHostIP {
 		return host, nil
 	}
 	// remote host
@@ -103,12 +99,12 @@ func (host *Host) connecting() (err error) {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	endpointBehindBastion := net.JoinHostPort(host.InternalAddress, strconv.Itoa(host.Port))
+	endpointBehindBastion := net.JoinHostPort(host.Address, strconv.Itoa(host.Port))
 
 	host.Conn = &HostConnection{}
 	host.Conn.sshclient, err = ssh.Dial("tcp", endpointBehindBastion, sshConfig)
 	if err != nil {
-		return errors.Wrapf(err, "client.Dial failed %s", host.InternalAddress)
+		return errors.Wrapf(err, "client.Dial failed %s", host.Address)
 	}
 	host.Conn.scpclient, err = scp.NewClientBySSH(host.Conn.sshclient)
 	if err != nil {
@@ -117,10 +113,13 @@ func (host *Host) connecting() (err error) {
 	return nil
 }
 
-func (host *Host) exec(cmd string) (stdout string, code int, err error) {
+func (host *Host) exec(sudo bool, cmd string) (stdout string, code int, err error) {
 	// run in localhost
-	if host.Name == LocalHostIP || host.Address == LocalHostIP || host.InternalAddress == LocalHostIP {
+	if host.Address == constants.LocalHostIP {
 		runner := exec.Command("sudo", "sh", "-c", cmd)
+		if sudo {
+			runner = exec.Command("sh", "-c", cmd)
+		}
 		var out, errout bytes.Buffer
 		runner.Stdout = &out
 		runner.Stderr = &errout
@@ -142,7 +141,7 @@ func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 
 	in, _ := sess.StdinPipe()
 	out, _ := sess.StdoutPipe()
-	err = sess.Start(utils.BuildBase64Cmd(cmd))
+	err = sess.Start(utils.BuildBase64Cmd(sudo, cmd))
 	if err != nil {
 		exitCode = -1
 		if exitErr, ok := err.(*ssh.ExitError); ok {
@@ -190,13 +189,17 @@ func (host *Host) exec(cmd string) (stdout string, code int, err error) {
 	return strings.TrimSpace(outStr), exitCode, errors.Wrapf(err, "Failed to exec command: %s \n%s", cmd, strings.TrimSpace(outStr))
 }
 
-func (host *Host) pullContent(src, dst, md5 string) (err error) {
-	output, _, err := host.exec(fmt.Sprintf("sudo cat %s | base64 -w 0", src))
+func (host *Host) pullContent(sudo bool, src, dst string) (err error) {
+	srcmd5, err := host.fileMd5(sudo, src)
+	if err != nil {
+		return err
+	}
+	output, _, err := host.exec(sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
 	if err != nil {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
 	dstDir := filepath.Dir(dst)
-	if isExist, _ := utils.IsExistsFile(dstDir); !isExist {
+	if utils.IsExistsFile(dstDir) {
 		err = os.MkdirAll(dstDir, os.ModePerm)
 		if err != nil {
 			return fmt.Errorf("create dst dir failed %v, dst dir: %s", err, dstDir)
@@ -221,14 +224,18 @@ func (host *Host) pullContent(src, dst, md5 string) (err error) {
 		return
 	}
 
-	if dstmd5 != md5 {
-		return errors.New(fmt.Sprintf("MD5: dstfile is %s, srcfile is %s", dstmd5, md5))
+	if dstmd5 != srcmd5 {
+		return errors.New(fmt.Sprintf("md5 error: dstfile is %s, srcfile is %s", dstmd5, srcmd5))
 	}
 
 	return nil
 }
 
-func (host *Host) pull(src, dst, md5 string) (err error) {
+func (host *Host) pull(sudo bool, src, dst string) (err error) {
+	srcmd5, err := host.fileMd5(sudo, src)
+	if err != nil {
+		return err
+	}
 	dst = utils.GetAbsoluteFilePath(dst)
 	dstFile, err := os.Create(dst)
 	if err != nil {
@@ -246,38 +253,78 @@ func (host *Host) pull(src, dst, md5 string) (err error) {
 	if err != nil {
 		return
 	}
-	if dstmd5 != md5 {
-		err = errors.New(fmt.Sprintf("MD5: dstfile is %s, srcfile is %s", dstmd5, md5))
+	if dstmd5 != srcmd5 {
+		err = errors.New(fmt.Sprintf("md5 error: dstfile is %s, srcfile is %s", dstmd5, srcmd5))
 		return
 	}
 	return
 }
 
-func (host *Host) push(src, dst, md5 string) (err error) {
+func (host *Host) push(sudo bool, src, dst string) (err error) {
+	if host.Address == constants.LocalHostIP {
+		return errors.New("remote address is localhost")
+	}
+	srcmd5, err := utils.FileMD5(src)
+	if err != nil {
+		return err
+	}
 	src = utils.GetAbsoluteFilePath(src)
-	srcFile, err := os.Open(src)
-	err = host.Conn.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
+	srcFile, err1 := os.Open(src)
+	err1 = host.Conn.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
 
-	if err != nil {
-		return
+	if err1 != nil {
+		return err1
 	}
-	dstmd5, err := host.fileMd5(dst)
-	if err != nil {
-		return
+	dstmd5, err1 := host.fileMd5(sudo, dst)
+	if err1 != nil {
+		return err1
 	}
-	if dstmd5 != md5 {
-		return errors.New(fmt.Sprintf("MD5: dstfile is %s, srcfile is %s", dstmd5, md5))
+
+	if dstmd5 != srcmd5 {
+		return errors.New(fmt.Sprintf("md5 error: dstfile is %s, srcfile is %s", dstmd5, srcmd5))
 	}
 	return
 }
 
-func (host *Host) fileMd5(filepath string) (md5 string, err error) {
+func (host *Host) fileMd5(sudo bool, filepath string) (md5 string, err error) {
 	filepath = utils.GetAbsoluteFilePath(filepath)
-	cmd := fmt.Sprintf("sudo md5sum %s | cut -d\" \" -f1", filepath)
-	stdout, _, err := host.exec(cmd)
+	cmd := fmt.Sprintf("md5sum %s | cut -d\" \" -f1", filepath)
+	if sudo {
+		cmd = fmt.Sprintf("sudo %s", cmd)
+	}
+	stdout, _, err := host.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
 	md5 = strings.TrimSpace(stdout)
+	return
+}
+
+func (host *Host) Script(logger *log.Logger, sudo bool, content string) (stdout string, exit int, err error) {
+	stdout, exit, err = host.exec(sudo, content)
+	if len(stdout) != 0 {
+		logger.Info.Println(stdout)
+	}
+	if exit != 0 {
+		return "", 1, err
+	}
+	return
+}
+
+func (host *Host) File(logger *log.Logger, sudo bool, direction, localfile, remotefile string) (err error) {
+	if utils.IsDownloadDirection(direction) {
+		err = host.pullContent(sudo, remotefile, localfile)
+		if err != nil {
+			logger.Error.Println(err)
+			return err
+		}
+	} else if utils.IsUploadDirection(direction) {
+		err = host.push(sudo, localfile, remotefile)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+	} else {
+		logger.Error.Println("invalid file transfer direction")
+	}
 	return
 }

@@ -19,7 +19,7 @@ var fileCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		host.ActionFile(logger, fileOpt)
+		host.ActionBatchFile(logger, fileOpt)
 	},
 }
 

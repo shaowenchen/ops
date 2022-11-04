@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/md5"
 	"fmt"
+	"github.com/shaowenchen/ops/pkg/constants"
 	"io"
 	"os"
 	"path/filepath"
@@ -31,15 +32,16 @@ func GetRuntimeInfo() (info map[string]string) {
 	return
 }
 
-func IsExistsFile(filepath string) (bool, error) {
-	_, err := os.Stat(filepath)
-	if err == nil {
-		return true, nil
+func IsExistsFile(filepath string) bool {
+	s, err := os.Stat(filepath)
+	if err != nil {
+		return false
 	}
-	if os.IsNotExist(err) {
-		return false, nil
+	if s.IsDir() {
+		return false
 	}
-	return false, err
+
+	return true
 }
 
 func CreateDir(dirpath string) error {
@@ -62,22 +64,18 @@ func FileMD5(path string) (string, error) {
 	return fileMd5, nil
 }
 
-func GetSliceFromFileOrString(str string) []string {
-	isExist, err := IsExistsFile(GetAbsoluteFilePath(str))
-	if err != nil {
-		return nil
-	}
-	var result []string
+func AnalysisHostsParameter(str string) (result []string, err error) {
+	isExist := IsExistsFile(GetAbsoluteFilePath(str))
 	if isExist {
 		// try kubeconfig
-		node_ips, err := GetAllNodesFromKubeconfig(str)
+		nodeIPs, err := GetAllNodesFromKubeconfig(str)
 		if err == nil {
-			return node_ips
+			return nodeIPs, nil
 		}
 		//try readfile
 		readFile, err := os.Open(str)
 		if err != nil {
-			panic(err)
+			return result, err
 		}
 		fileScanner := bufio.NewScanner(readFile)
 		fileScanner.Split(bufio.ScanLines)
@@ -91,7 +89,10 @@ func GetSliceFromFileOrString(str string) []string {
 	} else {
 		result = SplitStrings(str)
 	}
-	return result
+	if len(result) == 0 {
+		result = append(result, constants.LocalHostIP)
+	}
+	return RemoveDuplicates(result), nil
 }
 
 func GetAbsoluteFilePath(path string) string {

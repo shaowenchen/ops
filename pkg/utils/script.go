@@ -7,33 +7,32 @@ import (
 	"time"
 )
 
-func ScriptInstallOpscli() string {
-	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh"))
+func ScriptInstallOpscli(proxy string) string {
+	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh", proxy))
 }
 
-func ScriptAddHost(ip, domain string) string {
-	return BuildBase64Cmd(fmt.Sprintf("echo \"%s %s\" >> /etc/hosts", ip, domain))
+func ScriptAddHost(sudo bool, ip, domain string) string {
+	return BuildBase64Cmd(sudo, fmt.Sprintf("echo \"%s %s\" >> /etc/hosts", ip, domain))
 }
 
-func ScriptDeleteHost(domain string) string {
-	return BuildBase64Cmd(fmt.Sprintf("sed -i '/%s/d' /etc/hosts", domain))
+func ScriptDeleteHost(sudo bool, domain string) string {
+	return BuildBase64Cmd(sudo, fmt.Sprintf("sed -i '/%s/d' /etc/hosts", domain))
 }
 
-func GetAvailableUrl(url string) string {
+func ScriptMv(sudo bool, src string, dst string) string {
+	return fmt.Sprintf(`%s mv %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(src), GetAbsoluteFilePath(dst))
+}
+
+func GetAvailableUrl(url string, proxy string) string {
+	if proxy != "" {
+		return proxy + url
+	}
 	httpClient := http.Client{
 		Timeout: 3 * time.Second,
 	}
 	_, err := httpClient.Get(url)
 	if err != nil {
-		url = "https://ghproxy.com/" + url
+		url = proxy + url
 	}
 	return url
-}
-
-func ClearOpscliPipelibeBackupDir() string {
-	return "rm -rf ~/.opscli/.pipeline*"
-}
-
-func ClearOpscliLogDir() string {
-	return "rm -rf ~/.opscli/logs/*"
 }

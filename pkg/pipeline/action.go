@@ -28,12 +28,9 @@ func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 
 		globalVariables = p.renderVarsVariables(globalVariables)
 		logger.Info.Println(emoji.Sprint(":pizza:") + "[pipeline] " + p.Name)
-		if len(option.Hosts) == 0 {
-			option.Hosts = host.LocalHostIP
-		}
 		// check variable in pipeline is not empty
 		emptyVariable := ""
-		for key, _ := range p.Variables {
+		for key := range p.Variables {
 			if len(strings.TrimSpace(globalVariables[key])) == 0 {
 				emptyVariable = key
 				break
@@ -44,9 +41,15 @@ func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 			break
 		}
 		// run every pipeline
-		for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
+		hosts, _ := utils.AnalysisHostsParameter(option.Hosts)
+		for _, addr := range hosts {
 			globalVariables["result"] = ""
-			logger.Info.Print(utils.PlaceMiddle(fmt.Sprintf("[%s]", addr), "*"))
+			logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", addr)))
+			host, err := host.NewHost(addr, option.Port, option.Username, option.Password, option.Password)
+			if err != nil {
+				logger.Error.Println(err)
+				continue
+			}
 			for si, s := range p.Steps {
 				logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(p.Steps), s.Name))
 				s.When = p.renderWhen(s.When, p.renderVarsVariables(globalVariables))
@@ -65,7 +68,7 @@ func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 				stepFunc := p.getStepFunc(s)
 				var tempOption = option
 				tempOption.Hosts = addr
-				stepResult, isSuccessed := stepFunc(s, tempOption)
+				stepResult, isSuccessed := stepFunc(host, s, tempOption)
 				globalVariables["result"] = stepResult
 				if s.AllowFailure == false && isSuccessed == false {
 					break

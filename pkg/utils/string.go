@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-func SplitStr(str string) (strList []string) {
-	return strings.Split(str, ",")
-}
-
 func IsContainKey(targets []string, target string) bool {
 	for _, item := range targets {
 		if item == target {
@@ -34,6 +30,9 @@ func SplitKeyValues(str string) (pair map[string]string) {
 }
 
 func SplitStrings(str string) []string {
+	if len(strings.TrimSpace(str)) == 0 {
+		return []string{}
+	}
 	return strings.Split(str, ",")
 }
 
@@ -53,8 +52,8 @@ func EncodingBase64(rawCmd string) string {
 	return base64.StdEncoding.EncodeToString([]byte(rawCmd))
 }
 
-func BuildBase64Cmd(rawCmd string) string {
-	return fmt.Sprintf("base64 -d <<< %s | sudo sh", EncodingBase64(rawCmd))
+func BuildBase64Cmd(sudo bool, rawCmd string) string {
+	return fmt.Sprintf("base64 -d <<< %s | %s sh", EncodingBase64(rawCmd), GetSudoString(sudo))
 }
 
 func RemoveStartEndMark(raw string) string {
@@ -73,8 +72,12 @@ func MergeMap(target map[string]string, needMerge map[string]string) map[string]
 	return target
 }
 
-func PlaceMiddle(text string, fill string) string {
-	total := 50
+func PrintMiddleFilled(text string) string {
+	return PrintMiddle(text, "*")
+}
+
+func PrintMiddle(text string, fill string) string {
+	total := 59
 	if len(text)+1 >= total {
 		return text
 	}
@@ -83,4 +86,20 @@ func PlaceMiddle(text string, fill string) string {
 	}
 	leftLen := (total - len(text)) / 2
 	return fmt.Sprintf("%s%s%s", strings.Repeat(fill, leftLen), text, strings.Repeat(fill, (total-leftLen-len(text))))
+}
+
+func GetSudoString(sudo bool) string {
+	if sudo {
+		return "sudo"
+	} else {
+		return ""
+	}
+}
+
+func IsUploadDirection(direction string) bool {
+	return strings.Contains(strings.ToLower(direction), "up")
+}
+
+func IsDownloadDirection(direction string) bool {
+	return strings.Contains(strings.ToLower(direction), "down")
 }

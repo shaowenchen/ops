@@ -1,91 +1,41 @@
 package host
 
 import (
+	"errors"
 	"fmt"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/utils"
-	"strings"
 )
 
-func ActionFile(logger *log.Logger, option FileOption) (err error) {
-	hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
-	option.LocalFile = utils.GetAbsoluteFilePath(option.LocalFile)
-	if strings.Contains(option.Direction, "down") {
-		hosts := utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts))
-		if len(hosts) != 1 {
-			logger.Error.Println("need only one target host")
-			return
-		}
-		host, err := newHost(hosts[0], option.Port, option.Username, option.Password, option.PrivateKeyPath)
-
+func ActionBatchFile(logger *log.Logger, option FileOption) (err error) {
+	hosts, _ := utils.AnalysisHostsParameter(option.Hosts)
+	if utils.IsDownloadDirection(option.Direction) && len(hosts) != 1 {
+		errMsg := "need only one host while downloading"
+		logger.Error.Println(errMsg)
+		return errors.New(errMsg)
+	}
+	for _, addr := range hosts {
+		logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", addr)))
+		host, err := NewHost(addr, option.Port, option.Username, option.Password, option.PrivateKeyPath)
 		if err != nil {
 			logger.Error.Println(err)
 			return err
 		}
-		md5, err := host.fileMd5(option.RemoteFile)
-		if err != nil {
-			logger.Error.Println(err)
-			return err
-		}
-		err = host.pullContent(option.RemoteFile, option.LocalFile, md5)
-		if err != nil {
-			logger.Error.Println(err)
-			return err
-		}
-		logger.Info.Println("Md5: ", md5)
-	} else if strings.Contains(option.Direction, "up") {
-		md5, err := utils.FileMD5(option.LocalFile)
-		if err != nil {
-			logger.Error.Println(err)
-			return err
-		}
-		for _, addr := range hosts {
-			host, err := newHost(addr, option.Port, option.Username, option.Password, option.PrivateKeyPath)
-			if err != nil {
-				logger.Error.Println(err)
-				return err
-			}
-			err = host.push(option.LocalFile, option.RemoteFile, md5)
-			if err != nil {
-				logger.Error.Println(err)
-			}
-			logger.Info.Println("Md5: ", md5)
-		}
-	} else {
-		logger.Error.Println("invalid file transfer direction")
+		err = host.File(logger, option.Sudo, option.Direction, option.LocalFile, option.RemoteFile)
 	}
 	return
 }
 
 func ActionBatchScript(logger *log.Logger, option ScriptOption) (err error) {
-	if len(option.Hosts) == 0 {
-		option.Hosts = LocalHostIP
-	}
-	for _, addr := range utils.RemoveDuplicates(utils.GetSliceFromFileOrString(option.Hosts)) {
-		scriptOption := option
-		scriptOption.Hosts = addr
-		logger.Info.Print(utils.PlaceMiddle(fmt.Sprintf("[%s]", addr), "*"))
-		_, _, err = ActionScript(logger, scriptOption)
-	}
-	return
-}
-
-func ActionScript(logger *log.Logger, option ScriptOption) (stdout string, exit int, err error) {
-	if len(option.Hosts) == 0 {
-		option.Hosts = LocalHostIP
-	}
-	host, err := newHost(option.Hosts, option.Port, option.Username, option.Password, option.PrivateKeyPath)
-	if err != nil {
-		logger.Error.Println(err)
-		return "", 1, err
-	}
-	stdout, exit, err = host.exec(option.Content)
-	if len(stdout) != 0 {
-		logger.Info.Println(stdout)
-	}
-	if exit != 0 {
-		logger.Error.Println(err)
-		return "", 1, err
+	hosts, err := utils.AnalysisHostsParameter(option.Hosts)
+	for _, addr := range hosts {
+		logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", addr)))
+		host, err := NewHost(addr, option.Port, option.Username, option.Password, option.PrivateKeyPath)
+		if err != nil {
+			logger.Error.Println(err)
+			continue
+		}
+		host.Script(logger, option.Sudo, option.Content)
 	}
 	return
 }
