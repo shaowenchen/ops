@@ -2,45 +2,36 @@ package host
 
 import (
 	"bufio"
-	"context"
-	"time"
-
-	"io/ioutil"
-
-	"github.com/bramvdbogaerde/go-scp"
-	"github.com/pkg/errors"
-	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/log"
-	"github.com/shaowenchen/ops/pkg/utils"
-	"golang.org/x/crypto/ssh"
-
-	"net"
-
 	"bytes"
+	"context"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
-
 	"strconv"
 	"strings"
+	"time"
+
+	scp "github.com/bramvdbogaerde/go-scp"
+	"github.com/pkg/errors"
+	"github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/utils"
+	"golang.org/x/crypto/ssh"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Host struct {
-	Name           string `yaml:"name,omitempty" json:"name,omitempty"`
-	Address        string `yaml:"address,omitempty" json:"address,omitempty"`
-	Port           int    `yaml:"port,omitempty" json:"port,omitempty"`
-	Username       string `yaml:"user,omitempty" json:"username,omitempty"`
-	Password       string `yaml:"password,omitempty" json:"password,omitempty"`
-	PrivateKey     string `yaml:"privateKey,omitempty" json:"privateKey,omitempty"`
-	PrivateKeyPath string `yaml:"privateKeyPath,omitempty" json:"privateKeyPath,omitempty"`
-	Timeout        int64  `yaml:"timeout,omitempty" json:"timeout,omitempty"`
-	Conn           *HostConnection
-	Logger         *log.Logger
+type HostConnection struct {
+	host      v1.Host
+	scpclient scp.Client
+	sshclient *ssh.Client
 }
 
-func NewHost(address string, port int, username string, password string, privateKeyPath string) (*Host, error) {
+func NewHostConnection(address string, port int, username string, password string, privateKeyPath string) (c *HostConnection, err error) {
+
 	if len(privateKeyPath) == 0 {
 		privateKeyPath = constants.GetCurrentUserPrivateKeyPath()
 	}
@@ -50,72 +41,99 @@ func NewHost(address string, port int, username string, password string, private
 	if len(username) == 0 {
 		username = constants.GetCurrentUser()
 	}
-	host := &Host{
-		Name:           "",
-		Address:        address,
-		Port:           port,
-		Username:       username,
-		Password:       password,
-		PrivateKey:     "",
-		PrivateKeyPath: privateKeyPath,
-		Timeout:        10,
+	c = &HostConnection{}
+	host := &v1.Host{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "",
+			Name:      "",
+		},
+		Spec: v1.HostSpec{
+			Name:           "",
+			Address:        address,
+			Port:           port,
+			Username:       username,
+			Password:       password,
+			PrivateKey:     "",
+			PrivateKeyPath: privateKeyPath,
+			Timeout:        10,
+		},
 	}
 	// local host
 	if address == constants.LocalHostIP {
-		return host, nil
+		return c, nil
 	}
 	// remote host
-	if err := host.connecting(); err != nil {
-		fmt.Println("Failed connect host:", host.Address, err.Error())
-		return nil, err
+	if err := c.connecting(host); err != nil {
+		return c, err
 	}
-	return host, nil
+	return
 }
 
-func (host *Host) connecting() (err error) {
-	authMethods := make([]ssh.AuthMethod, 0)
-	if len(host.Password) > 0 {
-		authMethods = append(authMethods, ssh.Password(host.Password))
+func (c *HostConnection) session() (*ssh.Session, error) {
+	if c.sshclient == nil {
+		return nil, errors.New("connection closed")
+	}
+	sess, err := c.sshclient.NewSession()
+	if err != nil {
+		return nil, err
 	}
 
-	if len(host.PrivateKey) == 0 && len(host.PrivateKeyPath) > 0 {
-		content, err := ioutil.ReadFile(host.PrivateKeyPath)
-		if err != nil {
-			return errors.Wrapf(err, "Failed read keyfile %q", host.PrivateKeyPath)
-		}
-		host.PrivateKey = string(content)
+	modes := ssh.TerminalModes{
+		ssh.ECHO:          0,     // disable echoing
+		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 	}
-	if len(host.PrivateKey) > 0 {
-		signer, err := ssh.ParsePrivateKey([]byte(host.PrivateKey))
+
+	err = sess.RequestPty("xterm", 100, 50, modes)
+	if err != nil {
+		return nil, err
+	}
+	return sess, nil
+}
+
+func (c *HostConnection) connecting(host *v1.Host) (err error) {
+	authMethods := make([]ssh.AuthMethod, 0)
+	if len(host.Spec.Password) > 0 {
+		authMethods = append(authMethods, ssh.Password(host.Spec.Password))
+	}
+
+	if len(host.Spec.PrivateKey) == 0 && len(host.Spec.PrivateKeyPath) > 0 {
+		content, err := ioutil.ReadFile(host.Spec.PrivateKeyPath)
 		if err != nil {
-			return errors.Wrap(err, "The given SSH key could not be parsed")
+			return errors.New("Failed read keyfile")
+		}
+		host.Spec.PrivateKey = string(content)
+	}
+	if len(host.Spec.PrivateKey) > 0 {
+		signer, err := ssh.ParsePrivateKey([]byte(host.Spec.PrivateKey))
+		if err != nil {
+			return errors.New("The given SSH key could not be parsed")
 		}
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	}
 	sshConfig := &ssh.ClientConfig{
-		User:            host.Username,
-		Timeout:         time.Duration(host.Timeout) * time.Second,
+		User:            host.Spec.Username,
+		Timeout:         time.Duration(host.Spec.Timeout) * time.Second,
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	endpointBehindBastion := net.JoinHostPort(host.Address, strconv.Itoa(host.Port))
+	endpointBehindBastion := net.JoinHostPort(host.Spec.Address, strconv.Itoa(host.Spec.Port))
 
-	host.Conn = &HostConnection{}
-	host.Conn.sshclient, err = ssh.Dial("tcp", endpointBehindBastion, sshConfig)
+	c.sshclient, err = ssh.Dial("tcp", endpointBehindBastion, sshConfig)
 	if err != nil {
-		return errors.Wrapf(err, "client.Dial failed %s", host.Address)
+		return errors.Wrapf(err, "client.Dial failed %s", host.Spec.Address)
 	}
-	host.Conn.scpclient, err = scp.NewClientBySSH(host.Conn.sshclient)
+	c.scpclient, err = scp.NewClientBySSH(c.sshclient)
 	if err != nil {
 		return errors.Wrapf(err, "scp.NewClient failed")
 	}
 	return nil
 }
 
-func (host *Host) exec(sudo bool, cmd string) (stdout string, code int, err error) {
+func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, err error) {
 	// run in localhost
-	if host.Address == constants.LocalHostIP {
+	if c.host.Spec.Address == constants.LocalHostIP {
 		runner := exec.Command("sudo", "sh", "-c", cmd)
 		if sudo {
 			runner = exec.Command("sh", "-c", cmd)
@@ -131,7 +149,7 @@ func (host *Host) exec(sudo bool, cmd string) (stdout string, code int, err erro
 		stdout = out.String()
 		return
 	}
-	sess, err := host.Conn.session()
+	sess, err := c.session()
 	if err != nil {
 		return "", 1, errors.Wrap(err, "failed to get SSH session")
 	}
@@ -170,7 +188,7 @@ func (host *Host) exec(sudo bool, cmd string) (stdout string, code int, err erro
 		line += string(b)
 
 		if (strings.HasPrefix(line, "[sudo] password for ") || strings.HasPrefix(line, "Password")) && strings.HasSuffix(line, ": ") {
-			_, err = in.Write([]byte(host.Password + "\n"))
+			_, err = in.Write([]byte(c.host.Spec.Password + "\n"))
 			if err != nil {
 				break
 			}
@@ -183,35 +201,35 @@ func (host *Host) exec(sudo bool, cmd string) (stdout string, code int, err erro
 			exitCode = exitErr.ExitStatus()
 		}
 	}
-	outStr := strings.TrimPrefix(string(output), fmt.Sprintf("[sudo] password for %s:", host.Username))
+	outStr := strings.TrimPrefix(string(output), fmt.Sprintf("[sudo] password for %s:", c.host.Spec.Username))
 
 	// preserve original error
 	return strings.TrimSpace(outStr), exitCode, errors.Wrapf(err, "Failed to exec command: %s \n%s", cmd, strings.TrimSpace(outStr))
 }
 
-func (host *Host) mv(sudo bool, src, dst string) (stdout string, err error) {
-	stdout, _, err = host.exec(sudo, utils.ScriptMv(sudo, src, dst))
+func (c *HostConnection) mv(sudo bool, src, dst string) (stdout string, err error) {
+	stdout, _, err = c.exec(sudo, utils.ScriptMv(sudo, src, dst))
 	return
 }
 
-func (host *Host) copy(sudo bool, src, dst string) (stdout string, err error) {
+func (c *HostConnection) copy(sudo bool, src, dst string) (stdout string, err error) {
 	fmt.Println(utils.ScriptCopy(sudo, src, dst))
-	stdout, _, err = host.exec(sudo, utils.ScriptCopy(sudo, src, dst))
+	stdout, _, err = c.exec(sudo, utils.ScriptCopy(sudo, src, dst))
 	return
 }
 
-func (host *Host) rm(sudo bool, dst string) (stdout string, err error) {
+func (c *HostConnection) rm(sudo bool, dst string) (stdout string, err error) {
 	fmt.Println(utils.ScriptRm(sudo, dst))
-	stdout, _, err = host.exec(sudo, utils.ScriptRm(sudo, dst))
+	stdout, _, err = c.exec(sudo, utils.ScriptRm(sudo, dst))
 	return
 }
 
-func (host *Host) cmdPull(sudo bool, src, dst string) (err error) {
-	srcmd5, err := host.fileMd5(sudo, src)
+func (c *HostConnection) cmdPull(sudo bool, src, dst string) (err error) {
+	srcmd5, err := c.fileMd5(sudo, src)
 	if err != nil {
 		return err
 	}
-	output, _, err := host.exec(sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
+	output, _, err := c.exec(sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
 	if err != nil {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
@@ -248,14 +266,14 @@ func (host *Host) cmdPull(sudo bool, src, dst string) (err error) {
 	return nil
 }
 
-func (host *Host) scpPull(sudo bool, src, dst string) (err error) {
+func (c *HostConnection) scpPull(sudo bool, src, dst string) (err error) {
 	originSrc := src
-	src = host.getTempfileName(src)
-	stdout, err := host.copy(sudo, originSrc, src)
+	src = c.getTempfileName(src)
+	stdout, err := c.copy(sudo, originSrc, src)
 	if err != nil {
 		return errors.New(stdout)
 	}
-	srcmd5, err := host.fileMd5(sudo, originSrc)
+	srcmd5, err := c.fileMd5(sudo, originSrc)
 	if err != nil {
 		return err
 	}
@@ -266,13 +284,13 @@ func (host *Host) scpPull(sudo bool, src, dst string) (err error) {
 	}
 	defer dstFile.Close()
 
-	err = host.Conn.scpclient.CopyFromRemote(context.Background(), dstFile, src)
+	err = c.scpclient.CopyFromRemote(context.Background(), dstFile, src)
 
 	if err != nil {
 		return
 	}
 
-	stdout, err = host.rm(sudo, src)
+	stdout, err = c.rm(sudo, src)
 	if err != nil {
 		return errors.New(stdout)
 	}
@@ -289,10 +307,10 @@ func (host *Host) scpPull(sudo bool, src, dst string) (err error) {
 	return
 }
 
-func (host *Host) scpPush(sudo bool, src, dst string) (err error) {
+func (c *HostConnection) scpPush(sudo bool, src, dst string) (err error) {
 	originDst := dst
-	dst = host.getTempfileName(dst)
-	if host.Address == constants.LocalHostIP {
+	dst = c.getTempfileName(dst)
+	if c.host.Spec.Address == constants.LocalHostIP {
 		return errors.New("remote address is localhost")
 	}
 	srcmd5, err := utils.FileMD5(src)
@@ -301,17 +319,17 @@ func (host *Host) scpPush(sudo bool, src, dst string) (err error) {
 	}
 	src = utils.GetAbsoluteFilePath(src)
 	srcFile, err1 := os.Open(src)
-	err1 = host.Conn.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
+	err1 = c.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
 
 	if err1 != nil {
 		return err1
 	}
-	stdout, err := host.mv(sudo, dst, originDst)
+	stdout, err := c.mv(sudo, dst, originDst)
 	if err == nil {
 		err = errors.New(stdout)
 	}
 
-	dstmd5, err1 := host.fileMd5(sudo, originDst)
+	dstmd5, err1 := c.fileMd5(sudo, originDst)
 	if err1 != nil {
 		return err1
 	}
@@ -322,13 +340,13 @@ func (host *Host) scpPush(sudo bool, src, dst string) (err error) {
 	return
 }
 
-func (host *Host) fileMd5(sudo bool, filepath string) (md5 string, err error) {
+func (c *HostConnection) fileMd5(sudo bool, filepath string) (md5 string, err error) {
 	filepath = utils.GetAbsoluteFilePath(filepath)
 	cmd := fmt.Sprintf("md5sum %s | cut -d\" \" -f1", filepath)
 	if sudo {
 		cmd = fmt.Sprintf("sudo %s", cmd)
 	}
-	stdout, _, err := host.exec(sudo, cmd)
+	stdout, _, err := c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
@@ -336,24 +354,24 @@ func (host *Host) fileMd5(sudo bool, filepath string) (md5 string, err error) {
 	return
 }
 
-func (host *Host) getTempfileName(name string) string {
+func (c *HostConnection) getTempfileName(name string) string {
 	nameSplit := strings.Split(name, "/")
 	name = nameSplit[len(nameSplit)-1]
 	cmd := "pwd"
-	stdout, _, err := host.exec(false, cmd)
+	stdout, _, err := c.exec(false, cmd)
 	if err != nil {
 		return name
 	}
 	return fmt.Sprintf("%s/.%s-%d", strings.TrimSpace(stdout), name, time.Now().UnixNano())
 }
 
-func (host *Host) Script(logger *log.Logger, sudo bool, content string) (stdout string, exit int, err error) {
-	stdout, exit, err = host.exec(sudo, content)
+func (c *HostConnection) Script(sudo bool, content string) (stdout string, exit int, err error) {
+	stdout, exit, err = c.exec(sudo, content)
 	if len(stdout) != 0 {
-		logger.Info.Println(stdout)
-	} 
+		// logger.Info.Println(stdout)
+	}
 	if exit == 0 && len(stdout) == 0 {
-		logger.Info.Println("Succeeded")
+		// logger.Info.Println("Succeeded")
 	}
 	if exit != 0 {
 		return "", 1, err
@@ -361,22 +379,19 @@ func (host *Host) Script(logger *log.Logger, sudo bool, content string) (stdout 
 	return
 }
 
-func (host *Host) File(logger *log.Logger, sudo bool, direction, localfile, remotefile string) (err error) {
+func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string) (err error) {
 	if utils.IsDownloadDirection(direction) {
-		err = host.scpPull(sudo, remotefile, localfile)
+		err = c.scpPull(sudo, remotefile, localfile)
 		if err != nil {
-			logger.Error.Println(err)
 			return err
 		}
 	} else if utils.IsUploadDirection(direction) {
-		err = host.scpPush(sudo, localfile, remotefile)
+		err = c.scpPush(sudo, localfile, remotefile)
 		if err != nil {
-			logger.Error.Println(err)
+			return err
 		}
 	} else {
-		logger.Error.Println("invalid file transfer direction")
-		return
+		return errors.New("invalid file transfer direction")
 	}
-	logger.Info.Println("Succeeded")
 	return
 }

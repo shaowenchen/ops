@@ -1,9 +1,0 @@
-name: Fix Kernel Configuration
-steps:
-  - name: Free Mem
-    script: echo 3 > /proc/sys/vm/drop_caches
-  - name: Max PID
-    script: echo "kernel.pid_max=65535 " >> /etc/sysctl.conf && sysctl -p
-  - name: Max Thread
-    script: echo "kernel.threads-max=65535 " >> /etc/sysctl.conf && sysctl -p
-

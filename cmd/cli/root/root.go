@@ -6,7 +6,7 @@ import (
 
 	"github.com/shaowenchen/ops/cmd/cli/host"
 	"github.com/shaowenchen/ops/cmd/cli/kubernetes"
-	"github.com/shaowenchen/ops/cmd/cli/pipeline"
+	"github.com/shaowenchen/ops/cmd/cli/task"
 	"github.com/shaowenchen/ops/cmd/cli/storage"
 	"github.com/shaowenchen/ops/cmd/cli/upgrade"
 	"github.com/shaowenchen/ops/cmd/cli/version"
@@ -19,7 +19,7 @@ func Execute() {
 	RootCmd.AddCommand(host.HostCmd)
 	RootCmd.AddCommand(kubernetes.KubernetesCmd)
 	RootCmd.AddCommand(storage.StorageCmd)
-	RootCmd.AddCommand(pipeline.PipelineCmd)
+	RootCmd.AddCommand(task.TaskCmd)
 	RootCmd.AddCommand(version.VersionCmd)
 	RootCmd.AddCommand(upgrade.UpgradeCmd)
 	if err := RootCmd.Execute(); err != nil {

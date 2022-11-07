@@ -1,0 +1,14 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Docker Clear
+  steps:
+    - name: Docker system prune
+      script: docker system prune -f
+    - name: Clear none image
+      script: docker images | grep none | awk '{print $3}' | xargs /usr/bin/docker rmi
+    - name: Clear biz image
+      script: docker images |grep -E "([0-9a-z]+[-]){3,}[0-9]{9}" |awk '{print $3}' | xargs /usr/bin/docker rmi

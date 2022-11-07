@@ -1,0 +1,18 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Get OS Info
+  steps:
+  - name: Kernel Version
+    script: uname -r
+  - name: CPU Usage Percent/Load/Total
+    script: echo `grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {printf ("%.2f",usage)}'`%/`top -bn1 | grep load | awk '{printf "%.2f\n", $(NF-2)}'`/`grep -c "model name" /proc/cpuinfo`
+  - name: Mem Usage Percent/Total
+    script: echo `free -m | awk 'NR==2{printf "%.2f%%\n", $3*100/$2 }'`/`free -h | awk '/^Mem:/{print $2}'`
+  - name: Disk Usage Percent/Total
+    script: df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/
+  - name: NF_Conntrack Usage/Total
+    script: echo `cat /proc/sys/net/netfilter/nf_conntrack_count`/`cat /proc/sys/net/netfilter/nf_conntrack_max`

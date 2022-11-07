@@ -1,0 +1,12 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Push Local To Remote File
+  steps:
+  - name: Push To Remote
+    remotefile: /etc/hosts
+    localfile: /etc/hosts
+    direction: upload

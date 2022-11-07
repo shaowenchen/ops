@@ -1,0 +1,16 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Install Kubernetes Dependence
+  steps:
+    - name: Current System
+      script: echo ${os}
+    - name: Install for CentOS
+      script: yum install -y openssl ebtables ethtool socat ipset ipvsadm conntrack chrony
+      when: ${os} == centos
+    - name: Install for Ubuntu
+      script: apt-get install -y openssl ebtables ethtool socat ipset ipvsadm conntrack chrony
+      when: ${os} == ubuntu

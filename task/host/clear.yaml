@@ -1,0 +1,12 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Clear
+  steps:
+    - name: Clear Bacup Pipeline
+      script: rm -rf ~/.ops/.pipeline*
+    - name: Clear Log
+      script: rm -rf ~/.ops/logs/*

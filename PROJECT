@@ -1,0 +1,25 @@
+domain: chenshaowen.com
+layout:
+- go.kubebuilder.io/v3
+projectName: ops
+repo: github.com/shaowenchen/ops
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: chenshaowen.com
+  group: ops
+  kind: Host
+  path: github.com/shaowenchen/ops/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: chenshaowen.com
+  group: ops
+  kind: Task
+  path: github.com/shaowenchen/ops/api/v1
+  version: v1
+version: "3"

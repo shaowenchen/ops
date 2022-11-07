@@ -1,0 +1,14 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Status Velero
+  variables:
+    velero_version: v1.9.2
+  steps:
+  - name: Backup Status
+    script: ./velero-${velero_version}-linux-amd64/velero get backup
+  - name: Restore Status
+    script: ./velero-${velero_version}-linux-amd64/velero get restore

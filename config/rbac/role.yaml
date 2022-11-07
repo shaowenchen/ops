@@ -1,0 +1,59 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - ops.chenshaowen.com
+  resources:
+  - hosts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ops.chenshaowen.com
+  resources:
+  - hosts/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ops.chenshaowen.com
+  resources:
+  - hosts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ops.chenshaowen.com
+  resources:
+  - tasks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ops.chenshaowen.com
+  resources:
+  - tasks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ops.chenshaowen.com
+  resources:
+  - tasks/status
+  verbs:
+  - get
+  - patch
+  - update

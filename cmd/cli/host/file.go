@@ -3,6 +3,7 @@ package host
 import (
 	"fmt"
 
+	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/spf13/cobra"
@@ -19,7 +20,7 @@ var fileCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		host.ActionBatchFile(logger, fileOpt)
+		action.HostFile(logger, fileOpt)
 	},
 }
 

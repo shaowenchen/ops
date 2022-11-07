@@ -1,4 +1,0 @@
-name: Install Opscli
-steps:
-  - name: Install Opscli
-    script: ScriptInstallOpscli()

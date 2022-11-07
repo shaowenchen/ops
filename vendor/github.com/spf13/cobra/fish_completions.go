@@ -11,8 +11,8 @@ import (
 func genFishComp(buf io.StringWriter, name string, includeDesc bool) {
 	// Variables should not contain a '-' or ':' character
 	nameForVar := name
-	nameForVar = strings.ReplaceAll(nameForVar, "-", "_")
-	nameForVar = strings.ReplaceAll(nameForVar, ":", "_")
+	nameForVar = strings.Replace(nameForVar, "-", "_", -1)
+	nameForVar = strings.Replace(nameForVar, ":", "_", -1)
 
 	compCmd := ShellCompRequestCmd
 	if !includeDesc {
@@ -38,8 +38,7 @@ function __%[1]s_perform_completion
     __%[1]s_debug "args: $args"
     __%[1]s_debug "last arg: $lastArg"
 
-    # Disable ActiveHelp which is not supported for fish shell
-    set -l requestComp "%[9]s=0 $args[1] %[3]s $args[2..-1] $lastArg"
+    set -l requestComp "$args[1] %[3]s $args[2..-1] $lastArg"
 
     __%[1]s_debug "Calling $requestComp"
     set -l results (eval $requestComp 2> /dev/null)
@@ -197,7 +196,7 @@ complete -c %[2]s -n '__%[1]s_prepare_completions' -f -a '$__%[1]s_comp_results'
 
 `, nameForVar, name, compCmd,
 		ShellCompDirectiveError, ShellCompDirectiveNoSpace, ShellCompDirectiveNoFileComp,
-		ShellCompDirectiveFilterFileExt, ShellCompDirectiveFilterDirs, activeHelpEnvVar(name)))
+		ShellCompDirectiveFilterFileExt, ShellCompDirectiveFilterDirs))
 }
 
 // GenFishCompletion generates fish completion file and writes to the passed writer.

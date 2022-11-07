@@ -1,0 +1,33 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Install Velero Client && Server
+  variables:
+    velero_version: v1.9.2
+    download_url: https://ghproxy.com/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
+    region: ap-southeast-3
+    endpoint: https://obs.ap-southeast-3.myhuaweicloud.com
+    bucket:
+    ak:
+    sk:
+  steps:
+  - name: Download Velero Client
+    script: wget ${download_url}
+
+  - name: Install Velero Client
+    script: tar xvf velero-${velero_version}-linux-amd64.tar.gz
+
+  - name: Generate Credential - 1
+    script: echo "[default]" > velero-credentials
+
+  - name: Generate Credential - 2
+    script: echo "aws_access_key_id = ${ak}" >> velero-credentials
+
+  - name: Generate Credential - 3
+    script: echo "aws_secret_access_key = ${sk}" >> velero-credentials
+
+  - name: Install Velero Server
+    script: ./velero-${velero_version}-linux-amd64/velero install --image velero/velero:${velero_version} --plugins velero/velero-plugin-for-aws:v1.5.1 --provider aws  --bucket ${bucket} --namespace velero --secret-file ./velero-credentials --use-restic --backup-location-config region=${region},s3ForcePathStyle="true",s3Url=${endpoint} --snapshot-location-config region=${region}

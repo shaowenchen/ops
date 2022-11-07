@@ -5,6 +5,7 @@ import (
 
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +20,7 @@ var scriptCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		host.ActionBatchScript(logger, scriptOpt)
+		action.HostScript(logger, scriptOpt)
 	},
 }
 

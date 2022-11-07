@@ -1,6 +1,0 @@
-name: Push Local To Remote File
-steps:
-  - name: Push To Remote
-    remotefile: /etc/hosts
-    localfile: /etc/hosts
-    direction: upload

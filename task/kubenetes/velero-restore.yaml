@@ -1,0 +1,14 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Restore Kubernetes Using Velero
+  variables:
+    velero_version: v1.9.2
+    cluster_name: test
+    version: 2
+  steps:
+  - name: Restore all
+    script: ./velero-${velero_version}-linux-amd64/velero restore create  ${cluster_name}-${version}-restore --from-backup  ${cluster_name}-${version}

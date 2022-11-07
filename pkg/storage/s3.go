@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-func s3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (location string, err error) {
+func S3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (location string, err error) {
 	sess, _ := session.NewSession(&aws.Config{
 		Credentials:      credentials.NewStaticCredentials(ak, sk, ""),
 		Endpoint:         aws.String(endpoint),
@@ -36,7 +36,7 @@ func s3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string
 	return result.Location, err
 }
 
-func s3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (err error) {
+func S3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (err error) {
 	sess, _ := session.NewSession(&aws.Config{
 		Credentials:      credentials.NewStaticCredentials(ak, sk, ""),
 		Endpoint:         aws.String(endpoint),

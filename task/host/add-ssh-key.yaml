@@ -1,0 +1,12 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Add Key
+  variables:
+    key_content:
+  steps:
+  - name: Add Key to ~/.ssh/authorized_keys
+    script: echo "${key_content}" >> ~/.ssh/authorized_keys

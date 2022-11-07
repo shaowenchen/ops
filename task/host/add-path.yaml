@@ -1,0 +1,10 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Set Path
+  steps:
+    - name: Set /usr/local/bin to PATH
+      script: echo "export PATH=$PATH:/usr/local/bin" >> /etc/profile

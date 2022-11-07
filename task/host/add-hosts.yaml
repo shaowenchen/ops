@@ -1,0 +1,18 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Add hosts 
+  variables:
+    ip: ""
+    domain: ""
+    clear: false
+  steps:
+    - name: Add Etc Hosts
+      script: echo "${ip} ${domain}" >> /etc/hosts
+      when: ${clear} == false
+    - name: Remove Etc Hosts
+      script: sed -i '/${domain}/d' /etc/hosts
+      when: ${clear} == true

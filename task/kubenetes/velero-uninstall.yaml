@@ -1,0 +1,12 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Uninstall Velero
+  steps:
+  - name: Uninstall Velero Server
+    script: kubectl delete namespace/velero clusterrolebinding/velero & kubectl delete crds -l component=velero
+  - name: Clear Env
+    script: rm -rf velero*

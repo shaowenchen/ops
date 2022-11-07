@@ -1,0 +1,16 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: MetricsServer
+  variables:
+    clear: false
+  steps:
+  - name: Install MetricsServer
+    script: kubectl apply -f GetAvailableUrl(https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml)
+    when: ${clear} == false
+  - name: Remove MetricsServer
+    script: kubectl delete -f GetAvailableUrl(https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml)
+    when: ${clear} == true
