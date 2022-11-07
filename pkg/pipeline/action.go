@@ -52,7 +52,7 @@ func ActionPipeline(logger *log.Logger, option PipelineOption) (err error) {
 			}
 			for si, s := range p.Steps {
 				logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(p.Steps), s.Name))
-				s.When = p.renderWhen(s.When, p.renderVarsVariables(globalVariables))
+				s.When = p.renderWhen(s.When, globalVariables)
 				if !CheckWhen(s.When) {
 					logger.Info.Println("Skip!")
 					continue
