@@ -29,10 +29,10 @@ func CallMap(funcName string, params ...interface{}) (result []reflect.Value, er
 
 func CheckWhen(when string) (needRun bool) {
 	when = strings.TrimSpace(when)
-	if len(when) == 0 || when == "0" || strings.ToLower(when) == "false" || strings.ToLower(when) == "!true"{
+	if when == "0" || strings.ToLower(when) == "false" || strings.ToLower(when) == "!true" {
 		return false
 	}
-	if when == "1" || strings.ToLower(when) == "true" || strings.ToLower(when) == "!false" {
+	if len(when) == 0 || when == "1" || strings.ToLower(when) == "true" || strings.ToLower(when) == "!false" {
 		return true
 	}
 	if strings.Contains(when, "==") {
