@@ -351,6 +351,9 @@ func (host *Host) Script(logger *log.Logger, sudo bool, content string) (stdout 
 	stdout, exit, err = host.exec(sudo, content)
 	if len(stdout) != 0 {
 		logger.Info.Println(stdout)
+	} 
+	if exit == 0 && len(stdout) == 0 {
+		logger.Info.Println("Succeeded")
 	}
 	if exit != 0 {
 		return "", 1, err
@@ -372,6 +375,8 @@ func (host *Host) File(logger *log.Logger, sudo bool, direction, localfile, remo
 		}
 	} else {
 		logger.Error.Println("invalid file transfer direction")
+		return
 	}
+	logger.Info.Println("Succeeded")
 	return
 }
