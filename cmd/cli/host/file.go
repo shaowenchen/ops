@@ -24,6 +24,7 @@ var fileCmd = &cobra.Command{
 }
 
 func init() {
+	fileCmd.Flags().BoolVarP(&fileOpt.Sudo, "sudo", "", false, "")
 	fileCmd.Flags().StringVarP(&fileOpt.LocalFile, "localfile", "", "", "")
 	fileCmd.Flags().StringVarP(&fileOpt.RemoteFile, "remotefile", "", "", "")
 	fileCmd.Flags().StringVarP(&fileOpt.Direction, "direction", "d", "", "")

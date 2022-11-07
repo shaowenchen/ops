@@ -86,9 +86,9 @@ func (host *Host) connecting() (err error) {
 		host.PrivateKey = string(content)
 	}
 	if len(host.PrivateKey) > 0 {
-		signer, parseErr := ssh.ParsePrivateKey([]byte(host.PrivateKey))
-		if parseErr != nil {
-			return errors.Wrap(parseErr, "The given SSH key could not be parsed")
+		signer, err := ssh.ParsePrivateKey([]byte(host.PrivateKey))
+		if err != nil {
+			return errors.Wrap(err, "The given SSH key could not be parsed")
 		}
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	}
@@ -108,7 +108,7 @@ func (host *Host) connecting() (err error) {
 	}
 	host.Conn.scpclient, err = scp.NewClientBySSH(host.Conn.sshclient)
 	if err != nil {
-		fmt.Printf("scp.NewClient failed: %v\n", err)
+		return errors.Wrapf(err, "scp.NewClient failed")
 	}
 	return nil
 }
@@ -189,7 +189,24 @@ func (host *Host) exec(sudo bool, cmd string) (stdout string, code int, err erro
 	return strings.TrimSpace(outStr), exitCode, errors.Wrapf(err, "Failed to exec command: %s \n%s", cmd, strings.TrimSpace(outStr))
 }
 
-func (host *Host) pullContent(sudo bool, src, dst string) (err error) {
+func (host *Host) mv(sudo bool, src, dst string) (stdout string, err error) {
+	stdout, _, err = host.exec(sudo, utils.ScriptMv(sudo, src, dst))
+	return
+}
+
+func (host *Host) copy(sudo bool, src, dst string) (stdout string, err error) {
+	fmt.Println(utils.ScriptCopy(sudo, src, dst))
+	stdout, _, err = host.exec(sudo, utils.ScriptCopy(sudo, src, dst))
+	return
+}
+
+func (host *Host) rm(sudo bool, dst string) (stdout string, err error) {
+	fmt.Println(utils.ScriptRm(sudo, dst))
+	stdout, _, err = host.exec(sudo, utils.ScriptRm(sudo, dst))
+	return
+}
+
+func (host *Host) cmdPull(sudo bool, src, dst string) (err error) {
 	srcmd5, err := host.fileMd5(sudo, src)
 	if err != nil {
 		return err
@@ -231,8 +248,14 @@ func (host *Host) pullContent(sudo bool, src, dst string) (err error) {
 	return nil
 }
 
-func (host *Host) pull(sudo bool, src, dst string) (err error) {
-	srcmd5, err := host.fileMd5(sudo, src)
+func (host *Host) scpPull(sudo bool, src, dst string) (err error) {
+	originSrc := src
+	src = host.getTempfileName(src)
+	stdout, err := host.copy(sudo, originSrc, src)
+	if err != nil {
+		return errors.New(stdout)
+	}
+	srcmd5, err := host.fileMd5(sudo, originSrc)
 	if err != nil {
 		return err
 	}
@@ -249,6 +272,11 @@ func (host *Host) pull(sudo bool, src, dst string) (err error) {
 		return
 	}
 
+	stdout, err = host.rm(sudo, src)
+	if err != nil {
+		return errors.New(stdout)
+	}
+
 	dstmd5, err := utils.FileMD5(dst)
 	if err != nil {
 		return
@@ -257,10 +285,13 @@ func (host *Host) pull(sudo bool, src, dst string) (err error) {
 		err = errors.New(fmt.Sprintf("md5 error: dstfile is %s, srcfile is %s", dstmd5, srcmd5))
 		return
 	}
+
 	return
 }
 
-func (host *Host) push(sudo bool, src, dst string) (err error) {
+func (host *Host) scpPush(sudo bool, src, dst string) (err error) {
+	originDst := dst
+	dst = host.getTempfileName(dst)
 	if host.Address == constants.LocalHostIP {
 		return errors.New("remote address is localhost")
 	}
@@ -275,7 +306,12 @@ func (host *Host) push(sudo bool, src, dst string) (err error) {
 	if err1 != nil {
 		return err1
 	}
-	dstmd5, err1 := host.fileMd5(sudo, dst)
+	stdout, err := host.mv(sudo, dst, originDst)
+	if err == nil {
+		err = errors.New(stdout)
+	}
+
+	dstmd5, err1 := host.fileMd5(sudo, originDst)
 	if err1 != nil {
 		return err1
 	}
@@ -300,6 +336,17 @@ func (host *Host) fileMd5(sudo bool, filepath string) (md5 string, err error) {
 	return
 }
 
+func (host *Host) getTempfileName(name string) string {
+	nameSplit := strings.Split(name, "/")
+	name = nameSplit[len(nameSplit)-1]
+	cmd := "pwd"
+	stdout, _, err := host.exec(false, cmd)
+	if err != nil {
+		return name
+	}
+	return fmt.Sprintf("%s/.%s-%d", strings.TrimSpace(stdout), name, time.Now().UnixNano())
+}
+
 func (host *Host) Script(logger *log.Logger, sudo bool, content string) (stdout string, exit int, err error) {
 	stdout, exit, err = host.exec(sudo, content)
 	if len(stdout) != 0 {
@@ -313,13 +360,13 @@ func (host *Host) Script(logger *log.Logger, sudo bool, content string) (stdout 
 
 func (host *Host) File(logger *log.Logger, sudo bool, direction, localfile, remotefile string) (err error) {
 	if utils.IsDownloadDirection(direction) {
-		err = host.pullContent(sudo, remotefile, localfile)
+		err = host.scpPull(sudo, remotefile, localfile)
 		if err != nil {
 			logger.Error.Println(err)
 			return err
 		}
 	} else if utils.IsUploadDirection(direction) {
-		err = host.push(sudo, localfile, remotefile)
+		err = host.scpPush(sudo, localfile, remotefile)
 		if err != nil {
 			logger.Error.Println(err)
 		}

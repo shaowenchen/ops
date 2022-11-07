@@ -7,6 +7,8 @@ import (
 	"github.com/shaowenchen/ops/pkg/constants"
 	"io"
 	"os"
+	"os/exec"
+	"bytes"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -62,6 +64,23 @@ func FileMD5(path string) (string, error) {
 
 	fileMd5 := fmt.Sprintf("%x", m.Sum(nil))
 	return fileMd5, nil
+}
+
+func Mv(sudo bool, src, dst string) (stdout string, err error) {
+	runner := exec.Command("sudo", "sh", "-c", ScriptMv(false, src, dst))
+	if sudo {
+		runner = exec.Command("sh", "-c", ScriptMv(false, src, dst))
+	}
+	var out, errout bytes.Buffer
+	runner.Stdout = &out
+	runner.Stderr = &errout
+	err = runner.Run()
+	if err != nil {
+		stdout = errout.String()
+		return
+	}
+	stdout = out.String()
+	return
 }
 
 func AnalysisHostsParameter(str string) (result []string, err error) {

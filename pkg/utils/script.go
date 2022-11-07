@@ -20,7 +20,15 @@ func ScriptDeleteHost(sudo bool, domain string) string {
 }
 
 func ScriptMv(sudo bool, src string, dst string) string {
-	return fmt.Sprintf(`%s mv %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(src), GetAbsoluteFilePath(dst))
+	return fmt.Sprintf(`%s mv -bf %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(src), GetAbsoluteFilePath(dst))
+}
+
+func ScriptCopy(sudo bool, src string, dst string) string {
+	return fmt.Sprintf(`%s cp %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(src), GetAbsoluteFilePath(dst))
+}
+
+func ScriptRm(sudo bool, dst string) string {
+	return fmt.Sprintf(`%s rm -f %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(dst))
 }
 
 func GetAvailableUrl(url string, proxy string) string {
