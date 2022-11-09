@@ -3,9 +3,9 @@ package kubernetes
 import (
 	"fmt"
 
+	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/shaowenchen/ops/pkg/kubernetes"
 	"github.com/shaowenchen/ops/pkg/log"
-	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/spf13/cobra"
 )
 

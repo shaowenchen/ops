@@ -6,8 +6,8 @@ import (
 
 	"github.com/shaowenchen/ops/cmd/cli/host"
 	"github.com/shaowenchen/ops/cmd/cli/kubernetes"
-	"github.com/shaowenchen/ops/cmd/cli/task"
 	"github.com/shaowenchen/ops/cmd/cli/storage"
+	"github.com/shaowenchen/ops/cmd/cli/task"
 	"github.com/shaowenchen/ops/cmd/cli/upgrade"
 	"github.com/shaowenchen/ops/cmd/cli/version"
 	"github.com/shaowenchen/ops/pkg/constants"

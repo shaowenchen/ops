@@ -28,7 +28,7 @@ func ScriptCopy(sudo bool, src string, dst string) string {
 }
 
 func ScriptRm(sudo bool, dst string) string {
-	return fmt.Sprintf(`%s rm -f %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(dst))
+	return fmt.Sprintf(`%s rm -f %s`, GetSudoString(sudo), GetAbsoluteFilePath(dst))
 }
 
 func GetAvailableUrl(url string, proxy string) string {

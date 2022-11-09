@@ -3,9 +3,9 @@ package host
 import (
 	"fmt"
 
+	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
-	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/spf13/cobra"
 )
 

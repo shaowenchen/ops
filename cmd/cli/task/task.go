@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/task"
-	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/spf13/cobra"
 )
 

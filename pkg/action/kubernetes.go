@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/kubernetes"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/utils"
-	"github.com/shaowenchen/ops/pkg/kubernetes"
 	v1 "k8s.io/api/core/v1"
 )
 

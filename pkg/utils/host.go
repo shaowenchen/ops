@@ -2,13 +2,13 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/md5"
 	"fmt"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"io"
 	"os"
 	"os/exec"
-	"bytes"
 	"path/filepath"
 	"runtime"
 	"strings"
