@@ -1,12 +1,17 @@
-# ops
-// TODO(user): Add simple overview of use/purpose
+### Quick install
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+- Good network connections to GitHub
 
-## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
-**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
+
+- Poor network connections to GitHub
+
+curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -
+
+### Supported OS
+
+- Linux
+- macOS
 
 ### Running on the cluster
 1. Install Instances of Custom Resources:
