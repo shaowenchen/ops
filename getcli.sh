@@ -45,6 +45,7 @@ if [ $http_code -ne 302 ]; then
   DOWNLOAD_URL="https://ghproxy.com/${DOWNLOAD_URL}"
 fi
 
+rm -rf opscli* || true
 curl -fsLO "$DOWNLOAD_URL"
 
 if [ ! -f "${FILENAME}" ]; then
