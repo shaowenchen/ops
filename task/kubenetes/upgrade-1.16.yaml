@@ -1,0 +1,23 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Upgrade-K8s-From-1.16-to-1.17
+  variables:
+    cluster_version: 1.17.17-0
+  steps: 
+  - name: remove kubeadm
+    script: yum remove -y kubeadm
+    allow_failure: true
+  - name: install kubeadm
+    script: yum install -y kubeadm-${cluster_version} 
+  - name: view upgrade plan
+    script: kubeadm upgrade plan --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration
+  - name: upgrade cluster
+    script: kubeadm upgrade apply v1.17.17 --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration
+  - name: upgrade kubelet
+    script: yum install -y kubelet-${cluster_version} kubectl-${cluster_version} 
+  - name: kubectl version
+    script: kubectl version
