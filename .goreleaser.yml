@@ -1,0 +1,27 @@
+project_name: opscli
+builds:
+-
+  env:
+  - CGO_ENABLED=0
+  main: ./cmd/cli/main.go
+  binary: opscli
+  goarch:
+    - amd64
+  goos:
+    - linux
+    - darwin
+  tags:
+    containers_image_openpgp
+  ldflags:
+    - -X "github.com/shaowenchen/opscli/cmd.cli.version.buildVersion={{ .Version }}"
+    - -X "github.com/shaowenchen/opscli/cmd.cli.version.buildDate={{ .Date }}"
+    - -X "github.com/shaowenchen/opscli/cmd.cli.version.gicommitID={{ .ShortCommit }}"
+    - -w
+    - -s
+dist: bin
+archives:
+- name_template: "opscli-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+  files:
+    - task/*
+changelog:
+  skip: true
