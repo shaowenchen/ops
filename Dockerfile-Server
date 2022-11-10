@@ -1,0 +1,10 @@
+FROM golang:1.19 as builder
+WORKDIR /workspace
+COPY . .
+RUN go build  -o bin/opsserver cmd/server/main.go
+
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=builder /workspace/bin/opsserver .
+USER 65532:65532
+ENTRYPOINT ["/opsserver"]
