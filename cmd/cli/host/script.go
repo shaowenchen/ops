@@ -23,9 +23,14 @@ var scriptCmd = &cobra.Command{
 	},
 }
 
-func Script(logger *log.Logger, option host.ScriptOption) {
+func Script(logger *log.Logger, option host.ScriptOption) (err error) {
 	for _, h := range host.GetHosts(logger, option.HostOption) {
-		host.Script(logger, h, option)
+		err = host.Script(logger, h, option)
+		if err != nil {
+			logger.Error.Println(err)
+		} else {
+			logger.Info.Println("Successed!")
+		}
 	}
 	return
 }

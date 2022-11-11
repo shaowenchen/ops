@@ -34,7 +34,12 @@ func File(logger *log.Logger, option host.FileOption) (err error) {
 		return errors.New(errMsg)
 	}
 	for _, h := range hs {
-		host.File(logger, h, option)
+		err = host.File(logger, h, option)
+		if err != nil {
+			logger.Error.Println(err)
+		} else {
+			logger.Info.Println("Successed!")
+		}
 	}
 	return
 }

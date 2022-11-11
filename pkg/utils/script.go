@@ -27,6 +27,10 @@ func ScriptCopy(sudo bool, src string, dst string) string {
 	return fmt.Sprintf(`%s cp %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(src), GetAbsoluteFilePath(dst))
 }
 
+func ScriptChown(sudo bool, idU, idG, src string) string {
+	return fmt.Sprintf("%s chown %s:%s %s", GetSudoString(sudo), idU, idG, GetAbsoluteFilePath(src))
+}
+
 func ScriptRm(sudo bool, dst string) string {
 	return fmt.Sprintf(`%s rm -f %s`, GetSudoString(sudo), GetAbsoluteFilePath(dst))
 }

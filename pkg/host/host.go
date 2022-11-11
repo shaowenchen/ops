@@ -25,7 +25,7 @@ func Script(logger *log.Logger, h *v1.Host, option ScriptOption) (err error) {
 		logger.Error.Println(err)
 		return err
 	}
-	stdout, _, _ := c.Script(option.Sudo, option.Content)
+	stdout, _, err := c.Script(option.Sudo, option.Content)
 	logger.Info.Println(stdout)
 	return
 }

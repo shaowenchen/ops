@@ -200,13 +200,17 @@ func (c *HostConnection) mv(sudo bool, src, dst string) (stdout string, err erro
 }
 
 func (c *HostConnection) copy(sudo bool, src, dst string) (stdout string, err error) {
-	fmt.Println(utils.ScriptCopy(sudo, src, dst))
 	stdout, _, err = c.exec(sudo, utils.ScriptCopy(sudo, src, dst))
 	return
 }
 
+func (c *HostConnection) chown(sudo bool, idU, idG, src string) (stdout string, err error) {
+	stdout, _, err = c.exec(sudo, utils.ScriptChown(sudo, idU, idG, src))
+	fmt.Println(stdout)
+	return
+}
+
 func (c *HostConnection) rm(sudo bool, dst string) (stdout string, err error) {
-	fmt.Println(utils.ScriptRm(sudo, dst))
 	stdout, _, err = c.exec(sudo, utils.ScriptRm(sudo, dst))
 	return
 }
@@ -260,6 +264,18 @@ func (c *HostConnection) scpPull(sudo bool, src, dst string) (err error) {
 	if err != nil {
 		return errors.New(stdout)
 	}
+	idU, err := c.getIdU()
+	if err != nil {
+		return errors.New(stdout)
+	}
+	idG, err := c.getIdG()
+	if err != nil {
+		return errors.New(stdout)
+	}
+	stdout, err = c.chown(sudo, idU, idG, src)
+	if err != nil {
+		return errors.New(stdout)
+	}
 	srcmd5, err := c.fileMd5(sudo, originSrc)
 	if err != nil {
 		return err
@@ -270,8 +286,9 @@ func (c *HostConnection) scpPull(sudo bool, src, dst string) (err error) {
 		return
 	}
 	defer dstFile.Close()
-
-	err = c.scpclient.CopyFromRemote(context.Background(), dstFile, src)
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*10)
+	defer cancel()
+	err = c.scpclient.CopyFromRemote(ctx, dstFile, src)
 
 	if err != nil {
 		return
@@ -312,7 +329,7 @@ func (c *HostConnection) scpPush(sudo bool, src, dst string) (err error) {
 		return err1
 	}
 	stdout, err := c.mv(sudo, dst, originDst)
-	if err == nil {
+	if err == nil && len(stdout) > 0 {
 		err = errors.New(stdout)
 	}
 
@@ -339,6 +356,24 @@ func (c *HostConnection) fileMd5(sudo bool, filepath string) (md5 string, err er
 	}
 	md5 = strings.TrimSpace(stdout)
 	return
+}
+
+func (c *HostConnection) getIdU() (idu string, err error) {
+	cmd := fmt.Sprintf("id -u")
+	stdout, _, err := c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return stdout, err
+}
+
+func (c *HostConnection) getIdG() (idg string, err error) {
+	cmd := fmt.Sprintf("id -g")
+	stdout, _, err := c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return stdout, err
 }
 
 func (c *HostConnection) getTempfileName(name string) string {

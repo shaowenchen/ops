@@ -18,7 +18,7 @@ spec:
   - name: view upgrade plan
     script: kubeadm upgrade plan --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration
   - name: upgrade cluster
-    script: kubeadm upgrade apply v1.17.17 --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration
+    script: kubeadm upgrade apply v1.17.17 --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration -y
   - name: upgrade kubelet
     script: yum install -y kubelet-${cluster_version} kubectl-${cluster_version} 
   - name: kubectl version
