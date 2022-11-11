@@ -3,7 +3,6 @@ package host
 import (
 	"fmt"
 
-	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/spf13/cobra"
@@ -20,8 +19,15 @@ var scriptCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		action.HostScript(logger, scriptOpt)
+		Script(logger, scriptOpt)
 	},
+}
+
+func Script(logger *log.Logger, option host.ScriptOption) {
+	for _, h := range host.GetHosts(logger, option.HostOption) {
+		host.Script(logger, h, option)
+	}
+	return
 }
 
 func init() {

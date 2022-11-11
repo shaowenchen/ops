@@ -3,7 +3,6 @@ package kubernetes
 import (
 	"fmt"
 
-	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/shaowenchen/ops/pkg/kubernetes"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/spf13/cobra"
@@ -20,8 +19,19 @@ var scriptCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		action.KubernetesScript(logger, scriptOption)
+		Script(logger, scriptOption)
 	},
+}
+
+func Script(logger *log.Logger, option kubernetes.ScriptOption) (err error) {
+	client, nodeList, err := kubernetes.GetClientAndNodes(logger, option.KubeOption)
+	if err != nil {
+		logger.Error.Println(err)
+	}
+	for _, node := range nodeList {
+		kubernetes.Script(logger, client, node, option)
+	}
+	return
 }
 
 func init() {

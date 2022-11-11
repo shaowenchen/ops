@@ -5,9 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/shaowenchen/ops/pkg/action"
+	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/task"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -28,8 +29,23 @@ var TaskCmd = &cobra.Command{
 			fmt.Printf("--filepath is must provided")
 			return
 		}
-		action.Task(logger, taskOption)
+		Task(logger, taskOption)
 	},
+}
+
+func Task(logger *log.Logger, option task.TaskOption) (err error) {
+	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(option.FilePath))
+	if err != nil {
+		logger.Error.Println(err)
+		return err
+	}
+	hs := host.GetHosts(logger, option.HostOption)
+	for _, t := range tasks {
+		for _, h := range hs {
+			task.RunTaskOnHost(logger, t, h, option)
+		}
+	}
+	return
 }
 
 func parseArgs(args []string) (taskOption task.TaskOption) {

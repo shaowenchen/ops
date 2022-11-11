@@ -12,7 +12,6 @@ type ScriptOption struct {
 	Content string
 	Sudo    bool
 }
-
 type FileOption struct {
 	HostOption
 	LocalFile  string

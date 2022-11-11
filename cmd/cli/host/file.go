@@ -3,9 +3,10 @@ package host
 import (
 	"fmt"
 
-	"github.com/shaowenchen/ops/pkg/action"
+	"errors"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -20,8 +21,21 @@ var fileCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		action.HostFile(logger, fileOpt)
+		File(logger, fileOpt)
 	},
+}
+
+func File(logger *log.Logger, option host.FileOption) (err error) {
+	hs := host.GetHosts(logger, option.HostOption)
+	if utils.IsDownloadDirection(option.Direction) && len(hs) != 1 {
+		errMsg := "need only one host while downloading"
+		logger.Error.Println(errMsg)
+		return errors.New(errMsg)
+	}
+	for _, h := range hs {
+		host.File(logger, h, option)
+	}
+	return
 }
 
 func init() {

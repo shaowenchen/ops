@@ -3,7 +3,6 @@ package storage
 import (
 	"fmt"
 
-	"github.com/shaowenchen/ops/pkg/action"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/storage"
 	"github.com/spf13/cobra"
@@ -21,7 +20,7 @@ var s3FileCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		action.S3File(logger, s3FileOption)
+		storage.S3File(logger, s3FileOption)
 	},
 }
 

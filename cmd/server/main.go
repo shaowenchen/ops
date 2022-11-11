@@ -1,39 +1,25 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"github.com/spf13/pflag"
-	"time"
+	"github.com/gin-gonic/gin"
+	"github.com/shaowenchen/ops/pkg/server"
 )
 
-func init() {
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
+func setupRouter() *gin.Engine {
+	router := gin.Default()
+	v1 := router.Group("/api/v1/task")
+	{
+		v1.POST("/", server.CreateTask)
+		v1.GET("/", server.GetTask)
+	}
+	healthz := router.Group("/api/healthz")
+	{
+		healthz.GET("/", server.Healthz)
+	}
+	return router
 }
 
 func main() {
-	server, err := NewOpsServer()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	server.Run()
-	return
-}
-
-type OpsServer struct {
-}
-
-func NewOpsServer() (server *OpsServer, err error) {
-	server = &OpsServer{}
-	return server, nil
-}
-
-func (server *OpsServer) Run() (err error) {
-
-	for range time.Tick(time.Second * time.Duration(3)) {
-		fmt.Println("OK")
-	}
-	return
+	r := setupRouter()
+	r.Run(":8080")
 }

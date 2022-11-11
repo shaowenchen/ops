@@ -123,10 +123,6 @@ func GetAbsoluteFilePath(path string) string {
 		dirname, _ := os.Getwd()
 		path = filepath.Join(dirname, path[2:])
 		return path
-	} else if !strings.HasPrefix(path, "/") {
-		dirname, _ := os.Getwd()
-		path = filepath.Join(dirname, path)
-		return path
 	}
 	return path
 }

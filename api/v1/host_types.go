@@ -55,6 +55,24 @@ type Host struct {
 	Status HostStatus `json:"status,omitempty"`
 }
 
+func NewHost(namespace, name, address string, port int, username, password, privatekey, privatekeypath string) (h *Host) {
+	return &Host{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: HostSpec{
+			Address:        address,
+			Port:           port,
+			Username:       username,
+			Password:       password,
+			PrivateKey:     privatekey,
+			PrivateKeyPath: privatekeypath,
+			Timeout:        10,
+		},
+	}
+}
+
 //+kubebuilder:object:root=true
 
 // HostList contains a list of Host
