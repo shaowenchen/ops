@@ -23,11 +23,11 @@ jobs:
         with:
           push: true
           tags: shaowenchen/opsserver:latest
-          file: Dockerfile
+          file: Dockerfile-Server
       - name: Build and push Controller
         uses: docker/build-push-action@v3
         with:
           push: true
           tags: shaowenchen/opscontroller:latest
-          file: Dockerfile-Server
+          file: Dockerfile
 
