@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: Uninstall Velero
   steps:
-  - name: Uninstall Velero Server
-    script: kubectl delete namespace/velero clusterrolebinding/velero & kubectl delete crds -l component=velero
-  - name: Clear Env
-    script: rm -rf velero*
+    - name: Uninstall Velero Server
+      script: kubectl delete namespace/velero clusterrolebinding/velero & kubectl delete crds -l component=velero
+    - name: Clear Env
+      script: rm -rf velero*

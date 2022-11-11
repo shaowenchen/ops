@@ -4,22 +4,24 @@ metadata:
   name: task-sample
   namespace: default
 spec:
-  desc: Upgrade-K8s-From-1.16-to-1.16.15-0
+  desc: Upgrade-K8s-From-1.16-to-1.17.17-0
   variables:
-    cluster_version: 1.16.15-0
-  steps: 
-  - name: add kubernetes repo
-    script: echo -e "[kubernetes]\nname=Kubernetes\nbaseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" > /etc/yum.repos.d/kubernetes.repo
-  - name: remove kubeadm
-    script: yum remove -y kubeadm
-    allow_failure: true
-  - name: install kubeadm
-    script: yum install -y kubeadm-${cluster_version} 
-  - name: view upgrade plan
-    script: kubeadm upgrade plan --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration
-  - name: upgrade cluster
-    script: kubeadm upgrade apply v1.16.15 --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration -y
-  - name: upgrade kubelet
-    script: yum install -y kubelet-${cluster_version} kubectl-${cluster_version} 
-  - name: kubectl version
-    script: kubectl version
+    cluster_version: 1.17.17
+  steps:
+    - name: add kubernetes repo
+      script: echo -e "[kubernetes]\nname=Kubernetes\nbaseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" > /etc/yum.repos.d/kubernetes.repo
+    - name: remove kubeadm
+      script: yum remove -y kubeadm
+      allow_failure: true
+    - name: install kubeadm
+      script: yum install -y kubeadm-${cluster_version}-0
+    - name: view upgrade plan
+      script: kubeadm upgrade plan --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration
+    - name: upgrade cluster
+      script: kubeadm upgrade apply v${cluster_version} --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration -y
+    - name: upgrade kubelet
+      script: yum install -y kubelet-${cluster_version}-0 kubectl-${cluster_version}-0
+    - name: restart kubelet
+      script: systemctl restart kubelet
+    - name: kubectl version
+      script: kubectl version

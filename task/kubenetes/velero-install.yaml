@@ -14,20 +14,20 @@ spec:
     ak:
     sk:
   steps:
-  - name: Download Velero Client
-    script: wget ${download_url}
+    - name: Download Velero Client
+      script: wget ${download_url}
 
-  - name: Install Velero Client
-    script: tar xvf velero-${velero_version}-linux-amd64.tar.gz
+    - name: Install Velero Client
+      script: tar xvf velero-${velero_version}-linux-amd64.tar.gz
 
-  - name: Generate Credential - 1
-    script: echo "[default]" > velero-credentials
+    - name: Generate Credential - 1
+      script: echo "[default]" > velero-credentials
 
-  - name: Generate Credential - 2
-    script: echo "aws_access_key_id = ${ak}" >> velero-credentials
+    - name: Generate Credential - 2
+      script: echo "aws_access_key_id = ${ak}" >> velero-credentials
 
-  - name: Generate Credential - 3
-    script: echo "aws_secret_access_key = ${sk}" >> velero-credentials
+    - name: Generate Credential - 3
+      script: echo "aws_secret_access_key = ${sk}" >> velero-credentials
 
-  - name: Install Velero Server
-    script: ./velero-${velero_version}-linux-amd64/velero install --image velero/velero:${velero_version} --plugins velero/velero-plugin-for-aws:v1.5.1 --provider aws  --bucket ${bucket} --namespace velero --secret-file ./velero-credentials --use-restic --backup-location-config region=${region},s3ForcePathStyle="true",s3Url=${endpoint} --snapshot-location-config region=${region}
+    - name: Install Velero Server
+      script: ./velero-${velero_version}-linux-amd64/velero install --image velero/velero:${velero_version} --plugins velero/velero-plugin-for-aws:v1.5.1 --provider aws  --bucket ${bucket} --namespace velero --secret-file ./velero-credentials --use-restic --backup-location-config region=${region},s3ForcePathStyle="true",s3Url=${endpoint} --snapshot-location-config region=${region}

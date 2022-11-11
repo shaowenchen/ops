@@ -6,18 +6,17 @@ metadata:
 spec:
   desc: Opscli Auto Completion
   steps:
-  - name: CentOS 
-    script: yum install bash-completion -y;
-          echo "" >>~/.bashrc;
-          echo "source /usr/share/bash-completion/bash_completion" >>~/.bashrc;
-          echo "source <(opscli completion bash)" >>~/.bashrc;
-          source ~/.bashrc;
-    when: ${os} == centos
-  - name: Ubuntu 
-    script: apt-get install bash-completion -y;
-          echo "" >>~/.bashrc;
-          echo "source /usr/share/bash-completion/bash_completion" >>~/.bashrc;
-          echo "source <(opscli completion bash)" >>~/.bashrc;
-          source ~/.bashrc;
-    when: ${os} == ubuntu
-  
+    - name: CentOS
+      script: yum install bash-completion -y;
+        echo "" >>~/.bashrc;
+        echo "source /usr/share/bash-completion/bash_completion" >>~/.bashrc;
+        echo "source <(opscli completion bash)" >>~/.bashrc;
+        source ~/.bashrc;
+      when: ${os} == centos
+    - name: Ubuntu
+      script: apt-get install bash-completion -y;
+        echo "" >>~/.bashrc;
+        echo "source /usr/share/bash-completion/bash_completion" >>~/.bashrc;
+        echo "source <(opscli completion bash)" >>~/.bashrc;
+        source ~/.bashrc;
+      when: ${os} == ubuntu

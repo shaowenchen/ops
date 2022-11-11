@@ -8,5 +8,5 @@ spec:
   variables:
     key_content:
   steps:
-  - name: Add Key to ~/.ssh/authorized_keys
-    script: echo "${key_content}" >> ~/.ssh/authorized_keys
+    - name: Add Key to ~/.ssh/authorized_keys
+      script: echo "${key_content}" >> ~/.ssh/authorized_keys
