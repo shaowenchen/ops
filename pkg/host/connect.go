@@ -321,12 +321,16 @@ func (c *HostConnection) scpPush(sudo bool, src, dst string) (err error) {
 	if err != nil {
 		return err
 	}
+	err = c.makeDir(sudo, originDst)
+	if err != nil {
+		return err
+	}
 	src = utils.GetAbsoluteFilePath(src)
-	srcFile, err1 := os.Open(src)
-	err1 = c.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
+	srcFile, err := os.Open(src)
+	err = c.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
 
-	if err1 != nil {
-		return err1
+	if err != nil {
+		return err
 	}
 	stdout, err := c.mv(sudo, dst, originDst)
 	if err == nil && len(stdout) > 0 {
@@ -355,6 +359,15 @@ func (c *HostConnection) fileMd5(sudo bool, filepath string) (md5 string, err er
 		return
 	}
 	md5 = strings.TrimSpace(stdout)
+	return
+}
+
+func (c *HostConnection) makeDir(sudo bool, filepath string) (err error) {
+	cmd := utils.ScriptMakeDir(sudo, utils.SplitDirPath(filepath))
+	stdout, _, err := c.exec(false, cmd)
+	if err == nil && len(stdout) > 0 {
+		return errors.New(stdout)
+	}
 	return
 }
 

@@ -103,3 +103,11 @@ func IsUploadDirection(direction string) bool {
 func IsDownloadDirection(direction string) bool {
 	return strings.Contains(strings.ToLower(direction), "down")
 }
+
+func SplitDirPath(filepath string) string {
+	pathItems := strings.Split(filepath, "/")
+	if len(pathItems) > 2 {
+		return strings.Join(pathItems[:len(pathItems)-1], "/")
+	}
+	return filepath
+}

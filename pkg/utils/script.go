@@ -20,19 +20,23 @@ func ScriptDeleteHost(sudo bool, domain string) string {
 }
 
 func ScriptMv(sudo bool, src string, dst string) string {
-	return fmt.Sprintf(`%s mv -bf %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(src), GetAbsoluteFilePath(dst))
+	return fmt.Sprintf(`%s mv -bf %s %s`, GetSudoString(sudo), src, dst)
 }
 
 func ScriptCopy(sudo bool, src string, dst string) string {
-	return fmt.Sprintf(`%s cp %s %s`, GetSudoString(sudo), GetAbsoluteFilePath(src), GetAbsoluteFilePath(dst))
+	return fmt.Sprintf(`%s cp %s %s`, GetSudoString(sudo), src, dst)
+}
+
+func ScriptMakeDir(sudo bool, src string) string {
+	return fmt.Sprintf(`%s mkdir -p %s`, GetSudoString(sudo), src)
 }
 
 func ScriptChown(sudo bool, idU, idG, src string) string {
-	return fmt.Sprintf("%s chown %s:%s %s", GetSudoString(sudo), idU, idG, GetAbsoluteFilePath(src))
+	return fmt.Sprintf("%s chown %s:%s %s", GetSudoString(sudo), idU, idG, src)
 }
 
 func ScriptRm(sudo bool, dst string) string {
-	return fmt.Sprintf(`%s rm -f %s`, GetSudoString(sudo), GetAbsoluteFilePath(dst))
+	return fmt.Sprintf(`%s rm -f %s`, GetSudoString(sudo), dst)
 }
 
 func GetAvailableUrl(url string, proxy string) string {
