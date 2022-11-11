@@ -1,0 +1,27 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Upgrade-K8s-Node-From-1.17-to-1.18.20-0
+  variables:
+    cluster_version: 1.18.20
+  steps:
+    - name: remove kubeadm
+      script: yum remove -y kubeadm
+      allow_failure: true
+    - name: install kubeadm
+      script: yum install -y kubeadm-${cluster_version}-0 --disableexcludes=kubernetes
+    - name: upgrade node
+      script: kubeadm upgrade node
+    - name: stop kubelet
+      script: systemctl stop kubelet
+    - name: remove kubelet
+      script: yum remove -y kubelet
+    - name: install kubelet
+      script: yum install -y kubelet-${cluster_version}-0 --disableexcludes=kubernetes
+    - name: restart kubelet
+      script: systemctl daemon-reload;
+        systemctl restart kubelet;
+        systemctl status kubelet;

@@ -1,0 +1,38 @@
+apiVersion: ops.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: task-sample
+  namespace: default
+spec:
+  desc: Upgrade-K8s-Master-From-1.19-to-1.20
+  variables:
+    cluster_version: 1.20.15
+  steps:
+    - name: remove kubectl
+      script: yum remove -y kubectl
+      allow_failure: true
+    - name: install kubectl
+      script: yum install -y kubectl-${cluster_version}-0 --disableexcludes=kubernetes
+    - name: remove kubeadm
+      script: yum remove -y kubeadm
+      allow_failure: true
+    - name: install kubeadm
+      script: yum install -y kubeadm-${cluster_version}-0 --disableexcludes=kubernetes
+    - name: view upgrade plan
+      script: kubeadm upgrade plan --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration
+    - name: upgrade cluster
+      script: kubeadm upgrade apply v${cluster_version} --ignore-preflight-errors=ControlPlaneNodesReady,CoreDNSUnsupportedPlugins,CoreDNSMigration -y
+    - name: stop kubelet
+      script: systemctl stop kubelet
+    - name: remove kubelet
+      script: yum remove -y kubelet
+    - name: install kubelet
+      script: yum install -y kubelet-${cluster_version}-0 --disableexcludes=kubernetes
+    - name: restart kubelet
+      script: systemctl daemon-reload;
+        systemctl restart kubelet;
+        systemctl status kubelet;
+    - name: kubectl version
+      script: kubectl version
+    - name: kubelet version
+      script: kubelet --version
