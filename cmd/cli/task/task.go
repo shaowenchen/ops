@@ -19,7 +19,7 @@ var TaskCmd = &cobra.Command{
 	Short:              "command about task",
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewDefaultLogger(true, true)
+		logger, err := log.NewCliLogger(true, true)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return

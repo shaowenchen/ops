@@ -18,7 +18,7 @@ import (
 	"regexp"
 )
 
-func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)(err error){
+func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption) (err error) {
 	globalVariables := make(map[string]string)
 	// cli > env > yaml
 	utils.MergeMap(globalVariables, t.Spec.Variables)
@@ -43,7 +43,7 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 
 	globalVariables["result"] = ""
 	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
-	c, err := host.NewHostConnection(h.Spec.Address, option.Port, option.Username, option.Password, option.Password)
+	c, err := host.NewHostConnection(h.Spec.Address, option.Port, option.Username, option.Password, option.PrivateKeyPath)
 	if err != nil {
 		logger.Error.Println(err)
 		return
@@ -65,9 +65,7 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 			logger.Info.Println(s.Script)
 		}
 		stepFunc := GetStepFunc(s)
-		var tempOption = option
-		tempOption.Hosts = h.Spec.Address
-		stepResult, isSuccessed := stepFunc(&t, c, s, tempOption)
+		stepResult, isSuccessed := stepFunc(&t, c, s, option)
 		logger.Info.Println(stepResult)
 		globalVariables["result"] = stepResult
 		if s.AllowFailure == false && isSuccessed == false {

@@ -6,7 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shaowenchen/ops/api/v1"
+	v1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/task"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,10 +48,13 @@ func CreateTask(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 	}
-	logger, err := log.NewDefaultLogger(true, true)
+	logger, err := log.NewServerLogger(true, true)
 	if err != nil {
 		return
 	}
-	task.RunTaskOnHost(logger, *t, nil, task.TaskOption{})
-	c.JSON(http.StatusOK, "OK")
+	hosts := host.GetHosts(logger, host.HostOption{})
+	for _, host := range hosts {
+		task.RunTaskOnHost(logger, *t, host, task.TaskOption{})
+	}
+	c.JSON(http.StatusOK, logger.GetBuffer())
 }

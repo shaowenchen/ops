@@ -1,45 +1,64 @@
 package log
 
 import (
+	"bytes"
+	"github.com/shaowenchen/ops/pkg/constants"
 	"io"
 	"log"
 	"os"
-
-	"github.com/shaowenchen/ops/pkg/constants"
 )
 
 type Logger struct {
-	Print   bool
-	LogFile string
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
+	PrintLog   bool
+	FileLog    bool
+	BufferLog  bool
+	Info       *log.Logger
+	Warning    *log.Logger
+	Error      *log.Logger
+	BufferData *bytes.Buffer
 }
 
-func NewDefaultLogger(print bool, file bool) (*Logger, error) {
-	return NewLogger(constants.GetOpsLogFile(), true, true)
+func NewCliLogger(printLog bool, fileLog bool) (*Logger, error) {
+	return NewLogger(true, true, false)
 }
 
-func NewLogger(logFile string, print bool, file bool) (*Logger, error) {
+func NewServerLogger(printLog bool, bufferLog bool) (*Logger, error) {
+	return NewLogger(true, false, true)
+}
+
+func NewLogger(printLog bool, FileLog bool, BufferLog bool) (*Logger, error) {
 	logger := &Logger{
-		LogFile: logFile,
-		Print:   print,
+		PrintLog:  printLog,
+		FileLog:   FileLog,
+		BufferLog: BufferLog,
 	}
 	err := logger.init("")
 	return logger, err
 }
 
-func (logger *Logger) init(prefix string) error {
-	file, err := os.OpenFile(logger.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		return err
+func (logger *Logger) init(prefix string) (err error) {
+	multiWriter := io.MultiWriter()
+	if logger.PrintLog {
+		multiWriter = io.MultiWriter(multiWriter, os.Stdout)
 	}
-	multiWriter := io.MultiWriter(file)
-	if logger.Print {
-		multiWriter = io.MultiWriter(file, os.Stdout)
+	if logger.FileLog {
+		file, err := os.OpenFile(constants.GetOpsLogFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+		multiWriter = io.MultiWriter(multiWriter, file)
+	}
+	if logger.BufferLog {
+		logger.BufferData = new(bytes.Buffer)
+		multiWriter = io.MultiWriter(multiWriter, logger.BufferData)
 	}
 	logger.Info = log.New(multiWriter, prefix, 0)
 	logger.Warning = log.New(multiWriter, "", 0)
 	logger.Error = log.New(multiWriter, "", 0)
-	return err
+	return
+}
+
+func (logger *Logger) GetBuffer()(log string){
+	log = string(logger.BufferData.Bytes())
+	return
 }

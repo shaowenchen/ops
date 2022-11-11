@@ -24,7 +24,7 @@ import (
 )
 
 type HostConnection struct {
-	Host      v1.Host
+	Host      *v1.Host
 	scpclient scp.Client
 	sshclient *ssh.Client
 }
@@ -40,16 +40,17 @@ func NewHostConnection(address string, port int, username string, password strin
 	if len(username) == 0 {
 		username = constants.GetCurrentUser()
 	}
-	c = &HostConnection{}
-	host := v1.NewHost(
-		"", "", address, port, username, password, "", privateKeyPath,
-	)
+	c = &HostConnection{
+		Host: v1.NewHost(
+			"", "", address, port, username, password, "", privateKeyPath,
+		),
+	}
 	// local host
 	if address == constants.LocalHostIP {
 		return c, nil
 	}
 	// remote host
-	if err := c.connecting(host); err != nil {
+	if err := c.connecting(); err != nil {
 		return c, err
 	}
 	return
@@ -77,38 +78,38 @@ func (c *HostConnection) session() (*ssh.Session, error) {
 	return sess, nil
 }
 
-func (c *HostConnection) connecting(host *v1.Host) (err error) {
+func (c *HostConnection) connecting() (err error) {
 	authMethods := make([]ssh.AuthMethod, 0)
-	if len(host.Spec.Password) > 0 {
-		authMethods = append(authMethods, ssh.Password(host.Spec.Password))
+	if len(c.Host.Spec.Password) > 0 {
+		authMethods = append(authMethods, ssh.Password(c.Host.Spec.Password))
 	}
 
-	if len(host.Spec.PrivateKey) == 0 && len(host.Spec.PrivateKeyPath) > 0 {
-		content, err := ioutil.ReadFile(host.Spec.PrivateKeyPath)
+	if len(c.Host.Spec.PrivateKey) == 0 && len(c.Host.Spec.PrivateKeyPath) > 0 {
+		content, err := ioutil.ReadFile(c.Host.Spec.PrivateKeyPath)
 		if err != nil {
 			return errors.New("Failed read keyfile")
 		}
-		host.Spec.PrivateKey = string(content)
+		c.Host.Spec.PrivateKey = string(content)
 	}
-	if len(host.Spec.PrivateKey) > 0 {
-		signer, err := ssh.ParsePrivateKey([]byte(host.Spec.PrivateKey))
+	if len(c.Host.Spec.PrivateKey) > 0 {
+		signer, err := ssh.ParsePrivateKey([]byte(c.Host.Spec.PrivateKey))
 		if err != nil {
 			return errors.New("The given SSH key could not be parsed")
 		}
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	}
 	sshConfig := &ssh.ClientConfig{
-		User:            host.Spec.Username,
-		Timeout:         time.Duration(host.Spec.Timeout) * time.Second,
+		User:            c.Host.Spec.Username,
+		Timeout:         time.Duration(c.Host.Spec.Timeout) * time.Second,
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	endpointBehindBastion := net.JoinHostPort(host.Spec.Address, strconv.Itoa(host.Spec.Port))
+	endpointBehindBastion := net.JoinHostPort(c.Host.Spec.Address, strconv.Itoa(c.Host.Spec.Port))
 
 	c.sshclient, err = ssh.Dial("tcp", endpointBehindBastion, sshConfig)
 	if err != nil {
-		return errors.Wrapf(err, "client.Dial failed %s", host.Spec.Address)
+		return errors.Wrapf(err, "client.Dial failed %s", c.Host.Spec.Address)
 	}
 	c.scpclient, err = scp.NewClientBySSH(c.sshclient)
 	if err != nil {
@@ -120,9 +121,9 @@ func (c *HostConnection) connecting(host *v1.Host) (err error) {
 func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, err error) {
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
-		runner := exec.Command("sudo", "sh", "-c", cmd)
+		runner := exec.Command("sh", "-c", cmd)
 		if sudo {
-			runner = exec.Command("sh", "-c", cmd)
+			runner = exec.Command("sudo", "sh", "-c", cmd)
 		}
 		var out, errout bytes.Buffer
 		runner.Stdout = &out
@@ -354,10 +355,8 @@ func (c *HostConnection) getTempfileName(name string) string {
 func (c *HostConnection) Script(sudo bool, content string) (stdout string, exit int, err error) {
 	stdout, exit, err = c.exec(sudo, content)
 	if len(stdout) != 0 {
-		// logger.Info.Println(stdout)
 	}
 	if exit == 0 && len(stdout) == 0 {
-		// logger.Info.Println("Succeeded")
 	}
 	if exit != 0 {
 		return "", 1, err
