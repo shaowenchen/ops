@@ -64,6 +64,8 @@ func parseArgs(args []string) (taskOption task.TaskOption) {
 			}
 			if fieldName == "debug" {
 				taskOption.Debug = fieldValue == "true"
+			} else if fieldName == "sudo" {
+				taskOption.Sudo = fieldValue == "true"
 			} else if fieldName == "filepath" {
 				taskOption.FilePath = fieldValue
 			} else if fieldName == "hosts" {

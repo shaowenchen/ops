@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	buildVersion = ""
-	buildDate    = ""
-	gicommitID   = ""
+	BuildVersion = ""
+	BuildDate    = ""
+	GicommitID   = ""
 )
 
 type BuildInfo struct {
@@ -25,9 +25,9 @@ var VersionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		versionBytes, err := json.Marshal(
 			BuildInfo{
-				Version:   buildVersion,
-				BuildDate: buildDate,
-				GitCommit: gicommitID,
+				Version:   BuildVersion,
+				BuildDate: BuildVersion,
+				GitCommit: BuildVersion,
 			})
 		if err != nil {
 			return
