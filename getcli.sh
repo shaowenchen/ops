@@ -64,16 +64,16 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-OPSCLIDIR="${HOME}/.ops/"
-if [ ! -d "${OPSCLIDIR}" ]; then
-  mkdir "${OPSCLIDIR}"
+OPSDIR="${HOME}/.ops/"
+if [ ! -d "${OPSDIR}" ]; then
+  mkdir "${OPSDIR}"
 fi
 
-if [ -d "${OPSCLIDIR}pipeline" ]; then
-  mv ${OPSCLIDIR}pipeline ${OPSCLIDIR}.pipeline_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+if [ -d "${OPSDIR}task" ]; then
+  mv ${OPSDIR}task ${OPSDIR}.task_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
-mv pipeline ${OPSCLIDIR}
+mv task ${OPSDIR}
 
 if [ `id -u` -eq 0 ]; then
   mv -f opscli /usr/local/bin/

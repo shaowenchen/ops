@@ -34,8 +34,8 @@ func GetOpsLogFile() string {
 	return filepath.Join(GetOpsLogsDir(), fmt.Sprintf("%d-%d-%d.log", time.Now().Year(), time.Now().Month(), time.Now().Day()))
 }
 
-func GetOpsPipelineDir() string {
-	return filepath.Join(GetOpsDir(), "pipeline")
+func GetOpsTaskDir() string {
+	return filepath.Join(GetOpsDir(), "task")
 }
 
 func GetOpsLogsDir() string {
