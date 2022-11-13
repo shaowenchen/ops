@@ -13,9 +13,9 @@ builds:
   tags:
     containers_image_openpgp
   ldflags:
-    - -X "github.com/shaowenchen/ops/cmd.cli.version.BuildVersion={{ .Version }}"
-    - -X "github.com/shaowenchen/ops/cmd.cli.version.BuildDate={{ .Date }}"
-    - -X "github.com/shaowenchen/ops/cmd.cli.version.GicommitID={{ .ShortCommit }}"
+    - -X "github.com/shaowenchen/ops/cmd/cli/version.BuildVersion={{ .Version }}"
+    - -X "github.com/shaowenchen/ops/cmd/cli/version.BuildDate={{ .Date }}"
+    - -X "github.com/shaowenchen/ops/cmd/cli/version.GitCommitID={{ .ShortCommit }}"
     - -w
     - -s
 dist: bin
