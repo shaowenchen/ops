@@ -10,7 +10,7 @@ import (
 
 func File(logger *log.Logger, h *v1.Host, option FileOption) (err error) {
 	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
-	c, err := NewHostConnection(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKeyPath)
+	c, err := NewHostConnection(h.Spec.Address, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath)
 	if err != nil {
 		logger.Error.Println(err)
 		return err
@@ -20,7 +20,7 @@ func File(logger *log.Logger, h *v1.Host, option FileOption) (err error) {
 
 func Script(logger *log.Logger, h *v1.Host, option ScriptOption) (err error) {
 	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
-	c, err := NewHostConnection(h.Spec.Address, option.Port, option.Username, option.Password, option.PrivateKeyPath)
+	c, err := NewHostConnection(h.Spec.Address, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath)
 	if err != nil {
 		logger.Error.Println(err)
 		return err

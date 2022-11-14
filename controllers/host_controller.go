@@ -18,13 +18,15 @@ package controllers
 
 import (
 	"context"
+	"time"
 
+	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/host"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	opsv1 "github.com/shaowenchen/ops/api/v1"
 )
 
 // HostReconciler reconciles a Host object
@@ -47,10 +49,22 @@ type HostReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	h := &opsv1.Host{}
+	err := r.Get(ctx, req.NamespacedName, h)
 
+	if err != nil {
+		log.Info(err.Error())
+		if apierrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+	err = r.updateStatus(ctx, h, 10)
+	if err != nil {
+		log.Info(err.Error())
+	}
 	return ctrl.Result{}, nil
 }
 
@@ -59,4 +73,19 @@ func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Host{}).
 		Complete(r)
+}
+
+func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host, heatSecond time.Duration) (err error) {
+	hc, err := host.NewHostConnection(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
+
+	go func() {
+		for range time.Tick(heatSecond * time.Second) {
+			err := hc.UpdateStatus(false)
+			if err == nil {
+				h.Status = hc.Host.Status
+				err = r.Status().Update(ctx, h)
+			}
+		}
+	}()
+	return
 }

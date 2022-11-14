@@ -5,6 +5,7 @@ type HostOption struct {
 	Port           int
 	Username       string
 	Password       string
+	PrivateKey     string
 	PrivateKeyPath string
 }
 type ScriptOption struct {

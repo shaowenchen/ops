@@ -29,7 +29,7 @@ type HostConnection struct {
 	sshclient *ssh.Client
 }
 
-func NewHostConnection(address string, port int, username string, password string, privateKeyPath string) (c *HostConnection, err error) {
+func NewHostConnection(address string, port int, username string, password string, privateKey string, privateKeyPath string) (c *HostConnection, err error) {
 
 	if len(privateKeyPath) == 0 {
 		privateKeyPath = constants.GetCurrentUserPrivateKeyPath()
@@ -42,7 +42,7 @@ func NewHostConnection(address string, port int, username string, password strin
 	}
 	c = &HostConnection{
 		Host: v1.NewHost(
-			"", "", address, port, username, password, "", privateKeyPath,
+			"", "", address, port, username, password, privateKey, privateKeyPath,
 		),
 	}
 	// local host
@@ -387,6 +387,121 @@ func (c *HostConnection) getIdG() (idg string, err error) {
 		return
 	}
 	return stdout, err
+}
+
+func (c *HostConnection) UpdateStatus(sudo bool) (err error) {
+	hostname, _ := c.getHosname(sudo)
+	kerneVersion, _ := c.getKernelVersion(sudo)
+	distribution, _ := c.getDistribution(sudo)
+	diskTotal, _ := c.getDiskTotal(sudo)
+	diskUsagePercent, _ := c.getDiskUsagePercent(sudo)
+	cpuTotal, _ := c.getCPUTotal(sudo)
+	cpuLoad1, _ := c.getCPULoad1(sudo)
+	cpuUsagePercent, _ := c.getCPUUsagePercent(sudo)
+	memTotal, _ := c.getMemTotal(sudo)
+	memUsagePercent, _ := c.getMemUsagePercent(sudo)
+
+	c.Host.Status.Hostname = hostname
+	c.Host.Status.KernelVersion = kerneVersion
+	c.Host.Status.Distribution = distribution
+	c.Host.Status.DiskTotal = diskTotal
+	c.Host.Status.DiskUsagePercent = diskUsagePercent
+	c.Host.Status.CPUTotal = cpuTotal
+	c.Host.Status.CPULoad1 = cpuLoad1
+	c.Host.Status.CPUUsagePercent = cpuUsagePercent
+	c.Host.Status.MemTotal = memTotal
+	c.Host.Status.MemUsagePercent = memUsagePercent
+	return
+}
+
+func (c *HostConnection) getCPUTotal(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptCPUTotal(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getCPULoad1(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptCPULoad1(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getCPUUsagePercent(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptCPUUsagePercent(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getMemTotal(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptMemTotal(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getMemUsagePercent(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptMemUsagePercent(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getHosname(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptHostname(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getDiskTotal(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptDiskTotal(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getDiskUsagePercent(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptDiskUsagePercent(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getKernelVersion(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptKernelVersion(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getDistribution(sudo bool) (cpu string, err error) {
+	cmd := fmt.Sprintf(utils.ScriptDistribution(sudo))
+	cpu, _, err = c.exec(false, cmd)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func (c *HostConnection) getTempfileName(name string) string {

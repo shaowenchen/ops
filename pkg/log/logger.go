@@ -58,7 +58,7 @@ func (logger *Logger) init(prefix string) (err error) {
 	return
 }
 
-func (logger *Logger) GetBuffer()(log string){
+func (logger *Logger) GetBuffer() (log string) {
 	log = string(logger.BufferData.Bytes())
 	return
 }

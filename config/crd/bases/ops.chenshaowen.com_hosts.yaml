@@ -45,9 +45,9 @@ spec:
                 type: string
               port:
                 type: integer
-              privateKey:
+              privatekey:
                 type: string
-              privateKeyPath:
+              privatekeypath:
                 type: string
               timeout:
                 format: int64
@@ -57,6 +57,32 @@ spec:
             type: object
           status:
             description: HostStatus defines the observed state of Host
+            properties:
+              cpuload1:
+                type: string
+              cputotal:
+                type: string
+              cpuusagepercent:
+                type: string
+              disktotal:
+                type: string
+              diskusagepercent:
+                type: string
+              distribution:
+                type: string
+              heartbeat:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                type: boolean
+              hostname:
+                type: string
+              kernelversion:
+                type: string
+              memtotal:
+                type: string
+              memusagepercent:
+                type: string
             type: object
         type: object
     served: true

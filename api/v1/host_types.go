@@ -30,10 +30,10 @@ type HostSpec struct {
 	Name           string `yaml:"name,omitempty" json:"name,omitempty"`
 	Address        string `yaml:"address,omitempty" json:"address,omitempty"`
 	Port           int    `yaml:"port,omitempty" json:"port,omitempty"`
-	Username       string `yaml:"user,omitempty" json:"username,omitempty"`
+	Username       string `yaml:"username,omitempty" json:"username,omitempty"`
 	Password       string `yaml:"password,omitempty" json:"password,omitempty"`
-	PrivateKey     string `yaml:"privateKey,omitempty" json:"privateKey,omitempty"`
-	PrivateKeyPath string `yaml:"privateKeyPath,omitempty" json:"privateKeyPath,omitempty"`
+	PrivateKey     string `yaml:"privatekey,omitempty" json:"privatekey,omitempty"`
+	PrivateKeyPath string `yaml:"privatekeypath,omitempty" json:"privatekeypath,omitempty"`
 	Timeout        int64  `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 }
 
@@ -41,6 +41,17 @@ type HostSpec struct {
 type HostStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Heartbeat        bool   `yaml:"heartbeat,omitempty" json:"heartbeat,omitempty"`
+	Hostname         string `yaml:"hostname,omitempty" json:"hostname,omitempty"`
+	KernelVersion    string `yaml:"kernelversion,omitempty" json:"kernelversion,omitempty"`
+	Distribution     string `yaml:"distribution,omitempty" json:"distribution,omitempty"`
+	DiskTotal        string `yaml:"disktotal,omitempty" json:"disktotal,omitempty"`
+	DiskUsagePercent string `yaml:"diskusagepercent,omitempty" json:"diskusagepercent,omitempty"`
+	CPUTotal         string `yaml:"cputotal,omitempty" json:"cputotal,omitempty"`
+	CPULoad1         string `yaml:"cpuload1,omitempty" json:"cpuload1,omitempty"`
+	CPUUsagePercent  string `yaml:"cpuusagepercent,omitempty" json:"cpuusagepercent,omitempty"`
+	MemTotal         string `yaml:"memtotal,omitempty" json:"memtotal,omitempty"`
+	MemUsagePercent  string `yaml:"memusagepercent,omitempty" json:"memusagepercent,omitempty"`
 }
 
 //+kubebuilder:object:root=true

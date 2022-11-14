@@ -3,8 +3,8 @@ WORKDIR /workspace
 COPY . .
 RUN go build  -o bin/opsserver cmd/server/main.go
 
-FROM gcr.io/distroless/static:nonroot
+FROM ubuntu:latest
 WORKDIR /
 COPY --from=builder /workspace/bin/opsserver .
-USER 65532:65532
 ENTRYPOINT ["/opsserver"]
+Expose 8080
