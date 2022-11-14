@@ -45,19 +45,19 @@ if [ $http_code -ne 302 ]; then
   DOWNLOAD_URL="https://ghproxy.com/${DOWNLOAD_URL}"
 fi
 
-rm -rf opscli* || true
-curl -fsLO "$DOWNLOAD_URL"
+OPSTEMPDIR=$(mktemp -d)
+curl -s "$DOWNLOAD_URL" -o "$OPSTEMPDIR/$FILENAME"
 
-if [ ! -f "${FILENAME}" ]; then
+if [ ! -f "$OPSTEMPDIR/$FILENAME" ]; then
   echo "Download error."
   exit 1
 fi
 
 # install
-tar -xzf "${FILENAME}"
-chmod +x opscli
+tar -xzf "$OPSTEMPDIR/$FILENAME" -C "$OPSTEMPDIR"
+chmod +x "$OPSTEMPDIR/opscli"
 
-`pwd`/opscli version
+"$OPSTEMPDIR/opscli" version
 
 if [ $? -ne 0 ]; then
     echo "Opscli file error"
@@ -73,14 +73,15 @@ if [ -d "${OPSDIR}task" ]; then
   mv ${OPSDIR}task ${OPSDIR}.task_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
-mv task ${OPSDIR}
+mv "$OPSTEMPDIR/task" ${OPSDIR}
 
 if [ `id -u` -eq 0 ]; then
-  mv -f opscli /usr/local/bin/
+  mv -f "$OPSTEMPDIR/opscli" /usr/local/bin/
   echo "Congratulations! Opscli live in /usr/local/bin/opscli"
 else
+  mv -f "$OPSTEMPDIR/opscli" `pwd`
   echo "Congratulations! Please run 'sudo mv `pwd`/opscli /usr/local/bin/' to install."
 fi
 
 # clear
-rm -rf "${FILENAME}"
+rm -rf "$OPSTEMPDIR/$FILENAME"
