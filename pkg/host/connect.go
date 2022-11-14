@@ -414,81 +414,81 @@ func (c *HostConnection) UpdateStatus(sudo bool) (err error) {
 	return
 }
 
-func (c *HostConnection) getCPUTotal(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptCPUTotal(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	stdout, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (c *HostConnection) getCPULoad1(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getCPULoad1(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptCPULoad1(sudo))
-	cpu, _, err = c.exec(false, cmd)
-	if err != nil {
+	stdout, _, err = c.exec(sudo, cmd)
+ 	if err != nil {
 		return
 	}
 	return
 }
 
-func (c *HostConnection) getCPUUsagePercent(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getCPUUsagePercent(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptCPUUsagePercent(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	stdout, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (c *HostConnection) getMemTotal(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getMemTotal(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptMemTotal(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	stdout, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (c *HostConnection) getMemUsagePercent(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getMemUsagePercent(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptMemUsagePercent(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	stdout, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (c *HostConnection) getHosname(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getHosname(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptHostname(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	stdout, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (c *HostConnection) getDiskTotal(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getDiskTotal(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptDiskTotal(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	stdout, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (c *HostConnection) getDiskUsagePercent(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getDiskUsagePercent(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptDiskUsagePercent(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	stdout, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (c *HostConnection) getKernelVersion(sudo bool) (cpu string, err error) {
+func (c *HostConnection) getKernelVersion(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptKernelVersion(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	stdout, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}
@@ -497,7 +497,7 @@ func (c *HostConnection) getKernelVersion(sudo bool) (cpu string, err error) {
 
 func (c *HostConnection) getDistribution(sudo bool) (cpu string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptDistribution(sudo))
-	cpu, _, err = c.exec(false, cmd)
+	cpu, _, err = c.exec(sudo, cmd)
 	if err != nil {
 		return
 	}

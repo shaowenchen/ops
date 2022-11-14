@@ -60,11 +60,11 @@ func ScriptMemUsagePercent(sudo bool) string {
 }
 
 func ScriptDiskTotal(sudo bool) string {
-	return BuildBase64Cmd(sudo, `df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $2}'`)
+	return BuildBase64Cmd(sudo, `df -H | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $2}'`)
 }
 
 func ScriptDiskUsagePercent(sudo bool) string {
-	return BuildBase64Cmd(sudo, `df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`)
+	return BuildBase64Cmd(sudo, `df -H | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`)
 }
 
 func ScriptHostname(sudo bool) string {
@@ -76,7 +76,7 @@ func ScriptKernelVersion(sudo bool) string {
 }
 
 func ScriptDistribution(sudo bool) string {
-	return BuildBase64Cmd(sudo, `cat /etc/os-release 2>/dev/null | grep ^ID= | awk -F= '{print $2}'`)
+	return BuildBase64Cmd(sudo, `cat /etc/os-release 2>/dev/null | grep ^ID= | awk -F= '{print $2}' | sed 's/\"//g'`)
 }
 
 func GetAvailableUrl(url string, proxy string) string {
