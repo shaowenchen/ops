@@ -426,7 +426,7 @@ func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
 func (c *HostConnection) getCPULoad1(sudo bool) (stdout string, err error) {
 	cmd := fmt.Sprintf(utils.ScriptCPULoad1(sudo))
 	stdout, _, err = c.exec(sudo, cmd)
- 	if err != nil {
+	if err != nil {
 		return
 	}
 	return
@@ -517,12 +517,8 @@ func (c *HostConnection) getTempfileName(name string) string {
 
 func (c *HostConnection) Script(sudo bool, content string) (stdout string, exit int, err error) {
 	stdout, exit, err = c.exec(sudo, content)
-	if len(stdout) != 0 {
-	}
-	if exit == 0 && len(stdout) == 0 {
-	}
-	if exit != 0 {
-		return "", 1, err
+	if exit != 0 && len(stdout) == 0 {
+		return err.Error(), 1, err
 	}
 	return
 }
