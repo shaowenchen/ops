@@ -26,7 +26,7 @@ spec:
     - name: install kubelet
       script: yum install -y kubelet-${cluster_version}-0 --disableexcludes=kubernetes
     - name: replace systemd kubelet
-      scprit: sed -i "s/local\/bin\/kubelet/bin\/kubelet/" /etc/systemd/system/kubelet.service 
+      scprit: sed -i "s/local\/bin\/kubelet/bin\/kubelet/" /etc/systemd/system/kubelet.service
     - name: restart kubelet
       script: systemctl daemon-reload;
         systemctl restart kubelet;
