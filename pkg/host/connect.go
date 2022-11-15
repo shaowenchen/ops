@@ -6,21 +6,21 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
-	"net"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
-
 	scp "github.com/bramvdbogaerde/go-scp"
 	"github.com/pkg/errors"
 	"github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"golang.org/x/crypto/ssh"
+	"io/ioutil"
+	"net"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type HostConnection struct {
@@ -53,6 +53,85 @@ func NewHostConnection(address string, port int, username string, password strin
 	if err := c.connecting(); err != nil {
 		return c, err
 	}
+	return
+}
+
+func (c *HostConnection) Script(sudo bool, content string) (stdout string, exit int, err error) {
+	reg := regexp.MustCompile(`\${[^\}]*}`)
+	funcStrList := reg.FindAllString(content, -1)
+	for _, callFunc := range funcStrList {
+		rawCallFunc := callFunc
+		callFunc = callFunc[2 : len(callFunc)-1]
+		stdout, err = c.scriptFuncMap(sudo, callFunc)
+		if err != nil {
+			return stdout, -1, err
+		}
+		content = strings.ReplaceAll(content, rawCallFunc, stdout)
+	}
+	stdout, exit, err = c.exec(sudo, content)
+	if exit != 0 && len(stdout) == 0 {
+		return err.Error(), 1, err
+	}
+	return
+}
+
+func (c *HostConnection) scriptFuncMap(sudo bool, funcFull string) (stdout string, err error) {
+	if funcFull == "installOpscli()" {
+		return c.install(sudo, "opscli")
+	} else if funcFull == "distribution()" {
+		return c.getDistribution(sudo)
+	}
+	return
+}
+
+func (c *HostConnection) install(sudo bool, component string) (stdout string, err error) {
+
+	if component == "opscli" {
+		stdout, _, err = c.exec(sudo, utils.ScriptInstallOpscli(""))
+		return
+	}
+	return
+}
+
+func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string) (err error) {
+	if utils.IsDownloadDirection(direction) {
+		err = c.scpPull(sudo, remotefile, localfile)
+		if err != nil {
+			return err
+		}
+	} else if utils.IsUploadDirection(direction) {
+		err = c.scpPush(sudo, localfile, remotefile)
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("invalid file transfer direction")
+	}
+	return
+}
+
+func (c *HostConnection) UpdateStatus(sudo bool) (err error) {
+	hostname, _ := c.getHosname(sudo)
+	kerneVersion, _ := c.getKernelVersion(sudo)
+	distribution, _ := c.getDistribution(sudo)
+	diskTotal, _ := c.getDiskTotal(sudo)
+	diskUsagePercent, _ := c.getDiskUsagePercent(sudo)
+	cpuTotal, _ := c.getCPUTotal(sudo)
+	cpuLoad1, _ := c.getCPULoad1(sudo)
+	cpuUsagePercent, _ := c.getCPUUsagePercent(sudo)
+	memTotal, _ := c.getMemTotal(sudo)
+	memUsagePercent, _ := c.getMemUsagePercent(sudo)
+
+	c.Host.Status.Hostname = hostname
+	c.Host.Status.KernelVersion = kerneVersion
+	c.Host.Status.Distribution = distribution
+	c.Host.Status.DiskTotal = diskTotal
+	c.Host.Status.DiskUsagePercent = diskUsagePercent
+	c.Host.Status.CPUTotal = cpuTotal
+	c.Host.Status.CPULoad1 = cpuLoad1
+	c.Host.Status.CPUUsagePercent = cpuUsagePercent
+	c.Host.Status.MemTotal = memTotal
+	c.Host.Status.MemUsagePercent = memUsagePercent
 	return
 }
 
@@ -119,6 +198,7 @@ func (c *HostConnection) connecting() (err error) {
 }
 
 func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, err error) {
+	fmt.Println(cmd)
 	cmd = utils.BuildBase64Cmd(sudo, cmd)
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
@@ -390,31 +470,6 @@ func (c *HostConnection) getIdG() (idg string, err error) {
 	return stdout, err
 }
 
-func (c *HostConnection) UpdateStatus(sudo bool) (err error) {
-	hostname, _ := c.getHosname(sudo)
-	kerneVersion, _ := c.getKernelVersion(sudo)
-	distribution, _ := c.getDistribution(sudo)
-	diskTotal, _ := c.getDiskTotal(sudo)
-	diskUsagePercent, _ := c.getDiskUsagePercent(sudo)
-	cpuTotal, _ := c.getCPUTotal(sudo)
-	cpuLoad1, _ := c.getCPULoad1(sudo)
-	cpuUsagePercent, _ := c.getCPUUsagePercent(sudo)
-	memTotal, _ := c.getMemTotal(sudo)
-	memUsagePercent, _ := c.getMemUsagePercent(sudo)
-
-	c.Host.Status.Hostname = hostname
-	c.Host.Status.KernelVersion = kerneVersion
-	c.Host.Status.Distribution = distribution
-	c.Host.Status.DiskTotal = diskTotal
-	c.Host.Status.DiskUsagePercent = diskUsagePercent
-	c.Host.Status.CPUTotal = cpuTotal
-	c.Host.Status.CPULoad1 = cpuLoad1
-	c.Host.Status.CPUUsagePercent = cpuUsagePercent
-	c.Host.Status.MemTotal = memTotal
-	c.Host.Status.MemUsagePercent = memUsagePercent
-	return
-}
-
 func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
 	stdout, _, err = c.exec(sudo, utils.ScriptCPUTotal())
 	if err != nil {
@@ -504,29 +559,4 @@ func (c *HostConnection) getTempfileName(name string) string {
 		return name
 	}
 	return fmt.Sprintf("%s/.%s-%d", strings.TrimSpace(stdout), name, time.Now().UnixNano())
-}
-
-func (c *HostConnection) Script(sudo bool, content string) (stdout string, exit int, err error) {
-	stdout, exit, err = c.exec(sudo, content)
-	if exit != 0 && len(stdout) == 0 {
-		return err.Error(), 1, err
-	}
-	return
-}
-
-func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string) (err error) {
-	if utils.IsDownloadDirection(direction) {
-		err = c.scpPull(sudo, remotefile, localfile)
-		if err != nil {
-			return err
-		}
-	} else if utils.IsUploadDirection(direction) {
-		err = c.scpPush(sudo, localfile, remotefile)
-		if err != nil {
-			return err
-		}
-	} else {
-		return errors.New("invalid file transfer direction")
-	}
-	return
 }

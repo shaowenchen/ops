@@ -14,8 +14,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
-	"regexp"
 )
 
 func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption) (err error) {
@@ -52,7 +50,7 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 		var sp = &s
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
 		s.When = RenderWhen(s.When, globalVariables)
-		result, err := LogicExpression(s.When, true)
+		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
 			logger.Error.Println(err)
 			return err
@@ -62,7 +60,6 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 			continue
 		}
 		sp = RenderStepVariables(sp, globalVariables)
-		sp, err = RenderFunc(&s)
 		if err != nil {
 			logger.Error.Println(err)
 		}
@@ -73,7 +70,7 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 		stepResult, isSuccessed := stepFunc(&t, c, s, option)
 		logger.Info.Println(stepResult)
 		globalVariables["result"] = stepResult
-		result, err = LogicExpression(s.AllowFailure, false)
+		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
 			logger.Error.Println(err)
 			return err
@@ -126,36 +123,6 @@ func ReadTaskYaml(filePath string) (tasks []v1.Task, err error) {
 	}
 
 	return
-}
-
-func RenderFunc(step *v1.Step) (*v1.Step, error) {
-	var err error
-	reg := regexp.MustCompile(`([a-zA-Z])+(\([^\)]*\))`)
-	funcStrList := reg.FindAllString(step.Script, -1)
-	for _, item := range funcStrList {
-		funcResult := []reflect.Value{}
-		funcInfo := strings.Split(item, "(")
-		// there is no param
-		if strings.HasPrefix(funcInfo[1], ")") {
-			funcResult, err = CallMap(funcInfo[0])
-		} else {
-			funcParams := strings.Split(funcInfo[1], ")")
-			params := strings.Split(funcParams[0], ",")
-			var paramsi []interface{}
-			for _, param := range params {
-				paramsi = append(paramsi, param)
-			}
-			funcResult, err = CallMap(funcInfo[0], paramsi...)
-		}
-		if len(funcResult) > 0 {
-			step.Script = strings.ReplaceAll(step.Script, item, funcResult[0].String())
-		}
-
-		if err != nil {
-			return step, err
-		}
-	}
-	return step, err
 }
 
 func RenderStepVariables(step *v1.Step, vars map[string]string) *v1.Step {
