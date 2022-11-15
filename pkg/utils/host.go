@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 )
@@ -83,6 +84,13 @@ func Mv(sudo bool, src, dst string) (stdout string, err error) {
 	return
 }
 
+func findIP(input string) string {
+	numBlock := "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])"
+	regexPattern := numBlock + "\\." + numBlock + "\\." + numBlock + "\\." + numBlock
+	regEx := regexp.MustCompile(regexPattern)
+	return regEx.FindString(input)
+}
+
 func AnalysisHostsParameter(str string) (result []string, err error) {
 	isExist := IsExistsFile(GetAbsoluteFilePath(str))
 	if isExist {
@@ -100,6 +108,7 @@ func AnalysisHostsParameter(str string) (result []string, err error) {
 		fileScanner.Split(bufio.ScanLines)
 		for fileScanner.Scan() {
 			line := strings.TrimSpace(fileScanner.Text())
+			line = findIP(line)
 			if len(line) > 0 {
 				result = append(result, line)
 			}
