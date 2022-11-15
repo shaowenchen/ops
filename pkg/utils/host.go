@@ -67,9 +67,9 @@ func FileMD5(path string) (string, error) {
 }
 
 func Mv(sudo bool, src, dst string) (stdout string, err error) {
-	runner := exec.Command("sudo", "sh", "-c", ScriptMv(false, src, dst))
+	runner := exec.Command("sudo", "sh", "-c", ScriptMv(src, dst))
 	if sudo {
-		runner = exec.Command("sh", "-c", ScriptMv(false, src, dst))
+		runner = exec.Command("sh", "-c", ScriptMv(src, dst))
 	}
 	var out, errout bytes.Buffer
 	runner.Stdout = &out

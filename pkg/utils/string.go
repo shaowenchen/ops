@@ -91,7 +91,7 @@ func PrintMiddle(text string, fill string) string {
 
 func GetSudoString(sudo bool) string {
 	if sudo {
-		return "sudo"
+		return "sudo "
 	} else {
 		return ""
 	}

@@ -119,6 +119,7 @@ func (c *HostConnection) connecting() (err error) {
 }
 
 func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, err error) {
+	cmd = utils.BuildBase64Cmd(sudo, cmd)
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
 		runner := exec.Command("sh", "-c", cmd)
@@ -146,7 +147,7 @@ func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, e
 
 	in, _ := sess.StdinPipe()
 	out, _ := sess.StdoutPipe()
-	err = sess.Start(utils.BuildBase64Cmd(sudo, cmd))
+	err = sess.Start(cmd)
 	if err != nil {
 		exitCode = -1
 		if exitErr, ok := err.(*ssh.ExitError); ok {
@@ -195,23 +196,23 @@ func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, e
 }
 
 func (c *HostConnection) mv(sudo bool, src, dst string) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptMv(sudo, src, dst))
+	stdout, _, err = c.exec(sudo, utils.ScriptMv(src, dst))
 	return
 }
 
 func (c *HostConnection) copy(sudo bool, src, dst string) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptCopy(sudo, src, dst))
+	stdout, _, err = c.exec(sudo, utils.ScriptCopy(src, dst))
 	return
 }
 
 func (c *HostConnection) chown(sudo bool, idU, idG, src string) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptChown(sudo, idU, idG, src))
+	stdout, _, err = c.exec(sudo, utils.ScriptChown(idU, idG, src))
 	fmt.Println(stdout)
 	return
 }
 
 func (c *HostConnection) rm(sudo bool, dst string) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptRm(sudo, dst))
+	stdout, _, err = c.exec(sudo, utils.ScriptRm(dst))
 	return
 }
 
@@ -363,7 +364,7 @@ func (c *HostConnection) fileMd5(sudo bool, filepath string) (md5 string, err er
 }
 
 func (c *HostConnection) makeDir(sudo bool, filepath string) (err error) {
-	cmd := utils.ScriptMakeDir(sudo, utils.SplitDirPath(filepath))
+	cmd := utils.ScriptMakeDir(utils.SplitDirPath(filepath))
 	stdout, _, err := c.exec(false, cmd)
 	if err == nil && len(stdout) > 0 {
 		return errors.New(stdout)
@@ -415,8 +416,7 @@ func (c *HostConnection) UpdateStatus(sudo bool) (err error) {
 }
 
 func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptCPUTotal(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptCPUTotal())
 	if err != nil {
 		return
 	}
@@ -424,8 +424,7 @@ func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
 }
 
 func (c *HostConnection) getCPULoad1(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptCPULoad1(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptCPULoad1())
 	if err != nil {
 		return
 	}
@@ -433,8 +432,7 @@ func (c *HostConnection) getCPULoad1(sudo bool) (stdout string, err error) {
 }
 
 func (c *HostConnection) getCPUUsagePercent(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptCPUUsagePercent(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptCPUUsagePercent())
 	if err != nil {
 		return
 	}
@@ -442,8 +440,7 @@ func (c *HostConnection) getCPUUsagePercent(sudo bool) (stdout string, err error
 }
 
 func (c *HostConnection) getMemTotal(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptMemTotal(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptMemTotal())
 	if err != nil {
 		return
 	}
@@ -451,8 +448,7 @@ func (c *HostConnection) getMemTotal(sudo bool) (stdout string, err error) {
 }
 
 func (c *HostConnection) getMemUsagePercent(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptMemUsagePercent(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptMemUsagePercent())
 	if err != nil {
 		return
 	}
@@ -460,8 +456,7 @@ func (c *HostConnection) getMemUsagePercent(sudo bool) (stdout string, err error
 }
 
 func (c *HostConnection) getHosname(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptHostname(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptHostname())
 	if err != nil {
 		return
 	}
@@ -469,8 +464,7 @@ func (c *HostConnection) getHosname(sudo bool) (stdout string, err error) {
 }
 
 func (c *HostConnection) getDiskTotal(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptDiskTotal(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptDiskTotal())
 	if err != nil {
 		return
 	}
@@ -478,8 +472,7 @@ func (c *HostConnection) getDiskTotal(sudo bool) (stdout string, err error) {
 }
 
 func (c *HostConnection) getDiskUsagePercent(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptDiskUsagePercent(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptDiskUsagePercent())
 	if err != nil {
 		return
 	}
@@ -487,8 +480,7 @@ func (c *HostConnection) getDiskUsagePercent(sudo bool) (stdout string, err erro
 }
 
 func (c *HostConnection) getKernelVersion(sudo bool) (stdout string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptKernelVersion(sudo))
-	stdout, _, err = c.exec(sudo, cmd)
+	stdout, _, err = c.exec(sudo, utils.ScriptKernelVersion())
 	if err != nil {
 		return
 	}
@@ -496,8 +488,7 @@ func (c *HostConnection) getKernelVersion(sudo bool) (stdout string, err error) 
 }
 
 func (c *HostConnection) getDistribution(sudo bool) (cpu string, err error) {
-	cmd := fmt.Sprintf(utils.ScriptDistribution(sudo))
-	cpu, _, err = c.exec(sudo, cmd)
+	cpu, _, err = c.exec(sudo, utils.ScriptDistribution())
 	if err != nil {
 		return
 	}
