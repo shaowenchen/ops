@@ -2,8 +2,8 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/ops.chenshaowen.com_hosts.yaml
-- bases/ops.chenshaowen.com_tasks.yaml
+- bases/crd.chenshaowen.com_hosts.yaml
+- bases/crd.chenshaowen.com_tasks.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

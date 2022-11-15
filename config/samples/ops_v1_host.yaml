@@ -1,4 +1,4 @@
-apiVersion: ops.chenshaowen.com/v1
+apiVersion: crd.chenshaowen.com/v1
 kind: Host
 metadata:
   labels:

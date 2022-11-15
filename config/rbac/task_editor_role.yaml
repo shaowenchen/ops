@@ -12,7 +12,7 @@ metadata:
   name: task-editor-role
 rules:
 - apiGroups:
-  - ops.chenshaowen.com
+  - crd.chenshaowen.com
   resources:
   - tasks
   verbs:
@@ -24,7 +24,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - ops.chenshaowen.com
+  - crd.chenshaowen.com
   resources:
   - tasks/status
   verbs:

@@ -2,7 +2,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: hosts.ops.chenshaowen.com
+  name: hosts.crd.chenshaowen.com
 spec:
   conversion:
     strategy: Webhook

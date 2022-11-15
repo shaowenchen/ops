@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
-  name: tasks.ops.chenshaowen.com
+  name: tasks.crd.chenshaowen.com
 spec:
-  group: ops.chenshaowen.com
+  group: crd.chenshaowen.com
   names:
     kind: Task
     listKind: TaskList

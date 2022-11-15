@@ -27,7 +27,6 @@ import (
 type HostSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Name           string `yaml:"name,omitempty" json:"name,omitempty"`
 	Address        string `yaml:"address,omitempty" json:"address,omitempty"`
 	Port           int    `yaml:"port,omitempty" json:"port,omitempty"`
 	Username       string `yaml:"username,omitempty" json:"username,omitempty"`
@@ -57,7 +56,11 @@ type HostStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Host is the Schema for the hosts API
+// +kubebuilder:printcolumn:name="Hostname",type=string,JSONPath=`.status.hostname`
+// +kubebuilder:printcolumn:name="Address",type=string,JSONPath=`.spec.address`
+// +kubebuilder:printcolumn:name="Distribution",type=string,JSONPath=`.status.distribution`
+// +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cputotal`
+// +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memtotal`
 type Host struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

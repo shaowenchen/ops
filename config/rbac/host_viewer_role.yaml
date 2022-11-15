@@ -12,7 +12,7 @@ metadata:
   name: host-viewer-role
 rules:
 - apiGroups:
-  - ops.chenshaowen.com
+  - crd.chenshaowen.com
   resources:
   - hosts
   verbs:
@@ -20,7 +20,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ops.chenshaowen.com
+  - crd.chenshaowen.com
   resources:
   - hosts/status
   verbs:
