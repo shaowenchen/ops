@@ -198,7 +198,6 @@ func (c *HostConnection) connecting() (err error) {
 }
 
 func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, err error) {
-	fmt.Println(cmd)
 	cmd = utils.BuildBase64Cmd(sudo, cmd)
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
