@@ -33,24 +33,25 @@ type HostSpec struct {
 	Password       string `yaml:"password,omitempty" json:"password,omitempty"`
 	PrivateKey     string `yaml:"privatekey,omitempty" json:"privatekey,omitempty"`
 	PrivateKeyPath string `yaml:"privatekeypath,omitempty" json:"privatekeypath,omitempty"`
-	Timeout        int64  `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	TimeOutSeconds int64  `yaml:"timeoutseconds,omitempty" json:"timeoutseconds,omitempty"`
 }
 
 // HostStatus defines the observed state of Host
 type HostStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Heartbeat        bool   `yaml:"heartbeat,omitempty" json:"heartbeat,omitempty"`
-	Hostname         string `yaml:"hostname,omitempty" json:"hostname,omitempty"`
-	KernelVersion    string `yaml:"kernelversion,omitempty" json:"kernelversion,omitempty"`
-	Distribution     string `yaml:"distribution,omitempty" json:"distribution,omitempty"`
-	DiskTotal        string `yaml:"disktotal,omitempty" json:"disktotal,omitempty"`
-	DiskUsagePercent string `yaml:"diskusagepercent,omitempty" json:"diskusagepercent,omitempty"`
-	CPUTotal         string `yaml:"cputotal,omitempty" json:"cputotal,omitempty"`
-	CPULoad1         string `yaml:"cpuload1,omitempty" json:"cpuload1,omitempty"`
-	CPUUsagePercent  string `yaml:"cpuusagepercent,omitempty" json:"cpuusagepercent,omitempty"`
-	MemTotal         string `yaml:"memtotal,omitempty" json:"memtotal,omitempty"`
-	MemUsagePercent  string `yaml:"memusagepercent,omitempty" json:"memusagepercent,omitempty"`
+	HeartStatus      bool         `yaml:"heartstatus,omitempty" json:"heartstatus,omitempty"`
+	LatestHeartTime  *metav1.Time `yaml:"latesthearttime,omitempty" json:"latesthearttime,omitempty"`
+	Hostname         string       `yaml:"hostname,omitempty" json:"hostname,omitempty"`
+	KernelVersion    string       `yaml:"kernelversion,omitempty" json:"kernelversion,omitempty"`
+	Distribution     string       `yaml:"distribution,omitempty" json:"distribution,omitempty"`
+	DiskTotal        string       `yaml:"disktotal,omitempty" json:"disktotal,omitempty"`
+	DiskUsagePercent string       `yaml:"diskusagepercent,omitempty" json:"diskusagepercent,omitempty"`
+	CPUTotal         string       `yaml:"cputotal,omitempty" json:"cputotal,omitempty"`
+	CPULoad1         string       `yaml:"cpuload1,omitempty" json:"cpuload1,omitempty"`
+	CPUUsagePercent  string       `yaml:"cpuusagepercent,omitempty" json:"cpuusagepercent,omitempty"`
+	MemTotal         string       `yaml:"memtotal,omitempty" json:"memtotal,omitempty"`
+	MemUsagePercent  string       `yaml:"memusagepercent,omitempty" json:"memusagepercent,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -62,12 +63,18 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cputotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memtotal`
 // +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.disktotal`
+// +kubebuilder:printcolumn:name="LatestHeartTime",type=string,JSONPath=`.status.latesthearttime`
+// +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartstatus`
 type Host struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   HostSpec   `json:"spec,omitempty"`
 	Status HostStatus `json:"status,omitempty"`
+}
+
+func (h *Host) GetSpec() HostSpec {
+	return h.Spec
 }
 
 func NewHost(namespace, name, address string, port int, username, password, privatekey, privatekeypath string) (h *Host) {
@@ -83,7 +90,7 @@ func NewHost(namespace, name, address string, port int, username, password, priv
 			Password:       password,
 			PrivateKey:     privatekey,
 			PrivateKeyPath: privatekeypath,
-			Timeout:        10,
+			TimeOutSeconds: 10,
 		},
 	}
 }

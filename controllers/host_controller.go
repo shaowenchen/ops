@@ -23,6 +23,7 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/host"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -83,8 +84,12 @@ func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host, heatSe
 			err := hc.UpdateStatus(false)
 			if err == nil {
 				h.Status = hc.Host.Status
-				err = r.Status().Update(ctx, h)
+				h.Status.HeartStatus = true
+			} else {
+				h.Status.HeartStatus = false
 			}
+			h.Status.LatestHeartTime = &v1.Time{Time: time.Now()}
+			err = r.Status().Update(ctx, h)
 		}
 	}()
 	return

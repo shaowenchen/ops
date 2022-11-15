@@ -100,7 +100,7 @@ func (c *HostConnection) connecting() (err error) {
 	}
 	sshConfig := &ssh.ClientConfig{
 		User:            c.Host.Spec.Username,
-		Timeout:         time.Duration(c.Host.Spec.Timeout) * time.Second,
+		Timeout:         time.Duration(c.Host.GetSpec().TimeOutSeconds) * time.Second,
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
