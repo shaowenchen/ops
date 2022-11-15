@@ -48,8 +48,8 @@ spec:
               steps:
                 items:
                   properties:
-                    allow_failure:
-                      type: boolean
+                    allowfailure:
+                      type: string
                     direction:
                       type: string
                     localfile:
@@ -62,14 +62,6 @@ spec:
                       type: string
                     when:
                       type: string
-                  required:
-                  - allow_failure
-                  - direction
-                  - localfile
-                  - name
-                  - remotefile
-                  - script
-                  - when
                   type: object
                 type: array
               variables:

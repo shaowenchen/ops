@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -110,4 +111,15 @@ func SplitDirPath(filepath string) string {
 		return strings.Join(pathItems[:len(pathItems)-1], "/")
 	}
 	return filepath
+}
+
+func Logic(input string) (result bool, err error) {
+	input = strings.TrimSpace(input)
+	if input == "0" || strings.ToLower(input) == "false" || strings.ToLower(input) == "!true" {
+		return false, nil
+	}
+	if input == "1" || strings.ToLower(input) == "true" || strings.ToLower(input) == "!false" {
+		return true, nil
+	}
+	return false, errors.New("can't logic " + input)
 }

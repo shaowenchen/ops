@@ -52,7 +52,12 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 		var sp = &s
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
 		s.When = RenderWhen(s.When, globalVariables)
-		if !CheckWhen(s.When) {
+		result, err := LogicExpression(s.When, true)
+		if err != nil {
+			logger.Error.Println(err)
+			return err
+		}
+		if !result {
 			logger.Info.Println("Skip!")
 			continue
 		}
@@ -68,7 +73,12 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 		stepResult, isSuccessed := stepFunc(&t, c, s, option)
 		logger.Info.Println(stepResult)
 		globalVariables["result"] = stepResult
-		if s.AllowFailure == false && isSuccessed == false {
+		result, err = LogicExpression(s.AllowFailure, false)
+		if err != nil {
+			logger.Error.Println(err)
+			return err
+		}
+		if result == false && isSuccessed == false {
 			break
 		}
 	}
@@ -108,6 +118,7 @@ func ReadTaskYaml(filePath string) (tasks []v1.Task, err error) {
 		task := v1.Task{}
 		task.Spec.Variables = make(map[string]string, 0)
 		err = yaml.Unmarshal(yfile, &task)
+		fmt.Println(task.Spec.Steps[0].AllowFailure)
 		if err != nil {
 			return
 		}

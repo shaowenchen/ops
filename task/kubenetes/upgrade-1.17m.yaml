@@ -10,12 +10,12 @@ spec:
   steps:
     - name: remove kubectl
       script: yum remove -y kubectl
-      allow_failure: true
+      allowfailure: true
     - name: install kubectl
       script: yum install -y kubectl-${cluster_version}-0 --disableexcludes=kubernetes
     - name: remove kubeadm
       script: yum remove -y kubeadm
-      allow_failure: true
+      allowfailure: true
     - name: install kubeadm
       script: yum install -y kubeadm-${cluster_version}-0 --disableexcludes=kubernetes
     - name: get kubeadm-config

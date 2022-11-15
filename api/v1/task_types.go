@@ -37,13 +37,13 @@ type TaskSpec struct {
 }
 
 type Step struct {
-	When         string `json:"when"`
-	Name         string `json:"name"`
-	Script       string `json:"script"`
-	LocalFile    string `json:"localfile"`
-	RemoteFile   string `json:"remotefile"`
-	Direction    string `json:"direction"`
-	AllowFailure bool   `json:"allow_failure"`
+	When         string `json:"when,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Script       string `json:"script,omitempty"`
+	LocalFile    string `json:"localfile,omitempty"`
+	RemoteFile   string `json:"remotefile,omitempty"`
+	Direction    string `json:"direction,omitempty"`
+	AllowFailure string `json:"allowfailure,omitempty"`
 }
 
 // TaskStatus defines the observed state of Task

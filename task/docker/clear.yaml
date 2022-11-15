@@ -8,7 +8,10 @@ spec:
   steps:
     - name: Docker system prune
       script: docker system prune -f
-      allow_failure: true
+      allowfailure: true
     - name: Clear none image
-      script: docker images | grep none | awk '{print $3}' | xargs /usr/bin/docker rmi
-      allow_failure: true
+      script: docker rmi $(docker images | grep "none" | awk '/ / { print $3 }')
+      allowfailure: true
+    - name: Clear dangling image
+      script: docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
+      allowfailure: true

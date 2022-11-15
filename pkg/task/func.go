@@ -27,25 +27,29 @@ func CallMap(funcName string, params ...interface{}) (result []reflect.Value, er
 	return
 }
 
-func CheckWhen(when string) (needRun bool) {
-	when = strings.TrimSpace(when)
-	if when == "0" || strings.ToLower(when) == "false" || strings.ToLower(when) == "!true" {
-		return false
+func LogicExpression(exp string, ifEmptyDefault bool) (result bool, err error) {
+	exp = strings.TrimSpace(exp)
+	// default
+	if len(exp) == 0 {
+		return ifEmptyDefault, nil
 	}
-	if len(when) == 0 || when == "1" || strings.ToLower(when) == "true" || strings.ToLower(when) == "!false" {
-		return true
+	// logic bool
+	logicResult, err := utils.Logic(exp)
+	if err == nil {
+		return logicResult, nil
 	}
-	if strings.Contains(when, "==") {
-		whenPair := strings.Split(when, "==")
-		if len(whenPair) == 2 {
-			return strings.ToLower(utils.RemoveStartEndMark(whenPair[0])) == strings.ToLower(utils.RemoveStartEndMark(whenPair[1]))
+	// expression
+	if strings.Contains(exp, "==") {
+		expPair := strings.Split(exp, "==")
+		if len(expPair) == 2 {
+			return strings.ToLower(utils.RemoveStartEndMark(expPair[0])) == strings.ToLower(utils.RemoveStartEndMark(expPair[1])), nil
 		}
-	} else if strings.Contains(when, "!=") {
-		whenPair := strings.Split(when, "!=")
-		if len(whenPair) == 2 {
-			return strings.ToLower(utils.RemoveStartEndMark(whenPair[0])) != strings.ToLower(utils.RemoveStartEndMark(whenPair[1]))
+	} else if strings.Contains(exp, "!=") {
+		expPair := strings.Split(exp, "!=")
+		if len(expPair) == 2 {
+			return strings.ToLower(utils.RemoveStartEndMark(expPair[0])) != strings.ToLower(utils.RemoveStartEndMark(expPair[1])), nil
 		}
 	}
 
-	return false
+	return
 }

@@ -10,7 +10,7 @@ spec:
   steps:
     - name: remove kubeadm
       script: yum remove -y kubeadm
-      allow_failure: true
+      allowfailure: true
     - name: install kubeadm
       script: yum install -y kubeadm-${cluster_version}-0 --disableexcludes=kubernetes
     - name: upgrade node
