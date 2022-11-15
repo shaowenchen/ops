@@ -61,6 +61,7 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="Distribution",type=string,JSONPath=`.status.distribution`
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cputotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memtotal`
+// +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.disktotal`
 type Host struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

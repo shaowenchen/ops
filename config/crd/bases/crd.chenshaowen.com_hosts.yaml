@@ -31,6 +31,9 @@ spec:
     - jsonPath: .status.memtotal
       name: Mem
       type: string
+    - jsonPath: .status.disktotal
+      name: Disk
+      type: string
     name: v1
     schema:
       openAPIV3Schema:
