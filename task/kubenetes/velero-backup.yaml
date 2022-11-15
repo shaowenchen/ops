@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: task-sample
+  name: velero-backup
   namespace: default
 spec:
   desc: Backup Kubernetes Using Velero

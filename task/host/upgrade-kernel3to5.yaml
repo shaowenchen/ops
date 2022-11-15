@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: task-sample
+  name: upgrade-kernel3to5
   namespace: default
 spec:
   desc: Upgrade Centos Kernel 3 to 5

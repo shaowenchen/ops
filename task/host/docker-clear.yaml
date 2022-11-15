@@ -15,3 +15,6 @@ spec:
     - name: Clear dangling image
       script: docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
       allowfailure: true
+    - name: Clear biz image
+      script: docker images |grep -E "([0-9a-z]+[-]){3,}[0-9]{9}" |awk '{print $3}' | xargs /usr/bin/docker rmi
+      allowfailure: true

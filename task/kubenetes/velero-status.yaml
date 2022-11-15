@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: task-sample
+  name: velero-status
   namespace: default
 spec:
   desc: Status Velero

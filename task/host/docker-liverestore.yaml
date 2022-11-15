@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: task-sample
+  name: docker-live-restore
   namespace: default
 spec:
   desc: Set Docker live-restore
