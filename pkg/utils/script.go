@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+func ScriptIsInChina() string {
+	return `curl --connect-timeout 2 https://raw.githubusercontent.com/`
+}
+
 func ScriptInstallOpscli(proxy string) string {
 	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh", proxy))
 }

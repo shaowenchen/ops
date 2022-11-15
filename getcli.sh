@@ -38,7 +38,7 @@ fi
 FILENAME="opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 DOWNLOAD_URL="https://github.com/shaowenchen/ops/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 
-http_code=$(curl --connect-timeout 3 -s -o temp.out -w '%{http_code}' https://github.com)
+http_code=$(curl --connect-timeout 2 -s -o temp.out -w '%{http_code}' https://github.com)
 rm -rf temp.out || true
 
 if [ $http_code -ne 302 ]; then
@@ -46,7 +46,7 @@ if [ $http_code -ne 302 ]; then
 fi
 
 OPSTEMPDIR=$(mktemp -d)
-curl -s "$DOWNLOAD_URL" -o "$OPSTEMPDIR/$FILENAME"
+curl -fsL "$DOWNLOAD_URL" -o "$OPSTEMPDIR/$FILENAME"
 
 if [ ! -f "$OPSTEMPDIR/$FILENAME" ]; then
   echo "Download error."

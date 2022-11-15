@@ -85,12 +85,23 @@ func (c *HostConnection) scriptFuncMap(sudo bool, funcFull string) (stdout strin
 }
 
 func (c *HostConnection) install(sudo bool, component string) (stdout string, err error) {
-
 	if component == "opscli" {
-		stdout, _, err = c.exec(sudo, utils.ScriptInstallOpscli(""))
+		proxy := ""
+		if !c.isInChina() {
+			proxy = constants.DefaultProxy
+		}
+		stdout, _, err = c.exec(sudo, utils.ScriptInstallOpscli(proxy))
 		return
 	}
 	return
+}
+
+func (c *HostConnection) isInChina() (ok bool) {
+	_, exitCode, err := c.exec(false, utils.ScriptIsInChina())
+	if exitCode != 0 || err != nil {
+		return false
+	}
+	return true
 }
 
 func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string) (err error) {
