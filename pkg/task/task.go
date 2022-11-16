@@ -16,11 +16,10 @@ import (
 	"path/filepath"
 )
 
-func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption) (err error) {
+func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option TaskOption) (*v1.Task, error) {
 	globalVariables := make(map[string]string)
 	// cli > env > yaml
 	utils.MergeMap(globalVariables, t.Spec.Variables)
-	utils.MergeMap(globalVariables, utils.GetRuntimeInfo())
 	utils.MergeMap(globalVariables, utils.GetAllOsEnv())
 	utils.MergeMap(globalVariables, option.Variables)
 
@@ -36,16 +35,18 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 	}
 	if len(emptyVariable) > 0 {
 		logger.Info.Println("please set variable: ", emptyVariable)
-		return
+		return t, nil
 	}
 
 	globalVariables["result"] = ""
 	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
-	c, err := host.NewHostConnection(h.Spec.Address, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath)
+	h = fillHostByOption(h, &option.HostOption)
+	c, err := host.NewHostConnection(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
 	if err != nil {
 		logger.Error.Println(err)
-		return
+		return t, err
 	}
+	runOutput := &v1.RunOutput{}
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
@@ -53,7 +54,7 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
 			logger.Error.Println(err)
-			return err
+			return t, err
 		}
 		if !result {
 			logger.Info.Println("Skip!")
@@ -67,19 +68,40 @@ func RunTaskOnHost(logger *log.Logger, t v1.Task, h *v1.Host, option TaskOption)
 			logger.Info.Println(s.Script)
 		}
 		stepFunc := GetStepFunc(s)
-		stepResult, isSuccessed := stepFunc(&t, c, s, option)
+		stepResult, isSuccessed := stepFunc(t, c, s, option)
+		runOutput.AddRunOutput(s.Name, stepResult)
 		logger.Info.Println(stepResult)
 		globalVariables["result"] = stepResult
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
 			logger.Error.Println(err)
-			return err
+			return t, err
 		}
 		if result == false && isSuccessed == false {
 			break
 		}
 	}
-	return
+	t.Status.AddRecentRunOutput(runOutput)
+	return t, err
+}
+
+func fillHostByOption(h *v1.Host, option *host.HostOption) *v1.Host {
+	if option.Username != "" && h.GetSpec().Username == "" {
+		h.Spec.Username = option.Username
+	}
+	if option.Password != "" && h.GetSpec().Password == "" {
+		h.Spec.Password = option.Password
+	}
+	if option.Port != 0 && h.GetSpec().Port == 0 {
+		h.Spec.Port = option.Port
+	}
+	if option.PrivateKey != "" && h.GetSpec().PrivateKey == "" {
+		h.Spec.PrivateKey = option.PrivateKey
+	}
+	if option.PrivateKeyPath != "" && h.GetSpec().PrivateKeyPath == "" {
+		h.Spec.PrivateKeyPath = option.PrivateKeyPath
+	}
+	return h
 }
 
 func getFileArray(filePath string) (fileArray []string, err error) {

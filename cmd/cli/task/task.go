@@ -42,7 +42,7 @@ func Task(logger *log.Logger, option task.TaskOption) (err error) {
 	hs := host.GetHosts(logger, option.HostOption)
 	for _, t := range tasks {
 		for _, h := range hs {
-			task.RunTaskOnHost(logger, t, h, option)
+			task.RunTaskOnHost(logger, &t, h, option)
 		}
 	}
 	return

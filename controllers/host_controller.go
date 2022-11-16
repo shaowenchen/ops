@@ -62,7 +62,14 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		}
 		return ctrl.Result{}, err
 	}
-	err = r.updateStatus(ctx, h, 10)
+	// delete task
+	if !h.DeletionTimestamp.IsZero() {
+		//Todo: stop updateStatus
+		err := r.Client.Delete(ctx, h)
+		return ctrl.Result{}, err
+	}
+	// update status for all
+	err = r.updateStatus(ctx, h, 60)
 	if err != nil {
 		log.Info(err.Error())
 	}
@@ -81,15 +88,21 @@ func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host, heatSe
 
 	go func() {
 		for range time.Tick(heatSecond * time.Second) {
-			err := hc.UpdateStatus(false)
-			if err == nil {
-				h.Status = hc.Host.Status
-				h.Status.HeartStatus = true
-			} else {
-				h.Status.HeartStatus = false
+			select {
+			// case <-stopCh:
+			// 	return
+			default:
+				err := hc.UpdateStatus(false)
+				if err == nil {
+					h.Status = hc.Host.Status
+					h.Status.HeartStatus = true
+				} else {
+					h.Status.HeartStatus = false
+				}
+				h.Status.LatestHeartTime = &v1.Time{Time: time.Now()}
+				err = r.Status().Update(ctx, h)
 			}
-			h.Status.LatestHeartTime = &v1.Time{Time: time.Now()}
-			err = r.Status().Update(ctx, h)
+
 		}
 	}()
 	return

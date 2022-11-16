@@ -28,12 +28,13 @@ type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Variables map[string]string `json:"variables"`
-	Steps     []Step            `json:"steps"`
-	Name      string            `json:"name"`
-	Desc      string            `json:"desc"`
-	Hostname  string            `json:"hostname"`
-	Selector  map[string]string `json:"selector"`
+	Schedule  string                `json:"schedule,omitempty"`
+	Variables map[string]string     `json:"variables,omitempty"`
+	Steps     []Step                `json:"steps,omitempty"`
+	Name      string                `json:"name,omitempty"`
+	Desc      string                `json:"desc,omitempty"`
+	HostRef   string                `json:"hostRef,omitempty"`
+	Selector  *metav1.LabelSelector `json:"selector,omitempty"`
 }
 
 type Step struct {
@@ -50,6 +51,30 @@ type Step struct {
 type TaskStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	LastStatus       string       `json:"lastStatus,omitempty"`
+	LastScheduleTime *metav1.Time `json:"lastScheduleTime,omitempty"`
+	RecentRunOutput  []*RunOutput `json:"recentRunOutput,omitempty"`
+}
+
+func (taskStatus *TaskStatus) AddRecentRunOutput(runOutput *RunOutput) {
+	if len(taskStatus.RecentRunOutput) > 5 {
+		taskStatus.RecentRunOutput = taskStatus.RecentRunOutput[:5]
+	}
+	taskStatus.RecentRunOutput = append(taskStatus.RecentRunOutput, runOutput)
+}
+
+type RunOutput struct {
+	RunOutputSteps []*RunOutputStep `json:"runOutputSteps,omitempty"`
+}
+
+func (runOutput *RunOutput) AddRunOutput(name, output string) *RunOutput {
+	runOutput.RunOutputSteps = append(runOutput.RunOutputSteps, &RunOutputStep{Name: name, Output: output})
+	return runOutput
+}
+
+type RunOutputStep struct {
+	Name   string `json:"name,omitempty"`
+	Output string `json:"Output,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -62,6 +87,10 @@ type Task struct {
 
 	Spec   TaskSpec   `json:"spec,omitempty"`
 	Status TaskStatus `json:"status,omitempty"`
+}
+
+func (t *Task) GetSpec() *TaskSpec {
+	return &t.Spec
 }
 
 //+kubebuilder:object:root=true

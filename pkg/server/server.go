@@ -24,9 +24,8 @@ func GetTask(c *gin.Context) {
 			Namespace: "default",
 		},
 		Spec: v1.TaskSpec{
-			Name:     "This is a task example",
-			Desc:     "This desc about thie task",
-			Hostname: "127.0.0.1",
+			Name: "This is a task example",
+			Desc: "This desc about thie task",
 			Steps: []v1.Step{
 				{
 					Name:   "Show OS info",
@@ -54,7 +53,7 @@ func CreateTask(c *gin.Context) {
 	}
 	hosts := host.GetHosts(logger, host.HostOption{})
 	for _, host := range hosts {
-		task.RunTaskOnHost(logger, *t, host, task.TaskOption{})
+		task.RunTaskOnHost(logger, t, host, task.TaskOption{})
 	}
 	c.JSON(http.StatusOK, logger.GetBuffer())
 }

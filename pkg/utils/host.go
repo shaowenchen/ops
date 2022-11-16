@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 )
 
@@ -25,13 +24,6 @@ func GetAllOsEnv() (envs map[string]string) {
 			envs[pair[0]] = pair[1]
 		}
 	}
-	return
-}
-
-func GetRuntimeInfo() (info map[string]string) {
-	info = make(map[string]string, 0)
-	info["arch"] = runtime.GOARCH
-	info["os"] = runtime.GOOS
 	return
 }
 
