@@ -16,6 +16,9 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.server
+      name: Server
+      type: string
     - jsonPath: .status.version
       name: Version
       type: string
@@ -47,9 +50,7 @@ spec:
           spec:
             description: ClusterSpec defines the desired state of Cluster
             properties:
-              kubeconfig:
-                type: string
-              name:
+              config:
                 type: string
               server:
                 type: string
@@ -60,11 +61,12 @@ spec:
             description: ClusterStatus defines the observed state of Cluster
             properties:
               lastHeartTime:
+                format: date-time
                 type: string
               lastHeartstatus:
                 type: string
               nodeNumber:
-                type: string
+                type: integer
               version:
                 description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
                   of cluster Important: Run "make" to regenerate code after modifying

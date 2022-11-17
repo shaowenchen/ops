@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/shaowenchen/ops/cmd/cli/create"
 	"github.com/shaowenchen/ops/cmd/cli/host"
 	"github.com/shaowenchen/ops/cmd/cli/kube"
 	"github.com/shaowenchen/ops/cmd/cli/storage"
@@ -20,6 +21,7 @@ func Execute() {
 	RootCmd.AddCommand(kube.KubeCmd)
 	RootCmd.AddCommand(storage.StorageCmd)
 	RootCmd.AddCommand(task.TaskCmd)
+	RootCmd.AddCommand(create.CreateCmd)
 	RootCmd.AddCommand(version.VersionCmd)
 	RootCmd.AddCommand(upgrade.UpgradeCmd)
 	if err := RootCmd.Execute(); err != nil {

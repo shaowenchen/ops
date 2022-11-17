@@ -127,3 +127,9 @@ func GetAbsoluteFilePath(path string) string {
 	}
 	return path
 }
+
+func ReadFile(path string) (buff string, err error) {
+	path = GetAbsoluteFilePath(path)
+	buffBytes, err := os.ReadFile(path)
+	return string(buffBytes), err
+}

@@ -25,25 +25,25 @@ import (
 
 // ClusterSpec defines the desired state of Cluster
 type ClusterSpec struct {
-	Name       string `json:"name,omitempty"`
-	Server     string `json:"server,omitempty"`
-	Kubeconfig string `json:"kubeconfig,omitempty"`
-	Token      string `json:"token,omitempty"`
+	Server string `json:"server,omitempty"`
+	Config string `json:"config,omitempty"`
+	Token  string `json:"token,omitempty"`
 }
 
 // ClusterStatus defines the observed state of Cluster
 type ClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Version         string `json:"version,omitempty"`
-	NodeNumber      string `json:"nodeNumber,omitempty"`
-	LastHeartTime   string `json:"lastHeartTime,omitempty"`
-	LastHeartStatus string `json:"lastHeartstatus,omitempty"`
+	Version         string       `json:"version,omitempty"`
+	NodeNumber      int          `json:"nodeNumber,omitempty"`
+	LastHeartTime   *metav1.Time `json:"lastHeartTime,omitempty"`
+	LastHeartStatus string       `json:"lastHeartstatus,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
+// +kubebuilder:printcolumn:name="Server",type=string,JSONPath=`.spec.server`
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.status.version`
 // +kubebuilder:printcolumn:name="NodeNumber",type=string,JSONPath=`.status.nodeNumber`
 // +kubebuilder:printcolumn:name="LastHeartTime",type=string,JSONPath=`.status.lastHeartTime`
@@ -62,6 +62,20 @@ func (c *Cluster) GetSpec() *ClusterSpec {
 
 func (c *Cluster) GetStatus() *ClusterStatus {
 	return &c.Status
+}
+
+func NewCluster(namespace, name, server, config, token string) *Cluster {
+	return &Cluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: ClusterSpec{
+			Server: server,
+			Config: config,
+			Token:  token,
+		},
+	}
 }
 
 //+kubebuilder:object:root=true

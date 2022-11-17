@@ -49,12 +49,18 @@ func RemoveDuplicates(origin []string) []string {
 	return result
 }
 
-func EncodingBase64(rawCmd string) string {
+func EncodingStringToBase64(rawCmd string) string {
 	return base64.StdEncoding.EncodeToString([]byte(rawCmd))
 }
 
+func DecodingBase64ToString(src string) (dst string, err error) {
+	buff, err := base64.StdEncoding.DecodeString(src)
+	dst = string(buff)
+	return
+}
+
 func BuildBase64Cmd(sudo bool, rawCmd string) string {
-	return fmt.Sprintf("base64 -d <<< %s | %s sh", EncodingBase64(rawCmd), GetSudoString(sudo))
+	return fmt.Sprintf("base64 -d <<< %s | %s sh", EncodingStringToBase64(rawCmd), GetSudoString(sudo))
 }
 
 func RemoveStartEndMark(raw string) string {

@@ -5,24 +5,34 @@ import (
 	"context"
 	"fmt"
 	"io"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
+	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+func GetRestConfigByContent(kubeconfig string) (*rest.Config, error) {
+	restConfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(kubeconfig))
+	return restConfig, err
+}
 
 func NewKubernetesClient(kubeconfigpath string) (client *kubernetes.Clientset, err error) {
 	kubeconfigpath = GetAbsoluteFilePath(kubeconfigpath)
-	kubeconfig, err := GetRestConfig(kubeconfigpath)
+	restConfig, err := GetRestConfig(kubeconfigpath)
 	if err != nil {
 		return
 	}
-	kubeconfig.QPS = 100
-	kubeconfig.Burst = 100
-	client, err = kubernetes.NewForConfig(kubeconfig)
+	return GetClientByRestconfig(restConfig)
+}
+
+func GetClientByRestconfig(restConfig *rest.Config) (client *kubernetes.Clientset, err error) {
+	restConfig.QPS = 100
+	restConfig.Burst = 100
+	client, err = kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return
 	}
@@ -33,13 +43,16 @@ func GetRestConfig(kubeconfigPath string) (*rest.Config, error) {
 	if len(kubeconfigPath) > 0 {
 		return clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	}
-	if len(os.Getenv("KUBECONFIG")) > 0 {
-		return clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
-	}
-	if c, err := rest.InClusterConfig(); err == nil {
-		return c, nil
-	}
 	return nil, fmt.Errorf("could not locate a kubeconfig")
+}
+
+func NewConrollerRuntimeClient(kubeconfigPath string) (c runtimeClient.Client, err error) {
+	restConfig, err := GetRestConfig(kubeconfigPath)
+	if err != nil {
+		return
+	}
+	c, err = runtimeClient.New(restConfig, runtimeClient.Options{})
+	return
 }
 
 func GetAllNodesByKubeconfig(kubeconfigpath string) (nodes_ips []string, err error) {
