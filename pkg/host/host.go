@@ -2,6 +2,7 @@ package host
 
 import (
 	"fmt"
+	"strings"
 
 	v1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/log"
@@ -33,7 +34,7 @@ func Script(logger *log.Logger, h *v1.Host, option ScriptOption) (err error) {
 func GetHosts(logger *log.Logger, option HostOption) (hosts []*v1.Host) {
 	hs, _ := utils.AnalysisHostsParameter(option.Hosts)
 	for _, addr := range hs {
-		hosts = append(hosts, v1.NewHost("", "", addr, option.Port, option.Username, option.Password, "", option.PrivateKeyPath))
+		hosts = append(hosts, v1.NewHost("default", strings.ReplaceAll(addr, ".", "-"), addr, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath))
 	}
 	return
 }

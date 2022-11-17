@@ -12,4 +12,5 @@ var CreateCmd = &cobra.Command{
 func init() {
 	CreateCmd.AddCommand(hostCmd)
 	CreateCmd.AddCommand(clusterCmd)
+	CreateCmd.AddCommand(taskCmd)
 }

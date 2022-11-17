@@ -3,8 +3,8 @@ package create
 import (
 	"fmt"
 
-	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/create"
+	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
@@ -18,10 +18,14 @@ var hostCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger, err := log.NewCliLogger(true, true)
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Println(err)
 			return
 		}
-		CreateHost(logger, hostOption)
+		err = CreateHost(logger, hostOption)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
 	},
 }
 
@@ -32,8 +36,21 @@ func CreateHost(logger *log.Logger, option create.HostOption) (err error) {
 		logger.Error.Println(err)
 		return
 	}
-	host := opsv1.NewHost("", option.Name, option.Address, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath)
-	create.CreateHost(logger, restConfig, host, option.Clear)
+	if option.PrivateKey == "" {
+		option.PrivateKey, err = utils.ReadFile(option.PrivateKeyPath)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+	}
+	// one name, one host
+	// no name, multi host
+	for _, h := range host.GetHosts(logger, option.HostOption) {
+		err = create.CreateHost(logger, restConfig, h, option.Clear)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+	}
+
 	return
 }
 
@@ -42,9 +59,9 @@ func init() {
 	hostCmd.Flags().StringVarP(&hostOption.Namespace, "namespace", "", "default", "")
 	hostCmd.Flags().StringVarP(&hostOption.Name, "name", "", "", "")
 	hostCmd.MarkFlagRequired("name")
-	hostCmd.Flags().StringVarP(&hostOption.Username, "username", "", "", "")
+	hostCmd.Flags().StringVarP(&hostOption.Username, "username", "", "root", "")
 	hostCmd.Flags().StringVarP(&hostOption.Password, "password", "", "", "")
-	hostCmd.Flags().StringVarP(&hostOption.PrivateKeyPath, "privatekeypath", "", "", "")
+	hostCmd.Flags().StringVarP(&hostOption.PrivateKeyPath, "privatekeypath", "", "~/.ssh/id_rsa", "")
 	hostCmd.Flags().StringVarP(&hostOption.Hosts, "hosts", "", "", "")
 	hostCmd.MarkFlagRequired("hosts")
 	hostCmd.Flags().IntVar(&hostOption.Port, "port", 22, "")

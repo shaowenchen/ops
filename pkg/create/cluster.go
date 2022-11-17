@@ -44,3 +44,21 @@ func CreateCluster(logger *opslog.Logger, restConfig *rest.Config, cluster *opsv
 	}
 	return
 }
+
+func CreateTask(logger *opslog.Logger, restConfig *rest.Config, t *opsv1.Task, clear bool) (err error) {
+	scheme, err := opsv1.SchemeBuilder.Build()
+	if err != nil {
+		return
+	}
+
+	client, err := runtimeClient.New(restConfig, runtimeClient.Options{Scheme: scheme})
+	if err != nil {
+		return
+	}
+	if clear {
+		err = client.Delete(context.TODO(), t)
+	} else {
+		err = client.Create(context.TODO(), t)
+	}
+	return
+}

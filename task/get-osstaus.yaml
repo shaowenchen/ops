@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: Get OS Info
   schedule: everyminute
-  hostRef: dev1
+  hostRef:
   steps:
     - name: Kernel Version
       script: uname -r
