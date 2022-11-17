@@ -3,6 +3,8 @@ package kube
 import (
 	"context"
 	"errors"
+	"time"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -10,16 +12,17 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"time"
+	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type KubeConnection struct {
 	Cluster    *opsv1.Cluster
 	Client     *kubernetes.Clientset
 	RestConfig *rest.Config
+	OpsClient  *runtimeClient.Client
 }
 
-func NewKubeConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
+func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 	if c == nil {
 		return kc, errors.New("cluster is nil")
 	}
@@ -35,9 +38,33 @@ func NewKubeConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 	if err != nil {
 		return
 	}
+	kc.BuildClients()
+	return
+}
+
+func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
+	kc = &KubeConnection{}
+	kc.RestConfig, err = utils.GetRestConfig(kubeconfigPath)
+	if err != nil {
+		return
+	}
+	kc.BuildClients()
+	return
+}
+
+func (kc *KubeConnection) BuildClients() (err error) {
 	kc.Client, err = utils.GetClientByRestconfig(kc.RestConfig)
 	if err != nil {
 		return
+	}
+	scheme, err := opsv1.SchemeBuilder.Build()
+	if err != nil {
+		return
+	}
+
+	opsClient, err := runtimeClient.New(kc.RestConfig, runtimeClient.Options{Scheme: scheme})
+	if err == nil {
+		kc.OpsClient = &opsClient
 	}
 	// try others
 	return

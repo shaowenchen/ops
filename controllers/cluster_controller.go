@@ -18,10 +18,8 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	"github.com/shaowenchen/ops/pkg/kube"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -66,11 +64,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		err := r.Client.Delete(ctx, c)
 		return ctrl.Result{}, err
 	}
-	// update status for all
-	err = r.updateStatus(ctx, c, 10)
-	if err != nil {
-		// log.Info(err.Error())
-	}
 	return ctrl.Result{}, nil
 }
 
@@ -79,32 +72,4 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Cluster{}).
 		Complete(r)
-}
-
-func (r *ClusterReconciler) updateStatus(ctx context.Context, c *opsv1.Cluster, heatSecond time.Duration) (err error) {
-
-	kc, err := kube.NewKubeConnection(c)
-	if err != nil {
-		return
-	}
-
-	go func() {
-		for range time.Tick(heatSecond * time.Second) {
-			select {
-			// case <-stopCh:
-			// 	return
-			default:
-				status, err := kc.GetStatus()
-				if err == nil {
-					c.Status = *status
-					c.Status.LastHeartStatus = "true"
-				} else {
-					c.Status.LastHeartStatus = "false"
-				}
-				err = r.Status().Update(ctx, c)
-			}
-
-		}
-	}()
-	return
 }

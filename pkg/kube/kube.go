@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"time"
 
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/utils"
 	v1 "k8s.io/api/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option ScriptOption) (err error) {
@@ -76,6 +80,19 @@ func GetNodes(logger *log.Logger, client *kubernetes.Clientset, option KubeOptio
 	}
 	if option.All {
 		nodeList = nodes.Items
+	}
+	return
+}
+
+func GetOpsClient(logger *log.Logger, restConfig *rest.Config) (client runtimeClient.Client, err error) {
+	scheme, err := opsv1.SchemeBuilder.Build()
+	if err != nil {
+		return
+	}
+
+	client, err = runtimeClient.New(restConfig, runtimeClient.Options{Scheme: scheme})
+	if err != nil {
+		return
 	}
 	return
 }

@@ -73,10 +73,10 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	// create task
-	err = r.createTask(ctx, t)
-	if err != nil {
-		log.Info(err.Error())
-	}
+	// err = r.createTask(ctx, t)
+	// if err != nil {
+	// 	log.Info(err.Error())
+	// }
 
 	return ctrl.Result{}, nil
 }

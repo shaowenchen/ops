@@ -33,6 +33,7 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/controllers"
+	opskube "github.com/shaowenchen/ops/pkg/kube"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -120,6 +121,7 @@ func main() {
 		setupLog.Error(err, "unable to set up ready check")
 		os.Exit(1)
 	}
+	go opskube.SyncUpdateStatus()
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
