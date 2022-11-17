@@ -80,7 +80,10 @@ type RunOutputStep struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Task is the Schema for the tasks API
+// +kubebuilder:printcolumn:name="Schedule",type=string,JSONPath=`.spec.schedule`
+// +kubebuilder:printcolumn:name="HostRef",type=string,JSONPath=`.spec.hostRef`
+// +kubebuilder:printcolumn:name="LastScheduleTime",type=string,JSONPath=`.status.lastScheduleTime`
+// +kubebuilder:printcolumn:name="LastStatus",type=string,JSONPath=`.status.lastStatus`
 type Task struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

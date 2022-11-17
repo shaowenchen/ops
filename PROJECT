@@ -9,7 +9,7 @@ resources:
     namespaced: true
   controller: true
   domain: chenshaowen.com
-  group: ops
+  group: crd
   kind: Host
   path: github.com/shaowenchen/ops/api/v1
   version: v1
@@ -18,8 +18,17 @@ resources:
     namespaced: true
   controller: true
   domain: chenshaowen.com
-  group: ops
+  group: crd
   kind: Task
+  path: github.com/shaowenchen/ops/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: chenshaowen.com
+  group: crd
+  kind: Cluster
   path: github.com/shaowenchen/ops/api/v1
   version: v1
 version: "3"

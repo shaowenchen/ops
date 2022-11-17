@@ -154,6 +154,5 @@ func GetRestConfig(kubeconfigPath string) (*rest.Config, error) {
 	if c, err := rest.InClusterConfig(); err == nil {
 		return c, nil
 	}
-
 	return nil, fmt.Errorf("could not locate a kubeconfig")
 }

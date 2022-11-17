@@ -15,10 +15,22 @@ spec:
     singular: task
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.schedule
+      name: Schedule
+      type: string
+    - jsonPath: .spec.hostRef
+      name: HostRef
+      type: string
+    - jsonPath: .status.lastScheduleTime
+      name: LastScheduleTime
+      type: string
+    - jsonPath: .status.lastStatus
+      name: LastStatus
+      type: string
+    name: v1
     schema:
       openAPIV3Schema:
-        description: Task is the Schema for the tasks API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
