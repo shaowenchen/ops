@@ -1,4 +1,4 @@
-package kubernetes
+package kube
 
 type KubeOption struct {
 	Kubeconfig string

@@ -1,13 +1,15 @@
-package kubernetes
+package kube
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/utils"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -16,10 +18,11 @@ func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, opti
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	_, err = RunScriptOnNode(client, node, namespacedName, option.Image, option.Content)
+	pod, err := RunScriptOnNode(client, node, namespacedName, option.Image, option.Content)
 	if err != nil {
 		logger.Error.Println(err)
 	}
+	GetPodLog(context.TODO(), logger, client, pod)
 	return
 }
 
@@ -28,20 +31,38 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	_, err = DownloadFileOnNode(client, node, namespacedName, option.Image, option.RemoteFile, option.LocalFile)
+	pod, err := DownloadFileOnNode(client, node, namespacedName, option.Image, option.RemoteFile, option.LocalFile)
 	if err != nil {
 		logger.Error.Println(err)
+	}
+	GetPodLog(context.TODO(), logger, client, pod)
+	return
+}
+
+func GetPodLog(ctx context.Context, logger *log.Logger, client *kubernetes.Clientset, pod *v1.Pod) (log string, err error) {
+	for range time.Tick(time.Second * 3) {
+		select {
+		default:
+			pod, err = client.CoreV1().Pods(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
+			if utils.IsPendingPod(pod) {
+				continue
+			}
+			log, err = utils.GetPodLog(ctx, client, pod.Namespace, pod.Name)
+			if err != nil {
+				logger.Error.Println(err)
+				return
+			}
+			logger.Info.Println(log)
+			if utils.IsStopedPod(pod) {
+				return
+			}
+		}
 	}
 	return
 }
 
-func GetClientAndNodes(logger *log.Logger, option KubeOption) (client *kubernetes.Clientset, nodeList []v1.Node, err error) {
-	client, err = utils.NewKubernetesClient(option.Kubeconfig)
-	if client == nil || err != nil {
-		logger.Error.Println(err)
-		return
-	}
-	nodes, err := utils.GetAllNodes(client)
+func GetNodes(logger *log.Logger, client *kubernetes.Clientset, option KubeOption) (nodeList []v1.Node, err error) {
+	nodes, err := utils.GetAllNodesByClient(client)
 	if err != nil {
 		logger.Error.Println(err)
 		return

@@ -1,14 +1,15 @@
-package kubernetes
+package kube
 
 import (
 	"fmt"
 
-	"github.com/shaowenchen/ops/pkg/kubernetes"
+	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-var fileOption kubernetes.FileOption
+var fileOption kube.FileOption
 
 var fileCmd = &cobra.Command{
 	Use:   "file",
@@ -23,13 +24,21 @@ var fileCmd = &cobra.Command{
 	},
 }
 
-func File(logger *log.Logger, option kubernetes.FileOption) (err error) {
-	client, nodeList, err := kubernetes.GetClientAndNodes(logger, option.KubeOption)
+func File(logger *log.Logger, option kube.FileOption) (err error) {
+	client, err := utils.NewKubernetesClient(option.Kubeconfig)
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	}
+	nodeList, err := kube.GetNodes(logger, client, option.KubeOption)
 	if err != nil {
 		logger.Error.Println(err)
 	}
+	if len(nodeList) == 0 {
+		logger.Info.Println("Please provide a node at least")
+	}
 	for _, node := range nodeList {
-		kubernetes.File(logger, client, node, option)
+		kube.File(logger, client, node, option)
 	}
 	return
 }

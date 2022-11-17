@@ -87,7 +87,7 @@ func AnalysisHostsParameter(str string) (result []string, err error) {
 	isExist := IsExistsFile(GetAbsoluteFilePath(str))
 	if isExist {
 		// try kubeconfig
-		nodeIPs, err := GetAllNodesFromKubeconfig(str)
+		nodeIPs, err := GetAllNodesByKubeconfig(str)
 		if err == nil {
 			return nodeIPs, nil
 		}

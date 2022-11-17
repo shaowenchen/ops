@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/shaowenchen/ops/cmd/cli/host"
-	"github.com/shaowenchen/ops/cmd/cli/kubernetes"
+	"github.com/shaowenchen/ops/cmd/cli/kube"
 	"github.com/shaowenchen/ops/cmd/cli/storage"
 	"github.com/shaowenchen/ops/cmd/cli/task"
 	"github.com/shaowenchen/ops/cmd/cli/upgrade"
@@ -17,7 +17,7 @@ import (
 
 func Execute() {
 	RootCmd.AddCommand(host.HostCmd)
-	RootCmd.AddCommand(kubernetes.KubernetesCmd)
+	RootCmd.AddCommand(kube.KubeCmd)
 	RootCmd.AddCommand(storage.StorageCmd)
 	RootCmd.AddCommand(task.TaskCmd)
 	RootCmd.AddCommand(version.VersionCmd)
