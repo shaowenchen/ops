@@ -57,7 +57,7 @@ func NewHostConnection(address string, port int, username string, password strin
 	}
 	c = &HostConnection{
 		Host: opsv1.NewHost(
-			"", "", address, port, username, password, privateKey, privateKeyPath,
+			"", "", address, port, username, password, privateKey, privateKeyPath, constants.DefaultTimeoutSeconds,
 		),
 	}
 	// local host
@@ -158,8 +158,8 @@ func (c *HostConnection) GetStatus(sudo bool) (status *opsv1.HostStatus, err err
 		CPUUsagePercent:  cpuUsagePercent,
 		MemTotal:         memTotal,
 		MemUsagePercent:  memUsagePercent,
-		LastHeartTime:    &metav1.Time{Time: time.Now()},
-		LastHeartStatus:  opsv1.LastHeartStatusSuccessed,
+		HeartTime:    &metav1.Time{Time: time.Now()},
+		HeartStatus:  opsv1.LastHeartStatusSuccessed,
 	}
 	return
 }

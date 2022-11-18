@@ -9,6 +9,7 @@ import (
 )
 
 const LocalHostIP = "127.0.0.1"
+const DefaultTimeoutSeconds = 10
 
 func GetCurrentUserHomeDir() string {
 	homeDirectory, err := os.UserHomeDir()

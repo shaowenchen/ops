@@ -22,14 +22,20 @@ spec:
     - jsonPath: .status.version
       name: Version
       type: string
-    - jsonPath: .status.nodeNumber
+    - jsonPath: .status.node
       name: NodeNumber
       type: string
-    - jsonPath: .status.lastHeartTime
-      name: LastHeartTime
+    - jsonPath: .status.pod
+      name: Pod
       type: string
-    - jsonPath: .status.lastHeartstatus
-      name: LastHeartStatus
+    - jsonPath: .status.runningPod
+      name: RunningPod
+      type: string
+    - jsonPath: .status.heartTime
+      name: HeartTime
+      type: string
+    - jsonPath: .status.heartstatus
+      name: HeartStatus
       type: string
     name: v1
     schema:
@@ -60,12 +66,16 @@ spec:
           status:
             description: ClusterStatus defines the observed state of Cluster
             properties:
-              lastHeartTime:
+              heartTime:
                 format: date-time
                 type: string
-              lastHeartstatus:
+              heartstatus:
                 type: string
-              nodeNumber:
+              node:
+                type: integer
+              pod:
+                type: integer
+              runningPod:
                 type: integer
               version:
                 description: 'INSERT ADDITIONAL STATUS FIELD - define observed state

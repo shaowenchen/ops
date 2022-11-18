@@ -35,10 +35,12 @@ type ClusterSpec struct {
 type ClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Version         string       `json:"version,omitempty"`
-	NodeNumber      int          `json:"nodeNumber,omitempty"`
-	LastHeartTime   *metav1.Time `json:"lastHeartTime,omitempty"`
-	LastHeartStatus string       `json:"lastHeartstatus,omitempty"`
+	Version     string       `json:"version,omitempty"`
+	Node        int          `json:"node,omitempty"`
+	Pod         int          `json:"pod,omitempty"`
+	RunningPod  int          `json:"runningPod,omitempty"`
+	HeartTime   *metav1.Time `json:"heartTime,omitempty"`
+	HeartStatus string       `json:"heartstatus,omitempty"`
 }
 
 const LastHeartStatusSuccessed = "successed"
@@ -50,9 +52,11 @@ const LastHeartStatusError = "error"
 
 // +kubebuilder:printcolumn:name="Server",type=string,JSONPath=`.spec.server`
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.status.version`
-// +kubebuilder:printcolumn:name="NodeNumber",type=string,JSONPath=`.status.nodeNumber`
-// +kubebuilder:printcolumn:name="LastHeartTime",type=string,JSONPath=`.status.lastHeartTime`
-// +kubebuilder:printcolumn:name="LastHeartStatus",type=string,JSONPath=`.status.lastHeartstatus`
+// +kubebuilder:printcolumn:name="NodeNumber",type=string,JSONPath=`.status.node`
+// +kubebuilder:printcolumn:name="Pod",type=string,JSONPath=`.status.pod`
+// +kubebuilder:printcolumn:name="RunningPod",type=string,JSONPath=`.status.runningPod`
+// +kubebuilder:printcolumn:name="HeartTime",type=string,JSONPath=`.status.heartTime`
+// +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartstatus`
 type Cluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

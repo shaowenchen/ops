@@ -9,7 +9,6 @@ import (
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -73,21 +72,22 @@ func (kc *KubeConnection) BuildClients() (err error) {
 func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
 	version, _ := kc.GetVersion()
 	nodes, _ := kc.GetNodes()
+	allPods, _ := kc.GetAllPods()
+	allRunningPods, _ := kc.GetAllRunningPods()
+
 	status = &opsv1.ClusterStatus{
-		Version:         version,
-		NodeNumber:      len(nodes.Items),
-		LastHeartTime:   &metav1.Time{Time: time.Now()},
-		LastHeartStatus: opsv1.LastHeartStatusSuccessed,
+		Version:     version,
+		Node:        len(nodes.Items),
+		Pod:         len(allPods.Items),
+		RunningPod:  len(allRunningPods.Items),
+		HeartTime:   &metav1.Time{Time: time.Now()},
+		HeartStatus: opsv1.LastHeartStatusSuccessed,
 	}
 	return
 }
 
 func (kc *KubeConnection) GetVersion() (version string, err error) {
-	discoveryClient, err := discovery.NewDiscoveryClientForConfig(kc.RestConfig)
-	if err != nil {
-		return
-	}
-	info, err := discoveryClient.ServerVersion()
+	info, err := kc.Client.DiscoveryClient.ServerVersion()
 	if err != nil {
 		return
 	}
@@ -96,4 +96,14 @@ func (kc *KubeConnection) GetVersion() (version string, err error) {
 
 func (kc *KubeConnection) GetNodes() (*corev1.NodeList, error) {
 	return kc.Client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+}
+
+func (kc *KubeConnection) GetAllPods() (allPod *corev1.PodList, err error) {
+	return kc.Client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+}
+
+func (kc *KubeConnection) GetAllRunningPods() (allPod *corev1.PodList, err error) {
+	return kc.Client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
+		FieldSelector: "status.phase=Running",
+	})
 }

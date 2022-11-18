@@ -34,11 +34,11 @@ spec:
     - jsonPath: .status.disktotal
       name: Disk
       type: string
-    - jsonPath: .status.lastHeartTime
-      name: LastHeartTime
+    - jsonPath: .status.heartTime
+      name: HeartTime
       type: string
-    - jsonPath: .status.lastHeartStatus
-      name: LastHeartStatus
+    - jsonPath: .status.heartStatus
+      name: HeartStatus
       type: string
     name: v1
     schema:
@@ -92,17 +92,17 @@ spec:
                 type: string
               distribution:
                 type: string
+              heartStatus:
+                type: string
+              heartTime:
+                format: date-time
+                type: string
               hostname:
-                type: string
-              kernelversion:
-                type: string
-              lastHeartStatus:
                 description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
                   of cluster Important: Run "make" to regenerate code after modifying
                   this file'
                 type: string
-              lastHeartTime:
-                format: date-time
+              kernelversion:
                 type: string
               memtotal:
                 type: string

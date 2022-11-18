@@ -41,8 +41,6 @@ type HostSpec struct {
 type HostStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	LastHeartStatus  string       `yaml:"lastHeartStatus,omitempty" json:"lastHeartStatus,omitempty"`
-	LastHeartTime    *metav1.Time `yaml:"lastHeartTime,omitempty" json:"lastHeartTime,omitempty"`
 	Hostname         string       `yaml:"hostname,omitempty" json:"hostname,omitempty"`
 	KernelVersion    string       `yaml:"kernelversion,omitempty" json:"kernelversion,omitempty"`
 	Distribution     string       `yaml:"distribution,omitempty" json:"distribution,omitempty"`
@@ -53,6 +51,8 @@ type HostStatus struct {
 	CPUUsagePercent  string       `yaml:"cpuusagepercent,omitempty" json:"cpuusagepercent,omitempty"`
 	MemTotal         string       `yaml:"memtotal,omitempty" json:"memtotal,omitempty"`
 	MemUsagePercent  string       `yaml:"memusagepercent,omitempty" json:"memusagepercent,omitempty"`
+	HeartStatus      string       `yaml:"heartStatus,omitempty" json:"heartStatus,omitempty"`
+	HeartTime        *metav1.Time `yaml:"heartTime,omitempty" json:"heartTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -64,8 +64,8 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cputotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memtotal`
 // +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.disktotal`
-// +kubebuilder:printcolumn:name="LastHeartTime",type=string,JSONPath=`.status.lastHeartTime`
-// +kubebuilder:printcolumn:name="LastHeartStatus",type=string,JSONPath=`.status.lastHeartStatus`
+// +kubebuilder:printcolumn:name="HeartTime",type=string,JSONPath=`.status.heartTime`
+// +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartStatus`
 type Host struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -85,7 +85,7 @@ func (h *Host) GetSpec() HostSpec {
 	return h.Spec
 }
 
-func NewHost(namespace, name, address string, port int, username, password, privatekey, privatekeypath string) (h *Host) {
+func NewHost(namespace, name, address string, port int, username, password, privateKey, privateKeyPath string, timeoutSeconds int64) (h *Host) {
 	return &Host{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
@@ -96,9 +96,9 @@ func NewHost(namespace, name, address string, port int, username, password, priv
 			Port:           port,
 			Username:       username,
 			Password:       password,
-			PrivateKey:     privatekey,
-			PrivateKeyPath: privatekeypath,
-			TimeOutSeconds: 10,
+			PrivateKey:     privateKey,
+			PrivateKeyPath: privateKeyPath,
+			TimeOutSeconds: timeoutSeconds,
 		},
 	}
 }
