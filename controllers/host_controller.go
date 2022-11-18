@@ -18,22 +18,24 @@ package controllers
 
 import (
 	"context"
-	"time"
-
+	"fmt"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"time"
 )
 
 // HostReconciler reconciles a Host object
 type HostReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme              *runtime.Scheme
+	timeTickerStopChans map[string]chan bool
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=hosts,verbs=get;list;watch;create;update;patch;delete
@@ -50,30 +52,32 @@ type HostReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	_ = log.FromContext(ctx)
 
 	h := &opsv1.Host{}
 	err := r.Get(ctx, req.NamespacedName, h)
 
+	//if delete, stop ticker
+	if apierrors.IsNotFound(err) {
+		return ctrl.Result{}, r.DeleteHost(ctx, req.NamespacedName)
+	}
+
 	if err != nil {
-		log.Info(err.Error())
-		if apierrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
 		return ctrl.Result{}, err
 	}
-	// delete task
-	if !h.DeletionTimestamp.IsZero() {
-		//Todo: stop updateStatus
-		err := r.Client.Delete(ctx, h)
-		return ctrl.Result{}, err
-	}
-	// update status for all
-	err = r.updateStatus(ctx, h, 60)
-	if err != nil {
-		log.Info(err.Error())
-	}
+
+	// add timeticker
+	r.AddTimeTicker(ctx, h)
+
 	return ctrl.Result{}, nil
+}
+
+func (r *HostReconciler) DeleteHost(ctx context.Context, namespacedName types.NamespacedName) error {
+	_, ok := r.timeTickerStopChans[namespacedName.String()]
+	if ok {
+		r.timeTickerStopChans[namespacedName.String()] <- true
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -83,27 +87,56 @@ func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host, heatSecond time.Duration) (err error) {
-	hc, err := host.NewHostConnection(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
-
+func (r *HostReconciler) AddTimeTicker(ctx context.Context, h *opsv1.Host) (err error) {
+	// if ticker exist, return
+	_, ok := r.timeTickerStopChans[h.GetUniqueKey()]
+	if ok {
+		return
+	}
+	if r.timeTickerStopChans == nil {
+		r.timeTickerStopChans = make(map[string]chan bool)
+	}
+	r.timeTickerStopChans[h.GetUniqueKey()] = make(chan bool)
+	// create ticker
 	go func() {
-		for range time.Tick(heatSecond * time.Second) {
+		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
+		for {
 			select {
-			// case <-stopCh:
-			// 	return
-			default:
-				err := hc.UpdateStatus(false)
-				if err == nil {
-					h.Status = hc.Host.Status
-					h.Status.HeartStatus = true
-				} else {
-					h.Status.HeartStatus = false
-				}
-				h.Status.LatestHeartTime = &v1.Time{Time: time.Now()}
-				err = r.Status().Update(ctx, h)
+			case <-r.timeTickerStopChans[h.GetUniqueKey()]:
+				ticker.Stop()
+				delete(r.timeTickerStopChans, h.GetUniqueKey())
+				log.FromContext(ctx).Info(fmt.Sprintf("stop ticker for host %s", h.GetUniqueKey()))
+				return
+			case <-ticker.C:
+				r.updateStatus(ctx, h)
 			}
-
 		}
 	}()
+	return
+}
+
+func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host) (err error) {
+	hc, err := host.NewHostConnection(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
+	if err != nil {
+		return
+	}
+	status, err := hc.GetStatus(true)
+	if err != nil {
+		return
+	}
+	lastH := &opsv1.Host{}
+	err = r.Get(ctx, types.NamespacedName{Name: h.Name, Namespace: h.Namespace}, lastH)
+	if apierrors.IsNotFound(err) {
+		return
+	}
+	if err != nil {
+		log.FromContext(ctx).Error(err, "failed to get last host")
+		return
+	}
+	lastH.Status = *status
+	err = r.Client.Status().Update(ctx, lastH)
+	if err != nil {
+		log.FromContext(ctx).Error(err, "update host status error")
+	}
 	return
 }

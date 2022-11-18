@@ -6,12 +6,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	scp "github.com/bramvdbogaerde/go-scp"
-	"github.com/pkg/errors"
-	"github.com/shaowenchen/ops/api/v1"
-	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/utils"
-	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"net"
 	"os"
@@ -21,10 +15,18 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	scp "github.com/bramvdbogaerde/go-scp"
+	"github.com/pkg/errors"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/utils"
+	"golang.org/x/crypto/ssh"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type HostConnection struct {
-	Host      *v1.Host
+	Host      *opsv1.Host
 	scpclient scp.Client
 	sshclient *ssh.Client
 }
@@ -41,7 +43,7 @@ func NewHostConnection(address string, port int, username string, password strin
 		username = constants.GetCurrentUser()
 	}
 	c = &HostConnection{
-		Host: v1.NewHost(
+		Host: opsv1.NewHost(
 			"", "", address, port, username, password, privateKey, privateKeyPath,
 		),
 	}
@@ -121,7 +123,7 @@ func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string
 	return
 }
 
-func (c *HostConnection) UpdateStatus(sudo bool) (err error) {
+func (c *HostConnection) GetStatus(sudo bool) (status *opsv1.HostStatus, err error) {
 	hostname, _ := c.getHosname(sudo)
 	kerneVersion, _ := c.getKernelVersion(sudo)
 	distribution, _ := c.getDistribution(sudo)
@@ -132,17 +134,20 @@ func (c *HostConnection) UpdateStatus(sudo bool) (err error) {
 	cpuUsagePercent, _ := c.getCPUUsagePercent(sudo)
 	memTotal, _ := c.getMemTotal(sudo)
 	memUsagePercent, _ := c.getMemUsagePercent(sudo)
-
-	c.Host.Status.Hostname = hostname
-	c.Host.Status.KernelVersion = kerneVersion
-	c.Host.Status.Distribution = distribution
-	c.Host.Status.DiskTotal = diskTotal
-	c.Host.Status.DiskUsagePercent = diskUsagePercent
-	c.Host.Status.CPUTotal = cpuTotal
-	c.Host.Status.CPULoad1 = cpuLoad1
-	c.Host.Status.CPUUsagePercent = cpuUsagePercent
-	c.Host.Status.MemTotal = memTotal
-	c.Host.Status.MemUsagePercent = memUsagePercent
+	status = &opsv1.HostStatus{
+		Hostname:         hostname,
+		KernelVersion:    kerneVersion,
+		Distribution:     distribution,
+		DiskTotal:        diskTotal,
+		DiskUsagePercent: diskUsagePercent,
+		CPUTotal:         cpuTotal,
+		CPULoad1:         cpuLoad1,
+		CPUUsagePercent:  cpuUsagePercent,
+		MemTotal:         memTotal,
+		MemUsagePercent:  memUsagePercent,
+		LastHeartTime:    &metav1.Time{Time: time.Now()},
+		LastHeartStatus:  opsv1.LastHeartStatusSuccessed,
+	}
 	return
 }
 

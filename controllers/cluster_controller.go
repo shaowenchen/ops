@@ -18,10 +18,16 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opskube "github.com/shaowenchen/ops/pkg/kube"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -30,7 +36,8 @@ import (
 // ClusterReconciler reconciles a Cluster object
 type ClusterReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme              *runtime.Scheme
+	timeTickerStopChans map[string]chan bool
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=clusters,verbs=get;list;watch;create;update;patch;delete
@@ -52,19 +59,26 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	c := &opsv1.Cluster{}
 	err := r.Get(ctx, req.NamespacedName, c)
 
+	//if deleted, stop ticker
+	if apierrors.IsNotFound(err) {
+		return ctrl.Result{}, r.DeleteCluster(ctx, req.NamespacedName)
+	}
+
 	if err != nil {
-		if apierrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
 		return ctrl.Result{}, err
 	}
-	// delete cluster
-	if !c.DeletionTimestamp.IsZero() {
-		//Todo: stop updateStatus
-		err := r.Client.Delete(ctx, c)
-		return ctrl.Result{}, err
-	}
+	// add timeticker
+	r.AddTimeTicker(ctx, c)
+
 	return ctrl.Result{}, nil
+}
+
+func (r *ClusterReconciler) DeleteCluster(ctx context.Context, namespacedName types.NamespacedName) error {
+	_, ok := r.timeTickerStopChans[namespacedName.String()]
+	if ok {
+		r.timeTickerStopChans[namespacedName.String()] <- true
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -72,4 +86,60 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Cluster{}).
 		Complete(r)
+}
+
+func (r *ClusterReconciler) AddTimeTicker(ctx context.Context, c *opsv1.Cluster) {
+	// if ticker exist, return
+	_, ok := r.timeTickerStopChans[c.GetUniqueKey()]
+	if ok {
+		return
+	}
+	if r.timeTickerStopChans == nil {
+		r.timeTickerStopChans = make(map[string]chan bool)
+	}
+	r.timeTickerStopChans[c.GetUniqueKey()] = make(chan bool)
+	// create ticker
+	go func() {
+		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
+		for {
+			select {
+			case <-r.timeTickerStopChans[c.GetUniqueKey()]:
+				ticker.Stop()
+				delete(r.timeTickerStopChans, c.GetUniqueKey())
+				log.FromContext(ctx).Info(fmt.Sprintf("stop ticker for cluster %s", c.GetUniqueKey()))
+				return
+			case <-ticker.C:
+				r.updateStatus(ctx, c)
+			}
+		}
+	}()
+	return
+}
+
+func (r *ClusterReconciler) updateStatus(ctx context.Context, c *opsv1.Cluster) (err error) {
+	kc, err := opskube.NewClusterConnection(c)
+	if err != nil {
+		log.FromContext(ctx).Error(err, "failed to create cluster connection")
+		return
+	}
+	stauts, err := kc.GetStatus()
+	if err != nil {
+		log.FromContext(ctx).Error(err, "failed to get cluster status")
+		return
+	}
+	lastC := &opsv1.Cluster{}
+	err = r.Get(ctx, types.NamespacedName{Name: c.Name, Namespace: c.Namespace}, lastC)
+	if apierrors.IsNotFound(err) {
+		return
+	}
+	if err != nil {
+		log.FromContext(ctx).Error(err, "failed to get last cluster")
+		return
+	}
+	lastC.Status = *stauts
+	err = r.Client.Status().Update(ctx, lastC)
+	if err != nil {
+		log.FromContext(ctx).Error(err, "update cluster status error")
+	}
+	return
 }

@@ -10,6 +10,8 @@ const NodeKeyRoleWorker = "node-role.kubernetes.io/worker"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
+const SyncResourceStatusHeatSeconds = 60
+
 const (
 	ContainersReady string = "ContainersReady"
 	PodInitialized  string = "Initialized"

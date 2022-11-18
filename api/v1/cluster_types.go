@@ -18,6 +18,7 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -39,6 +40,10 @@ type ClusterStatus struct {
 	LastHeartTime   *metav1.Time `json:"lastHeartTime,omitempty"`
 	LastHeartStatus string       `json:"lastHeartstatus,omitempty"`
 }
+
+const LastHeartStatusSuccessed = "successed"
+const LastHeartStatusFailed = "failed"
+const LastHeartStatusError = "error"
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
@@ -62,6 +67,13 @@ func (c *Cluster) GetSpec() *ClusterSpec {
 
 func (c *Cluster) GetStatus() *ClusterStatus {
 	return &c.Status
+}
+
+func (c *Cluster) GetUniqueKey() string {
+	return types.NamespacedName{
+		Namespace: c.Namespace,
+		Name:      c.Name,
+	}.String()
 }
 
 func NewCluster(namespace, name, server, config, token string) *Cluster {

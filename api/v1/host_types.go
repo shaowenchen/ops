@@ -18,6 +18,7 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -40,8 +41,8 @@ type HostSpec struct {
 type HostStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	HeartStatus      bool         `yaml:"heartstatus,omitempty" json:"heartstatus,omitempty"`
-	LatestHeartTime  *metav1.Time `yaml:"latesthearttime,omitempty" json:"latesthearttime,omitempty"`
+	LastHeartStatus  string       `yaml:"lastHeartStatus,omitempty" json:"lastHeartStatus,omitempty"`
+	LastHeartTime    *metav1.Time `yaml:"lastHeartTime,omitempty" json:"lastHeartTime,omitempty"`
 	Hostname         string       `yaml:"hostname,omitempty" json:"hostname,omitempty"`
 	KernelVersion    string       `yaml:"kernelversion,omitempty" json:"kernelversion,omitempty"`
 	Distribution     string       `yaml:"distribution,omitempty" json:"distribution,omitempty"`
@@ -63,14 +64,21 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cputotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memtotal`
 // +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.disktotal`
-// +kubebuilder:printcolumn:name="LatestHeartTime",type=string,JSONPath=`.status.latesthearttime`
-// +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartstatus`
+// +kubebuilder:printcolumn:name="LastHeartTime",type=string,JSONPath=`.status.lastHeartTime`
+// +kubebuilder:printcolumn:name="LastHeartStatus",type=string,JSONPath=`.status.lastHeartStatus`
 type Host struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   HostSpec   `json:"spec,omitempty"`
 	Status HostStatus `json:"status,omitempty"`
+}
+
+func (h *Host) GetUniqueKey() string {
+	return types.NamespacedName{
+		Namespace: h.Namespace,
+		Name:      h.Name,
+	}.String()
 }
 
 func (h *Host) GetSpec() HostSpec {

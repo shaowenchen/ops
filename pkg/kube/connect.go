@@ -74,9 +74,10 @@ func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
 	version, _ := kc.GetVersion()
 	nodes, _ := kc.GetNodes()
 	status = &opsv1.ClusterStatus{
-		Version:       version,
-		NodeNumber:    len(nodes.Items),
-		LastHeartTime: &metav1.Time{Time: time.Now()},
+		Version:         version,
+		NodeNumber:      len(nodes.Items),
+		LastHeartTime:   &metav1.Time{Time: time.Now()},
+		LastHeartStatus: opsv1.LastHeartStatusSuccessed,
 	}
 	return
 }
