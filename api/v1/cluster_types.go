@@ -43,9 +43,9 @@ type ClusterStatus struct {
 	HeartStatus string       `json:"heartstatus,omitempty"`
 }
 
-const LastHeartStatusSuccessed = "successed"
-const LastHeartStatusFailed = "failed"
-const LastHeartStatusError = "error"
+const LastHeartStatusSuccessed = "SUCCESSED"
+const LastHeartStatusFailed = "FAILED"
+const LastHeartStatusError = "ERROR"
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
@@ -53,8 +53,8 @@ const LastHeartStatusError = "error"
 // +kubebuilder:printcolumn:name="Server",type=string,JSONPath=`.spec.server`
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.status.version`
 // +kubebuilder:printcolumn:name="Node",type=string,JSONPath=`.status.node`
-// +kubebuilder:printcolumn:name="Pod",type=string,JSONPath=`.status.pod`
 // +kubebuilder:printcolumn:name="RunningPod",type=string,JSONPath=`.status.runningPod`
+// +kubebuilder:printcolumn:name="Pod",type=string,JSONPath=`.status.pod`
 // +kubebuilder:printcolumn:name="HeartTime",type=string,JSONPath=`.status.heartTime`
 // +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartstatus`
 type Cluster struct {

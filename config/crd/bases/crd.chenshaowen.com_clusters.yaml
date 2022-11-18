@@ -25,11 +25,11 @@ spec:
     - jsonPath: .status.node
       name: Node
       type: string
-    - jsonPath: .status.pod
-      name: Pod
-      type: string
     - jsonPath: .status.runningPod
       name: RunningPod
+      type: string
+    - jsonPath: .status.pod
+      name: Pod
       type: string
     - jsonPath: .status.heartTime
       name: HeartTime

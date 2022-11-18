@@ -26,7 +26,6 @@ func CreateHost(logger *opslog.Logger, restConfig *rest.Config, host *opsv1.Host
 }
 
 func CreateCluster(logger *opslog.Logger, restConfig *rest.Config, cluster *opsv1.Cluster, clear bool) (err error) {
-	cluster.Spec.Server = restConfig.Host
 	client, err := opskube.GetOpsClient(logger, restConfig)
 	if err != nil {
 		return

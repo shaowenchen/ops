@@ -46,6 +46,14 @@ func GetRestConfig(kubeconfigPath string) (*rest.Config, error) {
 	return nil, fmt.Errorf("could not locate a kubeconfig")
 }
 
+func GetServerUrl(kubeconfigPath string) (string, error) {
+	restConfig, err := GetRestConfig(kubeconfigPath)
+	if err != nil {
+		return "", err
+	}
+	return restConfig.Host, nil
+}
+
 func NewConrollerRuntimeClient(kubeconfigPath string) (c runtimeClient.Client, err error) {
 	restConfig, err := GetRestConfig(kubeconfigPath)
 	if err != nil {

@@ -36,6 +36,9 @@ func CreateCluster(logger *log.Logger, option create.ClusterOption) (err error) 
 	if err != nil {
 		return
 	}
+	if option.Server == "" {
+		option.Server, _ = utils.GetServerUrl(option.Config)
+	}
 	option.Config = utils.EncodingStringToBase64(config)
 	cluster := opsv1.NewCluster(option.Namespace, option.Name, option.Server, option.Config, option.Token)
 	err = create.CreateCluster(logger, restConfig, cluster, option.Clear)
