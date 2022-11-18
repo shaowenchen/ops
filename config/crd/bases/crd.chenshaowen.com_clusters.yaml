@@ -23,7 +23,7 @@ spec:
       name: Version
       type: string
     - jsonPath: .status.node
-      name: NodeNumber
+      name: Node
       type: string
     - jsonPath: .status.pod
       name: Pod

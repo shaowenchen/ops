@@ -52,7 +52,7 @@ const LastHeartStatusError = "error"
 
 // +kubebuilder:printcolumn:name="Server",type=string,JSONPath=`.spec.server`
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.status.version`
-// +kubebuilder:printcolumn:name="NodeNumber",type=string,JSONPath=`.status.node`
+// +kubebuilder:printcolumn:name="Node",type=string,JSONPath=`.status.node`
 // +kubebuilder:printcolumn:name="Pod",type=string,JSONPath=`.status.pod`
 // +kubebuilder:printcolumn:name="RunningPod",type=string,JSONPath=`.status.runningPod`
 // +kubebuilder:printcolumn:name="HeartTime",type=string,JSONPath=`.status.heartTime`

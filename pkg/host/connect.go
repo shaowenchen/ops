@@ -140,6 +140,7 @@ func (c *HostConnection) GetStatus(sudo bool) (status *opsv1.HostStatus, err err
 	hostname, _ := c.getHosname(sudo)
 	kerneVersion, _ := c.getKernelVersion(sudo)
 	distribution, _ := c.getDistribution(sudo)
+	arch, _ := c.getArch(sudo)
 	diskTotal, _ := c.getDiskTotal(sudo)
 	diskUsagePercent, _ := c.getDiskUsagePercent(sudo)
 	cpuTotal, _ := c.getCPUTotal(sudo)
@@ -151,6 +152,7 @@ func (c *HostConnection) GetStatus(sudo bool) (status *opsv1.HostStatus, err err
 		Hostname:         hostname,
 		KernelVersion:    kerneVersion,
 		Distribution:     distribution,
+		Arch:             arch,
 		DiskTotal:        diskTotal,
 		DiskUsagePercent: diskUsagePercent,
 		CPUTotal:         cpuTotal,
@@ -548,6 +550,14 @@ func (c *HostConnection) getHosname(sudo bool) (stdout string, err error) {
 
 func (c *HostConnection) getDiskTotal(sudo bool) (stdout string, err error) {
 	stdout, _, err = c.exec(sudo, utils.ScriptDiskTotal())
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *HostConnection) getArch(sudo bool) (stdout string, err error) {
+	stdout, _, err = c.exec(sudo, utils.ScriptArch())
 	if err != nil {
 		return
 	}

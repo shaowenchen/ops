@@ -79,6 +79,10 @@ func ScriptKernelVersion() string {
 	return `uname -r`
 }
 
+func ScriptArch() string {
+	return `uname -m`
+}
+
 func ScriptDistribution() string {
 	return `cat /etc/os-release 2>/dev/null | grep ^ID= | awk -F= '{print $2}' | sed 's/\"//g'`
 }

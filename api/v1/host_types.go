@@ -44,6 +44,7 @@ type HostStatus struct {
 	Hostname         string       `yaml:"hostname,omitempty" json:"hostname,omitempty"`
 	KernelVersion    string       `yaml:"kernelversion,omitempty" json:"kernelversion,omitempty"`
 	Distribution     string       `yaml:"distribution,omitempty" json:"distribution,omitempty"`
+	Arch             string       `yaml:"arch,omitempty" json:"arch,omitempty"`
 	DiskTotal        string       `yaml:"disktotal,omitempty" json:"disktotal,omitempty"`
 	DiskUsagePercent string       `yaml:"diskusagepercent,omitempty" json:"diskusagepercent,omitempty"`
 	CPUTotal         string       `yaml:"cputotal,omitempty" json:"cputotal,omitempty"`
@@ -61,6 +62,7 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="Hostname",type=string,JSONPath=`.status.hostname`
 // +kubebuilder:printcolumn:name="Address",type=string,JSONPath=`.spec.address`
 // +kubebuilder:printcolumn:name="Distribution",type=string,JSONPath=`.status.distribution`
+// +kubebuilder:printcolumn:name="Arch",type=string,JSONPath=`.status.arch`
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cputotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memtotal`
 // +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.disktotal`
