@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-IMG ?= shaowenchen/opscontroller:latest
+IMG ?= shaowenchen/ops-controller-manager:latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.25.0
 
@@ -61,7 +61,7 @@ test: manifests generate fmt vet envtest ## Run tests.
 
 .PHONY: build
 build: generate fmt vet ## Build manager binary.
-	go build -o bin/opscontroller main.go
+	go build -o bin/ops-controller-manager main.go
 
 .PHONY: run
 run: manifests generate fmt vet ## Run a controller from your host.

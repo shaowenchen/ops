@@ -18,12 +18,12 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: shaowenchen/opsserver:latest
+          tags: shaowenchen/ops-server:latest
           file: Dockerfile-Server
       - name: Build and push Controller
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: shaowenchen/opscontroller:latest
+          tags: shaowenchen/ops-controller-manager:latest
           file: Dockerfile
 

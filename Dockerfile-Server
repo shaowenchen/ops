@@ -1,10 +1,10 @@
 FROM golang:1.19 as builder
 WORKDIR /workspace
 COPY . .
-RUN go build  -o bin/opsserver cmd/server/main.go
+RUN go build  -o bin/ops-server cmd/server/main.go
 
 FROM ubuntu:latest
 WORKDIR /
-COPY --from=builder /workspace/bin/opsserver .
-ENTRYPOINT ["/opsserver"]
+COPY --from=builder /workspace/bin/ops-server .
+ENTRYPOINT ["/ops-server"]
 Expose 8080

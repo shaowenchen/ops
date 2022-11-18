@@ -158,8 +158,8 @@ func (c *HostConnection) GetStatus(sudo bool) (status *opsv1.HostStatus, err err
 		CPUUsagePercent:  cpuUsagePercent,
 		MemTotal:         memTotal,
 		MemUsagePercent:  memUsagePercent,
-		HeartTime:    &metav1.Time{Time: time.Now()},
-		HeartStatus:  opsv1.LastHeartStatusSuccessed,
+		HeartTime:        &metav1.Time{Time: time.Now()},
+		HeartStatus:      opsv1.LastHeartStatusSuccessed,
 	}
 	return
 }
