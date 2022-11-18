@@ -99,6 +99,7 @@ func (r *ClusterReconciler) AddTimeTicker(ctx context.Context, c *opsv1.Cluster)
 	}
 	r.timeTickerStopChans[c.GetUniqueKey()] = make(chan bool)
 	// create ticker
+	log.FromContext(ctx).Info(fmt.Sprintf("start ticker for cluster %s", c.GetUniqueKey()))
 	go func() {
 		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
 		for {

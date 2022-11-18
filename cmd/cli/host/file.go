@@ -22,6 +22,9 @@ var fileCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
+		fileOpt.Password = utils.EncodingStringToBase64(fileOpt.Password)
+		privateKey, _ := utils.ReadFile(fileOpt.PrivateKeyPath)
+		fileOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		File(logger, fileOpt)
 	},
 }

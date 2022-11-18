@@ -31,6 +31,19 @@ type HostConnection struct {
 	sshclient *ssh.Client
 }
 
+func NewHostConnectionBase64(address string, port int, username string, passwordBase64 string, privateKeyBase64 string, privateKeyPath string) (c *HostConnection, err error) {
+	password, err := utils.DecodingBase64ToString(passwordBase64)
+	if err != nil {
+		return nil, err
+	}
+	privateKey, err := utils.DecodingBase64ToString(privateKeyBase64)
+	if err != nil {
+
+		return nil, err
+	}
+	return NewHostConnection(address, port, username, password, privateKey, privateKeyPath)
+}
+
 func NewHostConnection(address string, port int, username string, password string, privateKey string, privateKeyPath string) (c *HostConnection, err error) {
 
 	if len(privateKeyPath) == 0 {

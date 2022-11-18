@@ -41,7 +41,7 @@ func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option TaskOption
 	globalVariables["result"] = ""
 	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
 	h = fillHostByOption(h, &option.HostOption)
-	c, err := host.NewHostConnection(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
+	c, err := host.NewHostConnectionBase64(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
 	if err != nil {
 		logger.Error.Println(err)
 		return t, err

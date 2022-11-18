@@ -98,6 +98,7 @@ func (r *HostReconciler) AddTimeTicker(ctx context.Context, h *opsv1.Host) (err 
 	}
 	r.timeTickerStopChans[h.GetUniqueKey()] = make(chan bool)
 	// create ticker
+	log.FromContext(ctx).Info(fmt.Sprintf("start ticker for host %s", h.GetUniqueKey()))
 	go func() {
 		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
 		for {
@@ -116,7 +117,7 @@ func (r *HostReconciler) AddTimeTicker(ctx context.Context, h *opsv1.Host) (err 
 }
 
 func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host) (err error) {
-	hc, err := host.NewHostConnection(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
+	hc, err := host.NewHostConnectionBase64(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
 	if err != nil {
 		return
 	}

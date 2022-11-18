@@ -5,6 +5,7 @@ import (
 
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +20,9 @@ var scriptCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
+		scriptOpt.Password = utils.EncodingStringToBase64(scriptOpt.Password)
+		privateKey, _ := utils.ReadFile(scriptOpt.PrivateKeyPath)
+		scriptOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		Script(logger, scriptOpt)
 	},
 }

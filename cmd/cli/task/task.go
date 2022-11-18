@@ -29,6 +29,9 @@ var TaskCmd = &cobra.Command{
 			fmt.Printf("--filepath is must provided")
 			return
 		}
+		taskOption.Password = utils.EncodingStringToBase64(taskOption.Password)
+		privateKey, _ := utils.ReadFile(taskOption.PrivateKeyPath)
+		taskOption.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		Task(logger, taskOption)
 	},
 }

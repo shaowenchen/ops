@@ -38,10 +38,12 @@ func CreateHost(logger *log.Logger, option create.HostOption) (err error) {
 	}
 	if option.PrivateKey == "" {
 		option.PrivateKey, err = utils.ReadFile(option.PrivateKeyPath)
+		option.PrivateKey = utils.EncodingStringToBase64(option.PrivateKey)
 		if err != nil {
 			logger.Error.Println(err)
 		}
 	}
+	option.Password = utils.EncodingStringToBase64(option.Password)
 	// one name, one host
 	// no name, multi host
 	for _, h := range host.GetHosts(logger, option.HostOption) {
