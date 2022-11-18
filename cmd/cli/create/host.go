@@ -44,9 +44,14 @@ func CreateHost(logger *log.Logger, option create.HostOption) (err error) {
 		}
 	}
 	option.Password = utils.EncodingStringToBase64(option.Password)
-	// one name, one host
-	// no name, multi host
-	for _, h := range host.GetHosts(logger, option.HostOption) {
+	hs := host.GetHosts(logger, option.HostOption)
+
+	for _, h := range hs {
+		// one name, one host
+		if len(hs) == 1 {
+			hs[0].Name = option.Name
+		}
+		// no name, multi host
 		err = create.CreateHost(logger, restConfig, h, option.Clear)
 		if err != nil {
 			logger.Error.Println(err)

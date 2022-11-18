@@ -121,7 +121,7 @@ func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host) (err e
 	if err != nil {
 		return
 	}
-	status, err := hc.GetStatus(true)
+	status, err := hc.GetStatus(false)
 	if err != nil {
 		return
 	}
