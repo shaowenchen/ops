@@ -29,6 +29,7 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/task"
 )
 
@@ -102,9 +103,9 @@ func (r *TaskReconciler) createTask(ctx context.Context, t *opsv1.Task) (err err
 }
 
 func (r *TaskReconciler) analysisHosts(ctx context.Context, t *opsv1.Task) (hs []*opsv1.Host, err error) {
-	if t.GetSpec().HostRef != "" {
+	if t.GetSpec().Inventory != "" {
 		h := &opsv1.Host{}
-		err = r.Client.Get(ctx, types.NamespacedName{Name: t.GetSpec().HostRef, Namespace: t.Namespace}, h)
+		err = r.Client.Get(ctx, types.NamespacedName{Name: t.GetSpec().Inventory, Namespace: t.Namespace}, h)
 		if err != nil {
 			return
 		} else {
@@ -119,7 +120,7 @@ func (r *TaskReconciler) analysisHosts(ctx context.Context, t *opsv1.Task) (hs [
 func (r *TaskReconciler) runTask(ctx context.Context, t *opsv1.Task, hs []*opsv1.Host) (err error) {
 	logger, _ := opslog.NewCliLogger(true, false)
 	for _, h := range hs {
-		task.RunTaskOnHost(logger, t, h, task.TaskOption{})
+		task.RunTaskOnHost(logger, t, h, option.TaskOption{})
 		r.Client.Status().Update(ctx, t)
 	}
 	return
@@ -135,7 +136,7 @@ func (r *TaskReconciler) runTaskPeriodic(ctx context.Context, t *opsv1.Task, hs 
 			case <-ticker.C:
 				logger, _ := opslog.NewCliLogger(true, false)
 				for _, h := range hs {
-					task.RunTaskOnHost(logger, t, h, task.TaskOption{})
+					task.RunTaskOnHost(logger, t, h, option.TaskOption{})
 				}
 			case <-quit:
 				ticker.Stop()

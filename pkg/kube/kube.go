@@ -8,6 +8,7 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/log"
+	option "github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	v1 "k8s.io/api/core/v1"
 
@@ -17,12 +18,12 @@ import (
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option ScriptOption) (err error) {
+func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.ScriptOption) (err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := RunScriptOnNode(client, node, namespacedName, option.Image, option.Content)
+	pod, err := RunScriptOnNode(client, node, namespacedName, option.RuntimeImage, option.Script)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -30,12 +31,12 @@ func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, opti
 	return
 }
 
-func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option FileOption) (err error) {
+func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.FileOption, kubeOption option.KubeOption) (err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := DownloadFileOnNode(client, node, namespacedName, option.Image, option.RemoteFile, option.LocalFile)
+	pod, err := DownloadFileOnNode(client, node, namespacedName, kubeOption.RuntimeImage, option.RemoteFile, option.LocalFile)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -65,7 +66,7 @@ func GetPodLog(ctx context.Context, logger *log.Logger, client *kubernetes.Clien
 	return
 }
 
-func GetNodes(logger *log.Logger, client *kubernetes.Clientset, option KubeOption) (nodeList []v1.Node, err error) {
+func GetNodes(logger *log.Logger, client *kubernetes.Clientset, option option.KubeOption) (nodeList []v1.Node, err error) {
 	nodes, err := utils.GetAllNodesByClient(client)
 	if err != nil {
 		logger.Error.Println(err)

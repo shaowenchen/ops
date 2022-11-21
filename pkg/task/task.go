@@ -9,6 +9,7 @@ import (
 	"github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
@@ -16,7 +17,7 @@ import (
 	"path/filepath"
 )
 
-func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option TaskOption) (*v1.Task, error) {
+func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option option.TaskOption) (*v1.Task, error) {
 	globalVariables := make(map[string]string)
 	// cli > env > yaml
 	utils.MergeMap(globalVariables, t.Spec.Variables)
@@ -40,7 +41,7 @@ func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option TaskOption
 
 	globalVariables["result"] = ""
 	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
-	h = fillHostByOption(h, &option.HostOption)
+	// h = fillHostByOption(h, &hostOpt)
 	c, err := host.NewHostConnectionBase64(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
 	if err != nil {
 		logger.Error.Println(err)
@@ -85,7 +86,7 @@ func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option TaskOption
 	return t, err
 }
 
-func fillHostByOption(h *v1.Host, option *host.HostOption) *v1.Host {
+func fillHostByOption(h *v1.Host, option *option.HostOption) *v1.Host {
 	if option.Username != "" && h.GetSpec().Username == "" {
 		h.Spec.Username = option.Username
 	}
@@ -177,18 +178,18 @@ func RenderWhen(when string, vars map[string]string) string {
 	return when
 }
 
-func GetStepFunc(step v1.Step) func(t *v1.Task, c *host.HostConnection, step v1.Step, to TaskOption) (string, bool) {
+func GetStepFunc(step v1.Step) func(t *v1.Task, c *host.HostConnection, step v1.Step, to option.TaskOption) (string, bool) {
 	if len(step.Script) > 0 {
 		return runStepScript
 	}
 	return runStepCopy
 }
 
-func runStepScript(t *v1.Task, c *host.HostConnection, step v1.Step, option TaskOption) (result string, isSuccessed bool) {
+func runStepScript(t *v1.Task, c *host.HostConnection, step v1.Step, option option.TaskOption) (result string, isSuccessed bool) {
 	stdout, exit, _ := c.Script(option.Sudo, step.Script)
 	return stdout, exit == 0
 }
 
-func runStepCopy(t *v1.Task, c *host.HostConnection, step v1.Step, option TaskOption) (result string, isSuccessed bool) {
+func runStepCopy(t *v1.Task, c *host.HostConnection, step v1.Step, option option.TaskOption) (result string, isSuccessed bool) {
 	return "", c.File(option.Sudo, step.Direction, step.LocalFile, step.RemoteFile) == nil
 }

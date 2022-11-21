@@ -6,11 +6,10 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/create"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
-
-var clusterOption create.ClusterOption
 
 var clusterCmd = &cobra.Command{
 	Use:   "cluster",
@@ -21,27 +20,27 @@ var clusterCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		CreateCluster(logger, clusterOption)
+		CreateCluster(logger, createClusterOpt, inventory)
 	},
 }
 
-func CreateCluster(logger *log.Logger, option create.ClusterOption) (err error) {
-	option.Kubeconfig = utils.GetAbsoluteFilePath(option.Kubeconfig)
-	restConfig, err := utils.GetRestConfig(option.Kubeconfig)
+func CreateCluster(logger *log.Logger, clusterOpt option.CreateClusterOption, inventory string) (err error) {
+	inventory = utils.GetAbsoluteFilePath(inventory)
+	restConfig, err := utils.GetRestConfig(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	config, err := utils.ReadFile(option.Config)
+	config, err := utils.ReadFile(clusterOpt.Config)
 	if err != nil {
 		return
 	}
-	if option.Server == "" {
-		option.Server, _ = utils.GetServerUrl(option.Config)
+	if clusterOpt.Server == "" {
+		clusterOpt.Server, _ = utils.GetServerUrl(clusterOpt.Config)
 	}
-	option.Config = utils.EncodingStringToBase64(config)
-	cluster := opsv1.NewCluster(option.Namespace, option.Name, option.Server, option.Config, option.Token)
-	err = create.CreateCluster(logger, restConfig, cluster, option.Clear)
+	clusterOpt.Config = utils.EncodingStringToBase64(config)
+	cluster := opsv1.NewCluster(clusterOpt.Namespace, clusterOpt.Name, clusterOpt.Server, clusterOpt.Config, clusterOpt.Token)
+	err = create.CreateCluster(logger, restConfig, cluster, clusterOpt.Clear)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -49,11 +48,10 @@ func CreateCluster(logger *log.Logger, option create.ClusterOption) (err error) 
 }
 
 func init() {
-	clusterCmd.Flags().StringVarP(&clusterOption.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
-	clusterCmd.Flags().StringVarP(&clusterOption.Namespace, "namespace", "", "default", "")
-	clusterCmd.Flags().StringVarP(&clusterOption.Name, "name", "", "", "")
+	clusterCmd.Flags().StringVarP(&inventory, "invenroty", "i", "", "")
+	clusterCmd.Flags().StringVarP(&createHostOpt.Namespace, "namespace", "", "default", "")
+	clusterCmd.Flags().StringVarP(&createHostOpt.Name, "name", "", "", "")
 	clusterCmd.MarkFlagRequired("name")
-	clusterCmd.Flags().StringVarP(&clusterOption.Config, "config", "", "", "")
-	clusterCmd.MarkFlagRequired("config")
-	clusterCmd.Flags().BoolVarP(&clusterOption.Clear, "clear", "", false, "")
+	clusterCmd.Flags().StringVarP(&createHostOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
+	clusterCmd.Flags().BoolVarP(&createHostOpt.Clear, "clear", "", false, "")
 }

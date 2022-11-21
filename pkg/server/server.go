@@ -9,6 +9,7 @@ import (
 	v1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/task"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -51,9 +52,9 @@ func CreateTask(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	hosts := host.GetHosts(logger, host.HostOption{})
+	hosts := host.GetHosts(logger, option.HostOption{}, "")
 	for _, host := range hosts {
-		task.RunTaskOnHost(logger, t, host, task.TaskOption{})
+		task.RunTaskOnHost(logger, t, host, option.TaskOption{})
 	}
 	c.JSON(http.StatusOK, logger.GetBuffer())
 }

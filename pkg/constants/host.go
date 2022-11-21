@@ -11,6 +11,17 @@ import (
 const LocalHostIP = "127.0.0.1"
 const DefaultTimeoutSeconds = 10
 
+const (
+	InventoryTypeKubeconfig = "kubeconfig"
+	InventoryTypeHosts      = "hosts"
+)
+
+const (
+	RemoteStorageTypeImage = "image"
+	RemoteStorageTypeS3    = "s3"
+	RemoteStorageTypeLocal = "local"
+)
+
 func GetCurrentUserHomeDir() string {
 	homeDirectory, err := os.UserHomeDir()
 	if err != nil {

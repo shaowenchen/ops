@@ -7,12 +7,15 @@ import (
 
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/task"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-var taskOption task.TaskOption
+var taskOpt option.TaskOption
+var hostOpt option.HostOption
+var inventory string
 
 var TaskCmd = &cobra.Command{
 	Use:                "task",
@@ -24,34 +27,36 @@ var TaskCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		taskOption = parseArgs(args)
-		if len(taskOption.FilePath) == 0 {
-			fmt.Printf("--filepath is must provided")
+		taskOpt = parseArgs(args)
+		if len(taskOpt.TaskPath) == 0 {
+			fmt.Printf("--taskpath is must provided")
 			return
 		}
-		taskOption.Password = utils.EncodingStringToBase64(taskOption.Password)
-		privateKey, _ := utils.ReadFile(taskOption.PrivateKeyPath)
-		taskOption.PrivateKey = utils.EncodingStringToBase64(privateKey)
-		Task(logger, taskOption)
+		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
+		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
+		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
+		Task(logger, taskOpt, hostOpt, inventory)
 	},
 }
 
-func Task(logger *log.Logger, option task.TaskOption) (err error) {
-	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(option.FilePath))
+func Task(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
+	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.TaskPath))
 	if err != nil {
 		logger.Error.Println(err)
 		return err
 	}
-	hs := host.GetHosts(logger, option.HostOption)
+
+	fmt.Println(inventory)
+	hs := host.GetHosts(logger, hostOpt, inventory)
 	for _, t := range tasks {
 		for _, h := range hs {
-			task.RunTaskOnHost(logger, &t, h, option)
+			task.RunTaskOnHost(logger, &t, h, taskOpt)
 		}
 	}
 	return
 }
 
-func parseArgs(args []string) (taskOption task.TaskOption) {
+func parseArgs(args []string) (taskOption option.TaskOption) {
 	taskOption.Variables = make(map[string]string)
 	for i := 0; i < len(args); i++ {
 		fieldName := getArgName(args[i])
@@ -69,18 +74,18 @@ func parseArgs(args []string) (taskOption task.TaskOption) {
 				taskOption.Debug = fieldValue == "true"
 			} else if fieldName == "sudo" {
 				taskOption.Sudo = fieldValue == "true"
-			} else if fieldName == "filepath" {
-				taskOption.FilePath = fieldValue
-			} else if fieldName == "hosts" {
-				taskOption.Hosts = fieldValue
+			} else if fieldName == "taskpath" {
+				taskOption.TaskPath = fieldValue
+			} else if fieldName == "inventory" || fieldName == "i" {
+				inventory = fieldValue
 			} else if fieldName == "port" {
-				taskOption.Port, _ = strconv.Atoi(fieldValue)
+				hostOpt.Port, _ = strconv.Atoi(fieldValue)
 			} else if fieldName == "username" {
-				taskOption.Username = fieldValue
+				hostOpt.Username = fieldValue
 			} else if fieldName == "password" {
-				taskOption.Password = fieldValue
+				hostOpt.Password = fieldValue
 			} else if fieldName == "privatekeypath" {
-				taskOption.PrivateKeyPath = fieldValue
+				hostOpt.PrivateKeyPath = fieldValue
 			} else {
 				taskOption.Variables[fieldName] = fieldValue
 			}
@@ -92,17 +97,22 @@ func parseArgs(args []string) (taskOption task.TaskOption) {
 func getArgName(arg string) string {
 	if strings.HasPrefix(arg, "--") {
 		return arg[2:]
+	} else if strings.HasPrefix(arg, "-") {
+		return arg[1:]
 	}
 	return ""
 }
 
 func init() {
-	TaskCmd.Flags().BoolVarP(&taskOption.Debug, "debug", "", false, "")
-	TaskCmd.Flags().StringVarP(&taskOption.FilePath, "filepath", "", "", "")
-	TaskCmd.MarkFlagRequired("filepath")
-	TaskCmd.Flags().StringVarP(&taskOption.Hosts, "hosts", "", "", "")
-	TaskCmd.Flags().IntVarP(&taskOption.Port, "port", "", 22, "")
-	TaskCmd.Flags().StringVarP(&taskOption.Username, "username", "", "", "")
-	TaskCmd.Flags().StringVarP(&taskOption.Password, "password", "", "", "")
-	TaskCmd.Flags().StringVarP(&taskOption.PrivateKeyPath, "privatekeypath", "", "", "")
+	TaskCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
+
+	TaskCmd.Flags().BoolVarP(&taskOpt.Debug, "debug", "", false, "")
+	TaskCmd.Flags().StringVarP(&taskOpt.TaskPath, "taskpath", "", "", "")
+	TaskCmd.MarkFlagRequired("taskpath")
+
+	TaskCmd.Flags().IntVarP(&hostOpt.Port, "port", "", 22, "")
+	TaskCmd.Flags().StringVarP(&hostOpt.Username, "username", "", "", "")
+	TaskCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
+	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKey, "privatekey", "", "", "")
+	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", "", "")
 }

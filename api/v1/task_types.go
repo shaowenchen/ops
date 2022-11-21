@@ -33,7 +33,7 @@ type TaskSpec struct {
 	Steps     []Step                `json:"steps,omitempty"`
 	Name      string                `json:"name,omitempty"`
 	Desc      string                `json:"desc,omitempty"`
-	HostRef   string                `json:"hostRef,omitempty"`
+	Inventory string                `json:"inventory,omitempty"`
 	Selector  *metav1.LabelSelector `json:"selector,omitempty"`
 }
 

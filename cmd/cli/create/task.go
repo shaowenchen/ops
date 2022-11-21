@@ -6,12 +6,11 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/create"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
-
-var taskOption create.TaskOption
 
 var taskCmd = &cobra.Command{
 	Use:   "task",
@@ -22,18 +21,18 @@ var taskCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		Createtask(logger, taskOption)
+		Createtask(logger, createTaskOpt, inventory)
 	},
 }
 
-func Createtask(logger *log.Logger, option create.TaskOption) (err error) {
-	option.Kubeconfig = utils.GetAbsoluteFilePath(option.Kubeconfig)
-	restConfig, err := utils.GetRestConfig(option.Kubeconfig)
+func Createtask(logger *log.Logger, option option.CreateTaskOption, inventory string) (err error) {
+	inventory = utils.GetAbsoluteFilePath(inventory)
+	restConfig, err := utils.GetRestConfig(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	taskText, err := utils.ReadFile(option.Filepath)
+	taskText, err := utils.ReadFile(option.Taskpath)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -45,7 +44,7 @@ func Createtask(logger *log.Logger, option create.TaskOption) (err error) {
 	}
 	t.Namespace = option.Namespace
 	t.Name = option.Name
-	t.Spec.HostRef = option.HostRef
+	t.Spec.Inventory = inventory
 	err = create.CreateTask(logger, restConfig, t, option.Clear)
 	if err != nil {
 		logger.Error.Println(err)
@@ -55,12 +54,12 @@ func Createtask(logger *log.Logger, option create.TaskOption) (err error) {
 }
 
 func init() {
-	taskCmd.Flags().StringVarP(&taskOption.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
-	taskCmd.Flags().StringVarP(&taskOption.Namespace, "namespace", "", "default", "")
-	taskCmd.Flags().StringVarP(&taskOption.Name, "name", "", "", "")
+	taskCmd.Flags().StringVarP(&createTaskOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
+	taskCmd.Flags().StringVarP(&createTaskOpt.Namespace, "namespace", "", "default", "")
+	taskCmd.Flags().StringVarP(&createTaskOpt.Name, "name", "", "", "")
 	taskCmd.MarkFlagRequired("name")
-	taskCmd.Flags().StringVarP(&taskOption.HostRef, "hostref", "", "", "")
-	taskCmd.MarkFlagRequired("hostref")
-	taskCmd.Flags().StringVarP(&taskOption.Filepath, "filepath", "", "", "")
-	taskCmd.Flags().BoolVarP(&taskOption.Clear, "clear", "", false, "")
+	taskCmd.Flags().StringVarP(&inventory, "inventory", "", "", "")
+	taskCmd.MarkFlagRequired("inventory")
+	taskCmd.Flags().StringVarP(&createTaskOpt.Taskpath, "taskpath", "", "", "")
+	taskCmd.Flags().BoolVarP(&createTaskOpt.Clear, "clear", "", false, "")
 }

@@ -6,11 +6,10 @@ import (
 	"github.com/shaowenchen/ops/pkg/create"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
-
-var hostOption create.HostOption
 
 var hostCmd = &cobra.Command{
 	Use:   "host",
@@ -21,7 +20,7 @@ var hostCmd = &cobra.Command{
 			fmt.Println(err)
 			return
 		}
-		err = CreateHost(logger, hostOption)
+		err = CreateHost(logger, createHostOpt, inventory)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -29,9 +28,9 @@ var hostCmd = &cobra.Command{
 	},
 }
 
-func CreateHost(logger *log.Logger, option create.HostOption) (err error) {
-	option.Kubeconfig = utils.GetAbsoluteFilePath(option.Kubeconfig)
-	restConfig, err := utils.GetRestConfig(option.Kubeconfig)
+func CreateHost(logger *log.Logger, option option.CreateHostOption, inventory string) (err error) {
+	inventory = utils.GetAbsoluteFilePath(inventory)
+	restConfig, err := utils.GetRestConfig(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
@@ -44,7 +43,7 @@ func CreateHost(logger *log.Logger, option create.HostOption) (err error) {
 		}
 	}
 	option.Password = utils.EncodingStringToBase64(option.Password)
-	hs := host.GetHosts(logger, option.HostOption)
+	hs := host.GetHosts(logger, option.HostOption, inventory)
 
 	for _, h := range hs {
 		// one name, one host
@@ -62,15 +61,15 @@ func CreateHost(logger *log.Logger, option create.HostOption) (err error) {
 }
 
 func init() {
-	hostCmd.Flags().StringVarP(&hostOption.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
-	hostCmd.Flags().StringVarP(&hostOption.Namespace, "namespace", "", "default", "")
-	hostCmd.Flags().StringVarP(&hostOption.Name, "name", "", "", "")
+	hostCmd.Flags().StringVarP(&createHostOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
+	hostCmd.Flags().StringVarP(&createHostOpt.Namespace, "namespace", "", "default", "")
+	hostCmd.Flags().StringVarP(&createHostOpt.Name, "name", "", "", "")
 	hostCmd.MarkFlagRequired("name")
-	hostCmd.Flags().StringVarP(&hostOption.Username, "username", "", "root", "")
-	hostCmd.Flags().StringVarP(&hostOption.Password, "password", "", "", "")
-	hostCmd.Flags().StringVarP(&hostOption.PrivateKeyPath, "privatekeypath", "", "~/.ssh/id_rsa", "")
-	hostCmd.Flags().StringVarP(&hostOption.Hosts, "hosts", "", "", "")
-	hostCmd.MarkFlagRequired("hosts")
-	hostCmd.Flags().IntVar(&hostOption.Port, "port", 22, "")
-	hostCmd.Flags().BoolVarP(&hostOption.Clear, "clear", "", false, "")
+	hostCmd.Flags().StringVarP(&createHostOpt.Username, "username", "", "root", "")
+	hostCmd.Flags().StringVarP(&createHostOpt.Password, "password", "", "", "")
+	hostCmd.Flags().StringVarP(&createHostOpt.PrivateKeyPath, "privatekeypath", "", "~/.ssh/id_rsa", "")
+	hostCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
+	hostCmd.MarkFlagRequired("inventory")
+	hostCmd.Flags().IntVar(&createHostOpt.Port, "port", 22, "")
+	hostCmd.Flags().BoolVarP(&createHostOpt.Clear, "clear", "", false, "")
 }

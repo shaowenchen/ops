@@ -5,9 +5,8 @@ import (
 	"os"
 
 	"github.com/shaowenchen/ops/cmd/cli/create"
-	"github.com/shaowenchen/ops/cmd/cli/host"
-	"github.com/shaowenchen/ops/cmd/cli/kube"
-	"github.com/shaowenchen/ops/cmd/cli/storage"
+	"github.com/shaowenchen/ops/cmd/cli/file"
+	"github.com/shaowenchen/ops/cmd/cli/script"
 	"github.com/shaowenchen/ops/cmd/cli/task"
 	"github.com/shaowenchen/ops/cmd/cli/upgrade"
 	"github.com/shaowenchen/ops/cmd/cli/version"
@@ -17,11 +16,10 @@ import (
 )
 
 func Execute() {
-	RootCmd.AddCommand(host.HostCmd)
-	RootCmd.AddCommand(kube.KubeCmd)
-	RootCmd.AddCommand(storage.StorageCmd)
-	RootCmd.AddCommand(task.TaskCmd)
+	RootCmd.AddCommand(file.FileCmd)
+	RootCmd.AddCommand(script.ScriptCmd)
 	RootCmd.AddCommand(create.CreateCmd)
+	RootCmd.AddCommand(task.TaskCmd)
 	RootCmd.AddCommand(version.VersionCmd)
 	RootCmd.AddCommand(upgrade.UpgradeCmd)
 	if err := RootCmd.Execute(); err != nil {
