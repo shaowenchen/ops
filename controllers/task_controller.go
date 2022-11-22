@@ -23,6 +23,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/google/go-cmp/cmp"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -114,6 +115,9 @@ func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 					oldObject.Status = opsv1.TaskStatus{}
 					newObject.Status = opsv1.TaskStatus{}
+
+					oldObject.TypeMeta = metav1.TypeMeta{}
+					newObject.TypeMeta = metav1.TypeMeta{}
 
 					oldObject.ObjectMeta.ResourceVersion = ""
 					newObject.ObjectMeta.ResourceVersion = ""

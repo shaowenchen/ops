@@ -4,17 +4,20 @@ metadata:
   name: docker-clear
   namespace: default
 spec:
+  nameRef: tekton-prod1
+  typeRef: cluster
+  nodeName: node4
   desc: Docker Clear
   steps:
     - name: Docker system prune
       script: docker system prune -f
-      allowfailure: true
+      allowfailure: "true"
     - name: Clear none image
       script: docker rmi $(docker images | grep "none" | awk '/ / { print $3 }')
-      allowfailure: true
+      allowfailure: "true"
     - name: Clear dangling image
       script: docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
-      allowfailure: true
+      allowfailure: "true"
     - name: Clear biz image
       script: docker images |grep -E "([0-9a-z]+[-]){3,}[0-9]{9}" |awk '{print $3}' | xargs /usr/bin/docker rmi
-      allowfailure: true
+      allowfailure: "true"
