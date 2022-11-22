@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func RunScriptOnNode(client *kubernetes.Clientset, node v1.Node, namespacedName types.NamespacedName, image string, script string) (pod *corev1.Pod, err error) {
+func RunScriptOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, script string) (pod *corev1.Pod, err error) {
 	priviBool := true
 	tolerations := []v1.Toleration{}
 	for _, taint := range node.Spec.Taints {
@@ -57,7 +57,7 @@ func RunScriptOnNode(client *kubernetes.Clientset, node v1.Node, namespacedName 
 	return
 }
 
-func DownloadFileOnNode(client *kubernetes.Clientset, node v1.Node, namespacedName types.NamespacedName, image, remotefile, localfile string) (pod *corev1.Pod, err error) {
+func DownloadFileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image, remotefile, localfile string) (pod *corev1.Pod, err error) {
 	tolerations := []v1.Toleration{}
 	for _, taint := range node.Spec.Taints {
 		tolerations = append(tolerations, v1.Toleration{

@@ -44,7 +44,6 @@ func Createtask(logger *log.Logger, option option.CreateTaskOption, inventory st
 	}
 	t.Namespace = option.Namespace
 	t.Name = option.Name
-	t.Spec.Inventory = inventory
 	err = create.CreateTask(logger, restConfig, t, option.Clear)
 	if err != nil {
 		logger.Error.Println(err)

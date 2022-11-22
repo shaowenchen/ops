@@ -3,21 +3,21 @@ package task
 import (
 	"fmt"
 
-	"strings"
-
-	"github.com/kyokomi/emoji/v2"
-	"github.com/shaowenchen/ops/api/v1"
+	"errors"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/host"
-	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	corev1 "k8s.io/api/core/v1"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option option.TaskOption) (*v1.Task, error) {
+func GetRealVariables(t *opsv1.Task, option option.TaskOption) (map[string]string, error) {
 	globalVariables := make(map[string]string)
 	// cli > env > yaml
 	utils.MergeMap(globalVariables, t.Spec.Variables)
@@ -25,7 +25,6 @@ func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option option.Tas
 	utils.MergeMap(globalVariables, option.Variables)
 
 	globalVariables = RenderVarsVariables(globalVariables)
-	logger.Info.Println(emoji.Sprint(":pizza:") + "[task] " + t.Name)
 	// check variable in task is not empty
 	emptyVariable := ""
 	for key := range t.Spec.Variables {
@@ -35,58 +34,98 @@ func RunTaskOnHost(logger *log.Logger, t *v1.Task, h *v1.Host, option option.Tas
 		}
 	}
 	if len(emptyVariable) > 0 {
-		logger.Info.Println("please set variable: ", emptyVariable)
-		return t, nil
+		return nil, errors.New("please set variable: " + emptyVariable)
 	}
+	return globalVariables, nil
+}
 
-	globalVariables["result"] = ""
-	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
-	// h = fillHostByOption(h, &hostOpt)
-	c, err := host.NewHostConnectionBase64(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
-	if err != nil {
-		logger.Error.Println(err)
-		return t, err
+func RenderTask(t *opsv1.Task, allVars map[string]string) (*opsv1.Task, error) {
+	for i, s := range t.Spec.Steps {
+		sp := RenderStepVariables(&s, allVars)
+		t.Spec.Steps[i] = *sp
 	}
-	runOutput := &v1.RunOutput{}
+	return t, nil
+}
+
+func RunTaskOnHost(t *opsv1.Task, hc *host.HostConnection, taskOpt option.TaskOption) (*opsv1.Task, error) {
+	allVars, err := GetRealVariables(t, taskOpt)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
-		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
-		s.When = RenderWhen(s.When, globalVariables)
+		fmt.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
+		s.When = RenderWhen(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
-			logger.Error.Println(err)
+			fmt.Println(err)
 			return t, err
 		}
 		if !result {
-			logger.Info.Println("Skip!")
+			fmt.Println("Skip!")
 			continue
 		}
-		sp = RenderStepVariables(sp, globalVariables)
+		sp = RenderStepVariables(sp, allVars)
 		if err != nil {
-			logger.Error.Println(err)
+			fmt.Println(err)
 		}
-		if option.Debug && len(s.Script) > 0 {
-			logger.Info.Println(s.Script)
+		if taskOpt.Debug && len(s.Script) > 0 {
+			fmt.Println(s.Script)
 		}
-		stepFunc := GetStepFunc(s)
-		stepResult, isSuccessed := stepFunc(t, c, s, option)
-		runOutput.AddRunOutput(s.Name, stepResult)
-		logger.Info.Println(stepResult)
-		globalVariables["result"] = stepResult
+		stepFunc := GetHostStepFunc(s)
+		stepResult, isSuccessed := stepFunc(t, hc, s, taskOpt)
+		t.Status.AddOutputStep(hc.Host.Name, s.Name, stepResult, isSuccessed)
+		fmt.Println(stepResult)
+		allVars["result"] = stepResult
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
-			logger.Error.Println(err)
+			fmt.Println(err)
 			return t, err
 		}
 		if result == false && isSuccessed == false {
 			break
 		}
 	}
-	t.Status.AddRecentRunOutput(runOutput)
 	return t, err
 }
 
-func fillHostByOption(h *v1.Host, option *option.HostOption) *v1.Host {
+func RunTaskOnKube(t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, taskOpt option.TaskOption, kubeOpt option.KubeOption) (*opsv1.Task, error) {
+	allVars, err := GetRealVariables(t, taskOpt)
+	for si, s := range t.Spec.Steps {
+		var sp = &s
+		fmt.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
+		s.When = RenderWhen(s.When, allVars)
+		result, err := utils.LogicExpression(s.When, true)
+		if err != nil {
+			fmt.Println(err)
+			return t, err
+		}
+		if !result {
+			fmt.Println("Skip!")
+			continue
+		}
+		sp = RenderStepVariables(sp, allVars)
+		if err != nil {
+			fmt.Println(err)
+		}
+		if taskOpt.Debug && len(s.Script) > 0 {
+			fmt.Println(s.Script)
+		}
+		stepFunc := GetKubeStepFunc(s)
+		stepResult, isSuccessed := stepFunc(t, kc, node, s, taskOpt, kubeOpt)
+		t.Status.AddOutputStep(node.Name, s.Name, stepResult, isSuccessed)
+		fmt.Println(stepResult)
+		allVars["result"] = stepResult
+		result, err = utils.LogicExpression(s.AllowFailure, false)
+		if err != nil {
+			fmt.Println(err)
+			return t, err
+		}
+		if result == false && isSuccessed == false {
+			break
+		}
+	}
+	return t, err
+}
+
+func fillHostByOption(h *opsv1.Host, option *option.HostOption) *opsv1.Host {
 	if option.Username != "" && h.GetSpec().Username == "" {
 		h.Spec.Username = option.Username
 	}
@@ -125,7 +164,7 @@ func getFileArray(filePath string) (fileArray []string, err error) {
 	return
 }
 
-func ReadTaskYaml(filePath string) (tasks []v1.Task, err error) {
+func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 	fileArray, err := getFileArray(filePath)
 	if err != nil {
 		return
@@ -135,7 +174,7 @@ func ReadTaskYaml(filePath string) (tasks []v1.Task, err error) {
 		if err1 != nil {
 			return nil, err1
 		}
-		task := v1.Task{}
+		task := opsv1.Task{}
 		task.Spec.Variables = make(map[string]string, 0)
 		err = yaml.Unmarshal(yfile, &task)
 		fmt.Println(task.Spec.Steps[0].AllowFailure)
@@ -148,7 +187,7 @@ func ReadTaskYaml(filePath string) (tasks []v1.Task, err error) {
 	return
 }
 
-func RenderStepVariables(step *v1.Step, vars map[string]string) *v1.Step {
+func RenderStepVariables(step *opsv1.Step, vars map[string]string) *opsv1.Step {
 	for key, value := range vars {
 		step.Name = strings.ReplaceAll(step.Name, fmt.Sprintf("${%s}", key), value)
 		step.Script = strings.ReplaceAll(step.Script, fmt.Sprintf("${%s}", key), value)
@@ -178,18 +217,46 @@ func RenderWhen(when string, vars map[string]string) string {
 	return when
 }
 
-func GetStepFunc(step v1.Step) func(t *v1.Task, c *host.HostConnection, step v1.Step, to option.TaskOption) (string, bool) {
+func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (string, bool) {
 	if len(step.Script) > 0 {
-		return runStepScript
+		return runStepScriptOnHost
 	}
-	return runStepCopy
+	return runStepCopyOnHost
 }
 
-func runStepScript(t *v1.Task, c *host.HostConnection, step v1.Step, option option.TaskOption) (result string, isSuccessed bool) {
+func runStepScriptOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (result string, isSuccessed bool) {
 	stdout, exit, _ := c.Script(option.Sudo, step.Script)
 	return stdout, exit == 0
 }
 
-func runStepCopy(t *v1.Task, c *host.HostConnection, step v1.Step, option option.TaskOption) (result string, isSuccessed bool) {
+func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (result string, isSuccessed bool) {
 	return "", c.File(option.Sudo, step.Direction, step.LocalFile, step.RemoteFile) == nil
+}
+
+func GetKubeStepFunc(step opsv1.Step) func(t *opsv1.Task, c *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (string, bool) {
+	if len(step.Script) > 0 {
+		return runStepScriptOnKube
+	}
+	return runStepCopyOnKube
+}
+
+func runStepScriptOnKube(t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, isSuccessed bool) {
+	stdout, err := kc.ScriptOnNode(node,
+		option.ScriptOption{
+			Sudo:       taksOpt.Sudo,
+			Script:     step.Script,
+			KubeOption: kubeOpt,
+		})
+	return stdout, err == nil
+}
+
+func runStepCopyOnKube(t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (result string, isSuccessed bool) {
+	stdout, err := kc.FileonNode(node,
+		option.FileOption{
+			Sudo:       taskOpt.Sudo,
+			Direction:  step.Direction,
+			LocalFile:  step.LocalFile,
+			RemoteFile: step.RemoteFile,
+		})
+	return stdout, err == nil
 }

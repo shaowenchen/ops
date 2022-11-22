@@ -59,7 +59,7 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	//if delete, stop ticker
 	if apierrors.IsNotFound(err) {
-		return ctrl.Result{}, r.DeleteHost(ctx, req.NamespacedName)
+		return ctrl.Result{}, r.deleteHost(ctx, req.NamespacedName)
 	}
 
 	if err != nil {
@@ -67,17 +67,9 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	// add timeticker
-	r.AddTimeTicker(ctx, h)
+	r.addTimeTicker(ctx, h)
 
 	return ctrl.Result{}, nil
-}
-
-func (r *HostReconciler) DeleteHost(ctx context.Context, namespacedName types.NamespacedName) error {
-	_, ok := r.timeTickerStopChans[namespacedName.String()]
-	if ok {
-		r.timeTickerStopChans[namespacedName.String()] <- true
-	}
-	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -87,7 +79,15 @@ func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *HostReconciler) AddTimeTicker(ctx context.Context, h *opsv1.Host) (err error) {
+func (r *HostReconciler) deleteHost(ctx context.Context, namespacedName types.NamespacedName) error {
+	_, ok := r.timeTickerStopChans[namespacedName.String()]
+	if ok {
+		r.timeTickerStopChans[namespacedName.String()] <- true
+	}
+	return nil
+}
+
+func (r *HostReconciler) addTimeTicker(ctx context.Context, h *opsv1.Host) (err error) {
 	// if ticker exist, return
 	_, ok := r.timeTickerStopChans[h.GetUniqueKey()]
 	if ok {
@@ -139,5 +139,10 @@ func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host) (err e
 	if err != nil {
 		log.FromContext(ctx).Error(err, "update host status error")
 	}
+	return
+}
+
+func (r *HostReconciler) NewHostConnection(h *opsv1.Host) (hc *host.HostConnection, err error) {
+	hc, err = host.NewHostConnectionBase64(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
 	return
 }

@@ -3,15 +3,17 @@ package kube
 import (
 	"context"
 	"errors"
-	"time"
-
+	"fmt"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
+	"time"
 )
 
 type KubeConnection struct {
@@ -98,6 +100,13 @@ func (kc *KubeConnection) GetNodes() (*corev1.NodeList, error) {
 	return kc.Client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 }
 
+func (kc *KubeConnection) GetNodeByName(nodeName string) (*corev1.NodeList, error) {
+	nodes := &corev1.NodeList{}
+	node, err := kc.Client.CoreV1().Nodes().Get(context.TODO(), nodeName, metav1.GetOptions{})
+	nodes.Items = append(nodes.Items, *node)
+	return nodes, err
+}
+
 func (kc *KubeConnection) GetAllPods() (allPod *corev1.PodList, err error) {
 	return kc.Client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 }
@@ -106,4 +115,58 @@ func (kc *KubeConnection) GetAllRunningPods() (allPod *corev1.PodList, err error
 	return kc.Client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
 		FieldSelector: "status.phase=Running",
 	})
+}
+
+func (kc *KubeConnection) ScriptOnNode(node *corev1.Node, scriptOpt option.ScriptOption) (stdout string, err error) {
+	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
+	if err != nil {
+		return
+	}
+
+	pod, err := RunScriptOnNode(kc.Client, node, namespacedName, scriptOpt.RuntimeImage, scriptOpt.Script)
+	if err != nil {
+		return
+	}
+	return GetPodLog(context.TODO(), kc.Client, pod)
+}
+
+func (kc *KubeConnection) Script(scriptOpt option.ScriptOption) (err error) {
+	nodes, err := kc.GetNodeByName(scriptOpt.NodeName)
+
+	if err != nil {
+		return
+	}
+	if scriptOpt.All {
+		nodes, err = kc.GetNodes()
+	}
+	for _, node := range nodes.Items {
+		kc.ScriptOnNode(&node, scriptOpt)
+	}
+
+	return
+}
+
+func (kc *KubeConnection) FileonNode(node *corev1.Node, fileopt option.FileOption) (stdout string, err error) {
+	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
+	if err != nil {
+		return
+	}
+
+	pod, err := DownloadFileOnNode(kc.Client, node, namespacedName, fileopt.RuntimeImage, fileopt.RemoteFile, fileopt.LocalFile)
+	if err != nil {
+		return
+	}
+	return GetPodLog(context.TODO(), kc.Client, pod)
+}
+
+func (kc *KubeConnection) File(fileopt option.FileOption) (err error) {
+	nodes, err := kc.GetNodeByName(fileopt.NodeName)
+	if fileopt.All {
+		nodes, err = kc.GetNodes()
+	}
+	for _, node := range nodes.Items {
+		kc.FileonNode(&node, fileopt)
+	}
+	return
+
 }

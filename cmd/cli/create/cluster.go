@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/create"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
@@ -35,7 +36,7 @@ func CreateCluster(logger *log.Logger, clusterOpt option.CreateClusterOption, in
 	if err != nil {
 		return
 	}
-	if clusterOpt.Server == "" {
+	if clusterOpt.ClusterSpec.Server == "" {
 		clusterOpt.Server, _ = utils.GetServerUrl(clusterOpt.Config)
 	}
 	clusterOpt.Config = utils.EncodingStringToBase64(config)
@@ -52,6 +53,6 @@ func init() {
 	clusterCmd.Flags().StringVarP(&createHostOpt.Namespace, "namespace", "", "default", "")
 	clusterCmd.Flags().StringVarP(&createHostOpt.Name, "name", "", "", "")
 	clusterCmd.MarkFlagRequired("name")
-	clusterCmd.Flags().StringVarP(&createHostOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
+	clusterCmd.Flags().StringVarP(&createHostOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
 	clusterCmd.Flags().BoolVarP(&createHostOpt.Clear, "clear", "", false, "")
 }

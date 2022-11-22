@@ -131,6 +131,10 @@ func GetAllNodesByClient(client *kubernetes.Clientset) (nodes *corev1.NodeList, 
 	return client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 }
 
+func GetNodeByClient(client *kubernetes.Clientset, nodeName string) (node *corev1.Node, err error) {
+	return client.CoreV1().Nodes().Get(context.TODO(), nodeName, metav1.GetOptions{})
+}
+
 func GetPodLog(ctx context.Context, client *kubernetes.Clientset, namespace, podName string) (log string, err error) {
 	req := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{})
 	podLogs, err := req.Stream(ctx)

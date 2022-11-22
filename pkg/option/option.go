@@ -44,6 +44,7 @@ type ScriptOption struct {
 }
 
 type FileOption struct {
+	KubeOption
 	LocalFile  string
 	RemoteFile string
 	Direction  string

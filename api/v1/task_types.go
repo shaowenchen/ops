@@ -18,6 +18,8 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"time"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -28,13 +30,17 @@ type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Schedule  string                `json:"schedule,omitempty"`
-	Variables map[string]string     `json:"variables,omitempty"`
-	Steps     []Step                `json:"steps,omitempty"`
-	Name      string                `json:"name,omitempty"`
-	Desc      string                `json:"desc,omitempty"`
-	Inventory string                `json:"inventory,omitempty"`
-	Selector  *metav1.LabelSelector `json:"selector,omitempty"`
+	Crontab      string                `json:"crontab,omitempty"`
+	Variables    map[string]string     `json:"variables,omitempty"`
+	Steps        []Step                `json:"steps,omitempty"`
+	Name         string                `json:"name,omitempty"`
+	Desc         string                `json:"desc,omitempty"`
+	TypeRef      string                `json:"typeRef,omitempty"`
+	NameRef      string                `json:"nameRef,omitempty"`
+	NodeName     string                `json:"nodeName,omitempty"`
+	RuntimeImage string                `json:"runtimeImage,omitempty"`
+	NodeSelector *metav1.LabelSelector `json:"nodeselector,omitempty"`
+	TypeSelector *metav1.LabelSelector `json:"typeSelector,omitempty"`
 }
 
 type Step struct {
@@ -51,45 +57,57 @@ type Step struct {
 type TaskStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	LastStatus       string       `json:"lastStatus,omitempty"`
-	LastScheduleTime *metav1.Time `json:"lastScheduleTime,omitempty"`
-	RecentRunOutput  []*RunOutput `json:"recentRunOutput,omitempty"`
+	LastRunStatus string                   `json:"lastRunStatus,omitempty"`
+	LastRunTime   *metav1.Time             `json:"lastRunTime,omitempty"`
+	Outputs       map[string][]*StepOutput `json:"output,omitempty"`
 }
 
-func (taskStatus *TaskStatus) AddRecentRunOutput(runOutput *RunOutput) {
-	if len(taskStatus.RecentRunOutput) > 5 {
-		taskStatus.RecentRunOutput = taskStatus.RecentRunOutput[:5]
+const LastRunStatusSuccessed = "successed"
+const LastRunStatusFailed = "failed"
+
+type StepOutput struct {
+	StepName   string `json:"stepName,omitempty"`
+	StepOutput string `json:"stepOutput,omitempty"`
+}
+
+func (taskStatus *TaskStatus) NewOutput() {
+	taskStatus.Outputs = make(map[string][]*StepOutput)
+}
+
+func (taskStatus *TaskStatus) AddOutputStep(nodeName string, stepName, stepOutput string, isSuccessed bool) {
+	if taskStatus.Outputs == nil {
+		return
 	}
-	taskStatus.RecentRunOutput = append(taskStatus.RecentRunOutput, runOutput)
-}
-
-type RunOutput struct {
-	RunOutputSteps []*RunOutputStep `json:"runOutputSteps,omitempty"`
-}
-
-func (runOutput *RunOutput) AddRunOutput(name, output string) *RunOutput {
-	runOutput.RunOutputSteps = append(runOutput.RunOutputSteps, &RunOutputStep{Name: name, Output: output})
-	return runOutput
-}
-
-type RunOutputStep struct {
-	Name   string `json:"name,omitempty"`
-	Output string `json:"Output,omitempty"`
+	taskStatus.Outputs[nodeName] = append(taskStatus.Outputs[nodeName], &StepOutput{StepName: stepName, StepOutput: stepOutput})
+	if isSuccessed {
+		taskStatus.LastRunStatus = LastRunStatusSuccessed
+	} else {
+		taskStatus.LastRunStatus = LastRunStatusFailed
+	}
+	taskStatus.LastRunTime = &metav1.Time{Time: time.Now()}
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// +kubebuilder:printcolumn:name="Schedule",type=string,JSONPath=`.spec.schedule`
-// +kubebuilder:printcolumn:name="HostRef",type=string,JSONPath=`.spec.hostRef`
-// +kubebuilder:printcolumn:name="LastScheduleTime",type=string,JSONPath=`.status.lastScheduleTime`
-// +kubebuilder:printcolumn:name="LastStatus",type=string,JSONPath=`.status.lastStatus`
+// +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
+// +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
+// +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
+// +kubebuilder:printcolumn:name="LastRunTime",type=string,JSONPath=`.status.lastRunTime`
+// +kubebuilder:printcolumn:name="LastRunStatus",type=string,JSONPath=`.status.lastRunStatus`
 type Task struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   TaskSpec   `json:"spec,omitempty"`
 	Status TaskStatus `json:"status,omitempty"`
+}
+
+func (t *Task) GetUniqueKey() string {
+	return types.NamespacedName{
+		Namespace: t.Namespace,
+		Name:      t.Name,
+	}.String()
 }
 
 func (t *Task) GetSpec() *TaskSpec {

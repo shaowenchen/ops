@@ -3,6 +3,7 @@ package create
 import (
 	"fmt"
 
+	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/create"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
@@ -61,7 +62,7 @@ func CreateHost(logger *log.Logger, option option.CreateHostOption, inventory st
 }
 
 func init() {
-	hostCmd.Flags().StringVarP(&createHostOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
+	hostCmd.Flags().StringVarP(&createHostOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
 	hostCmd.Flags().StringVarP(&createHostOpt.Namespace, "namespace", "", "default", "")
 	hostCmd.Flags().StringVarP(&createHostOpt.Name, "name", "", "", "")
 	hostCmd.MarkFlagRequired("name")

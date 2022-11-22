@@ -3,14 +3,14 @@ package kube
 import (
 	"context"
 	"fmt"
-	"time"
-
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/log"
 	option "github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	v1 "k8s.io/api/core/v1"
+	"strings"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -23,11 +23,11 @@ func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, opti
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := RunScriptOnNode(client, node, namespacedName, option.RuntimeImage, option.Script)
+	pod, err := RunScriptOnNode(client, &node, namespacedName, option.RuntimeImage, option.Script)
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	GetPodLog(context.TODO(), logger, client, pod)
+	GetPodLog(context.TODO(), client, pod)
 	return
 }
 
@@ -36,15 +36,16 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := DownloadFileOnNode(client, node, namespacedName, kubeOption.RuntimeImage, option.RemoteFile, option.LocalFile)
+	pod, err := DownloadFileOnNode(client, &node, namespacedName, kubeOption.RuntimeImage, option.RemoteFile, option.LocalFile)
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	GetPodLog(context.TODO(), logger, client, pod)
+	GetPodLog(context.TODO(), client, pod)
 	return
 }
 
-func GetPodLog(ctx context.Context, logger *log.Logger, client *kubernetes.Clientset, pod *v1.Pod) (log string, err error) {
+func GetPodLog(ctx context.Context, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
+	var logList []string
 	for range time.Tick(time.Second * 3) {
 		select {
 		default:
@@ -52,14 +53,13 @@ func GetPodLog(ctx context.Context, logger *log.Logger, client *kubernetes.Clien
 			if utils.IsPendingPod(pod) {
 				continue
 			}
-			log, err = utils.GetPodLog(ctx, client, pod.Namespace, pod.Name)
+			log, err1 := utils.GetPodLog(ctx, client, pod.Namespace, pod.Name)
 			if err != nil {
-				logger.Error.Println(err)
-				return
+				return strings.Join(logList, ""), err1
 			}
-			logger.Info.Println(log)
+			logList = append(logList, log)
 			if utils.IsStopedPod(pod) {
-				return
+				return strings.Join(logList, ""), err1
 			}
 		}
 	}

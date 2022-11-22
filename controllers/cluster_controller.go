@@ -61,24 +61,16 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	//if deleted, stop ticker
 	if apierrors.IsNotFound(err) {
-		return ctrl.Result{}, r.DeleteCluster(ctx, req.NamespacedName)
+		return ctrl.Result{}, r.deleteCluster(ctx, req.NamespacedName)
 	}
 
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 	// add timeticker
-	r.AddTimeTicker(ctx, c)
+	r.addTimeTicker(ctx, c)
 
 	return ctrl.Result{}, nil
-}
-
-func (r *ClusterReconciler) DeleteCluster(ctx context.Context, namespacedName types.NamespacedName) error {
-	_, ok := r.timeTickerStopChans[namespacedName.String()]
-	if ok {
-		r.timeTickerStopChans[namespacedName.String()] <- true
-	}
-	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -88,7 +80,15 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ClusterReconciler) AddTimeTicker(ctx context.Context, c *opsv1.Cluster) {
+func (r *ClusterReconciler) deleteCluster(ctx context.Context, namespacedName types.NamespacedName) error {
+	_, ok := r.timeTickerStopChans[namespacedName.String()]
+	if ok {
+		r.timeTickerStopChans[namespacedName.String()] <- true
+	}
+	return nil
+}
+
+func (r *ClusterReconciler) addTimeTicker(ctx context.Context, c *opsv1.Cluster) {
 	// if ticker exist, return
 	_, ok := r.timeTickerStopChans[c.GetUniqueKey()]
 	if ok {
@@ -142,5 +142,10 @@ func (r *ClusterReconciler) updateStatus(ctx context.Context, c *opsv1.Cluster) 
 	if err != nil {
 		log.FromContext(ctx).Error(err, "update cluster status error")
 	}
+	return
+}
+
+func (r *ClusterReconciler) NewKubeConnection(c *opsv1.Cluster) (kc *opskube.KubeConnection, err error) {
+	kc, err = opskube.NewClusterConnection(c)
 	return
 }

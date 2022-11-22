@@ -41,10 +41,10 @@ func NewHostConnectionBase64(address string, port int, username string, password
 
 		return nil, err
 	}
-	return NewHostConnection(address, port, username, password, privateKey, privateKeyPath)
+	return newHostConnection(address, port, username, password, privateKey, privateKeyPath)
 }
 
-func NewHostConnection(address string, port int, username string, password string, privateKey string, privateKeyPath string) (c *HostConnection, err error) {
+func newHostConnection(address string, port int, username string, password string, privateKey string, privateKeyPath string) (c *HostConnection, err error) {
 
 	if len(privateKeyPath) == 0 {
 		privateKeyPath = constants.GetCurrentUserPrivateKeyPath()
