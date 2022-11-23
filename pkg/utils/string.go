@@ -79,20 +79,20 @@ func MergeMap(target map[string]string, needMerge map[string]string) map[string]
 	return target
 }
 
-func PrintMiddleFilled(text string) string {
-	return PrintMiddle(text, "*")
+func FilledInMiddle(text string) string {
+	return FilledCharInMiddle(text, "*")
 }
 
-func PrintMiddle(text string, fill string) string {
+func FilledCharInMiddle(text string, char string) string {
 	total := 59
 	if len(text)+1 >= total {
 		return text
 	}
-	if len(fill) != 1 {
+	if len(char) != 1 {
 		return text
 	}
 	leftLen := (total - len(text)) / 2
-	return fmt.Sprintf("%s%s%s", strings.Repeat(fill, leftLen), text, strings.Repeat(fill, (total-leftLen-len(text))))
+	return fmt.Sprintf("%s%s%s", strings.Repeat(char, leftLen), text, strings.Repeat(char, (total-leftLen-len(text))))
 }
 
 func GetSudoString(sudo bool) string {

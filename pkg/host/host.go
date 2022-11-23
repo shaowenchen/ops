@@ -12,7 +12,7 @@ import (
 )
 
 func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOption option.HostOption) (err error) {
-	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
+	logger.Info.Print(utils.FilledInMiddle(fmt.Sprintf("[%s]", h.Spec.Address)))
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
 	if err != nil {
@@ -23,7 +23,7 @@ func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOptio
 }
 
 func Script(logger *log.Logger, h *opsv1.Host, option option.ScriptOption, hostOption option.HostOption) (err error) {
-	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
+	logger.Info.Print(utils.FilledInMiddle(fmt.Sprintf("[%s]", h.Spec.Address)))
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
 	if err != nil {

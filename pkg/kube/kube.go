@@ -46,7 +46,7 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option
 
 func GetPodLog(logger *log.Logger, ctx context.Context, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
 	var logList []string
-	for range time.Tick(time.Second * 3) {
+	for range time.Tick(time.Second * 1) {
 		select {
 		default:
 			pod, err = client.CoreV1().Pods(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})

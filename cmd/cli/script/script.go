@@ -38,13 +38,13 @@ var ScriptCmd = &cobra.Command{
 	},
 }
 
-func KubeScript(logger *log.Logger, option option.ScriptOption, inventory string) (err error) {
+func KubeScript(logger *log.Logger, scriptOpt option.ScriptOption, inventory string) (err error) {
 	client, err := utils.NewKubernetesClient(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	nodeList, err := kube.GetNodes(logger, client, option.KubeOption)
+	nodeList, err := kube.GetNodes(logger, client, scriptOpt.KubeOption)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -52,7 +52,8 @@ func KubeScript(logger *log.Logger, option option.ScriptOption, inventory string
 		logger.Info.Println("Please provide a node at least")
 	}
 	for _, node := range nodeList {
-		kube.Script(logger, client, node, option)
+		logger.Info.Println(utils.FilledInMiddle(node.Name))
+		kube.Script(logger, client, node, scriptOpt)
 	}
 	return
 }
@@ -60,6 +61,7 @@ func KubeScript(logger *log.Logger, option option.ScriptOption, inventory string
 func HostScript(logger *log.Logger, scriptOpt option.ScriptOption, hostOpt option.HostOption, inventory string) (err error) {
 	fmt.Println(inventory)
 	for _, h := range host.GetHosts(logger, hostOpt, inventory) {
+		logger.Info.Println(utils.FilledInMiddle(h.Spec.Address))
 		err = host.Script(logger, h, scriptOpt, hostOpt)
 		if err != nil {
 			logger.Error.Println(err)
@@ -75,10 +77,11 @@ func init() {
 
 	ScriptCmd.Flags().BoolVarP(&scriptOpt.Sudo, "sudo", "", false, "")
 	ScriptCmd.Flags().StringVarP(&scriptOpt.Script, "script", "", "", "")
+	ScriptCmd.Flags().BoolVarP(&scriptOpt.All, "all", "", false, "")
 	ScriptCmd.Flags().StringVarP(&scriptOpt.NodeName, "nodename", "", "", "")
-	ScriptCmd.Flags().StringVarP(&scriptOpt.RuntimeImage, "runtimeimage", "", "docker.io/library/alpine:latest", "runtime image")
+	ScriptCmd.Flags().StringVarP(&scriptOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
 
-	ScriptCmd.Flags().StringVarP(&hostOpt.Username, "username", "", "", "")
+	ScriptCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	ScriptCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
 	ScriptCmd.Flags().StringVarP(&hostOpt.PrivateKey, "privatekey", "", "", "")
 	ScriptCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")
