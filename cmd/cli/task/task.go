@@ -31,8 +31,8 @@ var TaskCmd = &cobra.Command{
 			return
 		}
 		taskOpt = parseArgs(args)
-		if len(taskOpt.TaskPath) == 0 {
-			fmt.Printf("--taskpath is must provided")
+		if len(taskOpt.FilePath) == 0 {
+			fmt.Printf("--filepath is must provided")
 			return
 		}
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
@@ -48,11 +48,10 @@ var TaskCmd = &cobra.Command{
 }
 
 func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
-	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.TaskPath))
+	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.FilePath))
 	if err != nil {
 		logger.Error.Println(err)
 		return err
-
 	}
 
 	hs := host.GetHosts(logger, hostOpt, inventory)
@@ -62,26 +61,19 @@ func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.Host
 			continue
 		}
 		for _, t := range tasks {
-			hc, err := host.NewHostConnectionBase64(
-				h.Spec.Address,
-				h.Spec.Port,
-				h.Spec.Username,
-				h.Spec.Password,
-				h.Spec.PrivateKey,
-				h.Spec.PrivateKeyPath,
-			)
+			hc, err := host.NewHostConnBase64(h)
 			if err != nil {
 				logger.Error.Println(err)
 				continue
 			}
-			task.RunTaskOnHost(&t, hc, taskOpt)
+			task.RunTaskOnHost(logger, &t, hc, taskOpt)
 		}
 	}
 	return
 }
 
 func KubeTask(logger *log.Logger, taskOpt option.TaskOption, kubeOpt option.KubeOption, inventory string) (err error) {
-	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.TaskPath))
+	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.FilePath))
 	if err != nil {
 		logger.Error.Println(err)
 		return err
@@ -104,7 +96,7 @@ func KubeTask(logger *log.Logger, taskOpt option.TaskOption, kubeOpt option.Kube
 	}
 	for _, node := range nodeList.Items {
 		for _, t := range tasks {
-			task.RunTaskOnKube(&t, kc, &node, taskOpt, kubeOpt)
+			task.RunTaskOnKube(logger, &t, kc, &node, taskOpt, kubeOpt)
 		}
 	}
 	return
@@ -128,8 +120,8 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				taskOption.Debug = fieldValue == "true"
 			} else if fieldName == "sudo" {
 				taskOption.Sudo = fieldValue == "true"
-			} else if fieldName == "taskpath" {
-				taskOption.TaskPath = fieldValue
+			} else if fieldName == "filepath" {
+				taskOption.FilePath = fieldValue
 			} else if fieldName == "nodename" {
 				kubeOpt.NodeName = fieldValue
 			} else if fieldName == "runtimeimage" {
@@ -165,8 +157,8 @@ func init() {
 	TaskCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
 
 	TaskCmd.Flags().BoolVarP(&taskOpt.Debug, "debug", "", false, "")
-	TaskCmd.Flags().StringVarP(&taskOpt.TaskPath, "taskpath", "", "", "")
-	TaskCmd.MarkFlagRequired("taskpath")
+	TaskCmd.Flags().StringVarP(&taskOpt.FilePath, "filepath", "", "", "")
+	TaskCmd.MarkFlagRequired("filepath")
 
 	TaskCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "runtime image")

@@ -33,7 +33,7 @@ type S3FileOption struct {
 type TaskOption struct {
 	Debug     bool
 	Sudo      bool
-	TaskPath  string
+	FilePath  string
 	Variables map[string]string
 }
 
@@ -81,5 +81,5 @@ type CreateClusterOption struct {
 
 type CreateTaskOption struct {
 	ClusterOption
-	Taskpath string
+	Filepath string
 }

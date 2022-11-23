@@ -23,13 +23,11 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/google/go-cmp/cmp"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	cron "github.com/robfig/cron/v3"
@@ -37,6 +35,7 @@ import (
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
+	opslog "github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/task"
 )
@@ -62,8 +61,12 @@ type TaskReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
-func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	logger, err := opslog.NewCliLogger(true, true)
+	if err != nil {
+		fmt.Println(err)
+		return ctrl.Result{}, err
+	}
 
 	if r.crontabMap == nil {
 		r.crontabMap = make(map[string]cron.EntryID)
@@ -74,7 +77,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	t := &opsv1.Task{}
-	err := r.Client.Get(ctx, req.NamespacedName, t)
+	err = r.Client.Get(ctx, req.NamespacedName, t)
 
 	//if delete, stop ticker
 	if apierrors.IsNotFound(err) {
@@ -89,10 +92,14 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		t.Spec.RuntimeImage = constants.DefaultRuntimeImage
 	}
 
+	if t.Status.LastRunStatus != "" {
+		return ctrl.Result{}, nil
+	}
+
 	// create task
-	err = r.createTask(ctx, t)
+	r.createTask(logger, ctx, t)
 	if err != nil {
-		log.Info(err.Error())
+		logger.Error.Println(err)
 	}
 
 	return ctrl.Result{}, nil
@@ -113,16 +120,13 @@ func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					oldObject := e.ObjectOld.(*opsv1.Task).DeepCopy()
 					newObject := e.ObjectNew.(*opsv1.Task).DeepCopy()
 
-					oldObject.Status = opsv1.TaskStatus{}
-					newObject.Status = opsv1.TaskStatus{}
+					oldObjectCmp := &opsv1.Task{}
+					newObjectCmp := &opsv1.Task{}
 
-					oldObject.TypeMeta = metav1.TypeMeta{}
-					newObject.TypeMeta = metav1.TypeMeta{}
+					oldObjectCmp.Spec = oldObject.Spec
+					newObjectCmp.Spec = newObject.Spec
 
-					oldObject.ObjectMeta.ResourceVersion = ""
-					newObject.ObjectMeta.ResourceVersion = ""
-
-					return !cmp.Equal(oldObject, newObject)
+					return !cmp.Equal(oldObjectCmp, newObjectCmp)
 				},
 			},
 		).
@@ -138,7 +142,7 @@ func (r *TaskReconciler) deleteTask(ctx context.Context, namespacedName types.Na
 	return nil
 }
 
-func (r *TaskReconciler) createTask(ctx context.Context, t *opsv1.Task) (err error) {
+func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (err error) {
 	_, ok := r.crontabMap[t.GetUniqueKey()]
 	if ok {
 		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
@@ -152,7 +156,7 @@ func (r *TaskReconciler) createTask(ctx context.Context, t *opsv1.Task) (err err
 				fmt.Println(err.Error())
 				return
 			}
-			r.runTaskOnHost(ctx, t, h)
+			r.runTaskOnHost(logger, ctx, t, h)
 		}
 		if t.GetSpec().Crontab != "" {
 			r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, hostCmd)
@@ -170,7 +174,7 @@ func (r *TaskReconciler) createTask(ctx context.Context, t *opsv1.Task) (err err
 				fmt.Println(err.Error())
 				return
 			}
-			r.runTaskOnKube(ctx, t, c, t.Spec.NodeName)
+			r.runTaskOnKube(logger, ctx, t, c, t.Spec.NodeName)
 		}
 		if t.GetSpec().Crontab != "" {
 			r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, clusterCmd)
@@ -185,24 +189,17 @@ func (r *TaskReconciler) createTask(ctx context.Context, t *opsv1.Task) (err err
 	return
 }
 
-func (r *TaskReconciler) runTaskOnHost(ctx context.Context, t *opsv1.Task, h *opsv1.Host) (err error) {
-	hc, err := host.NewHostConnectionBase64(
-		h.Spec.Address,
-		h.Spec.Port,
-		h.Spec.Username,
-		h.Spec.Password,
-		h.Spec.PrivateKey,
-		h.Spec.PrivateKeyPath,
-	)
+func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, h *opsv1.Host) (err error) {
+	hc, err := host.NewHostConnBase64(h)
 	if err != nil {
 		return err
 	}
-	t.Status.NewOutput()
-	t, err = task.RunTaskOnHost(t, hc, option.TaskOption{})
+	t.Status.NewTaskRun()
+	t, err = task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
 	return
 }
 
-func (r *TaskReconciler) runTaskOnKube(ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, nodeName string) (err error) {
+func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, nodeName string) (err error) {
 	kc, err := kube.NewClusterConnection(c)
 	if err != nil {
 		return err
@@ -211,7 +208,7 @@ func (r *TaskReconciler) runTaskOnKube(ctx context.Context, t *opsv1.Task, c *op
 	if err != nil || len(nodes.Items) == 0 {
 		return err
 	}
-	t.Status.NewOutput()
-	t, err = task.RunTaskOnKube(t, kc, &nodes.Items[0], option.TaskOption{}, option.KubeOption{RuntimeImage: t.Spec.RuntimeImage})
+	t.Status.NewTaskRun()
+	t, err = task.RunTaskOnKube(logger, t, kc, &nodes.Items[0], option.TaskOption{}, option.KubeOption{RuntimeImage: t.Spec.RuntimeImage})
 	return
 }

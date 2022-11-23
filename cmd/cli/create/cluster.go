@@ -21,7 +21,11 @@ var clusterCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		CreateCluster(logger, createClusterOpt, inventory)
+		err = CreateCluster(logger, createClusterOpt, inventory)
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
 	},
 }
 

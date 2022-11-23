@@ -6,6 +6,7 @@ import (
 	"fmt"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
+	opslog "github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -117,7 +118,7 @@ func (kc *KubeConnection) GetAllRunningPods() (allPod *corev1.PodList, err error
 	})
 }
 
-func (kc *KubeConnection) ScriptOnNode(node *corev1.Node, scriptOpt option.ScriptOption) (stdout string, err error) {
+func (kc *KubeConnection) ScriptOnNode(logger *opslog.Logger, node *corev1.Node, scriptOpt option.ScriptOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
@@ -127,10 +128,10 @@ func (kc *KubeConnection) ScriptOnNode(node *corev1.Node, scriptOpt option.Scrip
 	if err != nil {
 		return
 	}
-	return GetPodLog(context.TODO(), kc.Client, pod)
+	return GetPodLog(logger, context.TODO(), kc.Client, pod)
 }
 
-func (kc *KubeConnection) Script(scriptOpt option.ScriptOption) (err error) {
+func (kc *KubeConnection) Script(logger *opslog.Logger, scriptOpt option.ScriptOption) (err error) {
 	nodes, err := kc.GetNodeByName(scriptOpt.NodeName)
 
 	if err != nil {
@@ -140,13 +141,13 @@ func (kc *KubeConnection) Script(scriptOpt option.ScriptOption) (err error) {
 		nodes, err = kc.GetNodes()
 	}
 	for _, node := range nodes.Items {
-		kc.ScriptOnNode(&node, scriptOpt)
+		kc.ScriptOnNode(logger, &node, scriptOpt)
 	}
 
 	return
 }
 
-func (kc *KubeConnection) FileonNode(node *corev1.Node, fileopt option.FileOption) (stdout string, err error) {
+func (kc *KubeConnection) FileonNode(logger *opslog.Logger, node *corev1.Node, fileopt option.FileOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
@@ -156,16 +157,16 @@ func (kc *KubeConnection) FileonNode(node *corev1.Node, fileopt option.FileOptio
 	if err != nil {
 		return
 	}
-	return GetPodLog(context.TODO(), kc.Client, pod)
+	return GetPodLog(logger, context.TODO(), kc.Client, pod)
 }
 
-func (kc *KubeConnection) File(fileopt option.FileOption) (err error) {
+func (kc *KubeConnection) File(logger *opslog.Logger, fileopt option.FileOption) (err error) {
 	nodes, err := kc.GetNodeByName(fileopt.NodeName)
 	if fileopt.All {
 		nodes, err = kc.GetNodes()
 	}
 	for _, node := range nodes.Items {
-		kc.FileonNode(&node, fileopt)
+		kc.FileonNode(logger, &node, fileopt)
 	}
 	return
 

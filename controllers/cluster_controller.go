@@ -24,13 +24,13 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
+	opslog "github.com/shaowenchen/ops/pkg/log"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // ClusterReconciler reconciles a Cluster object
@@ -53,11 +53,15 @@ type ClusterReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
-func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	logger, err := opslog.NewCliLogger(true, true)
+	if err != nil {
+		fmt.Printf(err.Error())
+		return ctrl.Result{}, err
+	}
 
 	c := &opsv1.Cluster{}
-	err := r.Get(ctx, req.NamespacedName, c)
+	err = r.Get(ctx, req.NamespacedName, c)
 
 	//if deleted, stop ticker
 	if apierrors.IsNotFound(err) {
@@ -68,7 +72,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 	// add timeticker
-	r.addTimeTicker(ctx, c)
+	r.addTimeTicker(logger, ctx, c)
 
 	return ctrl.Result{}, nil
 }
@@ -88,7 +92,7 @@ func (r *ClusterReconciler) deleteCluster(ctx context.Context, namespacedName ty
 	return nil
 }
 
-func (r *ClusterReconciler) addTimeTicker(ctx context.Context, c *opsv1.Cluster) {
+func (r *ClusterReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Context, c *opsv1.Cluster) {
 	// if ticker exist, return
 	_, ok := r.timeTickerStopChans[c.GetUniqueKey()]
 	if ok {
@@ -99,7 +103,7 @@ func (r *ClusterReconciler) addTimeTicker(ctx context.Context, c *opsv1.Cluster)
 	}
 	r.timeTickerStopChans[c.GetUniqueKey()] = make(chan bool)
 	// create ticker
-	log.FromContext(ctx).Info(fmt.Sprintf("start ticker for cluster %s", c.GetUniqueKey()))
+	logger.Info.Println(fmt.Sprintf("start ticker for cluster %s", c.GetUniqueKey()))
 	go func() {
 		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
 		for {
@@ -107,25 +111,25 @@ func (r *ClusterReconciler) addTimeTicker(ctx context.Context, c *opsv1.Cluster)
 			case <-r.timeTickerStopChans[c.GetUniqueKey()]:
 				ticker.Stop()
 				delete(r.timeTickerStopChans, c.GetUniqueKey())
-				log.FromContext(ctx).Info(fmt.Sprintf("stop ticker for cluster %s", c.GetUniqueKey()))
+				logger.Info.Println(fmt.Sprintf("stop ticker for cluster %s", c.GetUniqueKey()))
 				return
 			case <-ticker.C:
-				r.updateStatus(ctx, c)
+				r.updateStatus(logger, ctx, c)
 			}
 		}
 	}()
 	return
 }
 
-func (r *ClusterReconciler) updateStatus(ctx context.Context, c *opsv1.Cluster) (err error) {
+func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Context, c *opsv1.Cluster) (err error) {
 	kc, err := opskube.NewClusterConnection(c)
 	if err != nil {
-		log.FromContext(ctx).Error(err, "failed to create cluster connection")
+		logger.Error.Println(err, "failed to create cluster connection")
 		return
 	}
 	stauts, err := kc.GetStatus()
 	if err != nil {
-		log.FromContext(ctx).Error(err, "failed to get cluster status")
+		logger.Error.Println(err, "failed to get cluster status")
 		return
 	}
 	lastC := &opsv1.Cluster{}
@@ -134,18 +138,13 @@ func (r *ClusterReconciler) updateStatus(ctx context.Context, c *opsv1.Cluster) 
 		return
 	}
 	if err != nil {
-		log.FromContext(ctx).Error(err, "failed to get last cluster")
+		logger.Error.Println(err, "failed to get last cluster")
 		return
 	}
 	lastC.Status = *stauts
 	err = r.Client.Status().Update(ctx, lastC)
 	if err != nil {
-		log.FromContext(ctx).Error(err, "update cluster status error")
+		logger.Error.Println(err, "update cluster status error")
 	}
-	return
-}
-
-func (r *ClusterReconciler) NewKubeConnection(c *opsv1.Cluster) (kc *opskube.KubeConnection, err error) {
-	kc, err = opskube.NewClusterConnection(c)
 	return
 }

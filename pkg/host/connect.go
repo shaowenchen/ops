@@ -31,20 +31,25 @@ type HostConnection struct {
 	sshclient *ssh.Client
 }
 
-func NewHostConnectionBase64(address string, port int, username string, passwordBase64 string, privateKeyBase64 string, privateKeyPath string) (c *HostConnection, err error) {
-	password, err := utils.DecodingBase64ToString(passwordBase64)
+func NewHostConnBase64(h *opsv1.Host) (c *HostConnection, err error) {
+	password, err := utils.DecodingBase64ToString(h.Spec.Password)
 	if err != nil {
 		return nil, err
 	}
-	privateKey, err := utils.DecodingBase64ToString(privateKeyBase64)
+	privateKey, err := utils.DecodingBase64ToString(h.Spec.PrivateKey)
 	if err != nil {
 
 		return nil, err
 	}
-	return newHostConnection(address, port, username, password, privateKey, privateKeyPath)
+	c, err = newHostConn(h.Spec.Address, h.Spec.Port, h.Spec.Username, password, privateKey, h.Spec.PrivateKeyPath)
+	if err != nil {
+		return nil, err
+	}
+	c.Host = h
+	return
 }
 
-func newHostConnection(address string, port int, username string, password string, privateKey string, privateKeyPath string) (c *HostConnection, err error) {
+func newHostConn(address string, port int, username string, password string, privateKey string, privateKeyPath string) (c *HostConnection, err error) {
 
 	if len(privateKeyPath) == 0 {
 		privateKeyPath = constants.GetCurrentUserPrivateKeyPath()
@@ -55,11 +60,7 @@ func newHostConnection(address string, port int, username string, password strin
 	if len(username) == 0 {
 		username = constants.GetCurrentUser()
 	}
-	c = &HostConnection{
-		Host: opsv1.NewHost(
-			"", "", address, port, username, password, privateKey, privateKeyPath, constants.DefaultTimeoutSeconds,
-		),
-	}
+	c = &HostConnection{}
 	// local host
 	if address == constants.LocalHostIP {
 		return c, nil
@@ -71,7 +72,7 @@ func newHostConnection(address string, port int, username string, password strin
 	return
 }
 
-func (c *HostConnection) Script(sudo bool, content string) (stdout string, exit int, err error) {
+func (c *HostConnection) Script(sudo bool, content string) (stdout string, err error) {
 	reg := regexp.MustCompile(`\${[^\}]*}`)
 	funcStrList := reg.FindAllString(content, -1)
 	for _, callFunc := range funcStrList {
@@ -79,15 +80,11 @@ func (c *HostConnection) Script(sudo bool, content string) (stdout string, exit 
 		callFunc = callFunc[2 : len(callFunc)-1]
 		stdout, err = c.scriptFuncMap(sudo, callFunc)
 		if err != nil {
-			return stdout, -1, err
+			return stdout, err
 		}
 		content = strings.ReplaceAll(content, rawCallFunc, stdout)
 	}
-	stdout, exit, err = c.exec(sudo, content)
-	if exit != 0 && len(stdout) == 0 {
-		return err.Error(), 1, err
-	}
-	return
+	return c.exec(sudo, content)
 }
 
 func (c *HostConnection) scriptFuncMap(sudo bool, funcFull string) (stdout string, err error) {
@@ -105,18 +102,17 @@ func (c *HostConnection) install(sudo bool, component string) (stdout string, er
 		if !c.isInChina() {
 			proxy = constants.DefaultProxy
 		}
-		stdout, _, err = c.exec(sudo, utils.ScriptInstallOpscli(proxy))
-		return
+		return c.exec(sudo, utils.ScriptInstallOpscli(proxy))
 	}
 	return
 }
 
 func (c *HostConnection) isInChina() (ok bool) {
-	_, exitCode, err := c.exec(false, utils.ScriptIsInChina())
-	if exitCode != 0 || err != nil {
-		return false
+	_, err := c.exec(false, utils.ScriptIsInChina())
+	if err != nil {
+		return true
 	}
-	return true
+	return false
 }
 
 func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string) (err error) {
@@ -228,7 +224,7 @@ func (c *HostConnection) connecting() (err error) {
 	return nil
 }
 
-func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, err error) {
+func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, err error) {
 	cmd = utils.BuildBase64Cmd(sudo, cmd)
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
@@ -249,21 +245,15 @@ func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, e
 	}
 	sess, err := c.session()
 	if err != nil {
-		return "", 1, errors.Wrap(err, "failed to get SSH session")
+		return "", errors.Wrap(err, "failed to get SSH session")
 	}
 	defer sess.Close()
-
-	exitCode := 0
 
 	in, _ := sess.StdinPipe()
 	out, _ := sess.StdoutPipe()
 	err = sess.Start(cmd)
 	if err != nil {
-		exitCode = -1
-		if exitErr, ok := err.(*ssh.ExitError); ok {
-			exitCode = exitErr.ExitStatus()
-		}
-		return "", exitCode, err
+		return "", err
 	}
 
 	var (
@@ -293,37 +283,23 @@ func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, code int, e
 		}
 	}
 	err = sess.Wait()
-	if err != nil {
-		exitCode = -1
-		if exitErr, ok := err.(*ssh.ExitError); ok {
-			exitCode = exitErr.ExitStatus()
-		}
-	}
-	outStr := strings.TrimPrefix(string(output), fmt.Sprintf("[sudo] password for %s:", c.Host.Spec.Username))
-
-	// preserve original error
-	return strings.TrimSpace(outStr), exitCode, errors.Wrapf(err, "Failed to exec command: %s \n%s", cmd, strings.TrimSpace(outStr))
+	return string(output), err
 }
 
 func (c *HostConnection) mv(sudo bool, src, dst string) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptMv(src, dst))
-	return
+	return c.exec(sudo, utils.ScriptMv(src, dst))
 }
 
 func (c *HostConnection) copy(sudo bool, src, dst string) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptCopy(src, dst))
-	return
+	return c.exec(sudo, utils.ScriptCopy(src, dst))
 }
 
 func (c *HostConnection) chown(sudo bool, idU, idG, src string) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptChown(idU, idG, src))
-	fmt.Println(stdout)
-	return
+	return c.exec(sudo, utils.ScriptChown(idU, idG, src))
 }
 
 func (c *HostConnection) rm(sudo bool, dst string) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptRm(dst))
-	return
+	return c.exec(sudo, utils.ScriptRm(dst))
 }
 
 func (c *HostConnection) cmdPull(sudo bool, src, dst string) (err error) {
@@ -331,7 +307,7 @@ func (c *HostConnection) cmdPull(sudo bool, src, dst string) (err error) {
 	if err != nil {
 		return err
 	}
-	output, _, err := c.exec(sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
+	output, err := c.exec(sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
 	if err != nil {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
@@ -375,11 +351,11 @@ func (c *HostConnection) scpPull(sudo bool, src, dst string) (err error) {
 	if err != nil {
 		return errors.New(stdout)
 	}
-	idU, err := c.getIdU()
+	idU, err := c.getIDU()
 	if err != nil {
 		return errors.New(stdout)
 	}
-	idG, err := c.getIdG()
+	idG, err := c.getIDG()
 	if err != nil {
 		return errors.New(stdout)
 	}
@@ -465,134 +441,71 @@ func (c *HostConnection) fileMd5(sudo bool, filepath string) (md5 string, err er
 	if sudo {
 		cmd = fmt.Sprintf("sudo %s", cmd)
 	}
-	stdout, _, err := c.exec(sudo, cmd)
-	if err != nil {
-		return
-	}
-	md5 = strings.TrimSpace(stdout)
-	return
+	return c.exec(sudo, cmd)
 }
 
 func (c *HostConnection) makeDir(sudo bool, filepath string) (err error) {
-	cmd := utils.ScriptMakeDir(utils.SplitDirPath(filepath))
-	stdout, _, err := c.exec(false, cmd)
-	if err == nil && len(stdout) > 0 {
-		return errors.New(stdout)
-	}
+	_, err = c.exec(sudo, utils.ScriptMakeDir(utils.SplitDirPath(filepath)))
 	return
 }
 
-func (c *HostConnection) getIdU() (idu string, err error) {
-	cmd := fmt.Sprintf("id -u")
-	stdout, _, err := c.exec(false, cmd)
-	if err != nil {
-		return
-	}
-	return stdout, err
+func (c *HostConnection) getIDU() (idu string, err error) {
+	return c.exec(false, fmt.Sprintf("id -u"))
 }
 
-func (c *HostConnection) getIdG() (idg string, err error) {
-	cmd := fmt.Sprintf("id -g")
-	stdout, _, err := c.exec(false, cmd)
-	if err != nil {
-		return
-	}
-	return stdout, err
+func (c *HostConnection) getIDG() (idg string, err error) {
+	return c.exec(false, fmt.Sprintf("id -g"))
 }
 
 func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptCPUTotal())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptCPUTotal())
 }
 
 func (c *HostConnection) getCPULoad1(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptCPULoad1())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptCPULoad1())
 }
 
 func (c *HostConnection) getCPUUsagePercent(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptCPUUsagePercent())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptCPUUsagePercent())
 }
 
 func (c *HostConnection) getMemTotal(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptMemTotal())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptMemTotal())
 }
 
 func (c *HostConnection) getMemUsagePercent(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptMemUsagePercent())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptMemUsagePercent())
 }
 
 func (c *HostConnection) getHosname(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptHostname())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptHostname())
 }
 
 func (c *HostConnection) getDiskTotal(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptDiskTotal())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptDiskTotal())
 }
 
 func (c *HostConnection) getArch(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptArch())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptArch())
 }
 
 func (c *HostConnection) getDiskUsagePercent(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptDiskUsagePercent())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptDiskUsagePercent())
 }
 
 func (c *HostConnection) getKernelVersion(sudo bool) (stdout string, err error) {
-	stdout, _, err = c.exec(sudo, utils.ScriptKernelVersion())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptKernelVersion())
 }
 
 func (c *HostConnection) getDistribution(sudo bool) (cpu string, err error) {
-	cpu, _, err = c.exec(sudo, utils.ScriptDistribution())
-	if err != nil {
-		return
-	}
-	return
+	return c.exec(sudo, utils.ScriptDistribution())
 }
 
 func (c *HostConnection) getTempfileName(name string) string {
 	nameSplit := strings.Split(name, "/")
 	name = nameSplit[len(nameSplit)-1]
 	cmd := "pwd"
-	stdout, _, err := c.exec(false, cmd)
+	stdout, err := c.exec(false, cmd)
 	if err != nil {
 		return name
 	}

@@ -32,7 +32,7 @@ func Createtask(logger *log.Logger, option option.CreateTaskOption, inventory st
 		logger.Error.Println(err)
 		return
 	}
-	taskText, err := utils.ReadFile(option.Taskpath)
+	taskText, err := utils.ReadFile(option.Filepath)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -59,6 +59,6 @@ func init() {
 	taskCmd.MarkFlagRequired("name")
 	taskCmd.Flags().StringVarP(&inventory, "inventory", "", "", "")
 	taskCmd.MarkFlagRequired("inventory")
-	taskCmd.Flags().StringVarP(&createTaskOpt.Taskpath, "taskpath", "", "", "")
+	taskCmd.Flags().StringVarP(&createTaskOpt.Filepath, "filepath", "", "", "")
 	taskCmd.Flags().BoolVarP(&createTaskOpt.Clear, "clear", "", false, "")
 }

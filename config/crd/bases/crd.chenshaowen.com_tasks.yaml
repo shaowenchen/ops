@@ -188,23 +188,35 @@ spec:
             description: TaskStatus defines the observed state of Task
             properties:
               lastRunStatus:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                  of cluster Important: Run "make" to regenerate code after modifying
-                  this file'
                 type: string
               lastRunTime:
                 format: date-time
                 type: string
-              output:
+              taskRunStatus:
                 additionalProperties:
-                  items:
-                    properties:
-                      stepName:
-                        type: string
-                      stepOutput:
-                        type: string
-                    type: object
-                  type: array
+                  properties:
+                    lastRunStatus:
+                      type: string
+                    lastRunTime:
+                      format: date-time
+                      type: string
+                    taskRunStep:
+                      items:
+                        properties:
+                          stepCmd:
+                            type: string
+                          stepName:
+                            type: string
+                          stepOutput:
+                            type: string
+                          stepStatus:
+                            type: string
+                        type: object
+                      type: array
+                  type: object
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
                 type: object
             type: object
         type: object

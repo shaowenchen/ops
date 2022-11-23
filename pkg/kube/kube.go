@@ -27,7 +27,7 @@ func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, opti
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	GetPodLog(context.TODO(), client, pod)
+	GetPodLog(logger, context.TODO(), client, pod)
 	return
 }
 
@@ -40,11 +40,11 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	GetPodLog(context.TODO(), client, pod)
+	GetPodLog(logger, context.TODO(), client, pod)
 	return
 }
 
-func GetPodLog(ctx context.Context, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
+func GetPodLog(logger *log.Logger, ctx context.Context, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
 	var logList []string
 	for range time.Tick(time.Second * 3) {
 		select {
@@ -58,7 +58,9 @@ func GetPodLog(ctx context.Context, client *kubernetes.Clientset, pod *v1.Pod) (
 				return strings.Join(logList, ""), err1
 			}
 			logList = append(logList, log)
+			logger.Info.Println(log)
 			if utils.IsStopedPod(pod) {
+				client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
 				return strings.Join(logList, ""), err1
 			}
 		}

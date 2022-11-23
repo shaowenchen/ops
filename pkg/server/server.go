@@ -54,12 +54,12 @@ func CreateTask(c *gin.Context) {
 	}
 	hosts := host.GetHosts(logger, option.HostOption{}, "")
 	for _, h := range hosts {
-		hc, err := host.NewHostConnectionBase64(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
+		hc, err := host.NewHostConnBase64(h)
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
-		task.RunTaskOnHost(t, hc, option.TaskOption{})
+		task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
 	}
 	c.JSON(http.StatusOK, logger.GetBuffer())
 }

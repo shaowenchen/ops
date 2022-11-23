@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -98,4 +99,24 @@ func ReadFile(path string) (buff string, err error) {
 	path = GetAbsoluteFilePath(path)
 	buffBytes, err := os.ReadFile(path)
 	return string(buffBytes), err
+}
+
+func GetFileArray(filePath string) (fileArray []string, err error) {
+	info, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		return
+	}
+	if info.IsDir() {
+		files, err := ioutil.ReadDir(filePath)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, f := range files {
+			fileArray = append(fileArray, filepath.Join(filePath, f.Name()))
+		}
+	} else {
+		fileArray = append(fileArray, filePath)
+	}
+	return
 }

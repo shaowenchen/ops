@@ -13,7 +13,8 @@ import (
 
 func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOption option.HostOption) (err error) {
 	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
-	c, err := NewHostConnectionBase64(h.Spec.Address, hostOption.Port, hostOption.Username, hostOption.Password, hostOption.PrivateKey, hostOption.PrivateKeyPath)
+	FillHostByOption(h, &hostOption)
+	c, err := NewHostConnBase64(h)
 	if err != nil {
 		logger.Error.Println(err)
 		return err
@@ -23,12 +24,13 @@ func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOptio
 
 func Script(logger *log.Logger, h *opsv1.Host, option option.ScriptOption, hostOption option.HostOption) (err error) {
 	logger.Info.Print(utils.PrintMiddleFilled(fmt.Sprintf("[%s]", h.Spec.Address)))
-	c, err := NewHostConnectionBase64(h.Spec.Address, hostOption.Port, hostOption.Username, hostOption.Password, hostOption.PrivateKey, hostOption.PrivateKeyPath)
+	FillHostByOption(h, &hostOption)
+	c, err := NewHostConnBase64(h)
 	if err != nil {
 		logger.Error.Println(err)
 		return err
 	}
-	stdout, _, err := c.Script(option.Sudo, option.Script)
+	stdout, err := c.Script(option.Sudo, option.Script)
 	logger.Info.Println(stdout)
 	return
 }
@@ -39,4 +41,23 @@ func GetHosts(logger *log.Logger, option option.HostOption, inventory string) (h
 		hosts = append(hosts, opsv1.NewHost("default", strings.ReplaceAll(addr, ".", "-"), addr, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath, constants.DefaultTimeoutSeconds))
 	}
 	return
+}
+
+func FillHostByOption(h *opsv1.Host, option *option.HostOption) *opsv1.Host {
+	if option.Username != "" && h.GetSpec().Username == "" {
+		h.Spec.Username = option.Username
+	}
+	if option.Password != "" && h.GetSpec().Password == "" {
+		h.Spec.Password = option.Password
+	}
+	if option.Port != 0 && h.GetSpec().Port == 0 {
+		h.Spec.Port = option.Port
+	}
+	if option.PrivateKey != "" && h.GetSpec().PrivateKey == "" {
+		h.Spec.PrivateKey = option.PrivateKey
+	}
+	if option.PrivateKeyPath != "" && h.GetSpec().PrivateKeyPath == "" {
+		h.Spec.PrivateKeyPath = option.PrivateKeyPath
+	}
+	return h
 }

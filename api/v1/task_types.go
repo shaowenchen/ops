@@ -57,34 +57,53 @@ type Step struct {
 type TaskStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	LastRunStatus string                   `json:"lastRunStatus,omitempty"`
-	LastRunTime   *metav1.Time             `json:"lastRunTime,omitempty"`
-	Outputs       map[string][]*StepOutput `json:"output,omitempty"`
+	TaskRunStatus map[string]*TaskRunStatus `json:"taskRunStatus,omitempty"`
+	LastRunStatus string                    `json:"lastRunStatus,omitempty"`
+	LastRunTime   *metav1.Time              `json:"lastRunTime,omitempty"`
 }
 
 const LastRunStatusSuccessed = "successed"
 const LastRunStatusFailed = "failed"
 
-type StepOutput struct {
+func GetRunStatus(err error) string {
+	if err == nil {
+		return LastRunStatusSuccessed
+	}
+	return LastRunStatusFailed
+}
+
+type TaskRunStatus struct {
+	TaskRunStep   []*TaskRunStep `json:"taskRunStep,omitempty"`
+	LastRunStatus string         `json:"lastRunStatus,omitempty"`
+	LastRunTime   *metav1.Time   `json:"lastRunTime,omitempty"`
+}
+
+type TaskRunStep struct {
 	StepName   string `json:"stepName,omitempty"`
+	StepCmd    string `json:"stepCmd,omitempty"`
 	StepOutput string `json:"stepOutput,omitempty"`
+	StepStatus string `json:"stepStatus,omitempty"`
 }
 
-func (taskStatus *TaskStatus) NewOutput() {
-	taskStatus.Outputs = make(map[string][]*StepOutput)
+func (t *TaskStatus) NewTaskRun() {
+	t.TaskRunStatus = make(map[string]*TaskRunStatus)
 }
 
-func (taskStatus *TaskStatus) AddOutputStep(nodeName string, stepName, stepOutput string, isSuccessed bool) {
-	if taskStatus.Outputs == nil {
+func (t *TaskStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutput, stepStatus string) {
+	if t.TaskRunStatus == nil {
 		return
 	}
-	taskStatus.Outputs[nodeName] = append(taskStatus.Outputs[nodeName], &StepOutput{StepName: stepName, StepOutput: stepOutput})
-	if isSuccessed {
-		taskStatus.LastRunStatus = LastRunStatusSuccessed
-	} else {
-		taskStatus.LastRunStatus = LastRunStatusFailed
+	if _, ok := t.TaskRunStatus[nodeName]; !ok {
+		t.TaskRunStatus[nodeName] = &TaskRunStatus{}
 	}
-	taskStatus.LastRunTime = &metav1.Time{Time: time.Now()}
+	t.TaskRunStatus[nodeName].TaskRunStep = append(t.TaskRunStatus[nodeName].TaskRunStep, &TaskRunStep{
+		StepName:   stepName,
+		StepCmd:    stepCmd,
+		StepOutput: stepOutput,
+		StepStatus: stepStatus,
+	})
+	t.TaskRunStatus[nodeName].LastRunTime = &metav1.Time{Time: time.Now()}
+	t.TaskRunStatus[nodeName].LastRunStatus = stepStatus
 }
 
 //+kubebuilder:object:root=true

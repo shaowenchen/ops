@@ -117,7 +117,7 @@ func (r *HostReconciler) addTimeTicker(ctx context.Context, h *opsv1.Host) (err 
 }
 
 func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host) (err error) {
-	hc, err := host.NewHostConnectionBase64(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
+	hc, err := host.NewHostConnBase64(h)
 	if err != nil {
 		return
 	}
@@ -143,6 +143,6 @@ func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host) (err e
 }
 
 func (r *HostReconciler) NewHostConnection(h *opsv1.Host) (hc *host.HostConnection, err error) {
-	hc, err = host.NewHostConnectionBase64(h.Spec.Address, h.Spec.Port, h.Spec.Username, h.Spec.Password, h.Spec.PrivateKey, h.Spec.PrivateKeyPath)
+	hc, err = host.NewHostConnBase64(h)
 	return
 }
