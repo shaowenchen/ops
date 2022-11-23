@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	"github.com/shaowenchen/ops/pkg/create"
+	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
@@ -44,7 +44,7 @@ func Createtask(logger *log.Logger, option option.CreateTaskOption, inventory st
 	}
 	t.Namespace = option.Namespace
 	t.Name = option.Name
-	err = create.CreateTask(logger, restConfig, t, option.Clear)
+	err = kube.CreateTask(logger, restConfig, t, option.Clear)
 	if err != nil {
 		logger.Error.Println(err)
 	}

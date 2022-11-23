@@ -5,7 +5,7 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/create"
+	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
@@ -45,7 +45,7 @@ func CreateCluster(logger *log.Logger, clusterOpt option.CreateClusterOption, in
 	}
 	clusterOpt.Config = utils.EncodingStringToBase64(config)
 	cluster := opsv1.NewCluster(clusterOpt.Namespace, clusterOpt.Name, clusterOpt.Server, clusterOpt.Config, clusterOpt.Token)
-	err = create.CreateCluster(logger, restConfig, cluster, clusterOpt.Clear)
+	err = kube.CreateCluster(logger, restConfig, cluster, clusterOpt.Clear)
 	if err != nil {
 		logger.Error.Println(err)
 	}

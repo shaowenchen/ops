@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/create"
 	"github.com/shaowenchen/ops/pkg/host"
+	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
@@ -52,7 +52,7 @@ func CreateHost(logger *log.Logger, option option.CreateHostOption, inventory st
 			hs[0].Name = option.Name
 		}
 		// no name, multi host
-		err = create.CreateHost(logger, restConfig, h, option.Clear)
+		err = kube.CreateHost(logger, restConfig, h, option.Clear)
 		if err != nil {
 			logger.Error.Println(err)
 		}

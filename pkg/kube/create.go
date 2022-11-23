@@ -1,10 +1,9 @@
-package create
+package kube
 
 import (
 	"context"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 
 	"k8s.io/client-go/rest"
@@ -13,7 +12,7 @@ import (
 
 func CreateHost(logger *opslog.Logger, restConfig *rest.Config, host *opsv1.Host, clear bool) (err error) {
 
-	client, err := opskube.GetOpsClient(logger, restConfig)
+	client, err := GetOpsClient(logger, restConfig)
 	if err != nil {
 		return
 	}
@@ -26,7 +25,7 @@ func CreateHost(logger *opslog.Logger, restConfig *rest.Config, host *opsv1.Host
 }
 
 func CreateCluster(logger *opslog.Logger, restConfig *rest.Config, cluster *opsv1.Cluster, clear bool) (err error) {
-	client, err := opskube.GetOpsClient(logger, restConfig)
+	client, err := GetOpsClient(logger, restConfig)
 	if err != nil {
 		return
 	}
