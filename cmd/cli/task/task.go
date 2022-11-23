@@ -53,7 +53,6 @@ func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.Host
 		logger.Error.Println(err)
 		return err
 	}
-
 	hs := host.GetHosts(logger, hostOpt, inventory)
 	for _, h := range hs {
 		if err != nil {
@@ -84,18 +83,10 @@ func KubeTask(logger *log.Logger, taskOpt option.TaskOption, kubeOpt option.Kube
 		logger.Error.Println(err)
 		return err
 	}
-	nodeList, err := kc.GetNodes()
-	if err != nil {
-		logger.Error.Println(err)
-	}
-	if len(kubeOpt.NodeName) != 0 {
-		nodeList, err = kc.GetNodeByName(kubeOpt.NodeName)
-		if err != nil {
-			logger.Error.Println(err)
-		}
-	}
-	for _, node := range nodeList.Items {
+	nodes, err := kube.GetNodes(logger, kc.Client, kubeOpt)
+	for _, node := range nodes {
 		for _, t := range tasks {
+			logger.Info.Println(utils.FilledInMiddle(node.Name))
 			task.RunTaskOnKube(logger, &t, kc, &node, taskOpt, kubeOpt)
 		}
 	}

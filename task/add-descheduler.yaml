@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: add-descheduler
+  namespace: default
+spec:
+  desc: install descheduler
+  steps:
+    - name: apply rbac
+      script: kubectl apply -f https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/descheduler/v0.25.1-rbac.yaml
+    - name: apply configmap
+      script: kubectl apply -f https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/descheduler/v0.25.1-configmap.yaml
+    - name: apply deployment
+      script: kubectl apply -f https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/descheduler/v0.25.1-deployment.yaml

@@ -9,7 +9,6 @@ import (
 	option "github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	v1 "k8s.io/api/core/v1"
-	"strings"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,7 +17,7 @@ import (
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.ScriptOption) (err error) {
+func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.ScriptOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
@@ -27,11 +26,12 @@ func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, opti
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	GetPodLog(logger, context.TODO(), client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), client, pod)
+	logger.Info.Println(stdout)
 	return
 }
 
-func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.FileOption, kubeOption option.KubeOption) (err error) {
+func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.FileOption, kubeOption option.KubeOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
@@ -40,12 +40,12 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	GetPodLog(logger, context.TODO(), client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), client, pod)
+	logger.Info.Println(stdout)
 	return
 }
 
 func GetPodLog(logger *log.Logger, ctx context.Context, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
-	var logList []string
 	for range time.Tick(time.Second * 1) {
 		select {
 		default:
@@ -53,15 +53,13 @@ func GetPodLog(logger *log.Logger, ctx context.Context, client *kubernetes.Clien
 			if utils.IsPendingPod(pod) {
 				continue
 			}
-			log, err1 := utils.GetPodLog(ctx, client, pod.Namespace, pod.Name)
+			logs, err = utils.GetPodLog(ctx, client, pod.Namespace, pod.Name)
 			if err != nil {
-				return strings.Join(logList, ""), err1
+				return
 			}
-			logList = append(logList, log)
-			logger.Info.Println(log)
 			if utils.IsStopedPod(pod) {
 				client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
-				return strings.Join(logList, ""), err1
+				return
 			}
 		}
 	}

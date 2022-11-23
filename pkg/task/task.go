@@ -55,7 +55,6 @@ func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 		task := opsv1.Task{}
 		task.Spec.Variables = make(map[string]string, 0)
 		err = yaml.Unmarshal(yfile, &task)
-		fmt.Println(task.Spec.Steps[0].AllowFailure)
 		if err != nil {
 			return
 		}

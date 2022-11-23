@@ -128,7 +128,9 @@ func (kc *KubeConnection) ScriptOnNode(logger *opslog.Logger, node *corev1.Node,
 	if err != nil {
 		return
 	}
-	return GetPodLog(logger, context.TODO(), kc.Client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), kc.Client, pod)
+	logger.Info.Println(stdout)
+	return
 }
 
 func (kc *KubeConnection) Script(logger *opslog.Logger, scriptOpt option.ScriptOption) (err error) {

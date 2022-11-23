@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -32,37 +31,10 @@ type HostConnection struct {
 }
 
 func NewHostConnBase64(h *opsv1.Host) (c *HostConnection, err error) {
-	password, err := utils.DecodingBase64ToString(h.Spec.Password)
-	if err != nil {
-		return nil, err
-	}
-	privateKey, err := utils.DecodingBase64ToString(h.Spec.PrivateKey)
-	if err != nil {
-
-		return nil, err
-	}
-	c, err = newHostConn(h.Spec.Address, h.Spec.Port, h.Spec.Username, password, privateKey, h.Spec.PrivateKeyPath)
-	if err != nil {
-		return nil, err
-	}
-	c.Host = h
-	return
-}
-
-func newHostConn(address string, port int, username string, password string, privateKey string, privateKeyPath string) (c *HostConnection, err error) {
-
-	if len(privateKeyPath) == 0 {
-		privateKeyPath = constants.GetCurrentUserPrivateKeyPath()
-	}
-	if port == 0 {
-		port = 22
-	}
-	if len(username) == 0 {
-		username = constants.GetCurrentUser()
-	}
 	c = &HostConnection{}
+	c.Host = h
 	// local host
-	if address == constants.LocalHostIP {
+	if h.Spec.Password == constants.LocalHostIP {
 		return c, nil
 	}
 	// remote host
@@ -185,20 +157,22 @@ func (c *HostConnection) session() (*ssh.Session, error) {
 }
 
 func (c *HostConnection) connecting() (err error) {
+	password, err := utils.DecodingBase64ToString(c.Host.Spec.Password)
+	if err != nil {
+		return err
+	}
+	privateKey, err := utils.DecodingBase64ToString(c.Host.Spec.PrivateKey)
+	if err != nil {
+
+		return err
+	}
 	authMethods := make([]ssh.AuthMethod, 0)
-	if len(c.Host.Spec.Password) > 0 {
-		authMethods = append(authMethods, ssh.Password(c.Host.Spec.Password))
+	if len(password) > 0 {
+		authMethods = append(authMethods, ssh.Password(password))
 	}
 
-	if len(c.Host.Spec.PrivateKey) == 0 && len(c.Host.Spec.PrivateKeyPath) > 0 {
-		content, err := ioutil.ReadFile(c.Host.Spec.PrivateKeyPath)
-		if err != nil {
-			return errors.New("Failed read keyfile")
-		}
-		c.Host.Spec.PrivateKey = string(content)
-	}
-	if len(c.Host.Spec.PrivateKey) > 0 {
-		signer, err := ssh.ParsePrivateKey([]byte(c.Host.Spec.PrivateKey))
+	if len(privateKey) > 0 {
+		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
 		if err != nil {
 			return errors.New("The given SSH key could not be parsed")
 		}

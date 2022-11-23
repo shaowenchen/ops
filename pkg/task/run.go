@@ -75,7 +75,6 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 		stepFunc := GetKubeStepFunc(s)
 		stepOutput, stepErr := stepFunc(logger, t, kc, node, s, taskOpt, kubeOpt)
 		t.Status.AddOutputStep(node.Name, s.Name, s.Script, stepOutput, opsv1.GetRunStatus(stepErr))
-		logger.Info.Println(stepOutput)
 		allVars["result"] = stepOutput
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
