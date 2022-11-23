@@ -76,7 +76,10 @@ func GetNodes(logger *log.Logger, client *kubernetes.Clientset, option option.Ku
 	}
 	if len(option.NodeName) > 0 {
 		for _, node := range nodes.Items {
-			if node.Name == option.NodeName {
+			if option.NodeName == constants.AnyMaster && utils.IsMasterNode(&node) {
+				nodeList = append(nodeList, node)
+				return
+			} else if option.NodeName == node.Name {
 				nodeList = append(nodeList, node)
 			}
 		}

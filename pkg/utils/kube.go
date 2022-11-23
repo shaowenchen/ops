@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/shaowenchen/ops/pkg/constants"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -151,4 +152,9 @@ func GetPodLog(ctx context.Context, client *kubernetes.Clientset, namespace, pod
 	log = buf.String()
 
 	return
+}
+
+func IsMasterNode(node *corev1.Node) bool {
+	_, ok := node.Labels[constants.LabelNodeRoleMaster]
+	return ok
 }

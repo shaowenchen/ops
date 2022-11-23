@@ -5,8 +5,10 @@ import "path/filepath"
 const AllNamespaces = "all"
 const OpsNamespace = "ops-system"
 
-const NodeKeyRoleMaster = "node-role.kubernetes.io/master"
-const NodeKeyRoleWorker = "node-role.kubernetes.io/worker"
+const AnyMaster = "anymaster"
+
+const LabelNodeRoleMaster = "node-role.kubernetes.io/master"
+const LabelNodeRoleWorker = "node-role.kubernetes.io/worker"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
