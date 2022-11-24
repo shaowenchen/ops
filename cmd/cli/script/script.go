@@ -59,9 +59,7 @@ func KubeScript(logger *log.Logger, scriptOpt option.ScriptOption, inventory str
 }
 
 func HostScript(logger *log.Logger, scriptOpt option.ScriptOption, hostOpt option.HostOption, inventory string) (err error) {
-	fmt.Println(inventory)
 	for _, h := range host.GetHosts(logger, hostOpt, inventory) {
-		logger.Info.Println(utils.FilledInMiddle(h.Spec.Address))
 		err = host.Script(logger, h, scriptOpt, hostOpt)
 		if err != nil {
 			logger.Error.Println(err)

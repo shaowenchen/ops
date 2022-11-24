@@ -8,8 +8,8 @@ import (
 )
 
 func GetInventoryType(inventory string) string {
-	isExist := IsExistsFile(inventory)
-	if isExist {
+	_, err := GetRestConfig(inventory)
+	if err == nil {
 		return constants.InventoryTypeKubeconfig
 	}
 	return constants.InventoryTypeHosts
