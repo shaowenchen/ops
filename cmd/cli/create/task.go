@@ -21,18 +21,18 @@ var taskCmd = &cobra.Command{
 			fmt.Printf(err.Error())
 			return
 		}
-		Createtask(logger, createTaskOpt, inventory)
+		Createtask(logger, clusterOpt, inventory)
 	},
 }
 
-func Createtask(logger *log.Logger, option option.CreateTaskOption, inventory string) (err error) {
+func Createtask(logger *log.Logger, option option.ClusterOption, inventory string) (err error) {
 	inventory = utils.GetAbsoluteFilePath(inventory)
 	restConfig, err := utils.GetRestConfig(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	taskText, err := utils.ReadFile(option.Filepath)
+	taskText, err := utils.ReadFile(taskpath)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -53,12 +53,13 @@ func Createtask(logger *log.Logger, option option.CreateTaskOption, inventory st
 }
 
 func init() {
-	taskCmd.Flags().StringVarP(&createTaskOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
-	taskCmd.Flags().StringVarP(&createTaskOpt.Namespace, "namespace", "", "default", "")
-	taskCmd.Flags().StringVarP(&createTaskOpt.Name, "name", "", "", "")
+	taskCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
+	taskCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "default", "")
+	taskCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")
 	taskCmd.MarkFlagRequired("name")
+	taskCmd.Flags().BoolVarP(&clusterOpt.Clear, "clear", "", false, "")
+
 	taskCmd.Flags().StringVarP(&inventory, "inventory", "", "", "")
 	taskCmd.MarkFlagRequired("inventory")
-	taskCmd.Flags().StringVarP(&createTaskOpt.Filepath, "filepath", "", "", "")
-	taskCmd.Flags().BoolVarP(&createTaskOpt.Clear, "clear", "", false, "")
+	taskCmd.Flags().StringVarP(&taskpath, "filepath", "", "", "")
 }

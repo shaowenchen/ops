@@ -300,8 +300,8 @@ func (in *TaskRunStatus) DeepCopyInto(out *TaskRunStatus) {
 			}
 		}
 	}
-	if in.LastRunTime != nil {
-		in, out := &in.LastRunTime, &out.LastRunTime
+	if in.StartTime != nil {
+		in, out := &in.StartTime, &out.StartTime
 		*out = (*in).DeepCopy()
 	}
 }
@@ -386,8 +386,8 @@ func (in *TaskStatus) DeepCopyInto(out *TaskStatus) {
 			(*out)[key] = outVal
 		}
 	}
-	if in.LastRunTime != nil {
-		in, out := &in.LastRunTime, &out.LastRunTime
+	if in.StartTime != nil {
+		in, out := &in.StartTime, &out.StartTime
 		*out = (*in).DeepCopy()
 	}
 }

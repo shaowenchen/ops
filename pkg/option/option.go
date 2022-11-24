@@ -3,7 +3,6 @@ package option
 import (
 	"strings"
 
-	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 )
 
@@ -74,19 +73,4 @@ type ClusterOption struct {
 	Name       string
 	Kubeconfig string
 	Clear      bool
-}
-
-type CreateHostOption struct {
-	ClusterOption
-	HostOption
-}
-
-type CreateClusterOption struct {
-	ClusterOption
-	opsv1.ClusterSpec
-}
-
-type CreateTaskOption struct {
-	ClusterOption
-	Filepath string
 }

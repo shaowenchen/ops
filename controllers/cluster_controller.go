@@ -27,6 +27,7 @@ import (
 	opslog "github.com/shaowenchen/ops/pkg/log"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -125,23 +126,31 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	kc, err := opskube.NewClusterConnection(c)
 	if err != nil {
 		logger.Error.Println(err, "failed to create cluster connection")
-		return
+		return r.commitStatus(logger, ctx, c, nil, opsv1.StatusFailed)
 	}
-	stauts, err := kc.GetStatus()
+	status, err := kc.GetStatus()
 	if err != nil {
 		logger.Error.Println(err, "failed to get cluster status")
-		return
+		return r.commitStatus(logger, ctx, c, nil, opsv1.StatusFailed)
 	}
+	err = r.commitStatus(logger, ctx, c, status, opsv1.StatusSuccessed)
+	return
+}
+
+func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, c *opsv1.Cluster, overrideStatus *opsv1.ClusterStatus, status string) (err error) {
 	lastC := &opsv1.Cluster{}
 	err = r.Get(ctx, types.NamespacedName{Name: c.Name, Namespace: c.Namespace}, lastC)
-	if apierrors.IsNotFound(err) {
-		return
-	}
 	if err != nil {
 		logger.Error.Println(err, "failed to get last cluster")
 		return
 	}
-	lastC.Status = *stauts
+	if overrideStatus != nil {
+		lastC.Status = *overrideStatus
+	}
+	if status != "" {
+		lastC.Status.HeartStatus = status
+	}
+	lastC.Status.HeartTime = &metav1.Time{Time: time.Now()}
 	err = r.Client.Status().Update(ctx, lastC)
 	if err != nil {
 		logger.Error.Println(err, "update cluster status error")

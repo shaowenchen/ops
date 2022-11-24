@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.131
 	github.com/bramvdbogaerde/go-scp v1.2.0
 	github.com/gin-gonic/gin v1.8.1
+	github.com/google/go-cmp v0.5.8
 	github.com/onsi/ginkgo/v2 v2.1.4
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
@@ -52,7 +53,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect

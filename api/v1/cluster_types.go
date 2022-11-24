@@ -43,9 +43,9 @@ type ClusterStatus struct {
 	HeartStatus string       `json:"heartstatus,omitempty"`
 }
 
-const LastHeartStatusSuccessed = "successed"
-const LastHeartStatusFailed = "failed"
-const LastHeartStatusError = "error"
+const StatusSuccessed = "successed"
+const StatusFailed = "failed"
+const StatusRunning = "running"
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status

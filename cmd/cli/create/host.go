@@ -21,7 +21,7 @@ var hostCmd = &cobra.Command{
 			fmt.Println(err)
 			return
 		}
-		err = CreateHost(logger, createHostOpt, inventory)
+		err = CreateHost(logger, hostOpt, inventory)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -29,30 +29,30 @@ var hostCmd = &cobra.Command{
 	},
 }
 
-func CreateHost(logger *log.Logger, option option.CreateHostOption, inventory string) (err error) {
+func CreateHost(logger *log.Logger, hostOpt option.HostOption, inventory string) (err error) {
 	inventory = utils.GetAbsoluteFilePath(inventory)
 	restConfig, err := utils.GetRestConfig(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	if option.PrivateKey == "" {
-		option.PrivateKey, err = utils.ReadFile(option.PrivateKeyPath)
-		option.PrivateKey = utils.EncodingStringToBase64(option.PrivateKey)
+	if hostOpt.PrivateKey == "" {
+		hostOpt.PrivateKey, err = utils.ReadFile(hostOpt.PrivateKeyPath)
+		hostOpt.PrivateKey = utils.EncodingStringToBase64(hostOpt.PrivateKey)
 		if err != nil {
 			logger.Error.Println(err)
 		}
 	}
-	option.Password = utils.EncodingStringToBase64(option.Password)
-	hs := host.GetHosts(logger, option.HostOption, inventory)
+	hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
+	hs := host.GetHosts(logger, hostOpt, inventory)
 
 	for _, h := range hs {
 		// one name, one host
 		if len(hs) == 1 {
-			hs[0].Name = option.Name
+			hs[0].Name = clusterOpt.Name
 		}
 		// no name, multi host
-		err = kube.CreateHost(logger, restConfig, h, option.Clear)
+		err = kube.CreateHost(logger, restConfig, h, clusterOpt.Clear)
 		if err != nil {
 			logger.Error.Println(err)
 		}
@@ -62,15 +62,16 @@ func CreateHost(logger *log.Logger, option option.CreateHostOption, inventory st
 }
 
 func init() {
-	hostCmd.Flags().StringVarP(&createHostOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
-	hostCmd.Flags().StringVarP(&createHostOpt.Namespace, "namespace", "", "default", "")
-	hostCmd.Flags().StringVarP(&createHostOpt.Name, "name", "", "", "")
+	hostCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
+	hostCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "default", "")
+	hostCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")
 	hostCmd.MarkFlagRequired("name")
-	hostCmd.Flags().StringVarP(&createHostOpt.Username, "username", "", "root", "")
-	hostCmd.Flags().StringVarP(&createHostOpt.Password, "password", "", "", "")
-	hostCmd.Flags().StringVarP(&createHostOpt.PrivateKeyPath, "privatekeypath", "", "~/.ssh/id_rsa", "")
+	hostCmd.Flags().BoolVarP(&clusterOpt.Clear, "clear", "", false, "")
+
+	hostCmd.Flags().StringVarP(&hostOpt.Username, "username", "", "root", "")
+	hostCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
+	hostCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", "~/.ssh/id_rsa", "")
 	hostCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
 	hostCmd.MarkFlagRequired("inventory")
-	hostCmd.Flags().IntVar(&createHostOpt.Port, "port", 22, "")
-	hostCmd.Flags().BoolVarP(&createHostOpt.Clear, "clear", "", false, "")
+	hostCmd.Flags().IntVar(&hostOpt.Port, "port", 22, "")
 }

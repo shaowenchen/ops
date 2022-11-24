@@ -66,23 +66,23 @@ func GetPodLog(logger *log.Logger, ctx context.Context, client *kubernetes.Clien
 	return
 }
 
-func GetNodes(logger *log.Logger, client *kubernetes.Clientset, option option.KubeOption) (nodeList []v1.Node, err error) {
+func GetNodes(logger *log.Logger, client *kubernetes.Clientset, kubeOpt option.KubeOption) (nodeList []v1.Node, err error) {
 	nodes, err := utils.GetAllNodesByClient(client)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	if len(option.NodeName) > 0 {
+	if len(kubeOpt.NodeName) > 0 {
 		for _, node := range nodes.Items {
-			if option.NodeName == constants.AnyMaster && utils.IsMasterNode(&node) {
+			if kubeOpt.NodeName == constants.AnyMaster && utils.IsMasterNode(&node) {
 				nodeList = append(nodeList, node)
 				return
-			} else if option.NodeName == node.Name {
+			} else if kubeOpt.NodeName == node.Name {
 				nodeList = append(nodeList, node)
 			}
 		}
 	}
-	if option.All {
+	if kubeOpt.All {
 		nodeList = nodes.Items
 	}
 	return

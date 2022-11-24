@@ -105,17 +105,39 @@ func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string
 }
 
 func (c *HostConnection) GetStatus(sudo bool) (status *opsv1.HostStatus, err error) {
-	hostname, _ := c.getHosname(sudo)
-	kerneVersion, _ := c.getKernelVersion(sudo)
-	distribution, _ := c.getDistribution(sudo)
-	arch, _ := c.getArch(sudo)
-	diskTotal, _ := c.getDiskTotal(sudo)
-	diskUsagePercent, _ := c.getDiskUsagePercent(sudo)
-	cpuTotal, _ := c.getCPUTotal(sudo)
-	cpuLoad1, _ := c.getCPULoad1(sudo)
-	cpuUsagePercent, _ := c.getCPUUsagePercent(sudo)
-	memTotal, _ := c.getMemTotal(sudo)
-	memUsagePercent, _ := c.getMemUsagePercent(sudo)
+	hostname, err1 := c.getHosname(sudo)
+	err = utils.MergeError(err, err1)
+
+	kerneVersion, err1 := c.getKernelVersion(sudo)
+	err = utils.MergeError(err, err1)
+
+	distribution, err1 := c.getDistribution(sudo)
+	err = utils.MergeError(err, err1)
+
+	arch, err1 := c.getArch(sudo)
+	err = utils.MergeError(err, err1)
+
+	diskTotal, err1 := c.getDiskTotal(sudo)
+	err = utils.MergeError(err, err1)
+
+	diskUsagePercent, err1 := c.getDiskUsagePercent(sudo)
+	err = utils.MergeError(err, err1)
+
+	cpuTotal, err1 := c.getCPUTotal(sudo)
+	err = utils.MergeError(err, err1)
+
+	cpuLoad1, err1 := c.getCPULoad1(sudo)
+	err = utils.MergeError(err, err1)
+
+	cpuUsagePercent, err1 := c.getCPUUsagePercent(sudo)
+	err = utils.MergeError(err, err1)
+
+	memTotal, err1 := c.getMemTotal(sudo)
+	err = utils.MergeError(err, err1)
+
+	memUsagePercent, err1 := c.getMemUsagePercent(sudo)
+	err = utils.MergeError(err, err1)
+
 	status = &opsv1.HostStatus{
 		Hostname:         hostname,
 		KernelVersion:    kerneVersion,
@@ -129,7 +151,7 @@ func (c *HostConnection) GetStatus(sudo bool) (status *opsv1.HostStatus, err err
 		MemTotal:         memTotal,
 		MemUsagePercent:  memUsagePercent,
 		HeartTime:        &metav1.Time{Time: time.Now()},
-		HeartStatus:      opsv1.LastHeartStatusSuccessed,
+		HeartStatus:      opsv1.StatusSuccessed,
 	}
 	return
 }

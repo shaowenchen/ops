@@ -21,13 +21,14 @@ import (
 	"fmt"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/host"
+	opshost "github.com/shaowenchen/ops/pkg/host"
+	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
 )
 
@@ -52,10 +53,14 @@ type HostReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger, err := opslog.NewCliLogger(true, true)
+	if err != nil {
+		fmt.Printf(err.Error())
+		return ctrl.Result{}, err
+	}
 
 	h := &opsv1.Host{}
-	err := r.Get(ctx, req.NamespacedName, h)
+	err = r.Get(ctx, req.NamespacedName, h)
 
 	//if delete, stop ticker
 	if apierrors.IsNotFound(err) {
@@ -67,7 +72,7 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	// add timeticker
-	r.addTimeTicker(ctx, h)
+	r.addTimeTicker(logger, ctx, h)
 
 	return ctrl.Result{}, nil
 }
@@ -87,7 +92,7 @@ func (r *HostReconciler) deleteHost(ctx context.Context, namespacedName types.Na
 	return nil
 }
 
-func (r *HostReconciler) addTimeTicker(ctx context.Context, h *opsv1.Host) (err error) {
+func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Context, h *opsv1.Host) (err error) {
 	// if ticker exist, return
 	_, ok := r.timeTickerStopChans[h.GetUniqueKey()]
 	if ok {
@@ -98,7 +103,7 @@ func (r *HostReconciler) addTimeTicker(ctx context.Context, h *opsv1.Host) (err 
 	}
 	r.timeTickerStopChans[h.GetUniqueKey()] = make(chan bool)
 	// create ticker
-	log.FromContext(ctx).Info(fmt.Sprintf("start ticker for host %s", h.GetUniqueKey()))
+	logger.Info.Println(fmt.Sprintf("start ticker for host %s", h.GetUniqueKey()))
 	go func() {
 		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
 		for {
@@ -106,43 +111,48 @@ func (r *HostReconciler) addTimeTicker(ctx context.Context, h *opsv1.Host) (err 
 			case <-r.timeTickerStopChans[h.GetUniqueKey()]:
 				ticker.Stop()
 				delete(r.timeTickerStopChans, h.GetUniqueKey())
-				log.FromContext(ctx).Info(fmt.Sprintf("stop ticker for host %s", h.GetUniqueKey()))
+				logger.Info.Println(fmt.Sprintf("stop ticker for host %s", h.GetUniqueKey()))
 				return
 			case <-ticker.C:
-				r.updateStatus(ctx, h)
+				r.updateStatus(logger, ctx, h)
 			}
 		}
 	}()
 	return
 }
 
-func (r *HostReconciler) updateStatus(ctx context.Context, h *opsv1.Host) (err error) {
-	hc, err := host.NewHostConnBase64(h)
+func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context, h *opsv1.Host) (err error) {
+	hc, err := opshost.NewHostConnBase64(h)
 	if err != nil {
-		return
+		logger.Error.Println(err, "failed to create host connection")
+		return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)
 	}
 	status, err := hc.GetStatus(false)
 	if err != nil {
-		return
+		logger.Error.Println(err, "failed to get host status")
+		return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)
 	}
-	lastH := &opsv1.Host{}
-	err = r.Get(ctx, types.NamespacedName{Name: h.Name, Namespace: h.Namespace}, lastH)
-	if apierrors.IsNotFound(err) {
-		return
-	}
-	if err != nil {
-		log.FromContext(ctx).Error(err, "failed to get last host")
-		return
-	}
-	lastH.Status = *status
-	err = r.Client.Status().Update(ctx, lastH)
-	if err != nil {
-		log.FromContext(ctx).Error(err, "update host status error")
-	}
+	err = r.commitStatus(logger, ctx, h, status, opsv1.StatusSuccessed)
 	return
 }
 
-func (r *HostReconciler) NewHostConnection(h *opsv1.Host) (hc *host.HostConnection, err error) {
-	hc, err = host.NewHostConnBase64(h)
+func (r *HostReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, h *opsv1.Host, overrideStatus *opsv1.HostStatus, status string) (err error) {
+	lastH := &opsv1.Host{}
+	err = r.Get(ctx, types.NamespacedName{Name: h.Name, Namespace: h.Namespace}, lastH)
+	if err != nil {
+		logger.Error.Println(err, "failed to get last host")
+		return
+	}
+	if overrideStatus != nil {
+		lastH.Status = *overrideStatus
+	}
+	if status != "" {
+		lastH.Status.HeartStatus = status
+	}
+	lastH.Status.HeartTime = &metav1.Time{Time: time.Now()}
+	err = r.Client.Status().Update(ctx, lastH)
+	if err != nil {
+		logger.Error.Println(err, "update host status error")
+	}
 	return
 }

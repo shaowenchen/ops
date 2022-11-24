@@ -1,6 +1,7 @@
 package create
 
 import (
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/spf13/cobra"
 )
@@ -10,9 +11,10 @@ var CreateCmd = &cobra.Command{
 	Short: "command about Ops Resource",
 }
 
-var createHostOpt option.CreateHostOption
-var createClusterOpt option.CreateClusterOption
-var createTaskOpt option.CreateTaskOption
+var hostOpt option.HostOption
+var clusterOpt option.ClusterOption
+var clusterSpec opsv1.ClusterSpec
+var taskpath string
 var inventory string
 
 func init() {

@@ -38,6 +38,7 @@ type TaskSpec struct {
 	TypeRef      string                `json:"typeRef,omitempty"`
 	NameRef      string                `json:"nameRef,omitempty"`
 	NodeName     string                `json:"nodeName,omitempty"`
+	All          bool                  `json:"all,omitempty"`
 	RuntimeImage string                `json:"runtimeImage,omitempty"`
 	NodeSelector *metav1.LabelSelector `json:"nodeselector,omitempty"`
 	TypeSelector *metav1.LabelSelector `json:"typeSelector,omitempty"`
@@ -58,24 +59,21 @@ type TaskStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	TaskRunStatus map[string]*TaskRunStatus `json:"taskRunStatus,omitempty"`
-	LastRunStatus string                    `json:"lastRunStatus,omitempty"`
-	LastRunTime   *metav1.Time              `json:"lastRunTime,omitempty"`
+	RunStatus     string                    `json:"runStatus,omitempty"`
+	StartTime     *metav1.Time              `json:"startTime,omitempty"`
 }
-
-const LastRunStatusSuccessed = "successed"
-const LastRunStatusFailed = "failed"
 
 func GetRunStatus(err error) string {
 	if err == nil {
-		return LastRunStatusSuccessed
+		return StatusSuccessed
 	}
-	return LastRunStatusFailed
+	return StatusFailed
 }
 
 type TaskRunStatus struct {
-	TaskRunStep   []*TaskRunStep `json:"taskRunStep,omitempty"`
-	LastRunStatus string         `json:"lastRunStatus,omitempty"`
-	LastRunTime   *metav1.Time   `json:"lastRunTime,omitempty"`
+	TaskRunStep []*TaskRunStep `json:"taskRunStep,omitempty"`
+	RunStatus   string         `json:"runStatus,omitempty"`
+	StartTime   *metav1.Time   `json:"startTime,omitempty"`
 }
 
 type TaskRunStep struct {
@@ -102,8 +100,8 @@ func (t *TaskStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutpu
 		StepOutput: stepOutput,
 		StepStatus: stepStatus,
 	})
-	t.TaskRunStatus[nodeName].LastRunTime = &metav1.Time{Time: time.Now()}
-	t.TaskRunStatus[nodeName].LastRunStatus = stepStatus
+	t.TaskRunStatus[nodeName].StartTime = &metav1.Time{Time: time.Now()}
+	t.TaskRunStatus[nodeName].RunStatus = stepStatus
 }
 
 //+kubebuilder:object:root=true
@@ -112,8 +110,9 @@ func (t *TaskStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutpu
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
-// +kubebuilder:printcolumn:name="LastRunTime",type=date,JSONPath=`.status.lastRunTime`
-// +kubebuilder:printcolumn:name="LastRunStatus",type=string,JSONPath=`.status.lastRunStatus`
+// +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
+// +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
+// +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
 type Task struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

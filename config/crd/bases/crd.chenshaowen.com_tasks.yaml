@@ -25,11 +25,14 @@ spec:
     - jsonPath: .spec.nameRef
       name: NameRef
       type: string
-    - jsonPath: .status.lastRunTime
-      name: LastRunTime
+    - jsonPath: .spec.all
+      name: All
+      type: boolean
+    - jsonPath: .status.startTime
+      name: StartTime
       type: date
-    - jsonPath: .status.lastRunStatus
-      name: LastRunStatus
+    - jsonPath: .status.runStatus
+      name: RunStatus
       type: string
     name: v1
     schema:
@@ -50,6 +53,8 @@ spec:
           spec:
             description: TaskSpec defines the desired state of Task
             properties:
+              all:
+                type: boolean
               crontab:
                 type: string
               desc:
@@ -187,17 +192,17 @@ spec:
           status:
             description: TaskStatus defines the observed state of Task
             properties:
-              lastRunStatus:
+              runStatus:
                 type: string
-              lastRunTime:
+              startTime:
                 format: date-time
                 type: string
               taskRunStatus:
                 additionalProperties:
                   properties:
-                    lastRunStatus:
+                    runStatus:
                       type: string
-                    lastRunTime:
+                    startTime:
                       format: date-time
                       type: string
                     taskRunStep:

@@ -73,10 +73,14 @@ func (kc *KubeConnection) BuildClients() (err error) {
 }
 
 func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
-	version, _ := kc.GetVersion()
-	nodes, _ := kc.GetNodes()
-	allPods, _ := kc.GetAllPods()
-	allRunningPods, _ := kc.GetAllRunningPods()
+	version, err1 := kc.GetVersion()
+	err = utils.MergeError(err, err1)
+	nodes, err1 := kc.GetNodes()
+	err = utils.MergeError(err, err1)
+	allPods, err1 := kc.GetAllPods()
+	err = utils.MergeError(err, err1)
+	allRunningPods, err1 := kc.GetAllRunningPods()
+	err = utils.MergeError(err, err1)
 
 	status = &opsv1.ClusterStatus{
 		Version:     version,
@@ -84,7 +88,7 @@ func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
 		Pod:         len(allPods.Items),
 		RunningPod:  len(allRunningPods.Items),
 		HeartTime:   &metav1.Time{Time: time.Now()},
-		HeartStatus: opsv1.LastHeartStatusSuccessed,
+		HeartStatus: opsv1.StatusSuccessed,
 	}
 	return
 }

@@ -7,10 +7,11 @@ spec:
   nameRef: dev2
   typeRef: cluster
   nodeName: node4
+  all: true
   desc: Docker Clear
   steps:
     - name: Docker system prune
-      script: docker system prune -f
+      script: docker system prune
       allowfailure: "true"
     - name: Clear none image
       script: docker rmi $(docker images | grep "none" | awk '/ / { print $3 }')

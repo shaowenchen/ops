@@ -19,10 +19,11 @@ package controllers
 import (
 	"context"
 	"fmt"
-
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,6 +39,7 @@ import (
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/task"
+	"github.com/shaowenchen/ops/pkg/utils"
 )
 
 // TaskReconciler reconciles a Task object
@@ -92,7 +94,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		t.Spec.RuntimeImage = constants.DefaultRuntimeImage
 	}
 
-	if t.Status.LastRunStatus != "" {
+	if t.Status.RunStatus != "" {
 		return ctrl.Result{}, nil
 	}
 
@@ -147,8 +149,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 	if ok {
 		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
 	}
-	typeRef := t.GetSpec().TypeRef
-	if typeRef == "host" {
+	if t.GetSpec().TypeRef == "host" {
 		hostCmd := func() {
 			h := &opsv1.Host{}
 			err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, h)
@@ -166,15 +167,20 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 		} else {
 			hostCmd()
 		}
-	} else if typeRef == "cluster" {
+	} else if t.GetSpec().TypeRef == "cluster" {
 		clusterCmd := func() {
 			c := &opsv1.Cluster{}
+			kubeOpt := option.KubeOption{
+				NodeName:     t.GetSpec().NameRef,
+				All:          t.GetSpec().All,
+				RuntimeImage: t.GetSpec().RuntimeImage,
+			}
 			err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, c)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
 			}
-			r.runTaskOnKube(logger, ctx, t, c, t.Spec.NodeName)
+			r.runTaskOnKube(logger, ctx, t, c, kubeOpt)
 		}
 		if t.GetSpec().Crontab != "" {
 			r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, clusterCmd)
@@ -185,28 +191,73 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 			clusterCmd()
 		}
 	}
-	r.Client.Status().Update(ctx, t)
 	return
 }
 
 func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, h *opsv1.Host) (err error) {
 	hc, err := host.NewHostConnBase64(h)
 	if err != nil {
+		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
 		return err
 	}
 	t.Status.NewTaskRun()
-	return task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
+	r.commitStatus(logger, ctx, t, nil, opsv1.StatusRunning)
+	err = task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
+	if err != nil {
+		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
+		return err
+	} else {
+		r.commitStatus(logger, ctx, t, nil, opsv1.StatusSuccessed)
+	}
+	return
 }
 
-func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, nodeName string) (err error) {
+func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, kubeOpt option.KubeOption) (err error) {
 	kc, err := kube.NewClusterConnection(c)
 	if err != nil {
+		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
 		return err
 	}
-	nodes, err := kc.GetNodeByName(nodeName)
-	if err != nil || len(nodes.Items) == 0 {
+	nodes, err := kube.GetNodes(logger, kc.Client, kubeOpt)
+	if err != nil || len(nodes) == 0 {
+		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
 		return err
 	}
 	t.Status.NewTaskRun()
-	return task.RunTaskOnKube(logger, t, kc, &nodes.Items[0], option.TaskOption{}, option.KubeOption{RuntimeImage: t.Spec.RuntimeImage})
+	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusRunning)
+	for _, node := range nodes {
+		logger.Info.Println(utils.FilledInMiddle(node.Name))
+		err = utils.MergeError(err, task.RunTaskOnKube(logger, t, kc, &node, option.TaskOption{}, kubeOpt))
+		r.commitStatus(logger, ctx, t, &t.Status, "")
+	}
+	if err != nil {
+		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
+		return err
+	} else {
+		r.commitStatus(logger, ctx, t, nil, opsv1.StatusSuccessed)
+	}
+	return
+}
+
+func (r *TaskReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, overrideStatus *opsv1.TaskStatus, status string) (err error) {
+	lastT := &opsv1.Task{}
+	err = r.Client.Get(ctx, types.NamespacedName{Name: t.Name, Namespace: t.Namespace}, lastT)
+	if err != nil {
+		logger.Error.Println(err, "failed to get last task")
+		return
+	}
+	if overrideStatus != nil {
+		lastT.Status = *overrideStatus
+	}
+	if status != "" {
+		lastT.Status.RunStatus = status
+	}
+	if status == opsv1.StatusRunning {
+		lastT.Status.StartTime = &metav1.Time{Time: time.Now()}
+	}
+	err = r.Client.Status().Update(ctx, lastT)
+	if err != nil {
+		logger.Error.Println(err, "update host status error")
+	}
+	return
 }

@@ -129,3 +129,10 @@ func Logic(input string) (result bool, err error) {
 	}
 	return false, errors.New("can't logic " + input)
 }
+
+func MergeError(err error, err2 error) error {
+	if err != nil {
+		return err
+	}
+	return err2
+}
