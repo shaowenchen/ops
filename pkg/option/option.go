@@ -45,21 +45,28 @@ type ScriptOption struct {
 
 type FileOption struct {
 	KubeOption
-	LocalFile  string
-	RemoteFile string
-	Direction  string
-	Sudo       bool
+	LocalFile    string
+	RemoteFile   string
+	StorageType  string
+	StorageImage string
+	Direction    string
+	Sudo         bool
 }
 
-func (option *FileOption) GetStorageType() string {
-	remoteSplit := strings.Split(option.RemoteFile, "://")
+func (f *FileOption) Filling() {
+	remoteSplit := strings.Split(f.RemoteFile, "://")
 	if len(remoteSplit) == 1 {
-		return constants.RemoteStorageTypeLocal
+		f.StorageType = constants.RemoteStorageTypeLocal
+		return
+	} else if remoteSplit[0] == "s3" {
+		f.StorageType = constants.RemoteStorageTypeS3
+		f.RemoteFile = remoteSplit[1]
+		return
+	} else {
+		f.StorageType = constants.RemoteStorageTypeImage
+		f.StorageImage = remoteSplit[1]
+		return
 	}
-	if remoteSplit[0] == "s3" {
-		return constants.RemoteStorageTypeS3
-	}
-	return constants.RemoteStorageTypeImage
 }
 
 type ClusterOption struct {

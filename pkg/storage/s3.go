@@ -32,7 +32,11 @@ func S3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string
 			u.PartSize = 10 * 1024 * 1024
 			u.LeavePartsOnError = true
 			u.Concurrency = 3
-		})
+		},
+	)
+	if err != nil {
+		return
+	}
 	return result.Location, err
 }
 

@@ -70,7 +70,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 			logger.Error.Println(err)
 		}
 		if taskOpt.Debug && len(s.Script) > 0 {
-			logger.Error.Println(s.Script)
+			logger.Info.Println(s.Script)
 		}
 		stepFunc := GetKubeStepFunc(s)
 		stepOutput, stepErr := stepFunc(logger, t, kc, node, s, taskOpt, kubeOpt)

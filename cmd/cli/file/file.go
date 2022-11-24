@@ -33,12 +33,12 @@ var FileCmd = &cobra.Command{
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
-		remoteFiletype := fileOpt.GetStorageType()
-		if remoteFiletype == constants.RemoteStorageTypeS3 {
+		fileOpt.Filling()
+		if fileOpt.StorageType == constants.RemoteStorageTypeS3 {
 			err = S3File(logger, fileOpt, s3Opt)
-		} else if remoteFiletype == constants.RemoteStorageTypeImage {
+		} else if fileOpt.StorageType == constants.RemoteStorageTypeImage {
 			err = KubeFile(logger, fileOpt, kubeOpt, inventory)
-		} else if remoteFiletype == constants.RemoteStorageTypeLocal {
+		} else if fileOpt.StorageType == constants.RemoteStorageTypeLocal {
 			err = HostFile(logger, fileOpt, hostOpt, inventory)
 		}
 	},
