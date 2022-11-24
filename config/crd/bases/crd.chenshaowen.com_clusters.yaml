@@ -33,7 +33,7 @@ spec:
       type: string
     - jsonPath: .status.heartTime
       name: HeartTime
-      type: string
+      type: date
     - jsonPath: .status.heartstatus
       name: HeartStatus
       type: string

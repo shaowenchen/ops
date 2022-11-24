@@ -27,7 +27,7 @@ spec:
       type: string
     - jsonPath: .status.lastRunTime
       name: LastRunTime
-      type: string
+      type: date
     - jsonPath: .status.lastRunStatus
       name: LastRunStatus
       type: string

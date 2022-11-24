@@ -66,7 +66,7 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cputotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memtotal`
 // +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.disktotal`
-// +kubebuilder:printcolumn:name="HeartTime",type=string,JSONPath=`.status.heartTime`
+// +kubebuilder:printcolumn:name="HeartTime",type=date,JSONPath=`.status.heartTime`
 // +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartStatus`
 type Host struct {
 	metav1.TypeMeta   `json:",inline"`

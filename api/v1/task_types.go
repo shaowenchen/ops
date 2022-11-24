@@ -112,7 +112,7 @@ func (t *TaskStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutpu
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
-// +kubebuilder:printcolumn:name="LastRunTime",type=string,JSONPath=`.status.lastRunTime`
+// +kubebuilder:printcolumn:name="LastRunTime",type=date,JSONPath=`.status.lastRunTime`
 // +kubebuilder:printcolumn:name="LastRunStatus",type=string,JSONPath=`.status.lastRunStatus`
 type Task struct {
 	metav1.TypeMeta   `json:",inline"`

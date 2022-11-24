@@ -257,7 +257,8 @@ func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, err error) 
 		}
 	}
 	err = sess.Wait()
-	return string(output), err
+
+	return strings.TrimRight(string(output), "\r\n"), err
 }
 
 func (c *HostConnection) mv(sudo bool, src, dst string) (stdout string, err error) {
