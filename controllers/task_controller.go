@@ -195,8 +195,7 @@ func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Contex
 		return err
 	}
 	t.Status.NewTaskRun()
-	t, err = task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
-	return
+	return task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
 }
 
 func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, nodeName string) (err error) {
@@ -209,6 +208,5 @@ func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Contex
 		return err
 	}
 	t.Status.NewTaskRun()
-	t, err = task.RunTaskOnKube(logger, t, kc, &nodes.Items[0], option.TaskOption{}, option.KubeOption{RuntimeImage: t.Spec.RuntimeImage})
-	return
+	return task.RunTaskOnKube(logger, t, kc, &nodes.Items[0], option.TaskOption{}, option.KubeOption{RuntimeImage: t.Spec.RuntimeImage})
 }

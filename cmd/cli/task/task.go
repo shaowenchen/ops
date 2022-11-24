@@ -65,7 +65,11 @@ func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.Host
 				logger.Error.Println(err)
 				continue
 			}
-			task.RunTaskOnHost(logger, &t, hc, taskOpt)
+			err = task.RunTaskOnHost(logger, &t, hc, taskOpt)
+			if err != nil {
+				logger.Error.Println(err)
+				continue
+			}
 		}
 	}
 	return
@@ -87,7 +91,10 @@ func KubeTask(logger *log.Logger, taskOpt option.TaskOption, kubeOpt option.Kube
 	for _, node := range nodes {
 		for _, t := range tasks {
 			logger.Info.Println(utils.FilledInMiddle(node.Name))
-			task.RunTaskOnKube(logger, &t, kc, &node, taskOpt, kubeOpt)
+			err = task.RunTaskOnKube(logger, &t, kc, &node, taskOpt, kubeOpt)
+			if err != nil {
+				logger.Error.Println(err)
+			}
 		}
 	}
 	return

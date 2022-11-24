@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: build-imagefile
+  namespace: default
+spec:
+  desc: add file to image
+  variables:
+    image: myfileimage:latest
+    baseimage: docker.io/library/alpine:latest
+    remotefile:
+    localfile:
+  steps:
+    - name: run and copy file
+      script: echo 'FROM ${baseimage}\n Add ${localfile} ${remotefile}' | docker build -t ${image} -f- .
+    - name: display image
+      script: docker images |grep `echo ${image}|cut -d":" -f1`

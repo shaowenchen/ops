@@ -34,7 +34,7 @@ func NewHostConnBase64(h *opsv1.Host) (c *HostConnection, err error) {
 	c = &HostConnection{}
 	c.Host = h
 	// local host
-	if h.Spec.Password == constants.LocalHostIP {
+	if h.Spec.Address == constants.LocalHostIP {
 		return c, nil
 	}
 	// remote host
