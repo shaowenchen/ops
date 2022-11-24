@@ -35,9 +35,9 @@ type TaskSpec struct {
 	Steps        []Step                `json:"steps,omitempty"`
 	Name         string                `json:"name,omitempty"`
 	Desc         string                `json:"desc,omitempty"`
-	TypeRef      string                `json:"typeRef,omitempty"`
-	NameRef      string                `json:"nameRef,omitempty"`
-	NodeName     string                `json:"nodeName,omitempty"`
+	TypeRef      string                `json:"typeref,omitempty"`
+	NameRef      string                `json:"nameref,omitempty"`
+	NodeName     string                `json:"nodename,omitempty"`
 	All          bool                  `json:"all,omitempty"`
 	RuntimeImage string                `json:"runtimeImage,omitempty"`
 	NodeSelector *metav1.LabelSelector `json:"nodeselector,omitempty"`
@@ -85,6 +85,8 @@ type TaskRunStep struct {
 
 func (t *TaskStatus) NewTaskRun() {
 	t.TaskRunStatus = make(map[string]*TaskRunStatus)
+	t.RunStatus = StatusRunning
+	t.StartTime = nil
 }
 
 func (t *TaskStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutput, stepStatus string) {
@@ -108,8 +110,8 @@ func (t *TaskStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutpu
 //+kubebuilder:subresource:status
 
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
-// +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
-// +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
+// +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeref`
+// +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameref`
 // +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`

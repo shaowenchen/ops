@@ -93,8 +93,8 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if t.Spec.RuntimeImage == "" {
 		t.Spec.RuntimeImage = constants.DefaultRuntimeImage
 	}
-
-	if t.Status.RunStatus != "" {
+	// had run
+	if t.Status.RunStatus != "" && t.GetSpec().Crontab == "" {
 		return ctrl.Result{}, nil
 	}
 
@@ -149,6 +149,8 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 	if ok {
 		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
 	}
+	t.Status.NewTaskRun()
+	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
 	if t.GetSpec().TypeRef == "host" {
 		hostCmd := func() {
 			h := &opsv1.Host{}
@@ -161,6 +163,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 		}
 		if t.GetSpec().Crontab != "" {
 			r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, hostCmd)
+			logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
 			if err != nil {
 				return err
 			}
@@ -184,6 +187,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 		}
 		if t.GetSpec().Crontab != "" {
 			r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, clusterCmd)
+			logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
 			if err != nil {
 				return err
 			}
@@ -201,7 +205,7 @@ func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Contex
 		return err
 	}
 	t.Status.NewTaskRun()
-	r.commitStatus(logger, ctx, t, nil, opsv1.StatusRunning)
+	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusRunning)
 	err = task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
 	if err != nil {
 		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
@@ -252,7 +256,7 @@ func (r *TaskReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 	if status != "" {
 		lastT.Status.RunStatus = status
 	}
-	if status == opsv1.StatusRunning {
+	if lastT.Status.RunStatus == opsv1.StatusRunning {
 		lastT.Status.StartTime = &metav1.Time{Time: time.Now()}
 	}
 	err = r.Client.Status().Update(ctx, lastT)

@@ -4,9 +4,10 @@ metadata:
   name: get-osstaus
   namespace: default
 spec:
+  nameref: prod
+  typeref: cluster
+  all: true
   desc: Get OS Info
-  schedule: everyminute
-  hostRef:
   steps:
     - name: Kernel Version
       script: uname -r
