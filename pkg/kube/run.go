@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,6 +13,7 @@ import (
 )
 
 func RunScriptOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, script string) (pod *corev1.Pod, err error) {
+	scriptBase64 := utils.EncodingStringToBase64(script)
 	priviBool := true
 	tolerations := []v1.Toleration{}
 	for _, taint := range node.Spec.Taints {
@@ -38,7 +40,7 @@ func RunScriptOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName
 						Name:    "script",
 						Image:   image,
 						Command: []string{"sh"},
-						Args:    []string{"-c", "echo \"sudo " + script + "\" | nsenter -t 1 -m -u -i -n"},
+						Args:    []string{"-c", "echo \"base64 -d <<< " + scriptBase64 + "\" | nsenter -t 1 -m -u -i -n | nsenter -t 1 -m -u -i -n"},
 						SecurityContext: &corev1.SecurityContext{
 							Privileged: &priviBool,
 						},

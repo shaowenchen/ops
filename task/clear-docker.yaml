@@ -4,7 +4,7 @@ metadata:
   name: clear-docker
   namespace: default
 spec:
-  crontab: 0 0 22 * * 2
+  crontab: 0 22 * * 2
   nameref: prod
   typeref: cluster
   all: true

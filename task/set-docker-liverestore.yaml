@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: docker-live-restore
+  name: set-docker-liverestore
   namespace: default
 spec:
-  desc: Set Docker live-restore
+  desc: Set Docker liverestore true
   steps:
     - name: Make Docker Etc Dir
       script: mkdir -p /etc/docker

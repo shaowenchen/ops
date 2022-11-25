@@ -4,7 +4,8 @@ metadata:
   name: get-osstaus
   namespace: default
 spec:
-  nameref: prod
+  crontab: "*/10 * * * *"
+  nameref: dev2
   typeref: cluster
   all: true
   desc: Get OS Info

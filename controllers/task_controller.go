@@ -44,10 +44,11 @@ import (
 
 // TaskReconciler reconciles a Task object
 type TaskReconciler struct {
-	Client     client.Client
-	Scheme     *runtime.Scheme
-	crontabMap map[string]cron.EntryID
-	cron       *cron.Cron
+	Client            client.Client
+	Scheme            *runtime.Scheme
+	crontabMap        map[string]cron.EntryID
+	crontabRunningMap map[string]bool
+	cron              *cron.Cron
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=tasks,verbs=get;list;watch;create;update;patch;delete
@@ -72,6 +73,10 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 
 	if r.crontabMap == nil {
 		r.crontabMap = make(map[string]cron.EntryID)
+	}
+
+	if r.crontabRunningMap == nil {
+		r.crontabRunningMap = make(map[string]bool)
 	}
 	if r.cron == nil {
 		r.cron = cron.New()
@@ -147,6 +152,7 @@ func (r *TaskReconciler) deleteTask(ctx context.Context, namespacedName types.Na
 func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (err error) {
 	_, ok := r.crontabMap[t.GetUniqueKey()]
 	if ok {
+		logger.Info.Println(fmt.Sprintf("clear ticker for task %s", t.GetUniqueKey()))
 		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
 	}
 	t.Status.NewTaskRun()
@@ -199,6 +205,15 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 }
 
 func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, h *opsv1.Host) (err error) {
+	_, ok := r.crontabRunningMap[t.GetUniqueKey()]
+	if ok {
+		logger.Info.Println(fmt.Sprintf("skiped，task %s is running", t.GetUniqueKey()))
+		return
+	}
+	defer func() {
+		delete(r.crontabRunningMap, t.GetUniqueKey())
+	}()
+	r.crontabRunningMap[t.GetUniqueKey()] = true
 	hc, err := host.NewHostConnBase64(h)
 	if err != nil {
 		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
@@ -217,6 +232,15 @@ func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Contex
 }
 
 func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, kubeOpt option.KubeOption) (err error) {
+	_, ok := r.crontabRunningMap[t.GetUniqueKey()]
+	if ok {
+		logger.Info.Println(fmt.Sprintf("skiped，task %s is running", t.GetUniqueKey()))
+		return
+	}
+	defer func() {
+		delete(r.crontabRunningMap, t.GetUniqueKey())
+	}()
+	r.crontabRunningMap[t.GetUniqueKey()] = true
 	kc, err := kube.NewClusterConnection(c)
 	if err != nil {
 		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)

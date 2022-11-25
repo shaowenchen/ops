@@ -4,7 +4,7 @@ metadata:
   name: clear-kube
   namespace: default
 spec:
-  crontab: 0 10 22 * * *
+  crontab: 10 22 * * *
   nameref: test
   typeref: cluster
   nodename: anymaster
