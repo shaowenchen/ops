@@ -112,7 +112,7 @@ func (t *TaskStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutpu
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeref`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameref`
-// +kubebuilder:printcolumn:name="NodeName",type=boolean,JSONPath=`.spec.nodename`
+// +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodename`
 // +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`

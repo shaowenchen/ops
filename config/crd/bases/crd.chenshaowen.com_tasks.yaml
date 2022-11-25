@@ -27,7 +27,7 @@ spec:
       type: string
     - jsonPath: .spec.nodename
       name: NodeName
-      type: boolean
+      type: string
     - jsonPath: .spec.all
       name: All
       type: boolean
