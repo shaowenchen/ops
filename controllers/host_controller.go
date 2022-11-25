@@ -53,7 +53,7 @@ type HostReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logger, err := opslog.NewCliLogger(true, true)
+	logger, err := opslog.NewCliLogger(true, false)
 	if err != nil {
 		fmt.Printf(err.Error())
 		return ctrl.Result{}, err

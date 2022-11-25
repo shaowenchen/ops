@@ -20,10 +20,6 @@ type Logger struct {
 }
 
 func NewCliLogger(printLog bool, fileLog bool) (*Logger, error) {
-	err := utils.CreateDir(constants.GetOpsLogsDir())
-	if err != nil {
-		return nil, err
-	}
 	return NewLogger(true, true, false)
 }
 
@@ -47,6 +43,10 @@ func (logger *Logger) init(prefix string) (err error) {
 		multiWriter = io.MultiWriter(multiWriter, os.Stdout)
 	}
 	if logger.FileLog {
+		err := utils.CreateDir(constants.GetOpsLogsDir())
+		if err != nil {
+			return err
+		}
 		file, err := os.OpenFile(constants.GetOpsLogFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			return err
