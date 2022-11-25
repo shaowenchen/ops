@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+
 	"github.com/shaowenchen/ops/controllers"
 	//+kubebuilder:scaffold:imports
 )

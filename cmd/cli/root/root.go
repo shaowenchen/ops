@@ -10,8 +10,6 @@ import (
 	"github.com/shaowenchen/ops/cmd/cli/task"
 	"github.com/shaowenchen/ops/cmd/cli/upgrade"
 	"github.com/shaowenchen/ops/cmd/cli/version"
-	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -32,8 +30,4 @@ var RootCmd = &cobra.Command{
 	Use:   "opscli",
 	Short: "a cli tool",
 	Long:  `This is a cli tool for ops.`,
-}
-
-func init() {
-	utils.CreateDir(constants.GetOpsLogsDir())
 }

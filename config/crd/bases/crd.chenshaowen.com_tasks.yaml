@@ -25,6 +25,9 @@ spec:
     - jsonPath: .spec.nameref
       name: NameRef
       type: string
+    - jsonPath: .spec.nodename
+      name: NodeName
+      type: boolean
     - jsonPath: .spec.all
       name: All
       type: boolean

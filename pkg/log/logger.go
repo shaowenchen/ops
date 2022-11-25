@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"io"
 	"log"
 	"os"
@@ -19,6 +20,10 @@ type Logger struct {
 }
 
 func NewCliLogger(printLog bool, fileLog bool) (*Logger, error) {
+	err := utils.CreateDir(constants.GetOpsLogsDir())
+	if err != nil {
+		return nil, err
+	}
 	return NewLogger(true, true, false)
 }
 
