@@ -1,0 +1,20 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: add-istio
+  namespace: default
+spec:
+  desc: Add istio
+  variables:
+    version: "1.13.7"
+  steps:
+    - name: Download Istio
+      script: curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${version} TARGET_ARCH=x86_64 sh -
+    - name: Install Istio
+      script: ./istio-${version}/bin/istioctl install
+    - name: Install default-telemetry
+      script: kubectl apply -f apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/default-telemetry.yaml
+    - name: Install disabled-mtls
+      script: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/disabled-mtls.yaml
+    - name: Install preserve-request-header-case
+      script: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/preserve-request-header-case.yaml
