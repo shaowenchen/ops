@@ -164,5 +164,5 @@ func init() {
 	TaskCmd.Flags().StringVarP(&hostOpt.Username, "username", "", "", "")
 	TaskCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
 	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKey, "privatekey", "", "", "")
-	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", "", "")
+	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")
 }

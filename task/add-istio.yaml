@@ -15,7 +15,7 @@ spec:
     - name: Install Istio
       script: ./istio-${version}/bin/istioctl install -y --kubeconfig ${kubeconfig}
     - name: Install default-telemetry
-      script: kubectl apply -f apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/default-telemetry.yaml --kubeconfig ${kubeconfig}
+      script: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/default-telemetry.yaml --kubeconfig ${kubeconfig}
     - name: Install disabled-mtls
       script: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/disabled-mtls.yaml --kubeconfig ${kubeconfig}
     - name: Install preserve-request-header-case
