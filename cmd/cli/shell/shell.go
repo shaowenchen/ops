@@ -30,6 +30,9 @@ var ShellCmd = &cobra.Command{
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventoryType := utils.GetInventoryType(inventory)
+		if utils.IsExistsFile(shellOpt.Content) {
+			shellOpt.Content, _ = utils.ReadFile(shellOpt.Content)
+		}
 		if inventoryType == constants.InventoryTypeKubeconfig {
 			KubeShell(logger, shellOpt, inventory)
 		} else if inventoryType == constants.InventoryTypeHosts {
