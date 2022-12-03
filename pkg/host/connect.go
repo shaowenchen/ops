@@ -44,13 +44,13 @@ func NewHostConnBase64(h *opsv1.Host) (c *HostConnection, err error) {
 	return
 }
 
-func (c *HostConnection) Script(sudo bool, content string) (stdout string, err error) {
+func (c *HostConnection) Shell(sudo bool, content string) (stdout string, err error) {
 	reg := regexp.MustCompile(`\${[^\}]*}`)
 	funcStrList := reg.FindAllString(content, -1)
 	for _, callFunc := range funcStrList {
 		rawCallFunc := callFunc
 		callFunc = callFunc[2 : len(callFunc)-1]
-		stdout, err = c.scriptFuncMap(sudo, callFunc)
+		stdout, err = c.shellFuncMap(sudo, callFunc)
 		if err != nil {
 			return stdout, err
 		}
@@ -59,7 +59,7 @@ func (c *HostConnection) Script(sudo bool, content string) (stdout string, err e
 	return c.exec(sudo, content)
 }
 
-func (c *HostConnection) scriptFuncMap(sudo bool, funcFull string) (stdout string, err error) {
+func (c *HostConnection) shellFuncMap(sudo bool, funcFull string) (stdout string, err error) {
 	if funcFull == "installOpscli()" {
 		return c.install(sudo, "opscli")
 	} else if funcFull == "distribution()" {
@@ -74,13 +74,13 @@ func (c *HostConnection) install(sudo bool, component string) (stdout string, er
 		if !c.isInChina() {
 			proxy = constants.DefaultProxy
 		}
-		return c.exec(sudo, utils.ScriptInstallOpscli(proxy))
+		return c.exec(sudo, utils.ShellInstallOpscli(proxy))
 	}
 	return
 }
 
 func (c *HostConnection) isInChina() (ok bool) {
-	_, err := c.exec(false, utils.ScriptIsInChina())
+	_, err := c.exec(false, utils.ShellIsInChina())
 	if err != nil {
 		return true
 	}
@@ -284,19 +284,19 @@ func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, err error) 
 }
 
 func (c *HostConnection) mv(sudo bool, src, dst string) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptMv(src, dst))
+	return c.exec(sudo, utils.ShellMv(src, dst))
 }
 
 func (c *HostConnection) copy(sudo bool, src, dst string) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptCopy(src, dst))
+	return c.exec(sudo, utils.ShellCopy(src, dst))
 }
 
 func (c *HostConnection) chown(sudo bool, idU, idG, src string) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptChown(idU, idG, src))
+	return c.exec(sudo, utils.ShellChown(idU, idG, src))
 }
 
 func (c *HostConnection) rm(sudo bool, dst string) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptRm(dst))
+	return c.exec(sudo, utils.ShellRm(dst))
 }
 
 func (c *HostConnection) cmdPull(sudo bool, src, dst string) (err error) {
@@ -442,7 +442,7 @@ func (c *HostConnection) fileMd5(sudo bool, filepath string) (md5 string, err er
 }
 
 func (c *HostConnection) makeDir(sudo bool, filepath string) (err error) {
-	_, err = c.exec(sudo, utils.ScriptMakeDir(utils.SplitDirPath(filepath)))
+	_, err = c.exec(sudo, utils.ShellMakeDir(utils.SplitDirPath(filepath)))
 	return
 }
 
@@ -455,47 +455,47 @@ func (c *HostConnection) getIDG() (idg string, err error) {
 }
 
 func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptCPUTotal())
+	return c.exec(sudo, utils.ShellCPUTotal())
 }
 
 func (c *HostConnection) getCPULoad1(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptCPULoad1())
+	return c.exec(sudo, utils.ShellCPULoad1())
 }
 
 func (c *HostConnection) getCPUUsagePercent(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptCPUUsagePercent())
+	return c.exec(sudo, utils.ShellCPUUsagePercent())
 }
 
 func (c *HostConnection) getMemTotal(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptMemTotal())
+	return c.exec(sudo, utils.ShellMemTotal())
 }
 
 func (c *HostConnection) getMemUsagePercent(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptMemUsagePercent())
+	return c.exec(sudo, utils.ShellMemUsagePercent())
 }
 
 func (c *HostConnection) getHosname(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptHostname())
+	return c.exec(sudo, utils.ShellHostname())
 }
 
 func (c *HostConnection) getDiskTotal(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptDiskTotal())
+	return c.exec(sudo, utils.ShellDiskTotal())
 }
 
 func (c *HostConnection) getArch(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptArch())
+	return c.exec(sudo, utils.ShellArch())
 }
 
 func (c *HostConnection) getDiskUsagePercent(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptDiskUsagePercent())
+	return c.exec(sudo, utils.ShellDiskUsagePercent())
 }
 
 func (c *HostConnection) getKernelVersion(sudo bool) (stdout string, err error) {
-	return c.exec(sudo, utils.ScriptKernelVersion())
+	return c.exec(sudo, utils.ShellKernelVersion())
 }
 
 func (c *HostConnection) getDistribution(sudo bool) (cpu string, err error) {
-	return c.exec(sudo, utils.ScriptDistribution())
+	return c.exec(sudo, utils.ShellDistribution())
 }
 
 func (c *HostConnection) getTempfileName(name string) string {

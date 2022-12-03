@@ -36,10 +36,10 @@ type TaskOption struct {
 	Variables map[string]string
 }
 
-type ScriptOption struct {
+type ShellOption struct {
 	KubeOption
-	Script string
-	Sudo   bool
+	Content string
+	Sudo    bool
 }
 
 type FileOption struct {

@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"errors"
+	"io/ioutil"
+	"strings"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
-	"strings"
 )
 
 func GetRealVariables(t *opsv1.Task, taskOpt option.TaskOption) (map[string]string, error) {
@@ -62,7 +63,7 @@ func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 func RenderStepVariables(step *opsv1.Step, vars map[string]string) *opsv1.Step {
 	for key, value := range vars {
 		step.Name = strings.ReplaceAll(step.Name, fmt.Sprintf("${%s}", key), value)
-		step.Script = strings.ReplaceAll(step.Script, fmt.Sprintf("${%s}", key), value)
+		step.Content = strings.ReplaceAll(step.Content, fmt.Sprintf("${%s}", key), value)
 		step.LocalFile = strings.ReplaceAll(step.LocalFile, fmt.Sprintf("${%s}", key), value)
 		step.RemoteFile = strings.ReplaceAll(step.RemoteFile, fmt.Sprintf("${%s}", key), value)
 	}

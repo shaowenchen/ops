@@ -123,6 +123,8 @@ spec:
                   properties:
                     allowfailure:
                       type: string
+                    content:
+                      type: string
                     direction:
                       type: string
                     localfile:
@@ -130,8 +132,6 @@ spec:
                     name:
                       type: string
                     remotefile:
-                      type: string
-                    script:
                       type: string
                     when:
                       type: string

@@ -7,83 +7,83 @@ import (
 	"time"
 )
 
-func ScriptIsInChina() string {
+func ShellIsInChina() string {
 	return `curl --connect-timeout 2 https://raw.githubusercontent.com/`
 }
 
-func ScriptInstallOpscli(proxy string) string {
+func ShellInstallOpscli(proxy string) string {
 	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh", proxy))
 }
 
-func ScriptAddHost(ip, domain string) string {
+func ShellAddHost(ip, domain string) string {
 	return fmt.Sprintf(`echo \"%s %s\" >> /etc/hosts`, ip, domain)
 }
 
-func ScriptDeleteHost(domain string) string {
+func ShellDeleteHost(domain string) string {
 	return fmt.Sprintf(`sed -i '/%s/d' /etc/hosts`, domain)
 }
 
-func ScriptMv(src string, dst string) string {
+func ShellMv(src string, dst string) string {
 	return fmt.Sprintf(`mv -bf %s %s`, src, dst)
 }
 
-func ScriptCopy(src string, dst string) string {
+func ShellCopy(src string, dst string) string {
 	return fmt.Sprintf(`cp %s %s`, src, dst)
 }
 
-func ScriptMakeDir(src string) string {
+func ShellMakeDir(src string) string {
 	return fmt.Sprintf(`mkdir -p %s`, src)
 }
 
-func ScriptChown(idU, idG, src string) string {
+func ShellChown(idU, idG, src string) string {
 	return fmt.Sprintf(`chown %s:%s %s`, idU, idG, src)
 }
 
-func ScriptRm(dst string) string {
+func ShellRm(dst string) string {
 	return fmt.Sprintf(`rm -f %s`, dst)
 }
 
-func ScriptCPUTotal() string {
+func ShellCPUTotal() string {
 	return `grep -c "model name" /proc/cpuinfo`
 }
 
-func ScriptCPULoad1() string {
+func ShellCPULoad1() string {
 	return `top -bn1 | grep load | awk '{printf "%.2f\n", $(NF-2)}'`
 }
 
-func ScriptCPUUsagePercent() string {
+func ShellCPUUsagePercent() string {
 	return `grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {printf ("%.2f%",usage)}'`
 }
 
-func ScriptMemTotal() string {
+func ShellMemTotal() string {
 	return `free -h|grep -E "Mem"|awk '{print $2}'|head -1`
 }
 
-func ScriptMemUsagePercent() string {
+func ShellMemUsagePercent() string {
 	return `free -m | awk 'NR==2{printf "%.2f%\n", $3*100/$2 }'`
 }
 
-func ScriptDiskTotal() string {
+func ShellDiskTotal() string {
 	return `df -H | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $2}'`
 }
 
-func ScriptDiskUsagePercent() string {
+func ShellDiskUsagePercent() string {
 	return `df -H | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`
 }
 
-func ScriptHostname() string {
+func ShellHostname() string {
 	return `hostname`
 }
 
-func ScriptKernelVersion() string {
+func ShellKernelVersion() string {
 	return `uname -r`
 }
 
-func ScriptArch() string {
+func ShellArch() string {
 	return `uname -m`
 }
 
-func ScriptDistribution() string {
+func ShellDistribution() string {
 	return `cat /etc/os-release 2>/dev/null | grep ^ID= | awk -F= '{print $2}' | sed 's/\"//g'`
 }
 

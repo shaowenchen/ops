@@ -17,9 +17,10 @@ limitations under the License.
 package v1
 
 import (
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"time"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -47,7 +48,7 @@ type TaskSpec struct {
 type Step struct {
 	When         string `json:"when,omitempty"`
 	Name         string `json:"name,omitempty"`
-	Script       string `json:"script,omitempty"`
+	Content      string `json:"content,omitempty"`
 	LocalFile    string `json:"localfile,omitempty"`
 	RemoteFile   string `json:"remotefile,omitempty"`
 	Direction    string `json:"direction,omitempty"`

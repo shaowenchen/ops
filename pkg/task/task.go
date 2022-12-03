@@ -34,12 +34,12 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		if taskOpt.Debug && len(s.Script) > 0 {
-			logger.Error.Println(s.Script)
+		if taskOpt.Debug && len(s.Content) > 0 {
+			logger.Error.Println(s.Content)
 		}
 		stepFunc := GetHostStepFunc(s)
 		stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
-		t.Status.AddOutputStep(hc.Host.Name, s.Name, s.Script, stepOutput, opsv1.GetRunStatus(stepErr))
+		t.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, opsv1.GetRunStatus(stepErr))
 		logger.Info.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
@@ -75,12 +75,12 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		if taskOpt.Debug && len(s.Script) > 0 {
-			logger.Info.Println(s.Script)
+		if taskOpt.Debug && len(s.Content) > 0 {
+			logger.Info.Println(s.Content)
 		}
 		stepFunc := GetKubeStepFunc(s)
 		stepOutput, stepErr := stepFunc(logger, t, kc, node, s, taskOpt, kubeOpt)
-		t.Status.AddOutputStep(node.Name, s.Name, s.Script, stepOutput, opsv1.GetRunStatus(stepErr))
+		t.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, opsv1.GetRunStatus(stepErr))
 		allVars["result"] = stepOutput
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
@@ -95,14 +95,14 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 }
 
 func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (string, error) {
-	if len(step.Script) > 0 {
-		return runStepScriptOnHost
+	if len(step.Content) > 0 {
+		return runStepShellOnHost
 	}
 	return runStepCopyOnHost
 }
 
-func runStepScriptOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (stdout string, err error) {
-	stdout, err = c.Script(option.Sudo, step.Script)
+func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (stdout string, err error) {
+	stdout, err = c.Shell(option.Sudo, step.Content)
 	return
 }
 
@@ -113,19 +113,19 @@ func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, o
 }
 
 func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task, c *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (string, error) {
-	if len(step.Script) > 0 {
-		return runStepScriptOnKube
+	if len(step.Content) > 0 {
+		return runStepShellOnKube
 	}
 	return runStepCopyOnKube
 }
 
-func runStepScriptOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {
-	stdout, err := kc.ScriptOnNode(
+func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {
+	stdout, err := kc.ShellOnNode(
 		logger,
 		node,
-		option.ScriptOption{
+		option.ShellOption{
 			Sudo:       taksOpt.Sudo,
-			Script:     step.Script,
+			Content:    step.Content,
 			KubeOption: kubeOpt,
 		})
 	return stdout, err

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
@@ -14,7 +16,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
 )
 
 type KubeConnection struct {
@@ -122,13 +123,13 @@ func (kc *KubeConnection) GetAllRunningPods() (allPod *corev1.PodList, err error
 	})
 }
 
-func (kc *KubeConnection) ScriptOnNode(logger *opslog.Logger, node *corev1.Node, scriptOpt option.ScriptOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
+func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt option.ShellOption) (stdout string, err error) {
+	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("shell-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
 	}
 
-	pod, err := RunScriptOnNode(kc.Client, node, namespacedName, scriptOpt.RuntimeImage, scriptOpt.Script)
+	pod, err := RunShellOnNode(kc.Client, node, namespacedName, shellOpt.RuntimeImage, shellOpt.Content)
 	if err != nil {
 		return
 	}
@@ -137,17 +138,17 @@ func (kc *KubeConnection) ScriptOnNode(logger *opslog.Logger, node *corev1.Node,
 	return
 }
 
-func (kc *KubeConnection) Script(logger *opslog.Logger, scriptOpt option.ScriptOption) (err error) {
-	nodes, err := kc.GetNodeByName(scriptOpt.NodeName)
+func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt option.ShellOption) (err error) {
+	nodes, err := kc.GetNodeByName(shellOpt.NodeName)
 
 	if err != nil {
 		return
 	}
-	if scriptOpt.All {
+	if shellOpt.All {
 		nodes, err = kc.GetNodes()
 	}
 	for _, node := range nodes.Items {
-		kc.ScriptOnNode(logger, &node, scriptOpt)
+		kc.ShellOnNode(logger, &node, shellOpt)
 	}
 
 	return

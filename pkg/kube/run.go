@@ -12,8 +12,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func RunScriptOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, script string) (pod *corev1.Pod, err error) {
-	scriptBase64 := utils.EncodingStringToBase64(script)
+func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string) (pod *corev1.Pod, err error) {
+	shellBase64 := utils.EncodingStringToBase64(shell)
 	priviBool := true
 	tolerations := []v1.Toleration{}
 	for _, taint := range node.Spec.Taints {
@@ -37,10 +37,10 @@ func RunScriptOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName
 				NodeName:                     node.Name,
 				Containers: []corev1.Container{
 					{
-						Name:    "script",
+						Name:    "shell",
 						Image:   image,
 						Command: []string{"sh"},
-						Args:    []string{"-c", "echo \"base64 -d <<< " + scriptBase64 + "\" | nsenter -t 1 -m -u -i -n | nsenter -t 1 -m -u -i -n"},
+						Args:    []string{"-c", "echo \"base64 -d <<< " + shellBase64 + "\" | nsenter -t 1 -m -u -i -n | nsenter -t 1 -m -u -i -n"},
 						SecurityContext: &corev1.SecurityContext{
 							Privileged: &priviBool,
 						},

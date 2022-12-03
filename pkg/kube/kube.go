@@ -3,13 +3,14 @@ package kube
 import (
 	"context"
 	"fmt"
+	"time"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/log"
 	option "github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	v1 "k8s.io/api/core/v1"
-	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -17,12 +18,12 @@ import (
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func Script(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.ScriptOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("script-%s", time.Now().Format("2006-01-02-15-04-05")))
+func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.ShellOption) (stdout string, err error) {
+	namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("shell-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := RunScriptOnNode(client, &node, namespacedName, option.RuntimeImage, option.Script)
+	pod, err := RunShellOnNode(client, &node, namespacedName, option.RuntimeImage, option.Content)
 	if err != nil {
 		logger.Error.Println(err)
 	}

@@ -29,8 +29,8 @@ func GetTask(c *gin.Context) {
 			Desc: "This desc about thie task",
 			Steps: []v1.Step{
 				{
-					Name:   "Show OS info",
-					Script: "uname -a",
+					Name:    "Show OS info",
+					Content: "uname -a",
 				},
 			},
 		},

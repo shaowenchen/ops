@@ -22,7 +22,7 @@ func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOptio
 	return c.File(option.Sudo, option.Direction, option.LocalFile, option.RemoteFile)
 }
 
-func Script(logger *log.Logger, h *opsv1.Host, option option.ScriptOption, hostOption option.HostOption) (err error) {
+func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOption option.HostOption) (err error) {
 	logger.Info.Print(utils.FilledInMiddle(fmt.Sprintf("[%s]", h.Spec.Address)))
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
@@ -30,7 +30,7 @@ func Script(logger *log.Logger, h *opsv1.Host, option option.ScriptOption, hostO
 		logger.Error.Println(err)
 		return err
 	}
-	stdout, err := c.Script(option.Sudo, option.Script)
+	stdout, err := c.Shell(option.Sudo, option.Content)
 	logger.Info.Println(stdout)
 	return
 }
