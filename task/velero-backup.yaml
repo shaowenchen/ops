@@ -11,4 +11,4 @@ spec:
     velero_version: v1.9.2
   steps:
     - name: Backup all
-      script: ./velero-${velero_version}-linux-amd64/velero backup create ${cluster_name}-${version}
+      content: ./velero-${velero_version}-linux-amd64/velero backup create ${cluster_name}-${version}

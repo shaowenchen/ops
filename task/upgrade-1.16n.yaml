@@ -9,25 +9,25 @@ spec:
     cluster_version: 1.17.17
   steps:
     - name: add kubernetes repo
-      script: echo -e "[kubernetes]\nname=Kubernetes\nbaseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64\nenabled=1\ngpgcheck=0\nrepo_gpgcheck=0\ngpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" > /etc/yum.repos.d/kubernetes.repo
+      content: echo -e "[kubernetes]\nname=Kubernetes\nbaseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64\nenabled=1\ngpgcheck=0\nrepo_gpgcheck=0\ngpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg" > /etc/yum.repos.d/kubernetes.repo
     - name: make cache
-      script: yum makecache
+      content: yum makecache
     - name: remove kubeadm
-      script: yum remove -y kubeadm
+      content: yum remove -y kubeadm
       allowfailure: true
     - name: install kubeadm
-      script: yum install -y kubeadm-${cluster_version}-0 --disableexcludes=kubernetes
+      content: yum install -y kubeadm-${cluster_version}-0 --disableexcludes=kubernetes
     - name: upgrade node
-      script: kubeadm upgrade node
+      content: kubeadm upgrade node
     - name: stop kubelet
-      script: systemctl stop kubelet
+      content: systemctl stop kubelet
     - name: remove kubelet
-      script: yum remove -y kubelet
+      content: yum remove -y kubelet
     - name: install kubelet
-      script: yum install -y kubelet-${cluster_version}-0 --disableexcludes=kubernetes
+      content: yum install -y kubelet-${cluster_version}-0 --disableexcludes=kubernetes
     - name: replace systemd kubelet
       scprit: sed -i "s/local\/bin\/kubelet/bin\/kubelet/" /etc/systemd/system/kubelet.service
     - name: restart kubelet
-      script: systemctl daemon-reload;
+      content: systemctl daemon-reload;
         systemctl restart kubelet;
         systemctl status kubelet;

@@ -12,6 +12,6 @@ spec:
     localfile:
   steps:
     - name: run and copy file
-      script: echo 'FROM ${baseimage}\n Add ${localfile} ${remotefile}' | docker build -t ${image} -f- .
+      content: echo 'FROM ${baseimage}\n Add ${localfile} ${remotefile}' | docker build -t ${image} -f- .
     - name: display image
-      script: docker images |grep `echo ${image}|cut -d":" -f1`
+      content: docker images |grep `echo ${image}|cut -d":" -f1`

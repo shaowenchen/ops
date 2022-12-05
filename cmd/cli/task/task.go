@@ -118,7 +118,7 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				taskOption.Debug = fieldValue == "true"
 			} else if fieldName == "sudo" {
 				taskOption.Sudo = fieldValue == "true"
-			} else if fieldName == "filepath" {
+			} else if fieldName == "filepath" || fieldName == "f" {
 				taskOption.FilePath = fieldValue
 			} else if fieldName == "nodename" {
 				kubeOpt.NodeName = fieldValue

@@ -10,13 +10,13 @@ spec:
     kubeconfig: "~/.kube/config"
   steps:
     - name: Download Istio
-      script: curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${version} TARGET_ARCH=x86_64 sh -
+      content: curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${version} TARGET_ARCH=x86_64 sh -
       allowfailure: "true"
     - name: Install Istio
-      script: ./istio-${version}/bin/istioctl install -y --kubeconfig ${kubeconfig}
+      content: ./istio-${version}/bin/istioctl install -y --kubeconfig ${kubeconfig}
     - name: Install default-telemetry
-      script: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/default-telemetry.yaml --kubeconfig ${kubeconfig}
+      content: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/default-telemetry.yaml --kubeconfig ${kubeconfig}
     - name: Install disabled-mtls
-      script: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/disabled-mtls.yaml --kubeconfig ${kubeconfig}
+      content: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/disabled-mtls.yaml --kubeconfig ${kubeconfig}
     - name: Install preserve-request-header-case
-      script: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/preserve-request-header-case.yaml --kubeconfig ${kubeconfig}
+      content: kubectl apply -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/preserve-request-header-case.yaml --kubeconfig ${kubeconfig}

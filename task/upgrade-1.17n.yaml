@@ -9,19 +9,19 @@ spec:
     cluster_version: 1.18.20
   steps:
     - name: remove kubeadm
-      script: yum remove -y kubeadm
+      content: yum remove -y kubeadm
       allowfailure: true
     - name: install kubeadm
-      script: yum install -y kubeadm-${cluster_version}-0 --disableexcludes=kubernetes
+      content: yum install -y kubeadm-${cluster_version}-0 --disableexcludes=kubernetes
     - name: upgrade node
-      script: kubeadm upgrade node
+      content: kubeadm upgrade node
     - name: stop kubelet
-      script: systemctl stop kubelet
+      content: systemctl stop kubelet
     - name: remove kubelet
-      script: yum remove -y kubelet
+      content: yum remove -y kubelet
     - name: install kubelet
-      script: yum install -y kubelet-${cluster_version}-0 --disableexcludes=kubernetes
+      content: yum install -y kubelet-${cluster_version}-0 --disableexcludes=kubernetes
     - name: restart kubelet
-      script: systemctl daemon-reload;
+      content: systemctl daemon-reload;
         systemctl restart kubelet;
         systemctl status kubelet;

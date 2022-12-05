@@ -19,6 +19,7 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 	}
 	for si, s := range t.Spec.Steps {
 		var sp = &s
+		sp = RenderStepVariables(sp, allVars)
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
 		s.When = RenderWhen(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)
@@ -30,7 +31,6 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 			logger.Error.Println("Skip!")
 			continue
 		}
-		sp = RenderStepVariables(sp, allVars)
 		if err != nil {
 			logger.Error.Println(err)
 		}
@@ -60,6 +60,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 	}
 	for si, s := range t.Spec.Steps {
 		var sp = &s
+		sp = RenderStepVariables(sp, allVars)
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
 		s.When = RenderWhen(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)
@@ -71,7 +72,6 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 			logger.Error.Println("Skip!")
 			continue
 		}
-		sp = RenderStepVariables(sp, allVars)
 		if err != nil {
 			logger.Error.Println(err)
 		}

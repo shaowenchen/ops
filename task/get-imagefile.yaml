@@ -11,6 +11,6 @@ spec:
     localfile:
   steps:
     - name: run and copy file
-      script: id=$(docker run -d ${image});
+      content: id=$(docker run -d ${image});
         docker cp $id:${remotefile} ${localfile};
         docker rm $id -f;

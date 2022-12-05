@@ -9,10 +9,10 @@ spec:
     node_name: ""
   steps:
     - name: Cordon Node
-      script: kubectl cordon ${node_name}
+      content: kubectl cordon ${node_name}
     - name: Drain Node
-      script: kubectl drain ${node_name} --ignore-daemonsets
+      content: kubectl drain ${node_name} --ignore-daemonsets
     - name: Show Node on Kubernetes
-      script: kubectl get node
+      content: kubectl get node
     - name: Show Pod on Node
-      script: kubectl get pod -A |grep ${node_name}
+      content: kubectl get pod -A |grep ${node_name}

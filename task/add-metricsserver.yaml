@@ -9,8 +9,8 @@ spec:
     clear: false
   steps:
     - name: Install MetricsServer
-      script: kubectl apply -f GetAvailableUrl(https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml)
+      content: kubectl apply -f GetAvailableUrl(https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml)
       when: ${clear} == false
     - name: Remove MetricsServer
-      script: kubectl delete -f GetAvailableUrl(https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml)
+      content: kubectl delete -f GetAvailableUrl(https://raw.githubusercontent.com/shaowenchen/image-syncer/main/kubernetes/metrics-server-0.5.0.yaml)
       when: ${clear} == true

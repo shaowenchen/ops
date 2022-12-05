@@ -11,10 +11,10 @@ spec:
   desc: clear Kubernetes resource
   steps:
     - name: clear evicted pod
-      script: sudo kubectl get pods --all-namespaces -o wide | grep Evicted | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
+      content: sudo kubectl get pods --all-namespaces -o wide | grep Evicted | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
       allowfailure: "true"
     - name: clear error pod
-      script: sudo kubectl get pods --all-namespaces -o wide | grep Error | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
+      content: sudo kubectl get pods --all-namespaces -o wide | grep Error | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
       allowfailure: "true"
     - name: clear completed pod
-      script: sudo kubectl get pods --all-namespaces -o wide | grep Completed | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
+      content: sudo kubectl get pods --all-namespaces -o wide | grep Completed | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
