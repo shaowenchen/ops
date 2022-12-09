@@ -1,0 +1,10 @@
+FROM golang:1.19 as builder
+WORKDIR /workspace
+COPY . .
+RUN make cli 
+
+FROM ubuntu:latest
+WORKDIR /
+COPY --from=builder /workspace/bin/opscli /bin/opscli
+COPY --from=builder /workspace/task /root/.ops/task
+ENTRYPOINT ["/bin/opscli"]

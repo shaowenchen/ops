@@ -124,6 +124,8 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				taskOption.Sudo = fieldValue == "true"
 			} else if fieldName == "filepath" || fieldName == "f" {
 				taskOption.FilePath = fieldValue
+			} else if fieldName == "all" {
+				kubeOpt.All = fieldValue == "true"
 			} else if fieldName == "nodename" {
 				kubeOpt.NodeName = fieldValue
 			} else if fieldName == "runtimeimage" {
@@ -162,6 +164,7 @@ func init() {
 	TaskCmd.Flags().StringVarP(&taskOpt.FilePath, "filepath", "", "", "")
 	TaskCmd.MarkFlagRequired("filepath")
 
+	TaskCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "runtime image")
 	TaskCmd.Flags().IntVarP(&hostOpt.Port, "port", "", 22, "")
