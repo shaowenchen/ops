@@ -10,13 +10,13 @@ spec:
   all: true
   desc: Docker Clear
   steps:
-    - name: Clear Image
-      content: docker image prune -a --force --filter "until=240h"
-    - name: Clear Container
-      content: docker container prune --force --filter "until=2h"
-    - name: Docker system prune
-      content: docker system prune -f
+    - name: Clear Container exit more than 30m
+      content: docker container prune -f --filter "until=$(date +'%Y-%m-%dT%H:%M:%S' --date='-30 minutes')"
+    - name: Clear none image
+      content: docker image prune -f
       allowfailure: "true"
     - name: Clear biz image
-      content: docker images |grep -E "([0-9a-z]+[-]){3,}[0-9]{9}" |awk '{print $3}' | xargs /usr/bin/docker rmi
+      content: docker images | egrep "([0-9a-z]+[-]){3,}[0-9]{9}" | egrep -v "seconds|minutes" | awk '{print $3}' | xargs /usr/bin/docker rmi
       allowfailure: "true"
+    - name: Clear Network
+      content: docker network prune -f
