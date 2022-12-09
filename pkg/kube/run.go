@@ -39,12 +39,12 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 					{
 						Name:    "shell",
 						Image:   image,
-						Command: []string{"sh"},
-						Args:    []string{"-c", "echo \"base64 -d <<< " + shellBase64 + "\" | nsenter -t 1 -m -u -i -n | nsenter -t 1 -m -u -i -n"},
+						Command: []string{"bash"},
+						Args:    []string{"-c", "nsenter -t 1 -m -u -i -n `base64 -d <<< " + shellBase64 + "`"},
 						SecurityContext: &corev1.SecurityContext{
 							Privileged: &priviBool,
 						},
-						ImagePullPolicy: corev1.PullAlways,
+						ImagePullPolicy: corev1.PullIfNotPresent,
 					},
 				},
 				HostIPC:       true,
@@ -84,7 +84,7 @@ func DownloadFileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedN
 					{
 						Name:            "file",
 						Image:           image,
-						Command:         []string{"sh"},
+						Command:         []string{"bash"},
 						Args:            []string{"-c", fmt.Sprintf("cp -R %s /host%s", remotefile, localfile)},
 						ImagePullPolicy: corev1.PullAlways,
 						VolumeMounts: []v1.VolumeMount{

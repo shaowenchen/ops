@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: add-grafana
+  namespace: default
+spec:
+  desc: install grafana
+  variables:
+    namespace: monitor
+    action: install
+  steps:
+    - name: add helm repo
+      content: helm repo add grafana https://grafana.github.io/helm-charts
+    - name: update helm repo
+      content: helm repo update
+    - name: ${action} grafana
+      content: helm ${action} grafana -n ${namespace} grafana/grafana --create-namespace

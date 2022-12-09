@@ -224,9 +224,9 @@ func (c *HostConnection) exec(sudo bool, cmd string) (stdout string, err error) 
 	cmd = utils.BuildBase64Cmd(sudo, cmd)
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
-		runner := exec.Command("sh", "-c", cmd)
+		runner := exec.Command("bash", "-c", cmd)
 		if sudo {
-			runner = exec.Command("sudo", "sh", "-c", cmd)
+			runner = exec.Command("sudo", "bash", "-c", cmd)
 		}
 		var out, errout bytes.Buffer
 		runner.Stdout = &out

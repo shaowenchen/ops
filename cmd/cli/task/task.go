@@ -88,6 +88,10 @@ func KubeTask(logger *log.Logger, taskOpt option.TaskOption, kubeOpt option.Kube
 		return err
 	}
 	nodes, err := kube.GetNodes(logger, kc.Client, kubeOpt)
+	if len(nodes) == 0 {
+		logger.Error.Println("no nodes privided")
+		return
+	}
 	for _, node := range nodes {
 		for _, t := range tasks {
 			logger.Info.Println(utils.FilledInMiddle(node.Name))

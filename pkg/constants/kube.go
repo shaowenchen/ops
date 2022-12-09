@@ -12,7 +12,7 @@ const LabelNodeRoleWorker = "node-role.kubernetes.io/worker"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
-const DefaultRuntimeImage = "docker.io/library/alpine:latest"
+const DefaultRuntimeImage = "docker.io/library/ubuntu:20.04"
 
 const SyncResourceStatusHeatSeconds = 60
 

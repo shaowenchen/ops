@@ -4,8 +4,8 @@ metadata:
   name: clear-kube
   namespace: default
 spec:
-  crontab: 10 22 * * *
-  nameref: test
+  crontab: "*/2 * * * *"
+  nameref: dev1
   typeref: cluster
   nodename: anymaster
   desc: clear Kubernetes resource

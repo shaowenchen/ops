@@ -5,6 +5,8 @@ metadata:
   namespace: default
 spec:
   desc: Install Opscli
+  variables:
+    proxy: https://ghproxy.com/
   steps:
     - name: Install Opscli
-      content: echo ${installOpscli()}
+      content: curl -sfL ${proxy}https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -

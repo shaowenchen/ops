@@ -7,7 +7,7 @@ spec:
   desc: add file to image
   variables:
     image: myfileimage:latest
-    baseimage: docker.io/library/alpine:latest
+    baseimage: docker.io/library/ubuntu:20.04
     remotefile:
     localfile:
   steps:

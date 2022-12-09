@@ -4,14 +4,18 @@ metadata:
   name: clear-docker
   namespace: default
 spec:
-  crontab: 0 22 * * 2
+  # crontab: "*/5 * * * *"
   nameref: prod
   typeref: cluster
   all: true
   desc: Docker Clear
   steps:
+    - name: Clear Image
+      content: docker image prune -a --force --filter "until=240h"
+    - name: Clear Container
+      content: docker container prune --force --filter "until=2h"
     - name: Docker system prune
-      content: docker system prune
+      content: docker system prune -f
       allowfailure: "true"
     - name: Clear biz image
       content: docker images |grep -E "([0-9a-z]+[-]){3,}[0-9]{9}" |awk '{print $3}' | xargs /usr/bin/docker rmi
