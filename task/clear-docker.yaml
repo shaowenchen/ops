@@ -10,7 +10,7 @@ spec:
   all: true
   desc: Docker Clear
   steps:
-    - name: Clear Container exit more than 30m
+    - name: Clear container exit more than 30m
       content: docker container prune -f --filter "until=$(date +'%Y-%m-%dT%H:%M:%S' --date='-30 minutes')"
     - name: Clear none image
       content: docker image prune -f

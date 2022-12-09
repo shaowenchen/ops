@@ -40,7 +40,7 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 						Name:    "shell",
 						Image:   image,
 						Command: []string{"bash"},
-						Args:    []string{"-c", "echo \"base64 -d <<< " + shellBase64 + "\" | nsenter -t 1 -m -u -i -n | nsenter -t 1 -m -u -i -n"},
+						Args:    []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"},
 						SecurityContext: &corev1.SecurityContext{
 							Privileged: &priviBool,
 						},
