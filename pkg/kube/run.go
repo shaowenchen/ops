@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
@@ -31,6 +32,9 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      namespacedName.Name,
 				Namespace: namespacedName.Namespace,
+				Labels: map[string]string{
+					constants.LabelOpsTaskKey: constants.LabelOpsTaskValue,
+				},
 			},
 			Spec: corev1.PodSpec{
 				AutomountServiceAccountToken: &automountSA,
@@ -76,6 +80,9 @@ func DownloadFileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedN
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      namespacedName.Name,
 				Namespace: namespacedName.Namespace,
+				Labels: map[string]string{
+					constants.LabelOpsTaskKey: constants.LabelOpsTaskValue,
+				},
 			},
 			Spec: corev1.PodSpec{
 				AutomountServiceAccountToken: &automountSA,

@@ -10,6 +10,10 @@ const AnyMaster = "anymaster"
 const LabelNodeRoleMaster = "node-role.kubernetes.io/master"
 const LabelNodeRoleWorker = "node-role.kubernetes.io/worker"
 
+const LabelOpsTaskKey = "ops"
+
+const LabelOpsTaskValue = "task"
+
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
 const DefaultRuntimeImage = "docker.io/library/ubuntu:20.04"

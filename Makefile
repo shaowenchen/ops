@@ -17,11 +17,11 @@ SHELL = /usr/bin/env bash -o pipefail
 
 flags="-X github.com/shaowenchen/ops/cmd/cli/version.BuildVersion=`git symbolic-ref --short HEAD` -X github.com/shaowenchen/ops/cmd/cli/version.BuildDate=`date -u '+%Y-%m-%dT%I:%M:%SZ'` -X github.com/shaowenchen/ops/cmd/cli/version.GitCommitID=`git rev-parse --short=7 --verify HEAD` -w -s"
 
-cli: 
-	go build -ldflags ${flags} -o ./bin/opscli ./cmd/cli/main.go
-
 .PHONY: all
 all: build
+
+cli: 
+	go build -ldflags ${flags} -o ./bin/opscli ./cmd/cli/main.go
 
 ##@ General
 
