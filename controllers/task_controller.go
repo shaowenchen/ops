@@ -236,7 +236,7 @@ func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Contex
 func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, kubeOpt option.KubeOption) (err error) {
 	lock := r.crontabRunningMap[t.GetUniqueKey()]
 	getLock := lock.TryLock()
-	if getLock {
+	if !getLock {
 		logger.Info.Println(fmt.Sprintf("skiped，task %s is running", t.GetUniqueKey()))
 		return
 	}
