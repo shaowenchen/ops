@@ -20,3 +20,5 @@ spec:
       content: kubectl ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/disabled-mtls.yaml --kubeconfig ${kubeconfig}
     - name: ${action} preserve-request-header-case
       content: kubectl ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/preserve-request-header-case.yaml --kubeconfig ${kubeconfig}
+    - name: ${action} ingressgateway-settings
+      content: kubectl ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/ingressgateway-settings.yaml --kubeconfig ${kubeconfig}
