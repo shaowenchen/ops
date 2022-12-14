@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: clear-opstask
+  namespace: default
+spec:
+  crontab: "1 20 * * *"
+  nameref: prod
+  typeref: cluster
+  nodename: anymaster
+  desc: clear Kubernetes resource
+  steps:
+    - name: clear ops task pod
+      content: kubectl -n ops-system delete  pod -l ops=task 

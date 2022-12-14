@@ -4,7 +4,7 @@ metadata:
   name: clear-docker
   namespace: default
 spec:
-  crontab: "*/5 * * * *"
+  crontab: "15 * * * *"
   nameref: prod
   typeref: cluster
   all: true
@@ -15,8 +15,11 @@ spec:
     - name: Clear none image
       content: docker image prune -f
       allowfailure: "true"
-    - name: Clear biz image, eg，123-123-123
-      content: docker images | egrep "([0-9a-z]+[-]){2,}[0-9]{9}" | egrep -v "seconds|minutes" | awk '{print $3}' | xargs /usr/bin/docker rmi -f
+    - name: Clear biz image, eg，123-123-123, 123-123
+      content: docker images | egrep "([0-9a-z]+[-]){1,}[0-9]{9}" | egrep -v "seconds|minutes" | awk '{print $3}' | xargs /usr/bin/docker rmi -f
+      allowfailure: "true"
+    - name: Clear biz image, eg，label=privider=cicd
+      content: docker images --filter label=provider=cicd | egrep -v "seconds|minutes" | awk '{print $3}' | xargs /usr/bin/docker rmi -f
       allowfailure: "true"
     - name: Clear network
       content: docker network prune -f
