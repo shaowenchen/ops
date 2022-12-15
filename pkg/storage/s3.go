@@ -15,8 +15,8 @@ func S3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string
 		Credentials:      credentials.NewStaticCredentials(ak, sk, ""),
 		Endpoint:         aws.String(endpoint),
 		Region:           aws.String(region),
-		DisableSSL:       aws.Bool(false),
-		S3ForcePathStyle: aws.Bool(false),
+		DisableSSL:       aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(true),
 	})
 	uploader := s3manager.NewUploader(sess)
 	file, err := os.Open(localFilePath)
