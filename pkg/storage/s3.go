@@ -45,8 +45,8 @@ func S3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile stri
 		Credentials:      credentials.NewStaticCredentials(ak, sk, ""),
 		Endpoint:         aws.String(endpoint),
 		Region:           aws.String(region),
-		DisableSSL:       aws.Bool(false),
-		S3ForcePathStyle: aws.Bool(false),
+		DisableSSL:       aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(true),
 	})
 	downloader := s3manager.NewDownloader(sess)
 	file, err := os.Create(localFilePath)
