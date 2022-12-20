@@ -12,3 +12,11 @@ spec:
       content: echo "kernel.pid_max=65535 " >> /etc/sysctl.conf && sysctl -p
     - name: Max Thread
       content: echo "kernel.threads-max=65535 " >> /etc/sysctl.conf && sysctl -p
+    - name: Max Conntrack
+      content: echo "net.netfilter.nf_conntrack_max=2001234" >> /etc/sysctl.conf && sysctl -p
+    - name: Max ARP Router GC1
+      content: echo "net.ipv4.neigh.default.gc_thresh1=80000" >> /etc/sysctl.conf && sysctl -p
+    - name: Max ARP Router GC2
+      content: echo "net.ipv4.neigh.default.gc_thresh2=90000" >> /etc/sysctl.conf && sysctl -p
+    - name: Max ARP Router GC3
+      content: echo "net.ipv4.neigh.default.gc_thresh3=100000" >> /etc/sysctl.conf && sysctl -p
