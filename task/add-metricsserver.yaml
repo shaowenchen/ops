@@ -8,7 +8,7 @@ spec:
   variables:
     proxy: https://ghproxy.com/
     action: apply
-    version: 0.6.2
+    version: 0.5.0
   steps:
     - name: ${action} MetricsServer
       content: kubectl ${action} -f ${proxy}https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/kubernetes/metrics-server-${version}.yaml
