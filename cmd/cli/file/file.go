@@ -99,6 +99,9 @@ func init() {
 	FileCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")
 	FileCmd.Flags().IntVar(&hostOpt.Port, "port", 22, "")
 
+	FileCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
+	FileCmd.Flags().BoolVarP(&kubeOpt.Debug, "debug", "", false, "")
+
 	FileCmd.Flags().StringVarP(&s3Opt.Region, "region", "", "ap-southeast-3", "")
 	FileCmd.Flags().StringVarP(&s3Opt.Endpoint, "endpoint", "", "obs.ap-southeast-3.myhuaweicloud.com", "")
 	FileCmd.Flags().StringVarP(&s3Opt.Bucket, "bucket", "", "", "")

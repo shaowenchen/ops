@@ -133,7 +133,7 @@ func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, 
 	if err != nil {
 		return
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), kc.Client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), false, kc.Client, pod)
 	logger.Info.Println(stdout)
 	return
 }
@@ -164,7 +164,7 @@ func (kc *KubeConnection) FileonNode(logger *opslog.Logger, node *corev1.Node, f
 	if err != nil {
 		return
 	}
-	return GetPodLog(logger, context.TODO(), kc.Client, pod)
+	return GetPodLog(logger, context.TODO(), false, kc.Client, pod)
 }
 
 func (kc *KubeConnection) File(logger *opslog.Logger, fileopt option.FileOption) (err error) {

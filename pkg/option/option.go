@@ -18,6 +18,7 @@ type HostOption struct {
 type KubeOption struct {
 	NodeName     string
 	RuntimeImage string
+	Debug        bool
 	All          bool
 }
 
@@ -63,7 +64,8 @@ func (f *FileOption) Filling() {
 		return
 	} else {
 		f.StorageType = constants.RemoteStorageTypeImage
-		f.StorageImage = remoteSplit[1]
+		f.StorageImage = remoteSplit[0]
+		f.RemoteFile = remoteSplit[1]
 		return
 	}
 }

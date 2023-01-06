@@ -27,7 +27,7 @@ func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, optio
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
 	logger.Info.Println(stdout)
 	return
 }
@@ -37,16 +37,16 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := DownloadFileOnNode(client, &node, namespacedName, kubeOption.RuntimeImage, option.RemoteFile, option.LocalFile)
+	pod, err := DownloadFileOnNode(client, &node, namespacedName, option.StorageImage, option.RemoteFile, option.LocalFile)
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), kubeOption.Debug, client, pod)
 	logger.Info.Println(stdout)
 	return
 }
 
-func GetPodLog(logger *log.Logger, ctx context.Context, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
+func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
 	for range time.Tick(time.Second * 1) {
 		select {
 		default:
@@ -58,7 +58,7 @@ func GetPodLog(logger *log.Logger, ctx context.Context, client *kubernetes.Clien
 			if err != nil {
 				return
 			}
-			if utils.IsStopedPod(pod) {
+			if utils.IsStopedPod(pod) && !debug {
 				client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
 				return
 			}
