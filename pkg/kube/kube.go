@@ -18,16 +18,16 @@ import (
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.ShellOption) (stdout string, err error) {
+func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shellOpt option.ShellOption, kubeOpt option.KubeOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("shell-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := RunShellOnNode(client, &node, namespacedName, option.RuntimeImage, option.Content)
+	pod, err := RunShellOnNode(client, &node, namespacedName, kubeOpt.RuntimeImage, shellOpt.Content)
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), kubeOpt.Debug, client, pod)
 	logger.Info.Println(stdout)
 	return
 }
@@ -58,8 +58,10 @@ func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kube
 			if err != nil {
 				return
 			}
-			if utils.IsStopedPod(pod) && !debug {
-				client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
+			if utils.IsStopedPod(pod) {
+				if !debug {
+					client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
+				}
 				return
 			}
 		}

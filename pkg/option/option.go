@@ -38,7 +38,6 @@ type TaskOption struct {
 }
 
 type ShellOption struct {
-	KubeOption
 	Content string
 	Sudo    bool
 }

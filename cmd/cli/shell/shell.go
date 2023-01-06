@@ -13,6 +13,7 @@ import (
 )
 
 var shellOpt option.ShellOption
+var kubeOpt option.KubeOption
 var hostOpt option.HostOption
 
 var inventory string
@@ -34,20 +35,20 @@ var ShellCmd = &cobra.Command{
 			shellOpt.Content, _ = utils.ReadFile(shellOpt.Content)
 		}
 		if inventoryType == constants.InventoryTypeKubeconfig {
-			KubeShell(logger, shellOpt, inventory)
+			KubeShell(logger, shellOpt, kubeOpt, inventory)
 		} else if inventoryType == constants.InventoryTypeHosts {
 			HostShell(logger, shellOpt, hostOpt, inventory)
 		}
 	},
 }
 
-func KubeShell(logger *log.Logger, shellOpt option.ShellOption, inventory string) (err error) {
+func KubeShell(logger *log.Logger, shellOpt option.ShellOption, kubeOpt option.KubeOption, inventory string) (err error) {
 	client, err := utils.NewKubernetesClient(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	nodeList, err := kube.GetNodes(logger, client, shellOpt.KubeOption)
+	nodeList, err := kube.GetNodes(logger, client, kubeOpt)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -56,7 +57,7 @@ func KubeShell(logger *log.Logger, shellOpt option.ShellOption, inventory string
 	}
 	for _, node := range nodeList {
 		logger.Info.Println(utils.FilledInMiddle(node.Name))
-		kube.Shell(logger, client, node, shellOpt)
+		kube.Shell(logger, client, node, shellOpt, kubeOpt)
 	}
 	return
 }
@@ -66,8 +67,6 @@ func HostShell(logger *log.Logger, shellOpt option.ShellOption, hostOpt option.H
 		err = host.Shell(logger, h, shellOpt, hostOpt)
 		if err != nil {
 			logger.Error.Println(err)
-		} else {
-			logger.Info.Println("Successed!")
 		}
 	}
 	return
@@ -78,9 +77,12 @@ func init() {
 
 	ShellCmd.Flags().BoolVarP(&shellOpt.Sudo, "sudo", "", false, "")
 	ShellCmd.Flags().StringVarP(&shellOpt.Content, "content", "", "", "")
-	ShellCmd.Flags().BoolVarP(&shellOpt.All, "all", "", false, "")
-	ShellCmd.Flags().StringVarP(&shellOpt.NodeName, "nodename", "", "", "")
-	ShellCmd.Flags().StringVarP(&shellOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
+	ShellCmd.MarkFlagRequired("content")
+
+	ShellCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
+	ShellCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
+	ShellCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
+	ShellCmd.Flags().BoolVarP(&kubeOpt.Debug, "debug", "", false, "")
 
 	ShellCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	ShellCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")

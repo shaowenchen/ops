@@ -55,8 +55,6 @@ func HostFile(logger *log.Logger, option option.FileOption, hostOpt option.HostO
 		err = host.File(logger, h, fileOpt, hostOpt)
 		if err != nil {
 			logger.Error.Println(err)
-		} else {
-			logger.Info.Println("Successed!")
 		}
 	}
 	return

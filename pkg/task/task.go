@@ -124,10 +124,10 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 		logger,
 		node,
 		option.ShellOption{
-			Sudo:       taksOpt.Sudo,
-			Content:    step.Content,
-			KubeOption: kubeOpt,
-		})
+			Sudo:    taksOpt.Sudo,
+			Content: step.Content,
+		},
+		kubeOpt)
 	return stdout, err
 }
 

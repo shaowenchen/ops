@@ -123,13 +123,13 @@ func (kc *KubeConnection) GetAllRunningPods() (allPod *corev1.PodList, err error
 	})
 }
 
-func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt option.ShellOption) (stdout string, err error) {
+func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt option.ShellOption, kubeOpt option.KubeOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("shell-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
 	}
 
-	pod, err := RunShellOnNode(kc.Client, node, namespacedName, shellOpt.RuntimeImage, shellOpt.Content)
+	pod, err := RunShellOnNode(kc.Client, node, namespacedName, kubeOpt.RuntimeImage, shellOpt.Content)
 	if err != nil {
 		return
 	}
@@ -138,17 +138,17 @@ func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, 
 	return
 }
 
-func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt option.ShellOption) (err error) {
-	nodes, err := kc.GetNodeByName(shellOpt.NodeName)
+func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt option.ShellOption, kubeOpt option.KubeOption) (err error) {
+	nodes, err := kc.GetNodeByName(kubeOpt.NodeName)
 
 	if err != nil {
 		return
 	}
-	if shellOpt.All {
+	if kubeOpt.All {
 		nodes, err = kc.GetNodes()
 	}
 	for _, node := range nodes.Items {
-		kc.ShellOnNode(logger, &node, shellOpt)
+		kc.ShellOnNode(logger, &node, shellOpt, kubeOpt)
 	}
 
 	return
