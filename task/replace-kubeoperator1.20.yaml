@@ -1,0 +1,25 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: replace-kubeoperator1.20
+  namespace: default
+spec:
+  desc: replace kubeoperator 1.20 cluster image from registry.kubeoperator.local to official images
+  steps:
+    - name: replace calico-node
+      content:  |+
+        kubectl -n kube-system set image daemonset/calico-node calico-node=calico/node:v3.18.4
+        kubectl -n kube-system set image daemonset/calico-node upgrade-ipam=calico/cni:v3.18.4
+        kubectl -n kube-system set image daemonset/calico-node install-cni=calico/cni:v3.18.4
+        kubectl -n kube-system set image daemonset/calico-node flexvol-driver=calico/pod2daemon-flexvol:v3.18.4
+    - name: replace calicoctl kube-proxy node-cache
+      content:  |+
+        kubectl -n kube-system set image daemonset/calicoctl calicoctl=calico/ctl:v3.18.4
+        kubectl -n kube-system set image daemonset/kube-proxy kube-proxy=k8simage/kube-proxy:v1.20.12
+        kubectl -n kube-system set image daemonset/node-local-dns node-cache=k8simage/k8s-dns-node-cache:1.17.0
+    - name: replace calico calico-typha coredns metrics-server
+      content:  |+
+        kubectl -n kube-system set image deploy/calico-kube-controllers calico-kube-controllers=calico/kube-controllers:v3.18.4
+        kubectl -n kube-system set image deploy/calico-typha calico-typha=calico/typha:v3.18.4
+        kubectl -n kube-system set image deploy/coredns coredns=coredns/coredns:1.7.0
+        kubectl -n kube-system set image deploy/metrics-server metrics-server=k8simage/metrics-server:v0.5.0
