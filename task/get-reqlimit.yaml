@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: get-reqlimit
+  namespace: default
+spec:
+  desc: get request and limit
+  variables:
+    namespace: default
+  steps:
+    - name: get cpu request limit
+      content: kubectl get pod -A -o custom-columns='NAMESPACE:.metadata.namespace,POD-NAME:.metadata.name,CPU-REQ:.spec.containers[*].resources.requests.cpu,CPU-LIMIT:.spec.containers[*].resources.limits.cpu'
+    - name: get mem request limit
+      content: kubectl get pod -A -o custom-columns='NAMESPACE:.metadata.namespace,POD-NAME:.metadata.name,MEM-REQ:.spec.containers[*].resources.requests.memory,MEM-LIMIT:.spec.containers[*].resources.limits.memory'
