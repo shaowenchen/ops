@@ -127,6 +127,17 @@ spec:
                       type: string
                     direction:
                       type: string
+                    kubernetes:
+                      properties:
+                        action:
+                          type: string
+                        kind:
+                          type: string
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                      type: object
                     localfile:
                       type: string
                     name:
