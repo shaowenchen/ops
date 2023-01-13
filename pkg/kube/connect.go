@@ -193,14 +193,14 @@ func (kc *KubeConnection) SetRequestLimit(logger *opslog.Logger, option opsopt.K
 		return err
 	}
 	if option.Kind == "StatefulSet" {
-		err = SetDeploymentRecommandResource(kc.Client, namespacedName)
+		err = SetStatefulSetRecommandResource(kc.Client, namespacedName)
 		if err != nil {
 			logger.Error.Println(err)
 		}
 		return err
 	}
 	if option.Kind == "DaemonSet" {
-		err = SetDeploymentRecommandResource(kc.Client, namespacedName)
+		err = SetDaemonSetRecommandResource(kc.Client, namespacedName)
 		if err != nil {
 			logger.Error.Println(err)
 		}

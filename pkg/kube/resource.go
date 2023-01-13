@@ -58,6 +58,68 @@ func SetDeploymentRecommandResource(client *kubernetes.Clientset, namespacedName
 	return
 }
 
+func SetStatefulSetRecommandResource(client *kubernetes.Clientset, namespacedName types.NamespacedName) (err error) {
+	app, err := client.AppsV1().StatefulSets(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	listOptions := metav1.ListOptions{
+		LabelSelector: labels.Set(app.Spec.Selector.MatchLabels).String(),
+	}
+	pods, err := client.CoreV1().Pods(namespacedName.Namespace).List(context.TODO(), listOptions)
+	if err != nil {
+		return err
+	}
+	if len(pods.Items) == 0 {
+		return errors.New("resource have not pod")
+	}
+	var podList []string
+	for _, pod := range pods.Items {
+		podList = append(podList, pod.Name)
+	}
+	// set req\limit for all containers
+	for _, container := range pods.Items[0].Spec.Containers {
+		res, err := GetPodsContainerRecommandResource(client, namespacedName.Namespace, podList, container.Name)
+		if err != nil {
+			return err
+		}
+		SetContainerResource(app.Spec.Template.Spec.Containers, container, res)
+	}
+	_, err = client.AppsV1().StatefulSets(namespacedName.Namespace).Update(context.TODO(), app, metav1.UpdateOptions{})
+	return
+}
+
+func SetDaemonSetRecommandResource(client *kubernetes.Clientset, namespacedName types.NamespacedName) (err error) {
+	app, err := client.AppsV1().DaemonSets(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	listOptions := metav1.ListOptions{
+		LabelSelector: labels.Set(app.Spec.Selector.MatchLabels).String(),
+	}
+	pods, err := client.CoreV1().Pods(namespacedName.Namespace).List(context.TODO(), listOptions)
+	if err != nil {
+		return err
+	}
+	if len(pods.Items) == 0 {
+		return errors.New("resource have not pod")
+	}
+	var podList []string
+	for _, pod := range pods.Items {
+		podList = append(podList, pod.Name)
+	}
+	// set req\limit for all containers
+	for _, container := range pods.Items[0].Spec.Containers {
+		res, err := GetPodsContainerRecommandResource(client, namespacedName.Namespace, podList, container.Name)
+		if err != nil {
+			return err
+		}
+		SetContainerResource(app.Spec.Template.Spec.Containers, container, res)
+	}
+	_, err = client.AppsV1().DaemonSets(namespacedName.Namespace).Update(context.TODO(), app, metav1.UpdateOptions{})
+	return
+}
+
 func SetContainerResource(containers []corev1.Container, container corev1.Container, res corev1.ResourceRequirements) bool {
 	for index, item := range containers {
 		if item.Name == container.Name {
@@ -78,11 +140,13 @@ func GetPodsContainerRecommandResource(client *kubernetes.Clientset, namespace s
 	memReqContainersValue := GetMatrixContainerValue(memReqQueryResult)
 	memReq := int64(memReqContainersValue[containerName])
 	memReq = NotLess(memReq, 50)
+	println("memReq:", memReq)
 
 	cpuReqQueryResult, err := PromQueryRangeMatrix(serverUrl, fmt.Sprintf(PromQLPodCpuUsageReqM, namespace, strings.Join(podList, "|")))
 	cpuReqContainersValue := GetMatrixContainerValue(cpuReqQueryResult)
 	cpuReq := int64(cpuReqContainersValue[containerName])
 	cpuReq = NotLess(cpuReq, 50)
+	println("cpuReq:", cpuReq)
 
 	request := corev1.ResourceList{}
 
@@ -98,11 +162,13 @@ func GetPodsContainerRecommandResource(client *kubernetes.Clientset, namespace s
 	memLimitContainersValue := GetMatrixContainerValue(memLimitQueryResult)
 	memLimit := int64(memLimitContainersValue[containerName])
 	memLimit = NotLess(memLimit, 100)
+	println("memLimit:", memLimit)
 
 	cpuLimitQueryResult, err := PromQueryRangeMatrix(serverUrl, fmt.Sprintf(PromQLPodCpuUsageLimitM, namespace, strings.Join(podList, "|")))
 	cpuLimitContainersValue := GetMatrixContainerValue(cpuLimitQueryResult)
 	cpuLimit := int64(cpuLimitContainersValue[containerName])
 	cpuLimit = NotLess(cpuLimit, 100)
+	println("cpuLimit:", cpuLimit)
 
 	limits := corev1.ResourceList{}
 	limits[corev1.ResourceMemory] = *resource.NewQuantity(
