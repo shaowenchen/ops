@@ -29,3 +29,15 @@ spec:
       content: echo "fs.file-max=1048576" >> /etc/sysctl.conf && sysctl -p ;
           echo "fs.inotify.max_user_instances=8192" >> /etc/sysctl.conf && sysctl -p ;
           echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf && sysctl -p ;
+    - name: max user processes
+      content: |+
+          sed -i "/soft nproc/d" /etc/security/limits.conf ;
+          echo "* soft nproc  262144" >> /etc/security/limits.conf  
+          sed -i "/* hard nproc/d" /etc/security/limits.conf ;
+          echo "* hard nproc  262144" >> /etc/security/limits.conf 
+    - name: max user processes
+      content: |+
+          sed -i "/soft nofile/d" /etc/security/limits.conf ;
+          echo "* soft nofile  1048576" >> /etc/security/limits.conf  
+          sed -i "/* hard nofile/d" /etc/security/limits.conf ;
+          echo "* hard nofile  1048576" >> /etc/security/limits.conf 

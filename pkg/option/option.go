@@ -69,6 +69,15 @@ func (f *FileOption) Filling() {
 	}
 }
 
+type KubernetesOption struct {
+	Action   string
+	Kind     string
+	Metadata struct {
+		Name      string
+		Namespace string
+	}
+}
+
 type ClusterOption struct {
 	Namespace  string
 	Name       string

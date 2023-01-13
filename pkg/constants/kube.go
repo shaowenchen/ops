@@ -1,6 +1,8 @@
 package constants
 
-import "path/filepath"
+import (
+	"path/filepath"
+)
 
 const AllNamespaces = "all"
 const OpsNamespace = "ops-system"

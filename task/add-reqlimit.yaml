@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: add-reqlimit
+  namespace: default
+spec:
+  desc: add request and limit
+  variables:
+    namespace: default
+    name: 
+  steps:
+    - name: add request limit
+      kubernetes:
+        action: SetReqLimit
+        kind: Deployment
+        name: ${name}
+        namespace: ${namespace}

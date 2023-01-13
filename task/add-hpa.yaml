@@ -9,8 +9,9 @@ spec:
     name:
     resource_type: deploy
     namespace: default
+    min: 1
     max: 5
     cpu_percent: 80
   steps:
     - name: add hpa for
-      content: kubectl autoscale ${resource_type} ${name} --max=${max} --cpu-percent=${cpu_percent}
+      content: kubectl autoscale ${resource_type} ${name} --min=${min} --max=${max} --cpu-percent=${cpu_percent}

@@ -46,13 +46,21 @@ type TaskSpec struct {
 }
 
 type Step struct {
-	When         string `json:"when,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Content      string `json:"content,omitempty"`
-	LocalFile    string `json:"localfile,omitempty"`
-	RemoteFile   string `json:"remotefile,omitempty"`
-	Direction    string `json:"direction,omitempty"`
-	AllowFailure string `json:"allowfailure,omitempty"`
+	When         string     `json:"when,omitempty"`
+	Name         string     `json:"name,omitempty"`
+	Content      string     `json:"content,omitempty"`
+	LocalFile    string     `json:"localfile,omitempty"`
+	RemoteFile   string     `json:"remotefile,omitempty"`
+	Direction    string     `json:"direction,omitempty"`
+	AllowFailure string     `json:"allowfailure,omitempty"`
+	Kubernetes   Kubernetes `json:"kubernetes,omitempty"`
+}
+
+type Kubernetes struct {
+	Action    string `json:"action,omitempty"`
+	Kind      string `json:"kind,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // TaskStatus defines the observed state of Task

@@ -113,10 +113,26 @@ func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, o
 }
 
 func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task, c *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (string, error) {
-	if len(step.Content) > 0 {
+	if len(step.Kubernetes.Action) > 0 {
+		return runStepKubernetesOnKube
+	} else if len(step.Content) > 0 {
 		return runStepShellOnKube
+	} else {
+		return runStepCopyOnKube
 	}
-	return runStepCopyOnKube
+}
+
+func runStepKubernetesOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {
+	option := option.KubernetesOption{
+		Kind:   step.Kubernetes.Kind,
+		Action: step.Kubernetes.Action,
+	}
+	option.Metadata.Name = step.Kubernetes.Name
+	option.Metadata.Namespace = step.Kubernetes.Namespace
+	err = kc.SetRequestLimit(
+		logger,
+		option)
+	return "", err
 }
 
 func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {

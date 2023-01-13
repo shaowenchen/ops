@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
@@ -157,4 +158,26 @@ func GetPodLog(ctx context.Context, client *kubernetes.Clientset, namespace, pod
 func IsMasterNode(node *corev1.Node) bool {
 	_, ok := node.Labels[constants.LabelNodeRoleMaster]
 	return ok
+}
+
+func GetAnyMaster(client *kubernetes.Clientset) (master *corev1.Node, err error) {
+	nodes, err := GetAllNodesByClient(client)
+	if err != nil {
+		return
+	}
+	for _, node := range nodes.Items {
+		if IsMasterNode(&node) {
+			return &node, nil
+		}
+	}
+	return nil, errors.New("not found master")
+}
+
+func GetNodeInternalIp(node *corev1.Node) (ip string) {
+	for _, add := range node.Status.Addresses {
+		if add.Type == corev1.NodeInternalIP {
+			return add.Address
+		}
+	}
+	return ip
 }

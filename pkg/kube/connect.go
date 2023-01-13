@@ -9,10 +9,11 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
-	"github.com/shaowenchen/ops/pkg/option"
+	opsopt "github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -123,7 +124,7 @@ func (kc *KubeConnection) GetAllRunningPods() (allPod *corev1.PodList, err error
 	})
 }
 
-func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt option.ShellOption, kubeOpt option.KubeOption) (stdout string, err error) {
+func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt opsopt.ShellOption, kubeOpt opsopt.KubeOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("shell-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
@@ -138,7 +139,7 @@ func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, 
 	return
 }
 
-func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt option.ShellOption, kubeOpt option.KubeOption) (err error) {
+func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt opsopt.ShellOption, kubeOpt opsopt.KubeOption) (err error) {
 	nodes, err := kc.GetNodeByName(kubeOpt.NodeName)
 
 	if err != nil {
@@ -154,27 +155,57 @@ func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt option.ShellOpti
 	return
 }
 
-func (kc *KubeConnection) FileonNode(logger *opslog.Logger, node *corev1.Node, fileopt option.FileOption) (stdout string, err error) {
+func (kc *KubeConnection) FileonNode(logger *opslog.Logger, node *corev1.Node, option opsopt.FileOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.OpsNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
 	}
 
-	pod, err := DownloadFileOnNode(kc.Client, node, namespacedName, fileopt.RuntimeImage, fileopt.RemoteFile, fileopt.LocalFile)
+	pod, err := DownloadFileOnNode(kc.Client, node, namespacedName, option.RuntimeImage, option.RemoteFile, option.LocalFile)
 	if err != nil {
 		return
 	}
 	return GetPodLog(logger, context.TODO(), false, kc.Client, pod)
 }
 
-func (kc *KubeConnection) File(logger *opslog.Logger, fileopt option.FileOption) (err error) {
-	nodes, err := kc.GetNodeByName(fileopt.NodeName)
-	if fileopt.All {
+func (kc *KubeConnection) File(logger *opslog.Logger, option opsopt.FileOption) (err error) {
+	nodes, err := kc.GetNodeByName(option.NodeName)
+	if option.All {
 		nodes, err = kc.GetNodes()
 	}
 	for _, node := range nodes.Items {
-		kc.FileonNode(logger, &node, fileopt)
+		kc.FileonNode(logger, &node, option)
 	}
 	return
 
+}
+
+func (kc *KubeConnection) SetRequestLimit(logger *opslog.Logger, option opsopt.KubernetesOption) (err error) {
+	namespacedName := types.NamespacedName{
+		Namespace: option.Metadata.Namespace,
+		Name:      option.Metadata.Name,
+	}
+	if option.Kind == "Deployment" {
+		err = SetDeploymentRecommandResource(kc.Client, namespacedName)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		return err
+	}
+	if option.Kind == "StatefulSet" {
+		err = SetDeploymentRecommandResource(kc.Client, namespacedName)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		return err
+	}
+	if option.Kind == "DaemonSet" {
+		err = SetDeploymentRecommandResource(kc.Client, namespacedName)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		return err
+	}
+	logger.Info.Println("Unrecognized type: " + option.Kind)
+	return
 }
