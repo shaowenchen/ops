@@ -8,11 +8,11 @@ spec:
   variables:
     ip: ""
     domain: ""
-    clear: false
+    clear: "false"
   steps:
     - name: Add Etc Hosts
       content: echo "${ip} ${domain}" >> /etc/hosts
-      when: ${clear} == false
+      when: ${clear} == "false"
     - name: Remove Etc Hosts
       content: sed -i '/${domain}/d' /etc/hosts
-      when: ${clear} == true
+      when: ${clear} == "true"

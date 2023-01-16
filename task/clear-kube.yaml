@@ -10,11 +10,24 @@ spec:
   nodename: anymaster
   desc: clear Kubernetes resource
   steps:
-    - name: clear evicted pod
-      content: sudo kubectl get pods --all-namespaces -o wide | grep Evicted | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
+    - name: clear Evicted pod
+      content: kubectl get pods --all-namespaces -o wide | grep Evicted | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
       allowfailure: "true"
-    - name: clear error pod
-      content: sudo kubectl get pods --all-namespaces -o wide | grep Error | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
+    - name: clear Error pod
+      content: kubectl get pods --all-namespaces -o wide | grep Error | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
       allowfailure: "true"
-    - name: clear completed pod
-      content: sudo kubectl get pods --all-namespaces -o wide | grep Completed | awk '{print $1,$2}' | sudo xargs -L1 kubectl delete pod -n
+    - name: clear Completed pod
+      content: kubectl get pods --all-namespaces -o wide | grep Completed | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear ErrImagePull pod
+      content: kubectl get pods --all-namespaces -o wide | grep ErrImagePull | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear ImagePullBackOff pod
+      content: kubectl get pods --all-namespaces -o wide | grep ImagePullBackOff | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear CrashLoopBackOff pod
+      content: kubectl get pods --all-namespaces -o wide | grep CrashLoopBackOff | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear Terminating pod
+      content: kubectl get pods --all-namespaces -o wide | grep Terminating | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
