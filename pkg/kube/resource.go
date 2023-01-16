@@ -136,13 +136,20 @@ func GetPodsContainerRecommandResource(client *kubernetes.Clientset, namespace s
 		return
 	}
 	// get and set Request\Limit for mem
-	memReqQueryResult, err := PromQueryRangeMatrix(serverUrl, fmt.Sprintf(PromQLPodMemUsageReqMB, namespace, strings.Join(podList, "|")))
+	memReqQueryResult, err := PromQueryRangeMatrix(serverUrl, fmt.Sprintf(PromQLPodMemUsageReqMB,
+		namespace, strings.Join(podList, "|")))
+	if err != nil {
+		return
+	}
 	memReqContainersValue := GetMatrixContainerValue(memReqQueryResult)
 	memReq := int64(memReqContainersValue[containerName])
 	memReq = NotLess(memReq, 50)
 	println("memReq:", memReq)
 
 	cpuReqQueryResult, err := PromQueryRangeMatrix(serverUrl, fmt.Sprintf(PromQLPodCpuUsageReqM, namespace, strings.Join(podList, "|")))
+	if err != nil {
+		return
+	}
 	cpuReqContainersValue := GetMatrixContainerValue(cpuReqQueryResult)
 	cpuReq := int64(cpuReqContainersValue[containerName])
 	cpuReq = NotLess(cpuReq, 50)
@@ -159,12 +166,18 @@ func GetPodsContainerRecommandResource(client *kubernetes.Clientset, namespace s
 
 	// get and set Request\Limit for cpu
 	memLimitQueryResult, err := PromQueryRangeMatrix(serverUrl, fmt.Sprintf(PromQLPodMemUsageLimitMB, namespace, strings.Join(podList, "|")))
+	if err != nil {
+		return
+	}
 	memLimitContainersValue := GetMatrixContainerValue(memLimitQueryResult)
 	memLimit := int64(memLimitContainersValue[containerName])
 	memLimit = NotLess(memLimit, 100)
 	println("memLimit:", memLimit)
 
 	cpuLimitQueryResult, err := PromQueryRangeMatrix(serverUrl, fmt.Sprintf(PromQLPodCpuUsageLimitM, namespace, strings.Join(podList, "|")))
+	if err != nil {
+		return
+	}
 	cpuLimitContainersValue := GetMatrixContainerValue(cpuLimitQueryResult)
 	cpuLimit := int64(cpuLimitContainersValue[containerName])
 	cpuLimit = NotLess(cpuLimit, 100)

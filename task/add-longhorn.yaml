@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: add-longhorn
+  namespace: default
+spec:
+  desc: add longhorn
+  variables:
+    action: apply
+    version: 1.4.0
+  steps:
+    - name: ${action} longhorn
+      content: kubectl ${action} -f https://raw.githubusercontent.com/longhorn/longhorn/v${version}/deploy/longhorn.yaml
