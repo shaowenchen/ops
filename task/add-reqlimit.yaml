@@ -7,7 +7,7 @@ spec:
   desc: add request and limit, e.g. Deployment\StatefulSet\DaemonSet
   variables:
     namespace: default
-    name:
+    name: ""
     kind: Deployment
   steps:
     - name: add request limit
