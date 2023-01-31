@@ -25,3 +25,5 @@ spec:
       content: docker network prune -f
     - name: Clear volume
       content: docker volume prune -f
+    - name: Clear Build Cache
+      content: DOCKER_CLI_EXPERIMENTAL=enabled docker buildx prune --filter "until=72h" -f
