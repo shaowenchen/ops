@@ -12,6 +12,7 @@ spec:
   steps:
     - name: Clear container exit more than 30m
       content: docker container prune -f --filter "until=$(date +'%Y-%m-%dT%H:%M:%S' --date='-30 minutes')"
+      allowfailure: "true"
     - name: Clear none image
       content: docker image prune -f
       allowfailure: "true"
@@ -27,3 +28,4 @@ spec:
       content: docker volume prune -f
     - name: Clear Build Cache
       content: DOCKER_CLI_EXPERIMENTAL=enabled docker buildx prune --filter "until=72h" -f
+      allowfailure: "true"
