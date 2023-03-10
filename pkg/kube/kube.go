@@ -70,7 +70,7 @@ func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kube
 }
 
 func GetNodes(logger *log.Logger, client *kubernetes.Clientset, kubeOpt option.KubeOption) (nodeList []v1.Node, err error) {
-	nodes, err := utils.GetAllNodesByClient(client)
+	nodes, err := utils.GetAllReadyNodesByClient(client)
 	if err != nil {
 		logger.Error.Println(err)
 		return

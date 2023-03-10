@@ -90,6 +90,15 @@ func GetInterlIByNode(node corev1.Node) (ip string) {
 	return
 }
 
+func IsNodeReady(node *corev1.Node) bool {
+	for _, c := range node.Status.Conditions {
+		if c.Type == corev1.NodeReady {
+			return c.Status == corev1.ConditionTrue
+		}
+	}
+	return false
+}
+
 func IsStopedPod(pod *corev1.Pod) bool {
 	status := pod.Status.Phase
 	if status == corev1.PodFailed || status == corev1.PodSucceeded {
@@ -131,6 +140,19 @@ func GetOrCreateNamespacedName(client *kubernetes.Clientset, namespace, name str
 
 func GetAllNodesByClient(client *kubernetes.Clientset) (nodes *corev1.NodeList, err error) {
 	return client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+}
+
+func GetAllReadyNodesByClient(client *kubernetes.Clientset) (nodes *corev1.NodeList, err error) {
+	nodes, err = GetAllNodesByClient(client)
+	if err != nil {
+		return
+	}
+	for i, node := range nodes.Items {
+		if !IsNodeReady(&node) {
+			nodes.Items = append(nodes.Items[:i], nodes.Items[i+1:]...)
+		}
+	}
+	return
 }
 
 func GetNodeByClient(client *kubernetes.Clientset, nodeName string) (node *corev1.Node, err error) {
