@@ -11,4 +11,4 @@ spec:
     version: 0.5.0
   steps:
     - name: ${action} MetricsServer
-      content: kubectl ${action} -f ${proxy}https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/kubernetes/metrics-server-${version}.yaml
+      content: kubectl ${action} -f ${proxy}https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/observation/metrics-server-${version}.yaml
