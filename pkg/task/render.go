@@ -75,21 +75,17 @@ func RenderStepVariables(step *opsv1.Step, vars map[string]string) *opsv1.Step {
 }
 
 func RenderVarsVariables(vars map[string]string) map[string]string {
-	for valueKey, value := range vars {
-		for key, keyValue := range vars {
-			if strings.Contains(value, key) {
-				vars[valueKey] = strings.ReplaceAll(value, fmt.Sprintf("${%s}", key), keyValue)
-			}
-		}
+	for key := range vars {
+		vars[key] = RenderString(vars[key], vars)
 	}
 	return vars
 }
 
-func RenderWhen(when string, vars map[string]string) string {
+func RenderString(target string, vars map[string]string) string {
 	for key, value := range vars {
-		if strings.Contains(when, key) {
-			when = strings.ReplaceAll(when, fmt.Sprintf("${%s}", key), value)
+		if strings.Contains(target, fmt.Sprintf("${%s}", key)) {
+			target = strings.ReplaceAll(target, fmt.Sprintf("${%s}", key), value)
 		}
 	}
-	return when
+	return target
 }

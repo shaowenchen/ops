@@ -1,0 +1,21 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: alert-http-status
+  namespace: default
+spec:
+  desc: alert
+  crontab: "1/* * * * *"
+  variables:
+    url: https://www.chenshaowen.com/
+    status: "300"
+    message: "${url} http status is not ${status}"
+  steps:
+    - name: get status
+      content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}
+    - name: echo result
+      content: echo ${result}
+    - name: notifaction
+      when: ${result} != ${status}
+      content: |
+        curl -X POST  'https://xz.wps.cn/api/v1/webhook/send?key='  -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${message}" } }'

@@ -21,7 +21,7 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
-		s.When = RenderWhen(s.When, allVars)
+		s.When = RenderString(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
 			logger.Error.Println(err)
@@ -40,7 +40,7 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 		stepFunc := GetHostStepFunc(s)
 		stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
 		t.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, opsv1.GetRunStatus(stepErr))
-		logger.Info.Println(stepOutput)
+		allVars["result"] = stepOutput
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
 			logger.Error.Println(err)
@@ -62,7 +62,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
-		s.When = RenderWhen(s.When, allVars)
+		s.When = RenderString(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
 			logger.Error.Println(err)
