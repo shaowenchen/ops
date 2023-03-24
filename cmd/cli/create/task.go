@@ -16,7 +16,7 @@ var taskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "create task resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewCliLogger(true, true)
+		logger, err := log.NewCliLogger(true, true, log.LevelInfo)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return

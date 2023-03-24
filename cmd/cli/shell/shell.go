@@ -17,12 +17,17 @@ var kubeOpt option.KubeOption
 var hostOpt option.HostOption
 
 var inventory string
+var shellDebug bool
 
 var ShellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "run shell on hosts",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewCliLogger(true, true)
+		logLevel := log.LevelInfo
+		if shellDebug {
+			logLevel = log.LevelDebug
+		}
+		logger, err := log.NewCliLogger(true, true, logLevel)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return
@@ -74,6 +79,7 @@ func HostShell(logger *log.Logger, shellOpt option.ShellOption, hostOpt option.H
 
 func init() {
 	ShellCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
+	ShellCmd.Flags().BoolVarP(&shellDebug, "debug", "", false, "")
 
 	ShellCmd.Flags().BoolVarP(&shellOpt.Sudo, "sudo", "", false, "")
 	ShellCmd.Flags().StringVarP(&shellOpt.Content, "content", "", "", "")
@@ -82,7 +88,6 @@ func init() {
 	ShellCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
-	ShellCmd.Flags().BoolVarP(&kubeOpt.Debug, "debug", "", false, "")
 
 	ShellCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	ShellCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")

@@ -25,7 +25,7 @@ var FileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "transfer between local and remote file",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewCliLogger(true, true)
+		logger, err := log.NewCliLogger(true, true, log.LevelInfo)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return
@@ -98,7 +98,6 @@ func init() {
 	FileCmd.Flags().IntVar(&hostOpt.Port, "port", 22, "")
 
 	FileCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
-	FileCmd.Flags().BoolVarP(&kubeOpt.Debug, "debug", "", false, "")
 
 	FileCmd.Flags().StringVarP(&s3Opt.Region, "region", "", "ap-southeast-3", "")
 	FileCmd.Flags().StringVarP(&s3Opt.Endpoint, "endpoint", "", "obs.ap-southeast-3.myhuaweicloud.com", "")

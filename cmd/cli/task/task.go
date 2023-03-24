@@ -19,13 +19,19 @@ var taskOpt option.TaskOption
 var hostOpt option.HostOption
 var kubeOpt option.KubeOption
 var inventory string
+var taskDebug bool
 
 var TaskCmd = &cobra.Command{
 	Use:                "task",
 	Short:              "command about task",
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewCliLogger(true, true)
+		logLevel := log.LevelDebug
+		if taskDebug {
+			logLevel = log.LevelDebug
+		}
+		print(logLevel)
+		logger, err := log.NewCliLogger(true, true, logLevel)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return
@@ -118,9 +124,7 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				// --username root
 				fieldValue = args[i+1]
 			}
-			if fieldName == "debug" {
-				taskOption.Debug = fieldValue == "true"
-			} else if fieldName == "sudo" {
+			if fieldName == "sudo" {
 				taskOption.Sudo = fieldValue == "true"
 			} else if fieldName == "filepath" || fieldName == "f" {
 				taskOption.FilePath = fieldValue
@@ -159,14 +163,15 @@ func getArgName(arg string) string {
 
 func init() {
 	TaskCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
+	TaskCmd.Flags().BoolVarP(&taskDebug, "debug", "", false, "")
 
-	TaskCmd.Flags().BoolVarP(&taskOpt.Debug, "debug", "", false, "")
 	TaskCmd.Flags().StringVarP(&taskOpt.FilePath, "filepath", "", "", "")
 	TaskCmd.MarkFlagRequired("filepath")
 
 	TaskCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "runtime image")
+
 	TaskCmd.Flags().IntVarP(&hostOpt.Port, "port", "", 22, "")
 	TaskCmd.Flags().StringVarP(&hostOpt.Username, "username", "", "", "")
 	TaskCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")

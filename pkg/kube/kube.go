@@ -27,7 +27,7 @@ func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shell
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), kubeOpt.Debug, client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
 	logger.Info.Println(stdout)
 	return
 }
@@ -41,7 +41,7 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), kubeOption.Debug, client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
 	logger.Info.Println(stdout)
 	return
 }

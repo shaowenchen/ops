@@ -18,7 +18,6 @@ type HostOption struct {
 type KubeOption struct {
 	NodeName     string
 	RuntimeImage string
-	Debug        bool
 	All          bool
 }
 
@@ -31,7 +30,6 @@ type S3FileOption struct {
 }
 
 type TaskOption struct {
-	Debug     bool
 	Sudo      bool
 	FilePath  string
 	Variables map[string]string

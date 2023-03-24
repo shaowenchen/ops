@@ -28,19 +28,18 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 			return err
 		}
 		if !result {
-			logger.Error.Println("Skip!")
+			logger.Info.Println("Skip!")
 			continue
 		}
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		if taskOpt.Debug && len(s.Content) > 0 {
-			logger.Error.Println(s.Content)
-		}
+		logger.Debug.Println("Content: ", s.Content)
 		stepFunc := GetHostStepFunc(s)
 		stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
 		t.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, opsv1.GetRunStatus(stepErr))
 		allVars["result"] = stepOutput
+		logger.Info.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
 			logger.Error.Println(err)
@@ -69,19 +68,18 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 			return err
 		}
 		if !result {
-			logger.Error.Println("Skip!")
+			logger.Info.Println("Skip!")
 			continue
 		}
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		if taskOpt.Debug && len(s.Content) > 0 {
-			logger.Info.Println(s.Content)
-		}
+		logger.Debug.Println("Content: ", s.Content)
 		stepFunc := GetKubeStepFunc(s)
 		stepOutput, stepErr := stepFunc(logger, t, kc, node, s, taskOpt, kubeOpt)
 		t.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, opsv1.GetRunStatus(stepErr))
 		allVars["result"] = stepOutput
+		logger.Info.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
 			logger.Error.Println(err)

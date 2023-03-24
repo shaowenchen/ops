@@ -135,7 +135,6 @@ func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, 
 		return
 	}
 	stdout, err = GetPodLog(logger, context.TODO(), false, kc.Client, pod)
-	logger.Info.Println(stdout)
 	return
 }
 

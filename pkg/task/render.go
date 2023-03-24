@@ -17,7 +17,7 @@ func GetRealVariables(t *opsv1.Task, taskOpt option.TaskOption) (map[string]stri
 	globalVariables := make(map[string]string)
 	// cli > env > yaml
 	utils.MergeMap(globalVariables, t.Spec.Variables)
-	// utils.MergeMap(globalVariables, utils.GetAllOsEnv())
+	utils.MergeMap(globalVariables, utils.GetAllOsEnv())
 	utils.MergeMap(globalVariables, taskOpt.Variables)
 
 	globalVariables = RenderVarsVariables(globalVariables)
