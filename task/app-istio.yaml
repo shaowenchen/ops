@@ -1,0 +1,24 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: add-istio
+  namespace: default
+spec:
+  desc: Add istio
+  variables:
+    version: "1.13.7"
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    action: apply
+  steps:
+    - name: Download Istio
+      content: curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${version} TARGET_ARCH=x86_64 sh -
+    - name: ${action} Istio
+      content: ./istio-${version}/bin/istioctl --kubeconfig ${kubeconfig} install -y
+    - name: ${action} default-telemetry
+      content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/default-telemetry.yaml
+    - name: ${action} disabled-mtls
+      content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/disabled-mtls.yaml
+    - name: ${action} preserve-request-header-case
+      content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/preserve-request-header-case.yaml
+    - name: ${action} ingressgateway-settings
+      content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/ingressgateway-settings.yaml

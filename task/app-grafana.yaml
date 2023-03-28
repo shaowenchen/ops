@@ -1,0 +1,18 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: add-grafana
+  namespace: default
+spec:
+  desc: install grafana
+  variables:
+    namespace: monitor
+    action: install
+    kubeconfig: "/etc/kubernetes/admin.conf"
+  steps:
+    - name: add helm repo
+      content: helm --kubeconfig ${kubeconfig} repo add grafana https://grafana.github.io/helm-charts
+    - name: update helm repo
+      content: helm --kubeconfig ${kubeconfig} repo update
+    - name: ${action} grafana
+      content: helm --kubeconfig ${kubeconfig} ${action} grafana -n ${namespace} grafana/grafana --create-namespace

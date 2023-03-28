@@ -1,16 +1,16 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: get-podimage
+  name: list-podimage
   namespace: default
 spec:
-  desc: get pod image
+  desc: list pod image
   variables:
     namespace: default
   steps:
-    - name: get pod image
+    - name: list pod image
       when: ${namespace} != "all"
       content: kubectl get pod -o custom-columns='POD-NAME:.metadata.name,NAMESPACE:.metadata.namespace,CONTAINER-IMAGES:.spec.containers[*].image' -n ${namespace}
-    - name: get all pod image
+    - name: list all pod image
       when: ${namespace} == "all"
       content: kubectl get pod -o custom-columns='POD-NAME:.metadata.name,NAMESPACE:.metadata.namespace,CONTAINER-IMAGES:.spec.containers[*].image' -A

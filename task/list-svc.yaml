@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: get-svc
+  name: list-svc
   namespace: default
 spec:
-  desc: get svc
+  desc: list svc
   variables:
     namespace: default
   steps:

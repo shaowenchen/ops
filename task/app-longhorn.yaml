@@ -8,6 +8,7 @@ spec:
   variables:
     action: apply
     version: 1.4.0
+    kubeconfig: "/etc/kubernetes/admin.conf"
   steps:
     - name: ${action} longhorn
-      content: kubectl ${action} -f https://raw.githubusercontent.com/longhorn/longhorn/v${version}/deploy/longhorn.yaml
+      content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/longhorn/longhorn/v${version}/deploy/longhorn.yaml
