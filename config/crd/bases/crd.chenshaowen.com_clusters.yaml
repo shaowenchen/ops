@@ -26,16 +26,16 @@ spec:
       name: Node
       type: string
     - jsonPath: .status.runningPod
-      name: RunningPod
+      name: Running
       type: string
     - jsonPath: .status.pod
-      name: Pod
+      name: TotalPod
       type: string
-    - jsonPath: .status.heartTime
-      name: HeartTime
-      type: date
+    - jsonPath: .status.certNotAfterDays
+      name: CertDays
+      type: string
     - jsonPath: .status.heartstatus
-      name: HeartStatus
+      name: Status
       type: string
     name: v1
     schema:
@@ -66,6 +66,8 @@ spec:
           status:
             description: ClusterStatus defines the observed state of Cluster
             properties:
+              certNotAfterDays:
+                type: integer
               heartTime:
                 format: date-time
                 type: string

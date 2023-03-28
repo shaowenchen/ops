@@ -83,14 +83,17 @@ func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
 	err = utils.MergeError(err, err1)
 	allRunningPods, err1 := kc.GetAllRunningPods()
 	err = utils.MergeError(err, err1)
+	days, err1 := kc.GetExpiredDays()
+	err = utils.MergeError(err, err1)
 
 	status = &opsv1.ClusterStatus{
-		Version:     version,
-		Node:        len(nodes.Items),
-		Pod:         len(allPods.Items),
-		RunningPod:  len(allRunningPods.Items),
-		HeartTime:   &metav1.Time{Time: time.Now()},
-		HeartStatus: opsv1.StatusSuccessed,
+		Version:          version,
+		Node:             len(nodes.Items),
+		Pod:              len(allPods.Items),
+		RunningPod:       len(allRunningPods.Items),
+		HeartTime:        &metav1.Time{Time: time.Now()},
+		HeartStatus:      opsv1.StatusSuccessed,
+		CertNotAfterDays: days,
 	}
 	return
 }
@@ -122,6 +125,10 @@ func (kc *KubeConnection) GetAllRunningPods() (allPod *corev1.PodList, err error
 	return kc.Client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
 		FieldSelector: "status.phase=Running",
 	})
+}
+
+func (kc *KubeConnection) GetExpiredDays() (days int, err error) {
+	return utils.GetCertNotAfterDays(kc.RestConfig)
 }
 
 func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt opsopt.ShellOption, kubeOpt opsopt.KubeOption) (stdout string, err error) {

@@ -35,12 +35,13 @@ type ClusterSpec struct {
 type ClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Version     string       `json:"version,omitempty"`
-	Node        int          `json:"node,omitempty"`
-	Pod         int          `json:"pod,omitempty"`
-	RunningPod  int          `json:"runningPod,omitempty"`
-	HeartTime   *metav1.Time `json:"heartTime,omitempty"`
-	HeartStatus string       `json:"heartstatus,omitempty"`
+	Version          string       `json:"version,omitempty"`
+	Node             int          `json:"node,omitempty"`
+	Pod              int          `json:"pod,omitempty"`
+	RunningPod       int          `json:"runningPod,omitempty"`
+	HeartTime        *metav1.Time `json:"heartTime,omitempty"`
+	HeartStatus      string       `json:"heartstatus,omitempty"`
+	CertNotAfterDays int          `json:"certNotAfterDays,omitempty"`
 }
 
 const StatusSuccessed = "successed"
@@ -54,10 +55,10 @@ const StatusInit = "init"
 // +kubebuilder:printcolumn:name="Server",type=string,JSONPath=`.spec.server`
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.status.version`
 // +kubebuilder:printcolumn:name="Node",type=string,JSONPath=`.status.node`
-// +kubebuilder:printcolumn:name="RunningPod",type=string,JSONPath=`.status.runningPod`
-// +kubebuilder:printcolumn:name="Pod",type=string,JSONPath=`.status.pod`
-// +kubebuilder:printcolumn:name="HeartTime",type=date,JSONPath=`.status.heartTime`
-// +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartstatus`
+// +kubebuilder:printcolumn:name="Running",type=string,JSONPath=`.status.runningPod`
+// +kubebuilder:printcolumn:name="TotalPod",type=string,JSONPath=`.status.pod`
+// +kubebuilder:printcolumn:name="CertDays",type=string,JSONPath=`.status.certNotAfterDays`
+// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.heartstatus`
 type Cluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

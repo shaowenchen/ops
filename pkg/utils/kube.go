@@ -3,9 +3,12 @@ package utils
 import (
 	"bytes"
 	"context"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/shaowenchen/ops/pkg/constants"
 	corev1 "k8s.io/api/core/v1"
@@ -202,4 +205,18 @@ func GetNodeInternalIp(node *corev1.Node) (ip string) {
 		}
 	}
 	return ip
+}
+
+func GetCertNotAfterDays(c *rest.Config) (days int, err error) {
+	certDerBlock, _ := pem.Decode(c.CertData)
+	if certDerBlock == nil {
+		err = errors.New("failed to decode PEM block containing the client certificate")
+		return
+	}
+	x509Cert, err := x509.ParseCertificate(certDerBlock.Bytes)
+	if err != nil {
+		return
+	}
+	days = int(x509Cert.NotAfter.Sub(time.Now()).Hours() / 24)
+	return
 }
