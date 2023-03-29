@@ -15,3 +15,5 @@ spec:
       content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/registry.k8s.io\/kube-state-metrics/hubimage/g' | kubectl apply -f -
     - name: replace quay.io/prometheus
       content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/quay.io\/prometheus/hubimage/g' | kubectl apply -f -
+    - name: replace k8s.gcr.io/autoscaling
+      content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/k8s.gcr.io\/autoscaling/hubimage/g' | kubectl apply -f -
