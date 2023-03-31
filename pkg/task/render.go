@@ -70,6 +70,8 @@ func RenderStepVariables(step *opsv1.Step, vars map[string]string) *opsv1.Step {
 		step.Kubernetes.Kind = strings.ReplaceAll(step.Kubernetes.Kind, fmt.Sprintf("${%s}", key), value)
 		step.Kubernetes.Namespace = strings.ReplaceAll(step.Kubernetes.Namespace, fmt.Sprintf("${%s}", key), value)
 		step.Kubernetes.Name = strings.ReplaceAll(step.Kubernetes.Name, fmt.Sprintf("${%s}", key), value)
+		step.Prometheus.Query = strings.ReplaceAll(step.Prometheus.Query, fmt.Sprintf("${%s}", key), value)
+		step.Prometheus.Endpoint = strings.ReplaceAll(step.Prometheus.Endpoint, fmt.Sprintf("${%s}", key), value)
 	}
 	return step
 }

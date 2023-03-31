@@ -1,0 +1,24 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: alert-promql
+  namespace: default
+spec:
+  nameref: prod
+  typeref: cluster
+  crontab: "1/* * * * *"
+  desc: alert by promql
+  variables:
+    query: "abs(max(tekton_pipelines_controller_running_pipelineruns_count) - count(count by (pod, label_tekton_dev_pipeline_run)(kube_pod_labels{label_tekton_dev_task_run!=''}) and on (pod) kube_pod_container_status_running{} > 0) )"
+    endpoint: "http://prometheus-server.monitor.svc.cluster.local:9090"
+    expect: "2"
+    message: "Pending PipelineRun count is more than ${expect}"
+  steps:
+    - name: get status
+      prometheus:
+        endpoint: ${endpoint}
+        query: ${query}
+    - name: notifaction
+      when: ${result} > ${expect}
+      content: |
+        curl -X POST  'https://xz.wps.cn/api/v1/webhook/send?key='  -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${message}" } }'

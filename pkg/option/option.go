@@ -76,6 +76,11 @@ type KubernetesOption struct {
 	}
 }
 
+type PrometheusOption struct {
+	Endpoint string
+	Query    string
+}
+
 type ClusterOption struct {
 	Namespace  string
 	Name       string

@@ -93,7 +93,9 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 }
 
 func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (string, error) {
-	if len(step.Content) > 0 {
+	if len(step.Prometheus.Endpoint) > 0 {
+		return runStepPrometheusOnHost
+	} else if len(step.Content) > 0 {
 		return runStepShellOnHost
 	}
 	return runStepCopyOnHost
@@ -118,6 +120,14 @@ func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task,
 	} else {
 		return runStepCopyOnKube
 	}
+}
+
+func runStepPrometheusOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (stdout string, err error) {
+	resultValue, err := kube.PromQuery(step.Prometheus.Endpoint, step.Prometheus.Query)
+	if err != nil {
+		return err.Error(), err
+	}
+	return resultValue.Value.String(), nil
 }
 
 func runStepKubernetesOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {

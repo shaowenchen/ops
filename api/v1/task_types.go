@@ -54,6 +54,7 @@ type Step struct {
 	Direction    string     `json:"direction,omitempty"`
 	AllowFailure string     `json:"allowfailure,omitempty"`
 	Kubernetes   Kubernetes `json:"kubernetes,omitempty"`
+	Prometheus   Prometheus `json:"prometheus,omitempty"`
 }
 
 type Kubernetes struct {
@@ -61,6 +62,11 @@ type Kubernetes struct {
 	Kind      string `json:"kind,omitempty"`
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
+}
+
+type Prometheus struct {
+	Endpoint string `json:"endpoint,omitempty"`
+	Query    string `json:"query,omitempty"`
 }
 
 // TaskStatus defines the observed state of Task
