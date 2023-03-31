@@ -159,7 +159,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 	r.crontabRunningMap[t.GetUniqueKey()] = &sync.Mutex{}
 	t.Status.NewTaskRun()
 	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
-	if t.GetSpec().TypeRef == "host" {
+	if t.GetSpec().TypeRef == "host" || t.GetSpec().TypeRef == "" {
 		hostCmd := func() {
 			h := &opsv1.Host{}
 			err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, h)
@@ -208,6 +208,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 }
 
 func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, h *opsv1.Host) (err error) {
+	logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
 	lock := r.crontabRunningMap[t.GetUniqueKey()]
 	getLock := lock.TryLock()
 	if !getLock {
@@ -235,6 +236,7 @@ func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Contex
 }
 
 func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, kubeOpt option.KubeOption) (err error) {
+	logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
 	lock := r.crontabRunningMap[t.GetUniqueKey()]
 	getLock := lock.TryLock()
 	if !getLock {

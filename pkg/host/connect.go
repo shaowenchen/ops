@@ -33,8 +33,11 @@ type HostConnection struct {
 func NewHostConnBase64(h *opsv1.Host) (c *HostConnection, err error) {
 	c = &HostConnection{}
 	c.Host = h
+	if h.Spec.Address == "" {
+		h.Spec.Address = constants.LocalHostIP
+	}
 	// local host
-	if h.Spec.Address == constants.LocalHostIP || h.Spec.Address == "" {
+	if h.Spec.Address == constants.LocalHostIP {
 		return c, nil
 	}
 	// remote host

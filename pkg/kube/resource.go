@@ -256,7 +256,12 @@ func PromQuery(serverUrl string, promQl string) (result *prommodel.Sample, err e
 		// handle scalar stuff
 	case retValue.Type() == prommodel.ValVector:
 		// handle vector stuff
-		result = retValue.(prommodel.Vector)[0]
+		results := retValue.(prommodel.Vector)
+		if len(results) == 0 {
+			err = errors.New("no result")
+			return
+		}
+		result = results[0]
 	case retValue.Type() == prommodel.ValMatrix:
 		// handle matrix stuff
 	case retValue.Type() == prommodel.ValString:
