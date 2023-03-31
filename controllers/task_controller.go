@@ -163,7 +163,8 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 		hostCmd := func() {
 			h := &opsv1.Host{}
 			err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, h)
-			if err != nil {
+			// if hostname is empty, use localhost
+			if len(t.GetSpec().NameRef) > 0 && err != nil {
 				fmt.Println(err.Error())
 				return
 			}
