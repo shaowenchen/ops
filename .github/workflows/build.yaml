@@ -14,6 +14,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push Controller
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: shaowenchen/ops-controller-manager:latest
+          file: Dockerfile
       - name: Build and push Cli
         uses: docker/build-push-action@v3
         with:
@@ -26,10 +32,3 @@ jobs:
           push: true
           tags: shaowenchen/ops-server:latest
           file: Dockerfile-Server
-      - name: Build and push Controller
-        uses: docker/build-push-action@v3
-        with:
-          push: true
-          tags: shaowenchen/ops-controller-manager:latest
-          file: Dockerfile
-
