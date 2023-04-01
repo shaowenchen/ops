@@ -27,7 +27,7 @@ var ShellCmd = &cobra.Command{
 		if shellDebug {
 			logLevel = log.LevelDebug
 		}
-		logger, err := log.NewCliLogger(true, true, logLevel)
+		logger, err := log.NewStdFileLogger(false, logLevel)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return

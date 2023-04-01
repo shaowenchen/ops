@@ -48,7 +48,7 @@ func CreateTask(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 	}
-	logger, err := log.NewServerLogger(true, true, log.LevelInfo)
+	logger, err := log.NewStdFileLogger(true, log.LevelInfo)
 	if err != nil {
 		return
 	}

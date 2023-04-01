@@ -25,7 +25,7 @@ var FileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "transfer between local and remote file",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewCliLogger(true, true, log.LevelInfo)
+		logger, err := log.NewStdFileLogger(false, log.LevelInfo)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return

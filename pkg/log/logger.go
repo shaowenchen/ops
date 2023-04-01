@@ -2,11 +2,12 @@ package log
 
 import (
 	"bytes"
-	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/utils"
 	"io"
 	"log"
 	"os"
+
+	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/utils"
 )
 
 const (
@@ -19,9 +20,8 @@ const (
 )
 
 type Logger struct {
-	PrintLog   bool
 	FileLog    bool
-	BufferLog  bool
+	StdLog     bool
 	Trace      *log.Logger
 	Debug      *log.Logger
 	Info       *log.Logger
@@ -32,28 +32,35 @@ type Logger struct {
 	Level      int
 }
 
-func NewCliLogger(printLog bool, fileLog bool, level int) (*Logger, error) {
-	return NewLogger(true, true, false, level)
+func NewStdFileLogger(withTime bool, level int) (*Logger, error) {
+	return NewLogger(true, true, withTime, level)
 }
 
-func NewServerLogger(printLog bool, bufferLog bool, level int) (*Logger, error) {
-	return NewLogger(true, false, true, level)
+func NewStdLogger(withTime bool, level int) (*Logger, error) {
+	return NewLogger(true, false, withTime, level)
 }
 
-func NewLogger(printLog bool, fileLog bool, bufferLog bool, level int) (*Logger, error) {
-	l := &Logger{
-		PrintLog:  printLog,
-		FileLog:   fileLog,
-		BufferLog: bufferLog,
-		Level:     level,
+func NewFileLogger(withTime bool, level int) (*Logger, error) {
+	return NewLogger(false, true, withTime, level)
+}
+
+func NewLogger(stdLog, fileLog, withTime bool, level int) (*Logger, error) {
+	var flag int
+	if withTime {
+		flag = log.Ltime | log.Ldate
 	}
-	err := l.init(level)
+	l := &Logger{
+		StdLog:  stdLog,
+		FileLog: fileLog,
+		Level:   level,
+	}
+	err := l.init(flag, level)
 	return l, err
 }
 
-func (l *Logger) init(level int) (err error) {
+func (l *Logger) init(flag, level int) (err error) {
 	multiWriter := io.MultiWriter()
-	if l.PrintLog {
+	if l.StdLog {
 		multiWriter = io.MultiWriter(multiWriter, os.Stdout)
 	}
 	if l.FileLog {
@@ -67,40 +74,39 @@ func (l *Logger) init(level int) (err error) {
 		}
 		multiWriter = io.MultiWriter(multiWriter, file)
 	}
-	if l.BufferLog {
-		l.BufferData = new(bytes.Buffer)
-		multiWriter = io.MultiWriter(multiWriter, l.BufferData)
-	}
+
+	l.BufferData = new(bytes.Buffer)
+	multiWriter = io.MultiWriter(multiWriter, l.BufferData)
 
 	if LevelFatal <= level {
-		l.Fatal = log.New(multiWriter, "[FATAL]", 0)
+		l.Fatal = log.New(multiWriter, "[FATAL]", flag)
 	} else {
-		l.Fatal = log.New(io.Discard, "[FATAL]", 0)
+		l.Fatal = log.New(io.Discard, "[FATAL]", flag)
 	}
 	if LevelError <= level {
-		l.Error = log.New(multiWriter, "[ERROR]", 0)
+		l.Error = log.New(multiWriter, "[ERROR]", flag)
 	} else {
-		l.Error = log.New(io.Discard, "[ERROR]", 0)
+		l.Error = log.New(io.Discard, "[ERROR]", flag)
 	}
 	if LevelWarning <= level {
-		l.Warning = log.New(multiWriter, "[WARNING]", 0)
+		l.Warning = log.New(multiWriter, "[WARNING]", flag)
 	} else {
-		l.Warning = log.New(io.Discard, "[WARNING]", 0)
+		l.Warning = log.New(io.Discard, "[WARNING]", flag)
 	}
 	if LevelInfo <= level {
-		l.Info = log.New(multiWriter, "[INFO]", 0)
+		l.Info = log.New(multiWriter, "[INFO]", flag)
 	} else {
-		l.Info = log.New(io.Discard, "[INFO]", 0)
+		l.Info = log.New(io.Discard, "[INFO]", flag)
 	}
 	if LevelDebug <= level {
-		l.Debug = log.New(multiWriter, "[DEBUG]", 0)
+		l.Debug = log.New(multiWriter, "[DEBUG]", flag)
 	} else {
-		l.Debug = log.New(io.Discard, "[DEBUG]", 0)
+		l.Debug = log.New(io.Discard, "[DEBUG]", flag)
 	}
 	if LevelTrace <= level {
-		l.Trace = log.New(multiWriter, "[TRACE]", 0)
+		l.Trace = log.New(multiWriter, "[TRACE]", flag)
 	} else {
-		l.Trace = log.New(io.Discard, "[TRACE]", 0)
+		l.Trace = log.New(io.Discard, "[TRACE]", flag)
 	}
 	return
 }
