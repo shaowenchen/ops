@@ -67,7 +67,7 @@ type TaskReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	logger, err := opslog.NewStdLogger(true, opslog.LevelInfo)
+	logger, err := opslog.NewStdLogger(false, opslog.LevelInfo)
 	if err != nil {
 		fmt.Println(err)
 		return ctrl.Result{}, err
@@ -165,7 +165,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 	r.updateStatusMap[t.GetUniqueKey()] = &sync.Mutex{}
 	t.Status.NewTaskRun()
 	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
-	cliLogger, err := opslog.NewFileLogger(true, opslog.LevelDebug)
+	cliLogger, err := opslog.NewStdLogger(true, opslog.LevelInfo)
 	if err != nil {
 		fmt.Println(err)
 		return err

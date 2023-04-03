@@ -17,6 +17,7 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 	if err != nil {
 		return err
 	}
+	logger.Info.Println("Run Task: ", t.Name)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
