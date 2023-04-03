@@ -67,7 +67,7 @@ spec:
         #   type: RuntimeDefault
       containers:
       - command:
-        - /ops-controller-manager
+        - /app/ops-controller-manager
         args:
         - --leader-elect
         image: controller:latest

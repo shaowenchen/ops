@@ -50,6 +50,7 @@ type TaskReconciler struct {
 	crontabMap        map[string]cron.EntryID
 	crontabRunningMap map[string]*sync.Mutex
 	cron              *cron.Cron
+	updateStatusMap   map[string]*sync.Mutex
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=tasks,verbs=get;list;watch;create;update;patch;delete
@@ -82,6 +83,10 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if r.cron == nil {
 		r.cron = cron.New()
 		r.cron.Start()
+	}
+
+	if r.updateStatusMap == nil {
+		r.updateStatusMap = make(map[string]*sync.Mutex)
 	}
 
 	t := &opsv1.Task{}
@@ -157,9 +162,10 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
 	}
 	r.crontabRunningMap[t.GetUniqueKey()] = &sync.Mutex{}
+	r.updateStatusMap[t.GetUniqueKey()] = &sync.Mutex{}
 	t.Status.NewTaskRun()
 	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
-	cliLogger, err := opslog.NewFileLogger(true, opslog.LevelInfo)
+	cliLogger, err := opslog.NewFileLogger(true, opslog.LevelDebug)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -289,10 +295,13 @@ func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Contex
 }
 
 func (r *TaskReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, overrideStatus *opsv1.TaskStatus, status string) (err error) {
+	lock := r.updateStatusMap[t.GetUniqueKey()]
+	lock.Lock()
 	lastT := &opsv1.Task{}
 	err = r.Client.Get(ctx, types.NamespacedName{Name: t.Name, Namespace: t.Namespace}, lastT)
 	if err != nil {
 		logger.Error.Println(err, "failed to get last task")
+		lock.Unlock()
 		return
 	}
 	if overrideStatus != nil {
@@ -304,9 +313,11 @@ func (r *TaskReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 	if lastT.Status.RunStatus == opsv1.StatusRunning {
 		lastT.Status.StartTime = &metav1.Time{Time: time.Now()}
 	}
-	err = r.Client.Status().Update(ctx, lastT)
+	// err = r.Client.Status().Update(ctx, lastT)
+	err = r.Client.Update(ctx, lastT)
 	if err != nil {
-		logger.Error.Println(err, "update host status error")
+		logger.Error.Println(err, "update task status error")
 	}
+	lock.Unlock()
 	return
 }

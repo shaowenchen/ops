@@ -15,11 +15,14 @@ COPY . .
 # by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
 RUN GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o ops-controller-manager main.go
 
-FROM alpine:latest
-RUN apk add --update curl && rm -rf /var/cache/apk/*
-WORKDIR /
-RUN mkdir /.ops 
-COPY --from=builder /workspace/ops-controller-manager .
-RUN chown -R 65532:65532 /.ops
+FROM ubuntu:latest
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/cache/apt/* && \
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
+RUN mkdir /app && chown -R 65532:65532 /app
+COPY --from=builder /workspace/ops-controller-manager /app/
 USER 65532:65532
-ENTRYPOINT ["/ops-controller-manager"]
+ENV HOME=/app
+ENTRYPOINT ["/app/ops-controller-manager"]
