@@ -1,8 +1,6 @@
 package file
 
 import (
-	"fmt"
-
 	"errors"
 
 	"github.com/shaowenchen/ops/pkg/constants"
@@ -25,21 +23,17 @@ var FileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "transfer between local and remote file",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewStdFileLogger(false, log.LevelInfo)
-		if err != nil {
-			fmt.Printf(err.Error())
-			return
-		}
+		logger := log.BuilderStdFileLogger(log.LevelInfo, true, true)
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		fileOpt.Filling()
 		if fileOpt.StorageType == constants.RemoteStorageTypeS3 {
-			err = S3File(logger, fileOpt, s3Opt)
+			S3File(logger, fileOpt, s3Opt)
 		} else if fileOpt.StorageType == constants.RemoteStorageTypeImage {
-			err = KubeFile(logger, fileOpt, kubeOpt, inventory)
+			KubeFile(logger, fileOpt, kubeOpt, inventory)
 		} else if fileOpt.StorageType == constants.RemoteStorageTypeLocal {
-			err = HostFile(logger, fileOpt, hostOpt, inventory)
+			HostFile(logger, fileOpt, hostOpt, inventory)
 		}
 	},
 }

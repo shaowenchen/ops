@@ -54,14 +54,10 @@ type HostReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logger, err := opslog.NewStdLogger(false, opslog.LevelInfo)
-	if err != nil {
-		fmt.Printf(err.Error())
-		return ctrl.Result{}, err
-	}
+	logger := opslog.BuilderStdLogger(opslog.LevelInfo, false, true)
 
 	h := &opsv1.Host{}
-	err = r.Get(ctx, req.NamespacedName, h)
+	err := r.Get(ctx, req.NamespacedName, h)
 
 	//if delete, stop ticker
 	if apierrors.IsNotFound(err) {

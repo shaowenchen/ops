@@ -2,118 +2,123 @@ package log
 
 import (
 	"bytes"
+	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"io"
 	"log"
 	"os"
-
-	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/utils"
 )
+
+var Std *os.File = os.Stdout
+var File *os.File = nil
 
 const (
-	LevelFatal = iota
-	LevelError
-	LevelWarning
+	LevelError = iota
 	LevelInfo
 	LevelDebug
-	LevelTrace
 )
 
-type Logger struct {
-	FileLog    bool
-	StdLog     bool
-	Plain      bool
-	Trace      *log.Logger
-	Debug      *log.Logger
-	Info       *log.Logger
-	Warning    *log.Logger
-	Error      *log.Logger
-	Fatal      *log.Logger
-	BufferData *bytes.Buffer
-	Level      int
+func init() {
+	// init file logger
+	err := utils.CreateDir(constants.GetOpsLogsDir())
+	if err != nil {
+		panic(err)
+	}
+	File, err = os.OpenFile(constants.GetOpsLogFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func NewStdFileLogger(plain bool, level int) (*Logger, error) {
-	return NewLogger(true, true, plain, level)
-}
-
-func NewStdLogger(plain bool, level int) (*Logger, error) {
-	return NewLogger(true, false, plain, level)
-}
-
-func NewFileLogger(plain bool, level int) (*Logger, error) {
-	return NewLogger(false, true, plain, level)
-}
-
-func NewLogger(stdLog, fileLog, plain bool, level int) (*Logger, error) {
+func BuilderStdLogger(level int, plain bool, instant bool) *Logger {
 	l := &Logger{
-		StdLog:  stdLog,
-		FileLog: fileLog,
-		Level:   level,
-		Plain:   plain,
+		Std:   Std,
+		File:  nil,
+		Level: level,
+		Plain: plain,
 	}
-	err := l.init(level)
-	return l, err
+	return l.init(instant)
 }
 
-func (l *Logger) init(level int) (err error) {
+func BuilderFileLogger(level int, plain bool, instant bool) *Logger {
+	l := &Logger{
+		Std:   nil,
+		File:  File,
+		Level: level,
+		Plain: plain,
+	}
+	return l.init(instant)
+}
+
+func BuilderStdFileLogger(level int, plain bool, instant bool) *Logger {
+	l := &Logger{
+		Std:   Std,
+		File:  File,
+		Level: level,
+		Plain: plain,
+	}
+	return l.init(instant)
+}
+
+type Logger struct {
+	Buffer *bytes.Buffer
+	Plain  bool
+	Level  int
+	Std    *os.File
+	File   *os.File
+	Debug  *log.Logger
+	Info   *log.Logger
+	Error  *log.Logger
+}
+
+func (block *Logger) init(instant bool) *Logger {
 	multiWriter := io.MultiWriter()
-	if l.StdLog {
-		multiWriter = io.MultiWriter(multiWriter, os.Stdout)
-	}
-	if l.FileLog {
-		err := utils.CreateDir(constants.GetOpsLogsDir())
-		if err != nil {
-			return err
-		}
-		file, err := os.OpenFile(constants.GetOpsLogFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			return err
-		}
-		multiWriter = io.MultiWriter(multiWriter, file)
-	}
+
 	var flag int
-	if !l.Plain {
+	if !block.Plain {
 		flag = log.Ltime | log.Ldate
 	}
+	if instant {
+		if block.Std != nil {
+			multiWriter = io.MultiWriter(multiWriter, block.Std)
+		}
+		if block.File != nil {
+			multiWriter = io.MultiWriter(multiWriter, block.File)
+		}
+	} else {
+		if block.Buffer == nil {
+			block.Buffer = bytes.NewBuffer([]byte{})
+		}
+		multiWriter = io.MultiWriter(multiWriter, block.Buffer)
+	}
 
-	l.BufferData = new(bytes.Buffer)
-	multiWriter = io.MultiWriter(multiWriter, l.BufferData)
-
-	if LevelFatal <= level {
-		l.Fatal = log.New(multiWriter, "", flag)
+	if LevelError <= block.Level {
+		block.Error = log.New(multiWriter, "", flag)
 	} else {
-		l.Fatal = log.New(io.Discard, "", flag)
+		block.Error = log.New(io.Discard, "", flag)
 	}
-	if LevelError <= level {
-		l.Error = log.New(multiWriter, "", flag)
+	if LevelInfo <= block.Level {
+		block.Info = log.New(multiWriter, "", flag)
 	} else {
-		l.Error = log.New(io.Discard, "", flag)
+		block.Info = log.New(io.Discard, "", flag)
 	}
-	if LevelWarning <= level {
-		l.Warning = log.New(multiWriter, "", flag)
+	if LevelDebug <= block.Level {
+		block.Debug = log.New(multiWriter, "", flag)
 	} else {
-		l.Warning = log.New(io.Discard, "", flag)
+		block.Debug = log.New(io.Discard, "", flag)
 	}
-	if LevelInfo <= level {
-		l.Info = log.New(multiWriter, "", flag)
-	} else {
-		l.Info = log.New(io.Discard, "", flag)
-	}
-	if LevelDebug <= level {
-		l.Debug = log.New(multiWriter, "", flag)
-	} else {
-		l.Debug = log.New(io.Discard, "", flag)
-	}
-	if LevelTrace <= level {
-		l.Trace = log.New(multiWriter, "", flag)
-	} else {
-		l.Trace = log.New(io.Discard, "", flag)
-	}
-	return
+	return block
 }
 
-func (logger *Logger) GetBuffer() (log string) {
-	log = string(logger.BufferData.Bytes())
-	return
+func (block *Logger) Flush() string {
+	multiWriter := io.MultiWriter()
+	if block.Std != nil {
+		multiWriter = io.MultiWriter(multiWriter, block.Std)
+	}
+	if block.File != nil {
+		multiWriter = io.MultiWriter(multiWriter, block.File)
+	}
+	io.Copy(multiWriter, block.Buffer)
+	defer block.Buffer.Reset()
+	return block.Buffer.String()
 }

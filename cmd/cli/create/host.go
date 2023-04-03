@@ -1,8 +1,6 @@
 package create
 
 import (
-	"fmt"
-
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -16,12 +14,8 @@ var hostCmd = &cobra.Command{
 	Use:   "host",
 	Short: "create host resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewStdFileLogger(false, log.LevelInfo)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		err = CreateHost(logger, hostOpt, inventory)
+		logger := log.BuilderStdFileLogger(log.LevelInfo, true, true)
+		err := CreateHost(logger, hostOpt, inventory)
 		if err != nil {
 			logger.Error.Println(err)
 			return

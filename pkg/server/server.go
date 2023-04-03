@@ -48,10 +48,7 @@ func CreateTask(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 	}
-	logger, err := log.NewStdFileLogger(true, log.LevelInfo)
-	if err != nil {
-		return
-	}
+	logger := log.BuilderStdLogger(log.LevelInfo, false, true)
 	hosts := host.GetHosts(logger, option.HostOption{}, "")
 	for _, h := range hosts {
 		hc, err := host.NewHostConnBase64(h)
@@ -61,5 +58,5 @@ func CreateTask(c *gin.Context) {
 		}
 		task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
 	}
-	c.JSON(http.StatusOK, logger.GetBuffer())
+	c.JSON(http.StatusOK, logger.Flush())
 }

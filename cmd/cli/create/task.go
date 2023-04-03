@@ -1,8 +1,6 @@
 package create
 
 import (
-	"fmt"
-
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
@@ -16,11 +14,7 @@ var taskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "create task resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := log.NewStdFileLogger(false, log.LevelInfo)
-		if err != nil {
-			fmt.Printf(err.Error())
-			return
-		}
+		logger := log.BuilderStdFileLogger(log.LevelInfo, true, true)
 		Createtask(logger, clusterOpt, inventory)
 	},
 }

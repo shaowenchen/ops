@@ -67,11 +67,7 @@ type TaskReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	logger, err := opslog.NewStdLogger(false, opslog.LevelInfo)
-	if err != nil {
-		fmt.Println(err)
-		return ctrl.Result{}, err
-	}
+	logger := opslog.BuilderStdLogger(opslog.LevelInfo, false, true)
 
 	if r.crontabMap == nil {
 		r.crontabMap = make(map[string]cron.EntryID)
@@ -165,11 +161,6 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 	r.updateStatusMap[t.GetUniqueKey()] = &sync.Mutex{}
 	t.Status.NewTaskRun()
 	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
-	cliLogger, err := opslog.NewStdLogger(true, opslog.LevelInfo)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
 	if t.GetSpec().TypeRef == "host" || t.GetSpec().TypeRef == "" {
 		hostCmd := func() {
 			h := &opsv1.Host{}
@@ -180,7 +171,9 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 				return
 			}
 			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
+			cliLogger := opslog.BuilderStdLogger(opslog.LevelInfo, true, false)
 			err = r.runTaskOnHost(cliLogger, ctx, t, h)
+			cliLogger.Flush()
 			if err != nil {
 				logger.Error.Println(err)
 			}
@@ -208,7 +201,9 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 				return
 			}
 			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
+			cliLogger := opslog.BuilderStdLogger(opslog.LevelInfo, true, false)
 			err = r.runTaskOnKube(cliLogger, ctx, t, c, kubeOpt)
+			cliLogger.Flush()
 			if err != nil {
 				logger.Error.Println(err)
 			}
@@ -227,7 +222,6 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 }
 
 func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, h *opsv1.Host) (err error) {
-	logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
 	lock := r.crontabRunningMap[t.GetUniqueKey()]
 	getLock := lock.TryLock()
 	if !getLock {
@@ -255,7 +249,6 @@ func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Contex
 }
 
 func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, kubeOpt option.KubeOption) (err error) {
-	logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
 	lock := r.crontabRunningMap[t.GetUniqueKey()]
 	getLock := lock.TryLock()
 	if !getLock {

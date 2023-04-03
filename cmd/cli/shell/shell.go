@@ -1,8 +1,6 @@
 package shell
 
 import (
-	"fmt"
-
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -27,11 +25,7 @@ var ShellCmd = &cobra.Command{
 		if shellDebug {
 			logLevel = log.LevelDebug
 		}
-		logger, err := log.NewStdFileLogger(false, logLevel)
-		if err != nil {
-			fmt.Printf(err.Error())
-			return
-		}
+		logger := log.BuilderStdFileLogger(logLevel, true, true)
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
