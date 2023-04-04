@@ -17,7 +17,7 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 	if err != nil {
 		return err
 	}
-	logger.Info.Println("Run Task ", t.GetUniqueKey(), " on ", hc.Host.Spec.Address)
+	logger.Info.Println("> Run Task ", t.GetUniqueKey(), " on ", hc.Host.Spec.Address)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
@@ -58,7 +58,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 	if err != nil {
 		return err
 	}
-	logger.Info.Println("Run Task ", t.GetUniqueKey(), " on Node ", node.Name)
+	logger.Info.Println("> Run Task ", t.GetUniqueKey(), " on Node ", node.Name)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)

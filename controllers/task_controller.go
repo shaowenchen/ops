@@ -270,7 +270,6 @@ func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Contex
 	t.Status.NewTaskRun()
 	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusRunning)
 	for _, node := range nodes {
-		logger.Info.Println(utils.FilledInMiddle(node.Name))
 		err = utils.MergeError(err, task.RunTaskOnKube(logger, t, kc, &node, option.TaskOption{}, kubeOpt))
 		if err != nil {
 			r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusFailed)

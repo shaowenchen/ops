@@ -137,7 +137,7 @@ func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, 
 		return
 	}
 
-	pod, err := RunShellOnNode(kc.Client, node, namespacedName, kubeOpt.RuntimeImage, shellOpt.Content)
+	pod, err := RunShellOnNode(kc.Client, node, namespacedName, kubeOpt.RuntimeImage, shellOpt.Content, kubeOpt.InCluster)
 	if err != nil {
 		return
 	}

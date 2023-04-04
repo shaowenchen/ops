@@ -13,7 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string) (pod *corev1.Pod, err error) {
+func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string, incluster bool) (pod *corev1.Pod, err error) {
 	shellBase64 := utils.EncodingStringToBase64(shell)
 	priviBool := true
 	tolerations := []v1.Toleration{}
@@ -26,6 +26,14 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 		})
 	}
 	automountSA := false
+
+	// is incluster or not
+	hostFlag := true
+	cmdArg := []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"}
+	if incluster {
+		hostFlag = false
+		cmdArg = []string{"-c", "echo " + shellBase64 + " | base64 -d | bash"}
+	}
 	pod, err = client.CoreV1().Pods(namespacedName.Namespace).Create(
 		context.TODO(),
 		&corev1.Pod{
@@ -44,16 +52,16 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 						Name:    "shell",
 						Image:   image,
 						Command: []string{"bash"},
-						Args:    []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"},
+						Args:    cmdArg,
 						SecurityContext: &corev1.SecurityContext{
 							Privileged: &priviBool,
 						},
 						ImagePullPolicy: corev1.PullIfNotPresent,
 					},
 				},
-				HostIPC:       true,
-				HostNetwork:   true,
-				HostPID:       true,
+				HostIPC:       hostFlag,
+				HostNetwork:   hostFlag,
+				HostPID:       hostFlag,
 				RestartPolicy: corev1.RestartPolicyNever,
 				Tolerations:   tolerations,
 			},

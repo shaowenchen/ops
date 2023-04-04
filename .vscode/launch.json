@@ -11,7 +11,7 @@
             "mode": "debug",
             "cwd": "${workspaceFolder}",
             "program": "cmd/cli/main.go",
-            "args": ["task", "-f", "task/list-podimage.yaml", "-i", "~/Documents/sre/opscli/hosts-dev1", "--port", "2222", "--username", "root"],
+            "args": ["task", "-f", "~/Documents/sre/opscli/alert/alert-promql-pending.yaml", "-i", "~/Documents/sre/opscli/kcicd-prod", "--incluster"],
             "env": {}
         },
         {

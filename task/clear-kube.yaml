@@ -7,7 +7,6 @@ spec:
   crontab: "*/2 * * * *"
   nameref: dev1
   typeref: cluster
-  nodename: anymaster
   desc: clear Kubernetes resource
   steps:
     - name: clear Evicted pod

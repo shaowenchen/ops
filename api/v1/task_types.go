@@ -38,6 +38,7 @@ type TaskSpec struct {
 	Desc         string                `json:"desc,omitempty"`
 	TypeRef      string                `json:"typeref,omitempty"`
 	NameRef      string                `json:"nameref,omitempty"`
+	InCluster    bool                  `json:"incluster,omitempty"`
 	NodeName     string                `json:"nodename,omitempty"`
 	All          bool                  `json:"all,omitempty"`
 	RuntimeImage string                `json:"runtimeImage,omitempty"`

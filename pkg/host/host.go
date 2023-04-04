@@ -1,7 +1,6 @@
 package host
 
 import (
-	"fmt"
 	"strings"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -12,7 +11,6 @@ import (
 )
 
 func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOption option.HostOption) (err error) {
-	logger.Info.Print(utils.FilledInMiddle(fmt.Sprintf("[%s]", h.Spec.Address)))
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
 	if err != nil {
@@ -23,7 +21,6 @@ func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOptio
 }
 
 func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOption option.HostOption) (err error) {
-	logger.Info.Print(utils.FilledInMiddle(fmt.Sprintf("[%s]", h.Spec.Address)))
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
 	if err != nil {

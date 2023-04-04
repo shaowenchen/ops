@@ -52,10 +52,10 @@ func KubeShell(logger *log.Logger, shellOpt option.ShellOption, kubeOpt option.K
 		logger.Error.Println(err)
 	}
 	if len(nodeList) == 0 {
-		logger.Info.Println("Please provide a node at least")
+		logger.Error.Println("no node found")
+		return
 	}
 	for _, node := range nodeList {
-		logger.Info.Println(utils.FilledInMiddle(node.Name))
 		kube.Shell(logger, client, node, shellOpt, kubeOpt)
 	}
 	return
@@ -80,6 +80,7 @@ func init() {
 	ShellCmd.MarkFlagRequired("content")
 
 	ShellCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
+	ShellCmd.Flags().BoolVarP(&kubeOpt.InCluster, "incluster", "", false, "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
 

@@ -8,8 +8,6 @@ const AllNamespaces = "all"
 const OpsNamespace = "ops-system"
 const DefaultNamespace = "default"
 
-const AnyMaster = "anymaster"
-
 const LabelNodeRoleMaster = "node-role.kubernetes.io/master"
 const LabelNodeRoleWorker = "node-role.kubernetes.io/worker"
 
