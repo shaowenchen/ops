@@ -14,7 +14,7 @@ var hostCmd = &cobra.Command{
 	Use:   "host",
 	Short: "create host resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.BuilderStdFileLogger(log.LevelInfo, true, true)
+		logger := log.NewLogger().SetLevel(log.LevelInfo).SetStd().SetFile().Build()
 		err := CreateHost(logger, hostOpt, inventory)
 		if err != nil {
 			logger.Error.Println(err)

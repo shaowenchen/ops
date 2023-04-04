@@ -54,6 +54,8 @@ func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 		if err != nil {
 			return
 		}
+		println(string(yfile))
+		println(task.ObjectMeta.Name)
 		tasks = append(tasks, task)
 	}
 

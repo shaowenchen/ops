@@ -67,7 +67,7 @@ type TaskReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	logger := opslog.BuilderStdLogger(opslog.LevelInfo, false, true)
+	logger := opslog.NewLogger().SetStd().SetFlag().Build()
 
 	if r.crontabMap == nil {
 		r.crontabMap = make(map[string]cron.EntryID)
@@ -171,7 +171,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 				return
 			}
 			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
-			cliLogger := opslog.BuilderStdLogger(opslog.LevelInfo, true, false)
+			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 			err = r.runTaskOnHost(cliLogger, ctx, t, h)
 			cliLogger.Flush()
 			if err != nil {
@@ -201,7 +201,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 				return
 			}
 			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
-			cliLogger := opslog.BuilderStdLogger(opslog.LevelInfo, true, false)
+			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 			err = r.runTaskOnKube(cliLogger, ctx, t, c, kubeOpt)
 			cliLogger.Flush()
 			if err != nil {

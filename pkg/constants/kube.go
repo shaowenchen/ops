@@ -6,6 +6,7 @@ import (
 
 const AllNamespaces = "all"
 const OpsNamespace = "ops-system"
+const DefaultNamespace = "default"
 
 const AnyMaster = "anymaster"
 

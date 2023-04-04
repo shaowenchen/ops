@@ -25,7 +25,7 @@ var ShellCmd = &cobra.Command{
 		if shellDebug {
 			logLevel = log.LevelDebug
 		}
-		logger := log.BuilderStdFileLogger(logLevel, true, true)
+		logger := log.NewLogger().SetLevel(logLevel).SetStd().SetFile().Build()
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)

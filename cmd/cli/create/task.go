@@ -14,7 +14,7 @@ var taskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "create task resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.BuilderStdFileLogger(log.LevelInfo, true, true)
+		logger := log.NewLogger().SetLevel(log.LevelInfo).SetStd().SetFile().Build()
 		Createtask(logger, clusterOpt, inventory)
 	},
 }

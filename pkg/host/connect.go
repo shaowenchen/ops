@@ -30,19 +30,20 @@ type HostConnection struct {
 	sshclient *ssh.Client
 }
 
-func NewHostConnBase64(h *opsv1.Host) (c *HostConnection, err error) {
-	c = &HostConnection{}
-	c.Host = h
+func NewHostConnBase64(h *opsv1.Host) (hc *HostConnection, err error) {
+	hc = &HostConnection{}
+	hc.Host = h
+	// empty address is local host
 	if h.Spec.Address == "" {
 		h.Spec.Address = constants.LocalHostIP
 	}
 	// local host
 	if h.Spec.Address == constants.LocalHostIP {
-		return c, nil
+		return hc, nil
 	}
 	// remote host
-	if err := c.connecting(); err != nil {
-		return c, err
+	if err := hc.connecting(); err != nil {
+		return hc, err
 	}
 	return
 }

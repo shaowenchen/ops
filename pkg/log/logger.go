@@ -30,95 +30,95 @@ func init() {
 	}
 }
 
-func BuilderStdLogger(level int, plain bool, instant bool) *Logger {
-	l := &Logger{
-		Std:   Std,
-		File:  nil,
-		Level: level,
-		Plain: plain,
-	}
-	return l.init(instant)
-}
-
-func BuilderFileLogger(level int, plain bool, instant bool) *Logger {
-	l := &Logger{
-		Std:   nil,
-		File:  File,
-		Level: level,
-		Plain: plain,
-	}
-	return l.init(instant)
-}
-
-func BuilderStdFileLogger(level int, plain bool, instant bool) *Logger {
-	l := &Logger{
-		Std:   Std,
-		File:  File,
-		Level: level,
-		Plain: plain,
-	}
-	return l.init(instant)
-}
-
 type Logger struct {
-	Buffer *bytes.Buffer
-	Plain  bool
-	Level  int
-	Std    *os.File
-	File   *os.File
-	Debug  *log.Logger
-	Info   *log.Logger
-	Error  *log.Logger
+	Buffer  *bytes.Buffer
+	Flag    int
+	Level   int
+	Instant bool
+	Std     *os.File
+	File    *os.File
+	Debug   *log.Logger
+	Info    *log.Logger
+	Error   *log.Logger
 }
 
-func (block *Logger) init(instant bool) *Logger {
-	multiWriter := io.MultiWriter()
-
-	var flag int
-	if !block.Plain {
-		flag = log.Ltime | log.Ldate
+func NewLogger() *Logger {
+	return &Logger{
+		Level:   LevelInfo,
+		Flag:    0,
+		Instant: true,
 	}
-	if instant {
-		if block.Std != nil {
-			multiWriter = io.MultiWriter(multiWriter, block.Std)
-		}
-		if block.File != nil {
-			multiWriter = io.MultiWriter(multiWriter, block.File)
-		}
-	} else {
-		if block.Buffer == nil {
-			block.Buffer = bytes.NewBuffer([]byte{})
-		}
-		multiWriter = io.MultiWriter(multiWriter, block.Buffer)
-	}
-
-	if LevelError <= block.Level {
-		block.Error = log.New(multiWriter, "", flag)
-	} else {
-		block.Error = log.New(io.Discard, "", flag)
-	}
-	if LevelInfo <= block.Level {
-		block.Info = log.New(multiWriter, "", flag)
-	} else {
-		block.Info = log.New(io.Discard, "", flag)
-	}
-	if LevelDebug <= block.Level {
-		block.Debug = log.New(multiWriter, "", flag)
-	} else {
-		block.Debug = log.New(io.Discard, "", flag)
-	}
-	return block
 }
 
-func (block *Logger) Flush() string {
+func (l *Logger) SetStd() *Logger {
+	l.Std = Std
+	return l
+}
+
+func (l *Logger) SetFile() *Logger {
+	l.File = File
+	return l
+}
+
+func (l *Logger) SetLevel(level int) *Logger {
+	l.Level = level
+	return l
+}
+
+func (l *Logger) SetFlag() *Logger {
+	l.Flag = log.Ltime | log.Ldate
+	return l
+}
+
+func (l *Logger) WaitFlush() *Logger {
+	l.Instant = false
+	return l
+}
+
+func (l *Logger) Build() *Logger {
 	multiWriter := io.MultiWriter()
-	if block.Std != nil {
-		multiWriter = io.MultiWriter(multiWriter, block.Std)
+
+	if l.Instant {
+		if l.Std != nil {
+			multiWriter = io.MultiWriter(multiWriter, l.Std)
+		}
+		if l.File != nil {
+			multiWriter = io.MultiWriter(multiWriter, l.File)
+		}
+	} else {
+		if l.Buffer == nil {
+			l.Buffer = bytes.NewBuffer([]byte{})
+		}
+		multiWriter = io.MultiWriter(multiWriter, l.Buffer)
 	}
-	if block.File != nil {
-		multiWriter = io.MultiWriter(multiWriter, block.File)
+
+	if LevelError <= l.Level {
+		l.Error = log.New(multiWriter, "", l.Flag)
+	} else {
+		l.Error = log.New(io.Discard, "", l.Flag)
 	}
-	io.Copy(multiWriter, block.Buffer)
-	defer block.Buffer.Reset()
-	return block.Buffer.String()
+	if LevelInfo <= l.Level {
+		l.Info = log.New(multiWriter, "", l.Flag)
+	} else {
+		l.Info = log.New(io.Discard, "", l.Flag)
+	}
+	if LevelDebug <= l.Level {
+		l.Debug = log.New(multiWriter, "", l.Flag)
+	} else {
+		l.Debug = log.New(io.Discard, "", l.Flag)
+	}
+	return l
+}
+
+func (l *Logger) Flush() string {
+	multiWriter := io.MultiWriter()
+	if l.Std != nil {
+		multiWriter = io.MultiWriter(multiWriter, l.Std)
+	}
+	if l.File != nil {
+		multiWriter = io.MultiWriter(multiWriter, l.File)
+	}
+	io.Copy(multiWriter, l.Buffer)
+	defer l.Buffer.Reset()
+	return l.Buffer.String()
 }

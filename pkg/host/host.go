@@ -38,7 +38,7 @@ func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOpt
 func GetHosts(logger *log.Logger, option option.HostOption, inventory string) (hosts []*opsv1.Host) {
 	hs, _ := utils.AnalysisHostsParameter(inventory)
 	for _, addr := range hs {
-		hosts = append(hosts, opsv1.NewHost("default", strings.ReplaceAll(addr, ".", "-"), addr, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath, constants.DefaultTimeoutSeconds))
+		hosts = append(hosts, opsv1.NewHost(constants.DefaultNamespace, strings.ReplaceAll(addr, ".", "-"), addr, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath, constants.DefaultTimeoutSeconds))
 	}
 	return
 }

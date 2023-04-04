@@ -30,7 +30,7 @@ var TaskCmd = &cobra.Command{
 		if taskDebug {
 			logLevel = log.LevelDebug
 		}
-		logger := log.BuilderStdFileLogger(logLevel, true, true)
+		logger := log.NewLogger().SetLevel(logLevel).SetStd().SetFile().Build()
 		taskOpt = parseArgs(args)
 		if len(taskOpt.FilePath) == 0 {
 			fmt.Printf("--filepath is must provided")

@@ -55,7 +55,7 @@ type ClusterReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	logger := opslog.BuilderFileLogger(opslog.LevelInfo, false, true)
+	logger := opslog.NewLogger().SetStd().SetFlag().Build()
 	c := &opsv1.Cluster{}
 	err = r.Get(ctx, req.NamespacedName, c)
 

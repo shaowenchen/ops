@@ -5,6 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "cli",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "cwd": "${workspaceFolder}",
+            "program": "cmd/cli/main.go",
+            "args": ["task", "-f", "task/list-podimage.yaml", "-i", "~/Documents/sre/opscli/hosts-dev1", "--port", "2222", "--username", "root"],
+            "env": {}
+        },
+        {
             "name": "server",
             "type": "go",
             "request": "launch",

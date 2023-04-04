@@ -23,7 +23,7 @@ var FileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "transfer between local and remote file",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.BuilderStdFileLogger(log.LevelInfo, true, true)
+		logger := log.NewLogger().SetStd().SetFile().Build()
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)

@@ -16,7 +16,7 @@ var clusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "create cluster resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.BuilderStdFileLogger(log.LevelInfo, true, true)
+		logger := log.NewLogger().SetLevel(log.LevelInfo).SetStd().SetFile().Build()
 
 		err := CreateCluster(logger, clusterOpt, inventory)
 		if err != nil {
