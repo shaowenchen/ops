@@ -70,7 +70,7 @@ func RenderStepVariables(step *opsv1.Step, vars map[string]string) *opsv1.Step {
 		step.Kubernetes.Kind = strings.ReplaceAll(step.Kubernetes.Kind, fmt.Sprintf(`${%s}`, key), value)
 		step.Kubernetes.Namespace = strings.ReplaceAll(step.Kubernetes.Namespace, fmt.Sprintf(`${%s}`, key), value)
 		step.Kubernetes.Name = strings.ReplaceAll(step.Kubernetes.Name, fmt.Sprintf(`${%s}`, key), value)
-		step.Alert.Target = strings.ReplaceAll(step.Alert.Target, fmt.Sprintf(`${%s}`, key), value)
+		step.Alert.Url = strings.ReplaceAll(step.Alert.Url, fmt.Sprintf(`${%s}`, key), value)
 		step.Alert.If = strings.ReplaceAll(step.Alert.If, fmt.Sprintf(`${%s}`, key), value)
 	}
 	return step

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	AlertStatusFiring = "firing"
+	AlertStatusFiring   = "firing"
 	PrometheusServerKey = "prometheus-server"
 )
 
@@ -52,7 +52,13 @@ func AlertPromQuery(serverUrl string, promQl string) (status string, result stri
 		}
 		items := make([]string, 0)
 		for _, item := range results {
-			items = append(items, fmt.Sprintf("%s %s", item.Metric.String(), item.Value))
+			itemMetrics := item.Metric.String()
+			itemValue := item.Value.String()
+			if itemMetrics == "{}" {
+				items = append(items, itemValue)
+			} else {
+				items = append(items, fmt.Sprintf("%s %s", itemMetrics, itemValue))
+			}
 		}
 		result = strings.Join(items, `\n`)
 		return

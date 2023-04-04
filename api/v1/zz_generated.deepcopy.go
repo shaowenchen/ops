@@ -22,7 +22,6 @@ limitations under the License.
 package v1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -377,16 +376,6 @@ func (in *TaskSpec) DeepCopyInto(out *TaskSpec) {
 		in, out := &in.Steps, &out.Steps
 		*out = make([]Step, len(*in))
 		copy(*out, *in)
-	}
-	if in.NodeSelector != nil {
-		in, out := &in.NodeSelector, &out.NodeSelector
-		*out = new(metav1.LabelSelector)
-		(*in).DeepCopyInto(*out)
-	}
-	if in.TypeSelector != nil {
-		in, out := &in.TypeSelector, &out.TypeSelector
-		*out = new(metav1.LabelSelector)
-		(*in).DeepCopyInto(*out)
 	}
 }
 

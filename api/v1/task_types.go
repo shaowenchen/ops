@@ -31,19 +31,17 @@ type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Crontab      string                `json:"crontab,omitempty"`
-	Variables    map[string]string     `json:"variables,omitempty"`
-	Steps        []Step                `json:"steps,omitempty"`
-	Name         string                `json:"name,omitempty"`
-	Desc         string                `json:"desc,omitempty"`
-	TypeRef      string                `json:"typeref,omitempty"`
-	NameRef      string                `json:"nameref,omitempty"`
-	InCluster    bool                  `json:"incluster,omitempty"`
-	NodeName     string                `json:"nodename,omitempty"`
-	All          bool                  `json:"all,omitempty"`
-	RuntimeImage string                `json:"runtimeImage,omitempty"`
-	NodeSelector *metav1.LabelSelector `json:"nodeselector,omitempty"`
-	TypeSelector *metav1.LabelSelector `json:"typeSelector,omitempty"`
+	Crontab      string            `json:"crontab,omitempty"`
+	Variables    map[string]string `json:"variables,omitempty"`
+	Steps        []Step            `json:"steps,omitempty"`
+	Name         string            `json:"name,omitempty"`
+	Desc         string            `json:"desc,omitempty"`
+	TypeRef      string            `json:"typeref,omitempty"`
+	NameRef      string            `json:"nameref,omitempty"`
+	InCluster    bool              `json:"incluster,omitempty"`
+	NodeName     string            `json:"nodename,omitempty"`
+	All          bool              `json:"all,omitempty"`
+	RuntimeImage string            `json:"runtimeImage,omitempty"`
 }
 
 type Step struct {
@@ -66,8 +64,8 @@ type Kubernetes struct {
 }
 
 type Alert struct {
-	Target string `json:"target,omitempty"`
-	If     string `json:"if,omitempty"`
+	Url string `json:"url,omitempty"`
+	If  string `json:"if,omitempty"`
 }
 
 // TaskStatus defines the observed state of Task

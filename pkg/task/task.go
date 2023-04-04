@@ -1,7 +1,6 @@
 package task
 
 import (
-
 	"fmt"
 	"strings"
 
@@ -24,6 +23,8 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
+		sp = RenderStepVariables(sp, allVars)
+		println(s.Content)
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
 		s.When = RenderString(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)
@@ -99,7 +100,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 }
 
 func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (string, string, error) {
-	if len(step.Alert.Target) > 0 {
+	if len(step.Alert.Url) > 0 {
 		return runStepAlertOnHost
 	} else if len(step.Content) > 0 {
 		return runStepShellOnHost
@@ -128,7 +129,7 @@ func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task,
 }
 
 func runStepAlertOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status string, stdout string, err error) {
-	return prom.AlertPromQuery(step.Alert.Target, step.Alert.If)
+	return prom.AlertPromQuery(step.Alert.Url, step.Alert.If)
 }
 
 func runStepKubernetesOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {
