@@ -123,6 +123,13 @@ spec:
               steps:
                 items:
                   properties:
+                    alert:
+                      properties:
+                        if:
+                          type: string
+                        target:
+                          type: string
+                      type: object
                     allowfailure:
                       type: string
                     content:
@@ -144,13 +151,6 @@ spec:
                       type: string
                     name:
                       type: string
-                    prometheus:
-                      properties:
-                        endpoint:
-                          type: string
-                        query:
-                          type: string
-                      type: object
                     remotefile:
                       type: string
                     when:

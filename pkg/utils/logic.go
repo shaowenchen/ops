@@ -29,44 +29,44 @@ func LogicExpression(exp string, ifEmptyDefault bool) (result bool, err error) {
 		}
 	} else if strings.Contains(exp, ">") {
 		expPair := strings.Split(exp, ">")
-		left, err := strconv.Atoi(RemoveStartEndMark(expPair[0]))
+		left, err := strconv.ParseFloat(RemoveStartEndMark(expPair[0]), 64)
 		if err != nil {
 			return false, err
 		}
-		right, err := strconv.Atoi(RemoveStartEndMark(expPair[1]))
+		right, err := strconv.ParseFloat(RemoveStartEndMark(expPair[1]), 64)
 		if err != nil {
 			return false, err
 		}
 		return left > right, nil
 	} else if strings.Contains(exp, ">=") {
 		expPair := strings.Split(exp, ">=")
-		left, err := strconv.Atoi(RemoveStartEndMark(expPair[0]))
+		left, err := strconv.ParseFloat(RemoveStartEndMark(expPair[0]), 64)
 		if err != nil {
 			return false, err
 		}
-		right, err := strconv.Atoi(RemoveStartEndMark(expPair[1]))
+		right, err := strconv.ParseFloat(RemoveStartEndMark(expPair[1]), 64)
 		if err != nil {
 			return false, err
 		}
 		return left >= right, nil
 	} else if strings.Contains(exp, "<") {
 		expPair := strings.Split(exp, "<")
-		left, err := strconv.Atoi(RemoveStartEndMark(expPair[0]))
+		left, err := strconv.ParseFloat(RemoveStartEndMark(expPair[0]), 64)
 		if err != nil {
 			return false, err
 		}
-		right, err := strconv.Atoi(RemoveStartEndMark(expPair[1]))
+		right, err := strconv.ParseFloat(RemoveStartEndMark(expPair[1]), 64)
 		if err != nil {
 			return false, err
 		}
 		return left < right, nil
 	} else if strings.Contains(exp, "=<") {
 		expPair := strings.Split(exp, "=<")
-		left, err := strconv.Atoi(RemoveStartEndMark(expPair[0]))
+		left, err := strconv.ParseFloat(RemoveStartEndMark(expPair[0]), 64)
 		if err != nil {
 			return false, err
 		}
-		right, err := strconv.Atoi(RemoveStartEndMark(expPair[1]))
+		right, err := strconv.ParseFloat(RemoveStartEndMark(expPair[1]), 64)
 		if err != nil {
 			return false, err
 		}

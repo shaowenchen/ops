@@ -62,16 +62,16 @@ func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 
 func RenderStepVariables(step *opsv1.Step, vars map[string]string) *opsv1.Step {
 	for key, value := range vars {
-		step.Name = strings.ReplaceAll(step.Name, fmt.Sprintf("${%s}", key), value)
-		step.Content = strings.ReplaceAll(step.Content, fmt.Sprintf("${%s}", key), value)
-		step.LocalFile = strings.ReplaceAll(step.LocalFile, fmt.Sprintf("${%s}", key), value)
-		step.RemoteFile = strings.ReplaceAll(step.RemoteFile, fmt.Sprintf("${%s}", key), value)
-		step.Kubernetes.Action = strings.ReplaceAll(step.Kubernetes.Action, fmt.Sprintf("${%s}", key), value)
-		step.Kubernetes.Kind = strings.ReplaceAll(step.Kubernetes.Kind, fmt.Sprintf("${%s}", key), value)
-		step.Kubernetes.Namespace = strings.ReplaceAll(step.Kubernetes.Namespace, fmt.Sprintf("${%s}", key), value)
-		step.Kubernetes.Name = strings.ReplaceAll(step.Kubernetes.Name, fmt.Sprintf("${%s}", key), value)
-		step.Prometheus.Query = strings.ReplaceAll(step.Prometheus.Query, fmt.Sprintf("${%s}", key), value)
-		step.Prometheus.Endpoint = strings.ReplaceAll(step.Prometheus.Endpoint, fmt.Sprintf("${%s}", key), value)
+		step.Name = strings.ReplaceAll(step.Name, fmt.Sprintf(`${%s}`, key), value)
+		step.Content = strings.ReplaceAll(step.Content, fmt.Sprintf(`${%s}`, key), value)
+		step.LocalFile = strings.ReplaceAll(step.LocalFile, fmt.Sprintf(`${%s}`, key), value)
+		step.RemoteFile = strings.ReplaceAll(step.RemoteFile, fmt.Sprintf(`${%s}`, key), value)
+		step.Kubernetes.Action = strings.ReplaceAll(step.Kubernetes.Action, fmt.Sprintf(`${%s}`, key), value)
+		step.Kubernetes.Kind = strings.ReplaceAll(step.Kubernetes.Kind, fmt.Sprintf(`${%s}`, key), value)
+		step.Kubernetes.Namespace = strings.ReplaceAll(step.Kubernetes.Namespace, fmt.Sprintf(`${%s}`, key), value)
+		step.Kubernetes.Name = strings.ReplaceAll(step.Kubernetes.Name, fmt.Sprintf(`${%s}`, key), value)
+		step.Alert.Target = strings.ReplaceAll(step.Alert.Target, fmt.Sprintf(`${%s}`, key), value)
+		step.Alert.If = strings.ReplaceAll(step.Alert.If, fmt.Sprintf(`${%s}`, key), value)
 	}
 	return step
 }
@@ -85,8 +85,8 @@ func RenderVarsVariables(vars map[string]string) map[string]string {
 
 func RenderString(target string, vars map[string]string) string {
 	for key, value := range vars {
-		if strings.Contains(target, fmt.Sprintf("${%s}", key)) {
-			target = strings.ReplaceAll(target, fmt.Sprintf("${%s}", key), value)
+		if strings.Contains(target, fmt.Sprintf(`${%s}`, key)) {
+			target = strings.ReplaceAll(target, fmt.Sprintf(`${%s}`, key), value)
 		}
 	}
 	return target

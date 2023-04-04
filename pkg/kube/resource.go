@@ -236,41 +236,6 @@ func PromQueryRangeMatrix(serverUrl string, promQl string) (result prommodel.Mat
 	return
 }
 
-func PromQuery(serverUrl string, promQl string) (result *prommodel.Sample, err error) {
-	client, err := promapi.NewClient(promapi.Config{
-		Address: serverUrl,
-	})
-	if err != nil {
-		return
-	}
-	v1api := promv1.NewAPI(client)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	retValue, _, err := v1api.Query(ctx, promQl, time.Now())
-	if err != nil {
-		return
-	}
-	switch {
-	case retValue.Type() == prommodel.ValScalar:
-		// handle scalar stuff
-	case retValue.Type() == prommodel.ValVector:
-		// handle vector stuff
-		results := retValue.(prommodel.Vector)
-		if len(results) == 0 {
-			err = errors.New("no result")
-			return
-		}
-		result = results[0]
-	case retValue.Type() == prommodel.ValMatrix:
-		// handle matrix stuff
-	case retValue.Type() == prommodel.ValString:
-		// handle string stuff
-	}
-
-	return result, nil
-}
-
 func GetPrometheusServerUrl(client *kubernetes.Clientset) (url string, err error) {
 	node, err := utils.GetAnyMaster(client)
 	if err != nil {

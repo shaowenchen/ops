@@ -1,13 +1,16 @@
 package task
 
 import (
+
 	"fmt"
+	"strings"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
+	"github.com/shaowenchen/ops/pkg/prom"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -37,9 +40,10 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 		}
 		logger.Debug.Println("Content: ", s.Content)
 		stepFunc := GetHostStepFunc(s)
-		stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
+		stepStatus, stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
 		t.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, opsv1.GetRunStatus(stepErr))
-		allVars["result"] = stepOutput
+		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
+		allVars["status"] = stepStatus
 		logger.Info.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
@@ -94,23 +98,22 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 	return err
 }
 
-func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (string, error) {
-	if len(step.Prometheus.Endpoint) > 0 {
-		return runStepPrometheusOnHost
+func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (string, string, error) {
+	if len(step.Alert.Target) > 0 {
+		return runStepAlertOnHost
 	} else if len(step.Content) > 0 {
 		return runStepShellOnHost
 	}
 	return runStepCopyOnHost
 }
 
-func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (stdout string, err error) {
+func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, stdout string, err error) {
 	stdout, err = c.Shell(option.Sudo, step.Content)
 	return
 }
 
-func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (result string, err error) {
+func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, result string, err error) {
 	err = c.File(option.Sudo, step.Direction, step.LocalFile, step.RemoteFile)
-
 	return
 }
 
@@ -124,12 +127,8 @@ func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task,
 	}
 }
 
-func runStepPrometheusOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (stdout string, err error) {
-	resultValue, err := kube.PromQuery(step.Prometheus.Endpoint, step.Prometheus.Query)
-	if err != nil {
-		return err.Error(), err
-	}
-	return resultValue.Value.String(), nil
+func runStepAlertOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status string, stdout string, err error) {
+	return prom.AlertPromQuery(step.Alert.Target, step.Alert.If)
 }
 
 func runStepKubernetesOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {
