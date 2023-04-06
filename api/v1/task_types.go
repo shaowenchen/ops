@@ -77,13 +77,6 @@ type TaskStatus struct {
 	StartTime     *metav1.Time              `json:"startTime,omitempty"`
 }
 
-func GetRunStatus(err error) string {
-	if err == nil {
-		return StatusSuccessed
-	}
-	return StatusFailed
-}
-
 type TaskRunStatus struct {
 	TaskRunStep []*TaskRunStep `json:"taskRunStep,omitempty"`
 	RunStatus   string         `json:"runStatus,omitempty"`

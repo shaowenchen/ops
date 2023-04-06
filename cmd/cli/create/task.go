@@ -14,7 +14,7 @@ var taskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "create task resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.NewLogger().SetLevel(log.LevelInfo).SetStd().SetFile().Build()
+		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
 		Createtask(logger, clusterOpt, inventory)
 	},
 }
@@ -47,6 +47,7 @@ func Createtask(logger *log.Logger, option option.ClusterOption, inventory strin
 }
 
 func init() {
+	taskCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
 	taskCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
 	taskCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "default", "")
 	taskCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")

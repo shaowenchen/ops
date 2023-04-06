@@ -16,7 +16,7 @@ var clusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "create cluster resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.NewLogger().SetLevel(log.LevelInfo).SetStd().SetFile().Build()
+		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
 
 		err := CreateCluster(logger, clusterOpt, inventory)
 		if err != nil {
@@ -51,6 +51,7 @@ func CreateCluster(logger *log.Logger, clusterOpt option.ClusterOption, inventor
 
 func init() {
 	clusterCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
+	clusterCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
 	clusterCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "default", "")
 	clusterCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")
 	clusterCmd.MarkFlagRequired("name")

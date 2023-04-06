@@ -18,12 +18,13 @@ var fileOpt option.FileOption
 var kubeOpt option.KubeOption
 var s3Opt option.S3FileOption
 var inventory string
+var verbose string
 
 var FileCmd = &cobra.Command{
 	Use:   "file",
 	Short: "transfer between local and remote file",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.NewLogger().SetStd().SetFile().Build()
+		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
@@ -79,7 +80,7 @@ func S3File(logger *log.Logger, option option.FileOption, s3option option.S3File
 
 func init() {
 	FileCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
-
+	FileCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
 	FileCmd.Flags().BoolVarP(&fileOpt.Sudo, "sudo", "", false, "")
 	FileCmd.Flags().StringVarP(&fileOpt.LocalFile, "localfile", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.RemoteFile, "remotefile", "", "", "")

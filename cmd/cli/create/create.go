@@ -16,6 +16,7 @@ var clusterOpt option.ClusterOption
 var clusterSpec opsv1.ClusterSpec
 var taskpath string
 var inventory string
+var verbose string
 
 func init() {
 	CreateCmd.AddCommand(hostCmd)

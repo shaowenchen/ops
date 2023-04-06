@@ -14,6 +14,16 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+func GetValidStatusError(status string, err error) string {
+	if err != nil {
+		return opsv1.StatusFailed
+	}
+	if status == "" {
+		return opsv1.StatusSuccessed
+	}
+	return status
+}
+
 func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection, taskOpt option.TaskOption) error {
 	allVars, err := GetRealVariables(t, taskOpt)
 	if err != nil {
@@ -37,12 +47,14 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		logger.Debug.Println("Content: ", s.Content)
 		stepFunc := GetHostStepFunc(s)
 		stepStatus, stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
-		t.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, opsv1.GetRunStatus(stepErr))
+		stepStatus = GetValidStatusError(stepStatus, stepErr)
+		t.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, stepStatus)
 		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["status"] = stepStatus
+		logger.Debug.Println("Content: ", s.Content)
+		logger.Debug.Println("Status: ", stepStatus)
 		logger.Info.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
@@ -79,11 +91,14 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		logger.Debug.Println("Content: ", s.Content)
 		stepFunc := GetKubeStepFunc(s)
-		stepOutput, stepErr := stepFunc(logger, t, kc, node, s, taskOpt, kubeOpt)
-		t.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, opsv1.GetRunStatus(stepErr))
-		allVars["result"] = stepOutput
+		stepStatus, stepOutput, stepErr := stepFunc(logger, t, kc, node, s, taskOpt, kubeOpt)
+		stepStatus = GetValidStatusError(stepStatus, stepErr)
+		t.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, stepStatus)
+		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
+		allVars["status"] = stepStatus
+		logger.Debug.Println("Content: ", s.Content)
+		logger.Debug.Println("Status: ", stepStatus)
 		logger.Info.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
@@ -97,7 +112,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 	return err
 }
 
-func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (string, string, error) {
+func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (status string, output string, err error) {
 	if len(step.Alert.Url) > 0 {
 		return runStepAlertOnHost
 	} else if len(step.Content) > 0 {
@@ -111,12 +126,12 @@ func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, 
 	return
 }
 
-func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, result string, err error) {
+func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, output string, err error) {
 	err = c.File(option.Sudo, step.Direction, step.LocalFile, step.RemoteFile)
 	return
 }
 
-func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task, c *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (string, error) {
+func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task, c *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (string, string, error) {
 	if len(step.Kubernetes.Action) > 0 {
 		return runStepKubernetesOnKube
 	} else if len(step.Content) > 0 {
@@ -126,11 +141,11 @@ func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task,
 	}
 }
 
-func runStepAlertOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status string, stdout string, err error) {
+func runStepAlertOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status string, output string, err error) {
 	return prom.AlertPromQuery(step.Alert.Url, step.Alert.If)
 }
 
-func runStepKubernetesOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {
+func runStepKubernetesOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
 	option := option.KubernetesOption{
 		Kind:   step.Kubernetes.Kind,
 		Action: step.Kubernetes.Action,
@@ -140,11 +155,11 @@ func runStepKubernetesOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.Kube
 	err = kc.SetRequestLimit(
 		logger,
 		option)
-	return "", err
+	return
 }
 
-func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {
-	stdout, err := kc.ShellOnNode(
+func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
+	output, err = kc.ShellOnNode(
 		logger,
 		node,
 		option.ShellOption{
@@ -152,11 +167,11 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 			Content: step.Content,
 		},
 		kubeOpt)
-	return stdout, err
+	return
 }
 
-func runStepCopyOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (result string, err error) {
-	stdout, err := kc.FileonNode(
+func runStepCopyOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
+	output, err = kc.FileonNode(
 		logger,
 		node,
 		option.FileOption{
@@ -165,5 +180,5 @@ func runStepCopyOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnec
 			LocalFile:  step.LocalFile,
 			RemoteFile: step.RemoteFile,
 		})
-	return stdout, err
+	return
 }

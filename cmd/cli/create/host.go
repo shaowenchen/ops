@@ -14,7 +14,7 @@ var hostCmd = &cobra.Command{
 	Use:   "host",
 	Short: "create host resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.NewLogger().SetLevel(log.LevelInfo).SetStd().SetFile().Build()
+		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
 		err := CreateHost(logger, hostOpt, inventory)
 		if err != nil {
 			logger.Error.Println(err)
@@ -56,6 +56,7 @@ func CreateHost(logger *log.Logger, hostOpt option.HostOption, inventory string)
 }
 
 func init() {
+	hostCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
 	hostCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
 	hostCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "default", "")
 	hostCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")

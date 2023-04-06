@@ -15,17 +15,13 @@ var kubeOpt option.KubeOption
 var hostOpt option.HostOption
 
 var inventory string
-var shellDebug bool
+var verbose string
 
 var ShellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "run shell on hosts",
 	Run: func(cmd *cobra.Command, args []string) {
-		logLevel := log.LevelInfo
-		if shellDebug {
-			logLevel = log.LevelDebug
-		}
-		logger := log.NewLogger().SetLevel(logLevel).SetStd().SetFile().Build()
+		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
@@ -73,7 +69,7 @@ func HostShell(logger *log.Logger, shellOpt option.ShellOption, hostOpt option.H
 
 func init() {
 	ShellCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
-	ShellCmd.Flags().BoolVarP(&shellDebug, "debug", "", false, "")
+	ShellCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
 
 	ShellCmd.Flags().BoolVarP(&shellOpt.Sudo, "sudo", "", false, "")
 	ShellCmd.Flags().StringVarP(&shellOpt.Content, "content", "", "", "")

@@ -9,13 +9,13 @@ import (
 	promapi "github.com/prometheus/client_golang/api"
 	promv1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	prommodel "github.com/prometheus/common/model"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 const (
-	AlertStatusFiring   = "firing"
 	PrometheusServerKey = "prometheus-server"
 )
 
@@ -48,7 +48,7 @@ func AlertPromQuery(serverUrl string, promQl string) (status string, result stri
 	case prommodel.ValVector:
 		results := value.(prommodel.Vector)
 		if len(results) > 0 {
-			status = AlertStatusFiring
+			status = opsv1.StatusFiring
 		}
 		items := make([]string, 0)
 		for _, item := range results {

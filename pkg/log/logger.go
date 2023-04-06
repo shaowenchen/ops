@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 )
 
 var Std *os.File = os.Stdout
@@ -17,6 +18,23 @@ const (
 	LevelInfo
 	LevelDebug
 )
+
+func getLogVerbose(level string) int {
+	levelInit, err := strconv.Atoi(level)
+	if err == nil {
+		return levelInit
+	}
+	switch level {
+	case "error":
+		return LevelError
+	case "info":
+		return LevelInfo
+	case "debug":
+		return LevelDebug
+	default:
+		return LevelInfo
+	}
+}
 
 func init() {
 	// init file logger
@@ -60,8 +78,8 @@ func (l *Logger) SetFile() *Logger {
 	return l
 }
 
-func (l *Logger) SetLevel(level int) *Logger {
-	l.Level = level
+func (l *Logger) SetVerbose(level string) *Logger {
+	l.Level = getLogVerbose(level)
 	return l
 }
 
