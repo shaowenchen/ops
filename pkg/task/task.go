@@ -23,8 +23,6 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
-		sp = RenderStepVariables(sp, allVars)
-		println(s.Content)
 		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
 		s.When = RenderString(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)

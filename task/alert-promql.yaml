@@ -9,7 +9,7 @@ spec:
   variables:
     if: "abs(max(tekton_pipelines_controller_running_pipelineruns_count) - count(count by (pod, label_tekton_dev_pipeline_run)(kube_pod_labels{label_tekton_dev_task_run!=''}) and on (pod) kube_pod_container_status_running{} > 0) ) > 2"
     url: "http://0.0.0.0:9090"
-    message: "Pending Pipeline Alert\n ${result}"
+    message: "Pending Pipeline Alert\n${result}"
   steps:
     - name: get status
       alert:
