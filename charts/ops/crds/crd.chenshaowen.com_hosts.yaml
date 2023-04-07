@@ -1,0 +1,121 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: hosts.crd.chenshaowen.com
+spec:
+  group: crd.chenshaowen.com
+  names:
+    kind: Host
+    listKind: HostList
+    plural: hosts
+    singular: host
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.hostname
+      name: Hostname
+      type: string
+    - jsonPath: .spec.address
+      name: Address
+      type: string
+    - jsonPath: .status.distribution
+      name: Distribution
+      type: string
+    - jsonPath: .status.arch
+      name: Arch
+      type: string
+    - jsonPath: .status.cputotal
+      name: CPU
+      type: string
+    - jsonPath: .status.memtotal
+      name: Mem
+      type: string
+    - jsonPath: .status.disktotal
+      name: Disk
+      type: string
+    - jsonPath: .status.heartTime
+      name: HeartTime
+      type: date
+    - jsonPath: .status.heartStatus
+      name: HeartStatus
+      type: string
+    name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HostSpec defines the desired state of Host
+            properties:
+              address:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              password:
+                type: string
+              port:
+                type: integer
+              privatekey:
+                type: string
+              privatekeypath:
+                type: string
+              timeoutseconds:
+                format: int64
+                type: integer
+              username:
+                type: string
+            type: object
+          status:
+            description: HostStatus defines the observed state of Host
+            properties:
+              arch:
+                type: string
+              cpuload1:
+                type: string
+              cputotal:
+                type: string
+              cpuusagepercent:
+                type: string
+              disktotal:
+                type: string
+              diskusagepercent:
+                type: string
+              distribution:
+                type: string
+              heartStatus:
+                type: string
+              heartTime:
+                format: date-time
+                type: string
+              hostname:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                type: string
+              kernelversion:
+                type: string
+              memtotal:
+                type: string
+              memusagepercent:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,158 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: tasks.crd.chenshaowen.com
+spec:
+  group: crd.chenshaowen.com
+  names:
+    kind: Task
+    listKind: TaskList
+    plural: tasks
+    singular: task
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.crontab
+      name: Crontab
+      type: string
+    - jsonPath: .spec.typeref
+      name: TypeRef
+      type: string
+    - jsonPath: .spec.nameref
+      name: NameRef
+      type: string
+    - jsonPath: .spec.nodename
+      name: NodeName
+      type: string
+    - jsonPath: .spec.all
+      name: All
+      type: boolean
+    - jsonPath: .status.startTime
+      name: StartTime
+      type: date
+    - jsonPath: .status.runStatus
+      name: RunStatus
+      type: string
+    name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TaskSpec defines the desired state of Task
+            properties:
+              all:
+                type: boolean
+              crontab:
+                type: string
+              desc:
+                type: string
+              incluster:
+                type: boolean
+              name:
+                type: string
+              nameref:
+                type: string
+              nodename:
+                type: string
+              runtimeImage:
+                type: string
+              steps:
+                items:
+                  properties:
+                    alert:
+                      properties:
+                        if:
+                          type: string
+                        url:
+                          type: string
+                      type: object
+                    allowfailure:
+                      type: string
+                    content:
+                      type: string
+                    direction:
+                      type: string
+                    kubernetes:
+                      properties:
+                        action:
+                          type: string
+                        kind:
+                          type: string
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                      type: object
+                    localfile:
+                      type: string
+                    name:
+                      type: string
+                    remotefile:
+                      type: string
+                    when:
+                      type: string
+                  type: object
+                type: array
+              typeref:
+                type: string
+              variables:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+          status:
+            description: TaskStatus defines the observed state of Task
+            properties:
+              runStatus:
+                type: string
+              startTime:
+                format: date-time
+                type: string
+              taskRunStatus:
+                additionalProperties:
+                  properties:
+                    runStatus:
+                      type: string
+                    startTime:
+                      format: date-time
+                      type: string
+                    taskRunStep:
+                      items:
+                        properties:
+                          stepCmd:
+                            type: string
+                          stepName:
+                            type: string
+                          stepOutput:
+                            type: string
+                          stepStatus:
+                            type: string
+                        type: object
+                      type: array
+                  type: object
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

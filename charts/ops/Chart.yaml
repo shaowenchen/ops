@@ -1,0 +1,24 @@
+apiVersion: v2
+name: ops
+description: a tool for ops
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - kubernetes
+  - ops
+  - cluster
+  - automation
+  - batch
+home: https://github.com/shaowenchen/ops
+icon: https://github.com/shaowenchen/ops
+sources:
+  - https://github.com/shaowenchen/ops
+maintainers:
+  - name: shaowenchen
+    email: mail@chenshaowen.com
+annotations:
+  artifacthub.io/changes: |
+    - version: 0.1.0
+      date: 2023-04-07
+      description: First release

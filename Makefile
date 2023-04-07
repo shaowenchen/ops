@@ -23,6 +23,12 @@ all: build
 cli: 
 	go build -ldflags ${flags} -o ./bin/opscli ./cmd/cli/main.go
 
+charts: controller-gen manifests kustomize
+	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=charts/ops/crds
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/manager > charts/ops/templates/manager.yaml
+	$(KUSTOMIZE) build config/rbac > charts/ops/templates/rbac.yaml
+
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
