@@ -98,5 +98,10 @@ spec:
           requests:
             cpu: 100m
             memory: 258Mi
+        env:
+          - name: ACTION_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -67,6 +68,10 @@ type TaskReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	actionNs := os.Getenv("ACTION_NAMESPACE")
+	if actionNs != "" && actionNs != req.Namespace {
+		return ctrl.Result{}, nil
+	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
 
 	if r.crontabMap == nil {

@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -54,6 +55,10 @@ type HostReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	actionNs := os.Getenv("ACTION_NAMESPACE")
+	if actionNs != "" && actionNs != req.Namespace {
+		return ctrl.Result{}, nil
+	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
 	h := &opsv1.Host{}
 	err := r.Get(ctx, req.NamespacedName, h)

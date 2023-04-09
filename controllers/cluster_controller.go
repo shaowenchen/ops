@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -55,6 +56,10 @@ type ClusterReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	actionNs := os.Getenv("ACTION_NAMESPACE")
+	if actionNs != "" && actionNs != req.Namespace {
+		return ctrl.Result{}, nil
+	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
 	c := &opsv1.Cluster{}
 	err = r.Get(ctx, req.NamespacedName, c)

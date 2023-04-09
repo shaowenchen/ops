@@ -55,6 +55,11 @@ spec:
               port: 8081
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: ACTION_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
