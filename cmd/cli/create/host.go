@@ -15,7 +15,7 @@ var hostCmd = &cobra.Command{
 	Short: "create host resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
-		err := CreateHost(logger, hostOpt, inventory)
+		err := CreateHost(logger, clusterOpt, hostOpt, inventory)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -23,9 +23,9 @@ var hostCmd = &cobra.Command{
 	},
 }
 
-func CreateHost(logger *log.Logger, hostOpt option.HostOption, inventory string) (err error) {
-	inventory = utils.GetAbsoluteFilePath(inventory)
-	restConfig, err := utils.GetRestConfig(inventory)
+func CreateHost(logger *log.Logger, clusterOpt option.ClusterOption, hostOpt option.HostOption, inventory string) (err error) {
+	kubeconfigPath := utils.GetAbsoluteFilePath(clusterOpt.Kubeconfig)
+	restConfig, err := utils.GetRestConfig(kubeconfigPath)
 	if err != nil {
 		logger.Error.Println(err)
 		return
@@ -41,6 +41,7 @@ func CreateHost(logger *log.Logger, hostOpt option.HostOption, inventory string)
 	hs := host.GetHosts(logger, hostOpt, inventory)
 
 	for _, h := range hs {
+		h.Namespace = clusterOpt.Namespace
 		// one name, one host
 		if len(hs) == 1 {
 			hs[0].Name = clusterOpt.Name
