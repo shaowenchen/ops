@@ -37,6 +37,10 @@ jobs:
         run: |
           helm package ./charts/ops --destination ./charts
           helm repo index ./charts --merge ./charts/index.yaml
+
+      - name: Copy Helm Charts
+        run: |
+          mkdir -p ./docs/_book/charts
           cp ./charts/index.yaml ./docs/_book/charts/index.yaml
           cp ./charts/*.tgz ./docs/_book/charts/
 

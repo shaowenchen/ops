@@ -1,6 +1,5 @@
 # Summary
 
-* [Opscli](opscli.md)
-* [Opsserver](opsserver.md)
-* [Opscontroller](opscontroller.md)
-
+- [Opscli](content/opscli.md)
+- [Opsserver](content/opsserver.md)
+- [Opscontroller](content/opscontroller.md)

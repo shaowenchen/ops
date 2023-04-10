@@ -33,10 +33,10 @@
         "issues": false,
         "contribute": false,
         "sidebar": {
-            "DevOps 101": "https://www.chenshaowen.com/"
+            "Ops": "https://www.chenshaowen.com/"
         },
         "tail": {
-            "DevOps 101": "https://www.chenshaowen.com/devops-101/"
+            "Ops": "https://www.chenshaowen.com/ops/"
         },
         "gitbook": false
     }
