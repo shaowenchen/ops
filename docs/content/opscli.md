@@ -29,7 +29,7 @@ curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VER
 curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -
 ```
 
-## 自动不全
+## 自动补全
 
 ### bash
 

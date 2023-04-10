@@ -35,8 +35,15 @@ jobs:
 
       - name: Generate Helm Charts
         run: |
-          helm package ./charts/ops --destination ./docs/_book/charts
-          helm repo index ./docs/_book/charts --merge ./docs/_book/charts/index.yaml
+          helm package ./charts/ops --destination ./charts/
+          helm repo index ./charts --merge ./charts/index.yaml
+
+      - name: Copy Helm Charts
+        run: |
+          mkdir -p ./docs/_book/charts
+          cp ./charts/*.tgz ./docs/_book/charts/
+          cp ./charts/artifacthub-repo.yml ./docs/_book/charts/
+          cp ./charts/index.yaml ./docs/_book/charts/
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

@@ -6,7 +6,9 @@
         "path": "README.md",
         "title": "Ops"
     },
-    "plugins": [],
+    "plugins": [
+        "github"
+    ],
     "pluginsConfig": {
         "fontSettings": {
             "theme": "white",
@@ -17,14 +19,14 @@
             "token": "G-E6LG2CPVQS"
         },
         "sharing": {
-            "weibo": true,
-            "facebook": true,
-            "twitter": true,
+            "weibo": false,
+            "facebook": false,
+            "twitter": false,
             "all": [
-                "facebook",
-                "twitter",
-                "weibo"
             ]
+        },
+        "github": {
+            "url": "https://github.com/shaowenchen/ops"
         }
     },
     "links": {

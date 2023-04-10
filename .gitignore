@@ -25,3 +25,5 @@ Dockerfile.cross
 *.swo
 *~
 __*
+docs/node_modules
+docs/_book
