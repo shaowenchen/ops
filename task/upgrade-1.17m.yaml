@@ -2,7 +2,7 @@ apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
   name: upgrade-1.17m
-  namespace: default
+  namespace: ops-system
 spec:
   desc: Upgrade-K8s-Master-From-1.17-to-1.18.20-0
   variables:

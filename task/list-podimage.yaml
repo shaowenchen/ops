@@ -2,11 +2,11 @@ apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
   name: list-podimage
-  namespace: default
+  namespace: ops-system
 spec:
   desc: list pod image
   variables:
-    namespace: default
+    namespace: ops-system
   steps:
     - name: list pod image
       when: ${namespace} != "all"

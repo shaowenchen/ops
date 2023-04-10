@@ -58,7 +58,7 @@ func CreateHost(logger *log.Logger, hostOpt option.HostOption, inventory string)
 func init() {
 	hostCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
 	hostCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
-	hostCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "default", "")
+	hostCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "ops-system", "")
 	hostCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")
 	hostCmd.MarkFlagRequired("name")
 	hostCmd.Flags().BoolVarP(&clusterOpt.Clear, "clear", "", false, "")

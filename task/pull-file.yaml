@@ -2,7 +2,7 @@ apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
   name: pull-file
-  namespace: default
+  namespace: ops-system
 spec:
   desc: Pull From Remote File
   steps:

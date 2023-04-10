@@ -49,7 +49,7 @@ func Createtask(logger *log.Logger, option option.ClusterOption, inventory strin
 func init() {
 	taskCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
 	taskCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kubeconfig", "", "~/.kube/config", "")
-	taskCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "default", "")
+	taskCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "ops-system", "")
 	taskCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")
 	taskCmd.MarkFlagRequired("name")
 	taskCmd.Flags().BoolVarP(&clusterOpt.Clear, "clear", "", false, "")

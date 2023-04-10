@@ -2,7 +2,7 @@ apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
   name: push-file
-  namespace: default
+  namespace: ops-system
 spec:
   desc: Push Local To Remote File
   steps:

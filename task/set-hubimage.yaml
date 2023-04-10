@@ -2,11 +2,11 @@ apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
   name: set-hubimage
-  namespace: default
+  namespace: ops-system
 spec:
   desc: Set hubimage
   variables:
-    namespace: default
+    namespace: ops-system
     resource: deployments,daemonsets,statefulsets
   steps:
     - name: replace quay.io/prometheus-operator

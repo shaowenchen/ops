@@ -2,11 +2,11 @@ apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
   name: add-reqlimit
-  namespace: default
+  namespace: ops-system
 spec:
   desc: add request and limit, e.g. Deployment\StatefulSet\DaemonSet
   variables:
-    namespace: default
+    namespace: ops-system
     name: ""
     kind: Deployment
   steps:

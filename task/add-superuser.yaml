@@ -2,7 +2,7 @@ apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
   name: add-superuser
-  namespace: default
+  namespace: ops-system
 spec:
   desc: Add Super User
   variables:

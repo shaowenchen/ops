@@ -52,7 +52,7 @@ func CreateCluster(logger *log.Logger, clusterOpt option.ClusterOption, inventor
 func init() {
 	clusterCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
 	clusterCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
-	clusterCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "default", "")
+	clusterCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "ops-system", "")
 	clusterCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")
 	clusterCmd.MarkFlagRequired("name")
 	clusterCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")

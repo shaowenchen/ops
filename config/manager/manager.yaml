@@ -99,7 +99,7 @@ spec:
             cpu: 100m
             memory: 258Mi
         env:
-          - name: ACTION_NAMESPACE
+          - name: ACTIVE_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace

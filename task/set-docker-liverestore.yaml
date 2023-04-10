@@ -2,7 +2,7 @@ apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
   name: set-docker-liverestore
-  namespace: default
+  namespace: ops-system
 spec:
   desc: Set Docker liverestore true
   steps:

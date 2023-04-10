@@ -56,7 +56,7 @@ type ClusterReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	actionNs := os.Getenv("ACTION_NAMESPACE")
+	actionNs := os.Getenv("ACTIVE_NAMESPACE")
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
 	}
