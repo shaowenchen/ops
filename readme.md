@@ -1,14 +1,32 @@
-### Supported OS
+## Quick Start
 
-- Linux
-- macOS
+### install Opscli
 
-### Quick install
+Supported OS Linux and macOS.
 
-- Good network connections to GitHub
+If Good network connections to GitHub
 
 `curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -`
 
-- Poor network connections to GitHub
+else Poor network connections to GitHub
 
 `curl -sfL https://ghproxy.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -`
+
+### install Ops Controller
+
+1. Add Helm repo
+
+```bash
+```bash
+helm repo add ops https://shaowenchen.github.io/ops/charts
+```
+
+2. Install Opscli Controller
+
+```bash
+helm install myops ops/ops --version 1.0.0 --namespace ops-system --create-namespace
+```
+
+## More
+
+Go to [docs](https://www.chenshaowen.com/ops/) for more information.
