@@ -1,0 +1,43 @@
+{
+    "title": "Ops",
+    "description": "Ops Tools",
+    "keywords": "Ops,Tools,",
+    "introduction": {
+        "path": "README.md",
+        "title": "Ops"
+    },
+    "plugins": [],
+    "pluginsConfig": {
+        "fontSettings": {
+            "theme": "white",
+            "family": "serif",
+            "size": 2
+        },
+        "ga": {
+            "token": "G-E6LG2CPVQS"
+        },
+        "sharing": {
+            "weibo": true,
+            "facebook": true,
+            "twitter": true,
+            "all": [
+                "facebook",
+                "twitter",
+                "weibo"
+            ]
+        }
+    },
+    "links": {
+        "home": false,
+        "about": false,
+        "issues": false,
+        "contribute": false,
+        "sidebar": {
+            "DevOps 101": "https://www.chenshaowen.com/"
+        },
+        "tail": {
+            "DevOps 101": "https://www.chenshaowen.com/devops-101/"
+        },
+        "gitbook": false
+    }
+}

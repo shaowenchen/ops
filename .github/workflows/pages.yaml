@@ -1,0 +1,49 @@
+name: Pages
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "10.22.0"
+
+      - name: Build
+        run: |
+          npm install gitbook-cli -g
+          gitbook init
+          gitbook install
+          gitbook build ./docs --output=. ./docs/_book
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.7.0
+
+      - name: Generate Helm Charts
+        run: |
+          helm package ./charts/ops --destination ./charts
+          helm repo index ./charts --merge ./charts/index.yaml
+          cp ./charts/index.yaml ./docs/_book/charts/index.yaml
+          cp ./charts/*.tgz ./docs/_book/charts/
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_book
+          force_orphan: true
+          full_commit_message: ${{ github.event.head_commit.message }}
