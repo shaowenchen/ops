@@ -10,7 +10,8 @@
     "-highlight",
     "search-pro",
     "github-buttons",
-    "code"
+    "code",
+    "custom-favicon"
   ],
   "pluginsConfig": {
     "fontSettings": {
@@ -25,6 +26,7 @@
         "theme": "default",
         "linenums": true
     },
+    "favicon": "favicon.ico",
     "github-buttons": {
         "buttons": [
           {

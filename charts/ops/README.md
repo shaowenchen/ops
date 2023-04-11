@@ -1,5 +1,5 @@
 ```bash
-helm repo add ops https://shaowenchen.github.io/ops/charts
+helm repo add ops https://www.chenshaowen.com/ops/charts
 ```
 
 ```bash

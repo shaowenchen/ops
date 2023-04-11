@@ -18,7 +18,7 @@ else Poor network connections to GitHub
 
 ```bash
 ```bash
-helm repo add ops https://shaowenchen.github.io/ops/charts
+helm repo add ops https://www.chenshaowen.com/ops/charts
 ```
 
 2. Install Opscli Controller

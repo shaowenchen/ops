@@ -27,7 +27,7 @@ curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bas
 ### 添加 Helm 仓库
 
 ```bash
-helm repo add ops https://shaowenchen.github.io/ops/charts
+helm repo add ops https://www.chenshaowen.com/ops/charts
 ```
 
 ### 安装 ops-controller-manager
