@@ -23,11 +23,10 @@ jobs:
 
       - name: Build
         run: |
+          cd ./docs
           npm i gitbook-cli -g
-          npm i gitbook-plugin-github
-          gitbook init
           gitbook install
-          gitbook build ./docs --output=. ./docs/_book
+          gitbook build
 
       - name: Install Helm
         uses: azure/setup-helm@v3

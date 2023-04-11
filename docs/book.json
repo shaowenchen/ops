@@ -1,45 +1,60 @@
 {
-    "title": "Ops",
-    "description": "Ops Tools",
-    "keywords": "Ops,Tools,",
-    "introduction": {
-        "path": "README.md",
-        "title": "Ops"
+  "title": "Ops",
+  "description": "Ops Tools",
+  "keywords": "Ops,Tools,",
+  "introduction": {
+    "path": "README.md",
+    "title": "Ops"
+  },
+  "plugins": [
+    "-highlight",
+    "search-pro",
+    "github-buttons",
+    "code"
+  ],
+  "pluginsConfig": {
+    "fontSettings": {
+      "theme": "white",
+      "family": "serif",
+      "size": 2
     },
-    "plugins": [
-        "github"
-    ],
-    "pluginsConfig": {
-        "fontSettings": {
-            "theme": "white",
-            "family": "serif",
-            "size": 2
-        },
-        "ga": {
-            "token": "G-E6LG2CPVQS"
-        },
-        "sharing": {
-            "weibo": false,
-            "facebook": false,
-            "twitter": false,
-            "all": [
-            ]
-        },
-        "github": {
-            "url": "https://github.com/shaowenchen/ops"
-        }
+    "ga": {
+      "token": "G-E6LG2CPVQS"
     },
-    "links": {
-        "home": false,
-        "about": false,
-        "issues": false,
-        "contribute": false,
-        "sidebar": {
-            "Ops": "https://www.chenshaowen.com/"
-        },
-        "tail": {
-            "Ops": "https://www.chenshaowen.com/ops/"
-        },
-        "gitbook": false
+    "code": {
+        "theme": "default",
+        "linenums": true
+    },
+    "github-buttons": {
+        "buttons": [
+          {
+            "user": "shaowenchen",
+            "repo": "ops", 
+            "type": "star",
+            "count": true,
+            "size": "small"
+          }, 
+          {
+            "user": "shaowenchen",
+            "width": "160", 
+            "type": "follow", 
+            "count": true,
+            "size": "small"
+          }
+        ]
     }
+  },
+  "links": {
+    "home": false,
+    "about": false,
+    "issues": false,
+    "contribute": false,
+    "sidebar": {
+      "Ops": "https://www.chenshaowen.com/"
+    },
+    "tail": {
+      "Ops": "https://www.chenshaowen.com/ops/"
+    },
+    "gitbook": false
+  }
 }
