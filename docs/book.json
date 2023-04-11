@@ -31,14 +31,14 @@
             "user": "shaowenchen",
             "repo": "ops", 
             "type": "star",
-            "count": true,
+            "count": false,
             "size": "small"
           }, 
           {
             "user": "shaowenchen",
             "width": "160", 
             "type": "follow", 
-            "count": true,
+            "count": false,
             "size": "small"
           }
         ]
