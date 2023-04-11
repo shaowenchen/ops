@@ -1,39 +1,45 @@
 {
-  "title": "Ops",
-  "description": "Ops Tools",
-  "keywords": "Ops,Tools,",
-  "introduction": {
-    "path": "README.md",
-    "title": "Ops"
-  },
-  "plugins": [],
-  "pluginsConfig": {
-    "fontSettings": {
-      "theme": "white",
-      "family": "serif",
-      "size": 2
+    "title": "Ops",
+    "description": "Ops Tools",
+    "keywords": "Ops,Tools,",
+    "introduction": {
+        "path": "README.md",
+        "title": "Ops"
     },
-    "ga": {
-      "token": "G-E6LG2CPVQS"
+    "plugins": [
+        "github"
+    ],
+    "pluginsConfig": {
+        "fontSettings": {
+            "theme": "white",
+            "family": "serif",
+            "size": 2
+        },
+        "ga": {
+            "token": "G-E6LG2CPVQS"
+        },
+        "sharing": {
+            "weibo": false,
+            "facebook": false,
+            "twitter": false,
+            "all": [
+            ]
+        },
+        "github": {
+            "url": "https://github.com/shaowenchen/ops"
+        }
     },
-    "sharing": {
-      "weibo": false,
-      "facebook": false,
-      "twitter": false,
-      "all": []
+    "links": {
+        "home": false,
+        "about": false,
+        "issues": false,
+        "contribute": false,
+        "sidebar": {
+            "Ops": "https://www.chenshaowen.com/"
+        },
+        "tail": {
+            "Ops": "https://www.chenshaowen.com/ops/"
+        },
+        "gitbook": false
     }
-  },
-  "links": {
-    "home": false,
-    "about": false,
-    "issues": false,
-    "contribute": false,
-    "sidebar": {
-      "Ops": "https://www.chenshaowen.com/"
-    },
-    "tail": {
-      "Ops": "https://www.chenshaowen.com/ops/"
-    },
-    "gitbook": false
-  }
 }

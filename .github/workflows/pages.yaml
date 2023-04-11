@@ -23,7 +23,8 @@ jobs:
 
       - name: Build
         run: |
-          npm install gitbook-cli -g
+          npm i gitbook-cli -g
+          npm i gitbook-plugin-github
           gitbook init
           gitbook install
           gitbook build ./docs --output=. ./docs/_book
