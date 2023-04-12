@@ -8,6 +8,7 @@
   },
   "plugins": [
     "-highlight",
+    "ga",
     "search-pro",
     "github-buttons",
     "code",
