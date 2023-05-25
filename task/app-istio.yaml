@@ -22,3 +22,27 @@ spec:
       content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/preserve-request-header-case.yaml
     - name: ${action} ingressgateway-settings
       content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/kubernetes-components/master/istio/ingressgateway-settings.yaml
+    - name: ${action} istio-default-virtualservice
+      content: |
+        kubectl --kubeconfig ${kubeconfig} ${action} -f - <<EOF
+        apiVersion: networking.istio.io/v1beta1
+        kind: VirtualService
+        metadata:
+          name: default-gateway-all-com
+          namespace: default
+        spec:
+          gateways:
+            - default/default-gateway
+          hosts:
+            - '*'
+          http:
+            - match:
+                - uri:
+                    exact: /never-used-default-default-404
+              route:
+                - destination:
+                    host: default
+                    port:
+                      number: 80
+                  weight: 100
+        EOF
