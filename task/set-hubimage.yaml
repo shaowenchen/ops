@@ -19,3 +19,11 @@ spec:
       content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/prom\/blackbox-exporter/hubimage\/blackbox-exporter/g' | kubectl apply -f -
     - name: replace k8s.gcr.io/autoscaling
       content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/k8s.gcr.io\/autoscaling/hubimage/g' | kubectl apply -f -
+    - name: replace ghcr.io/chaos-mesh/chaos-mesh
+      content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/ghcr.io\/chaos-mesh\/chaos-mesh/hubimage\/chaos-mesh/g' | kubectl apply -f -
+    - name: replace ghcr.io/chaos-mesh/chaos-daemon
+      content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/ghcr.io\/chaos-mesh\/chaos-daemon/hubimage\/chaos-daemon/g' | kubectl apply -f -
+    - name: replace ghcr.io/chaos-mesh/chaos-dashboard
+      content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/ghcr.io\/chaos-mesh\/chaos-dashboard/hubimage\/chaos-dashboard/g' | kubectl apply -f -
+    - name: replace ghcr.io/chaos-mesh/chaos-coredns
+      content: kubectl -n ${namespace} get ${resource} -o yaml | sed 's/ghcr.io\/chaos-mesh\/chaos-coredns/hubimage\/chaos-coredns/g' | kubectl apply -f -
