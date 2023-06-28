@@ -1,14 +1,14 @@
 ## opscli shell command
 
-### 主机清单
+### 指定操作目标清单 
 
-`-i` 参数指定
-
-- 直接 ip
+- 指定主机
 
 `-i 1.1.1.1`
 
-- 批量 ip
+通过 `--username` 指定用户名，`--password` 指定密码。
+
+- 批量主机
 
 `-i hosts.txt`
 
@@ -21,34 +21,78 @@ cat hosts.txt
 
 opscli 会从每行中正则匹配 ip 地址，作为目标地址。
 
-### 批量安装
+- 集群全部节点
 
 ```bash
-opscli shell --content "curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -" -i hosts.txt
+-i ~/.kube/config --all
 ```
 
-### 批量升级
+`-i` 默认值为 `~/.kube/config`。
+
+- 集群指定节点
 
 ```bash
-opscli shell --content "sudo /usr/local/bin/opscli upgrade" -i hosts.txt
+-i ~/.kube/config --nodename node1
 ```
 
-### 查找并替换镜像
+node1 为节点名称。
+
+### 安装
+
+- 单机
 
 ```bash
-opscli shell --content "sudo /usr/local/bin/opscli task -f .ops/task/list-podimage.yaml --namespace all" -i hosts.txt
+curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
+```
+
+- 批量
+
+```bash
+/usr/local/bin/opscli shell --content "curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -" -i hosts.txt
+```
+
+### 升级
+
+- 单机
+
+```bash
+sudo /usr/local/bin/opscli upgrade
+```
+
+- 批量
+
+```bash
+/usr/local/bin/opscli shell --content "sudo /usr/local/bin/opscli upgrade" -i hosts.txt
+```
+
+### 查看集群镜像
+
+- 单机
+
+```bash
+/usr/local/bin/opscli task -f .ops/task/list-podimage.yaml --namespace all
+```
+
+- 批量查看
+
+```bash
+/usr/local/bin/opscli shell --content "sudo /usr/local/bin/opscli task -f .ops/task/list-podimage.yaml --namespace all" -i hosts.txt
+```
+
+### 替换 metrics-server 镜像
+
+```bash
+/usr/local/bin/opscli shell --content "sudo kubectl -n kube-system set image deployment/metrics-server metrics-server=hubimage/metrics-server:v0.5.0" -i hosts.txt
 ```
 
 ```bash
-opscli shell --content "sudo kubectl -n kube-system set image deployment/metrics-server metrics-server=hubimage/metrics-server:v0.5.0" -i hosts.txt
+/usr/local/bin/opscli shell --content "sudo kubectl -n kube-system set image deployment/metrics-server metrics-server=hubimage/metrics-server:v0.6.1" -i hosts-B.txt
 ```
 
-```bash
-opscli shell --content "sudo kubectl -n kube-system set image deployment/metrics-server metrics-server=hubimage/metrics-server:v0.6.1" -i hosts-B.txt
-```
+### 替换 kube-state-metrics 镜像
 
 ```bash
-opscli shell --content "sudo kubectl -n kube-system set image deployment/prom-k8s-kube-state-metrics kube-state-metrics=hubimage/kube-state-metrics:v2.2.4" -i hosts.txt
+/usr/local/bin/opscli shell --content "sudo kubectl -n kube-system set image deployment/prom-k8s-kube-state-metrics kube-state-metrics=hubimage/kube-state-metrics:v2.2.4" -i hosts.txt
 ```
 
 ### 集群批量操作
