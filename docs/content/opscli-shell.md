@@ -50,3 +50,25 @@ opscli shell --content "sudo kubectl -n kube-system set image deployment/metrics
 ```bash
 opscli shell --content "sudo kubectl -n kube-system set image deployment/prom-k8s-kube-state-metrics kube-state-metrics=hubimage/kube-state-metrics:v2.2.4" -i hosts.txt
 ```
+
+### 集群批量操作
+
+- 全部节点
+
+```bash
+opscli shell --content "uname -a" --all
+```
+
+- 指定节点
+
+```bash
+opscli shell --content "uname -a" --nodename node1
+```
+
+- 指定 kubeconfig
+
+默认 kubeconfig 为 `~/.kube/config`，可以通过 `-i` 参数指定。
+
+```bash
+opscli shell -i  ~/Documents/opscli/prod --content "uname -a" --nodename node1
+```
