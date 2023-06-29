@@ -17,7 +17,6 @@ else Poor network connections to GitHub
 1. Add Helm repo
 
 ```bash
-```bash
 helm repo add ops https://www.chenshaowen.com/ops/charts
 ```
 
