@@ -21,6 +21,7 @@ func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOptio
 }
 
 func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOption option.HostOption) (err error) {
+	logger.Info.Println("> Run Shell on ", h.Spec.Address)
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
 	if err != nil {
