@@ -44,7 +44,7 @@ node1 为节点名称。
 远程到主机 `1.1.1.1` ，更新 `/etc/hosts` 文件。
 
 ```bash
-/usr/local/bin/opscli task -f .ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i 1.1.1.1 --port 2222 --username root
+/usr/local/bin/opscli task -f ~/.ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i 1.1.1.1 --port 2222 --username root
 ```
 
 如果需要清理加上 `--clear` 参数即可。
@@ -52,11 +52,11 @@ node1 为节点名称。
 - 集群全部节点
 
 ```bash
-/usr/local/bin/opscli task -f .ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --all
+/usr/local/bin/opscli task -f ~/.ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --all
 ```
 
 - 集群指定节点
 
 ```bash
-/usr/local/bin/opscli task -f .ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --nodename node1
+/usr/local/bin/opscli task -f ~/.ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --nodename node1
 ```

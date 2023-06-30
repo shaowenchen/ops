@@ -70,13 +70,13 @@ sudo /usr/local/bin/opscli upgrade
 - 单机
 
 ```bash
-/usr/local/bin/opscli task -f .ops/task/list-podimage.yaml --namespace all
+/usr/local/bin/opscli task -f ~/.ops/task/list-podimage.yaml --namespace all
 ```
 
 - 批量查看
 
 ```bash
-/usr/local/bin/opscli shell --content "sudo /usr/local/bin/opscli task -f .ops/task/list-podimage.yaml --namespace all" -i hosts.txt
+/usr/local/bin/opscli shell --content "sudo /usr/local/bin/opscli task -f ~/.ops/task/list-podimage.yaml --namespace all" -i hosts.txt
 ```
 
 ### 替换 metrics-server 镜像
