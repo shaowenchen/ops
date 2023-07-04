@@ -60,3 +60,19 @@ node1 为节点名称。
 ```bash
 /usr/local/bin/opscli task -f ~/.ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --nodename node1
 ```
+
+### 应用安装
+
+- 安装 Istio
+
+```bash
+/usr/local/bin/opscli task -f ~/.ops/task/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf
+```
+
+--version 默认值为 1.13.7，--kubeconfig 默认值为 /etc/kubernetes/admin.conf。
+
+- 卸载 Istio
+
+```bash
+/usr/local/bin/opscli task -f ~/.ops/task/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf --action delete
+```
