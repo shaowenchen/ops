@@ -18,6 +18,8 @@ spec:
       content: echo `free -m | awk 'NR==2{printf "%.2f%%\n", $3*100/$2 }'`/`free -h | awk '/^Mem:/{print $2}'`
     - name: Disk Usage Percent/Total
       content: df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/
+    - name: TCP TIME_WAIT Usage/Total
+      content: echo `netstat -an | grep TIME_WAIT | wc -l`/`cat /proc/sys/net/ipv4/tcp_max_tw_buckets`
     - name: NF_Conntrack Usage/Total
       content: echo `cat /proc/sys/net/netfilter/nf_conntrack_count`/`cat /proc/sys/net/netfilter/nf_conntrack_max`
     - name: PID Usage
