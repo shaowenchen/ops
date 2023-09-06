@@ -12,7 +12,7 @@ const LocalHostIP = "127.0.0.1"
 const DefaultTimeoutSeconds = 10
 
 const (
-	InventoryTypeKubeconfig = "kubeconfig"
+	InventoryTypeKubernetes = "kubernetes"
 	InventoryTypeHosts      = "hosts"
 )
 

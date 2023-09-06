@@ -29,7 +29,10 @@ func NewKubernetesClient(kubeconfigpath string) (client *kubernetes.Clientset, e
 	kubeconfigpath = GetAbsoluteFilePath(kubeconfigpath)
 	restConfig, err := GetRestConfig(kubeconfigpath)
 	if err != nil {
-		return
+		restConfig, err = GetInClusterConfig()
+		if err != nil {
+			return
+		}
 	}
 	return GetClientByRestconfig(restConfig)
 }
@@ -49,6 +52,14 @@ func GetRestConfig(kubeconfigPath string) (*rest.Config, error) {
 		return clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	}
 	return nil, fmt.Errorf("could not locate a kubeconfig")
+}
+
+func GetInClusterConfig() (*rest.Config, error) {
+	c, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
 func GetServerUrl(kubeconfigPath string) (string, error) {

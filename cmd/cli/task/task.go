@@ -37,7 +37,7 @@ var TaskCmd = &cobra.Command{
 		inventoryType := utils.GetInventoryType(inventory)
 		if inventoryType == constants.InventoryTypeHosts {
 			HostTask(logger, taskOpt, hostOpt, inventory)
-		} else if inventoryType == constants.InventoryTypeKubeconfig {
+		} else if inventoryType == constants.InventoryTypeKubernetes {
 			KubeTask(logger, taskOpt, kubeOpt, inventory)
 		}
 	},

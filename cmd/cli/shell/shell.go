@@ -29,7 +29,7 @@ var ShellCmd = &cobra.Command{
 		if utils.IsExistsFile(shellOpt.Content) {
 			shellOpt.Content, _ = utils.ReadFile(shellOpt.Content)
 		}
-		if inventoryType == constants.InventoryTypeKubeconfig {
+		if inventoryType == constants.InventoryTypeKubernetes {
 			KubeShell(logger, shellOpt, kubeOpt, inventory)
 		} else if inventoryType == constants.InventoryTypeHosts {
 			HostShell(logger, shellOpt, hostOpt, inventory)

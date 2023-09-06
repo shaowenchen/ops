@@ -10,8 +10,13 @@ import (
 func GetInventoryType(inventory string) string {
 	_, err := GetRestConfig(inventory)
 	if err == nil {
-		return constants.InventoryTypeKubeconfig
+		return constants.InventoryTypeKubernetes
 	}
+	_, err = GetInClusterConfig()
+	if err == nil {
+		return constants.InventoryTypeKubernetes
+	}
+
 	return constants.InventoryTypeHosts
 }
 
