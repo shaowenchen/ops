@@ -159,7 +159,7 @@ func init() {
 	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "runtime image")
 
 	TaskCmd.Flags().IntVarP(&hostOpt.Port, "port", "", 22, "")
-	TaskCmd.Flags().StringVarP(&hostOpt.Username, "username", "", "", "")
+	TaskCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	TaskCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
 	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKey, "privatekey", "", "", "")
 	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")

@@ -86,7 +86,7 @@ func init() {
 	FileCmd.Flags().StringVarP(&fileOpt.RemoteFile, "remotefile", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.Direction, "direction", "d", "", "")
 
-	FileCmd.Flags().StringVarP(&hostOpt.Username, "username", "", "", "")
+	FileCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	FileCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
 	FileCmd.Flags().StringVarP(&hostOpt.PrivateKey, "privatekey", "", "", "")
 	FileCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")
