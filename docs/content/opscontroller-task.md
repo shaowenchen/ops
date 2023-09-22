@@ -3,7 +3,7 @@
 ### 直接使用 `create` 子命令创建
 
 ```bash
-go run cmd/cli/main.go create task --name t1 --typeref host --nameref dev1  --filepath ./task/get-osstaus.yaml
+/usr/local/bin/opscli create task --name t1 --typeref host --nameref dev1  --filepath ./task/get-osstaus.yaml
 ```
 
 通过 `--typeref host --nameref dev1` 指定任务执行的主机。
