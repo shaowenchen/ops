@@ -20,8 +20,6 @@ spec:
       content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/hubimage/master/istio/disabled-mtls.yaml
     - name: ${action} preserve-request-header-case
       content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/hubimage/master/istio/preserve-request-header-case.yaml
-    - name: ${action} ingressgateway-settings
-      content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/shaowenchen/hubimage/master/istio/ingressgateway-settings.yaml
     - name: ${action} istio-default-virtualservice
       content: |
         kubectl --kubeconfig ${kubeconfig} ${action} -f - <<EOF
