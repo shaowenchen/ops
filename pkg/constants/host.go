@@ -1,8 +1,10 @@
 package constants
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"time"
@@ -21,6 +23,17 @@ const (
 	RemoteStorageTypeS3    = "s3"
 	RemoteStorageTypeLocal = "local"
 )
+
+func GetOsInfo() string {
+	cmd := exec.Command("uname", "-a")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return ""
+	}
+	return out.String()
+}
 
 func GetCurrentUserHomeDir() string {
 	homeDirectory, err := os.UserHomeDir()

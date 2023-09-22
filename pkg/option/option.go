@@ -41,6 +41,14 @@ type ShellOption struct {
 	Sudo    bool
 }
 
+type CopilotOption struct {
+	Endpoint string
+	Model    string
+	Key      string
+	History  int
+	Silence  bool
+}
+
 type FileOption struct {
 	KubeOption
 	LocalFile    string

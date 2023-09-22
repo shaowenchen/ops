@@ -13,6 +13,24 @@ import (
 	"strings"
 )
 
+func GetEnvDefault(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
+
+func GetMultiEnvDefault(keys []string, defaultValue string) string {
+	for _, key := range keys {
+		value := os.Getenv(key)
+		if value != "" {
+			return value
+		}
+	}
+	return defaultValue
+}
+
 func GetAllOsEnv() (envs map[string]string) {
 	envs = make(map[string]string, 0)
 	for _, keyValue := range os.Environ() {
