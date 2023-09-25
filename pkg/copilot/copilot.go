@@ -4,7 +4,7 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-type ChatCodeResponse []Langcode
+type ChatCodeResponse Langcode
 
 type Langcode struct {
 	Language string `json:"language"`
@@ -19,6 +19,7 @@ type RoleContent struct {
 
 const RoleUser = openai.ChatMessageRoleUser
 const RoleSystem = openai.ChatMessageRoleSystem
+const RoleAssistant = openai.ChatMessageRoleAssistant
 
 type RoleContentList []RoleContent
 
@@ -38,8 +39,25 @@ func (rcl *RoleContentList) AddUserContent(content string) *RoleContentList {
 	return rcl
 }
 
+func (rcl *RoleContentList) AddAssistantContent(content string) *RoleContentList {
+	*rcl = append(*rcl, RoleContent{
+		Role:    RoleAssistant,
+		Content: content,
+	})
+	return rcl
+}
+
+func (rcl *RoleContentList) AddChatPairContent(ask, reply string) *RoleContentList {
+	return rcl.AddUserContent(ask).AddAssistantContent(reply)
+}
+
+func (rcl *RoleContentList) Merge(merge *RoleContentList) *RoleContentList {
+	*rcl = append(*rcl, *merge...)
+	return rcl
+}
+
 func (rcl *RoleContentList) WithHistory(maxHistory int) *RoleContentList {
-	if len(*rcl) > maxHistory {
+	if len(*rcl) > maxHistory*2 {
 		*rcl = (*rcl)[len(*rcl)-maxHistory:]
 	}
 	return rcl

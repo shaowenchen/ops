@@ -2,9 +2,6 @@ package copilot
 
 import (
 	"context"
-	"errors"
-	"os/exec"
-	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/shaowenchen/ops/pkg/log"
@@ -31,8 +28,9 @@ func chatCompletetion(logger *log.Logger, client *openai.Client, model string, h
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:    model,
-			Messages: history.GetOpenaiChatCompletionMessages(),
+			Model:       model,
+			Messages:    history.GetOpenaiChatCompletionMessages(),
+			Temperature: 0.1,
 		},
 	)
 	if err != nil {

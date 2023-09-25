@@ -228,20 +228,20 @@ func (c *HostConnection) connecting() (err error) {
 }
 
 func (c *HostConnection) execBash(sudo bool, cmd string) (stdout string, err error) {
-	return c.execWithExecutor(sudo, "bash", cmd)
+	return c.ExecWithExecutor(sudo, "bash", "-c", cmd)
 }
 
 func (c *HostConnection) execPython(sudo bool, cmd string) (stdout string, err error) {
-	return c.execWithExecutor(sudo, "python", cmd)
+	return c.ExecWithExecutor(sudo, "python", "-c", cmd)
 }
 
-func (c *HostConnection) execWithExecutor(sudo bool, executor, cmd string) (stdout string, err error) {
+func (c *HostConnection) ExecWithExecutor(sudo bool, executor, param, cmd string) (stdout string, err error) {
 	cmd = utils.BuildBase64Cmd(sudo, cmd)
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
-		runner := exec.Command(executor, "-c", cmd)
+		runner := exec.Command(executor, param, cmd)
 		if sudo {
-			runner = exec.Command(executor, "bash", "-c", cmd)
+			runner = exec.Command("sudo", executor, param, cmd)
 		}
 		var out, errout bytes.Buffer
 		runner.Stdout = &out

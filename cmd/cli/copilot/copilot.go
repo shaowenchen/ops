@@ -4,14 +4,15 @@ import (
 	"bufio"
 	"fmt"
 
+	"os"
+	"strings"
+
 	"github.com/shaowenchen/ops/pkg/copilot"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"strings"
 )
 
 var copilotOpt option.CopilotOption
@@ -36,62 +37,64 @@ var CopilotCmd = &cobra.Command{
 
 func CreateCopilot(logger *log.Logger, opt option.CopilotOption) (err error) {
 	// Create History List
-	historyList := copilot.RoleContentList{}
+	askHistory := copilot.RoleContentList{}
 	// Start Chat
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print(">")
-		input, _ := reader.ReadString('\n')
-		input = strings.TrimSpace(input)
+		ask, _ := reader.ReadString('\n')
+		ask = strings.TrimSpace(ask)
 
-		if input == "exit" || input == "q" {
+		if ask == "exit" || ask == "q" {
 			break
 		}
-		if input == "" {
+		if ask == "" {
 			continue
 		}
-		chatMessage, err := ChatAsk(logger, opt, &historyList, input)
+		reply, err := ChatAsk(logger, opt, &askHistory, ask)
 		if err != nil {
 			logger.Error.Printf("Chat error: %v\n", err)
 			continue
 		}
-		if copilot.IsCanBeSolvedWithCode(chatMessage) {
-			langcodeList, err := ChatCode(logger, opt, &historyList, chatMessage)
+		askHistory.AddChatPairContent(ask, reply).WithHistory(opt.History)
+		if copilot.IsCanBeSolvedWithCode(reply) {
+			codeHistory := copilot.RoleContentList{}
+			codeHistory.Merge(&askHistory)
+			langcode, err := ChatCode(logger, opt, &codeHistory, reply)
 			if err != nil {
 				logger.Error.Printf("Chat error: %v\n", err)
 				continue
 			}
-			for _, langcode := range langcodeList {
-				needRun := false
-				if opt.Silence {
+			needRun := false
+			if opt.Silence {
+				needRun = true
+			} else {
+				logger.Info.Println(langcode.Content)
+				logger.Info.Printf("Would you like to run this code? (y/n)\n%s\n", langcode.Code)
+				confirm, _ := reader.ReadString('\n')
+				confirm = strings.TrimSpace(confirm)
+				if confirm == "y" {
 					needRun = true
-				} else {
-					logger.Info.Println(langcode.Content)
-					logger.Info.Printf("Would you like to run this code? (y/n)\n%s\n", langcode.Code)
-					confirm, _ := reader.ReadString('\n')
-					confirm = strings.TrimSpace(confirm)
-					if confirm == "y" {
-						needRun = true
-					} else if confirm == "n" {
-						continue
-					}
-				}
-				if needRun {
-					h, err := host.NewHostConnBase64(nil)
-					if err != nil {
-						logger.Error.Println(err)
-						break
-					}
-					stdout, err := h.Shell(false, langcode.Code)
-					if err != nil {
-						logger.Error.Println(err)
-						break
-					}
-					logger.Info.Println(stdout)
+				} else if confirm == "n" {
+					continue
 				}
 			}
+			if needRun {
+				hc, err := host.NewHostConnBase64(nil)
+				if err != nil {
+					logger.Error.Println(err)
+					break
+				}
+				stdout, err := hc.ExecWithExecutor(false, strings.ToLower(langcode.Language), "-c", langcode.Code)
+				if err != nil {
+					logger.Error.Println(err)
+					break
+				}
+				codeHistory.AddChatPairContent(langcode.Content, "Code execution returns: "+stdout)
+				logger.Info.Println(stdout)
+			}
 		} else {
-			logger.Info.Println(chatMessage)
+			logger.Info.Println(reply)
 		}
 	}
 	logger.Info.Println("Bye!")
