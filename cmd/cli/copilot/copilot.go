@@ -3,6 +3,7 @@ package copilot
 import (
 	"bufio"
 	"fmt"
+
 	"github.com/shaowenchen/ops/pkg/copilot"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
@@ -34,6 +35,9 @@ var CopilotCmd = &cobra.Command{
 }
 
 func CreateCopilot(logger *log.Logger, opt option.CopilotOption) (err error) {
+	// Create History List
+	historyList := copilot.RoleContentList{}
+	// Start Chat
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print(">")
@@ -46,21 +50,24 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) (err error) {
 		if input == "" {
 			continue
 		}
-		message, langcodeList, err := copilot.Chat(logger, opt, input)
+		chatMessage, err := ChatAsk(logger, opt, &historyList, input)
 		if err != nil {
 			logger.Error.Printf("Chat error: %v\n", err)
 			continue
 		}
-		if len(langcodeList) == 0 {
-			logger.Info.Println(message)
-			continue
-		} else {
+		if copilot.IsCanBeSolvedWithCode(chatMessage) {
+			langcodeList, err := ChatCode(logger, opt, &historyList, chatMessage)
+			if err != nil {
+				logger.Error.Printf("Chat error: %v\n", err)
+				continue
+			}
 			for _, langcode := range langcodeList {
 				needRun := false
 				if opt.Silence {
 					needRun = true
 				} else {
-					fmt.Printf("Would you like to run this code? (y/n)\n%s\n", langcode.Code)
+					logger.Info.Println(langcode.Content)
+					logger.Info.Printf("Would you like to run this code? (y/n)\n%s\n", langcode.Code)
 					confirm, _ := reader.ReadString('\n')
 					confirm = strings.TrimSpace(confirm)
 					if confirm == "y" {
@@ -83,6 +90,8 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) (err error) {
 					logger.Info.Println(stdout)
 				}
 			}
+		} else {
+			logger.Info.Println(chatMessage)
 		}
 	}
 	logger.Info.Println("Bye!")
