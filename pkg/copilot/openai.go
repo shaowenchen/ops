@@ -30,7 +30,7 @@ func chatCompletetion(logger *log.Logger, client *openai.Client, model string, h
 		openai.ChatCompletionRequest{
 			Model:       model,
 			Messages:    history.GetOpenaiChatCompletionMessages(),
-			Temperature: 0.1,
+			Temperature: 0,
 		},
 	)
 	if err != nil {

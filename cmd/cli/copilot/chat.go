@@ -2,6 +2,8 @@ package copilot
 
 import (
 	"encoding/json"
+	"fmt"
+
 	"github.com/shaowenchen/ops/pkg/copilot"
 	"github.com/shaowenchen/ops/pkg/log"
 
@@ -22,6 +24,7 @@ func ChatCode(logger *log.Logger, opt opsopt.CopilotOption, history *copilot.Rol
 	resp, err := copilot.ChatCompletetionCode(logger, client, opt.Model, history, input)
 	logger.Debug.Printf("llm code resp: %v\n", resp)
 	langCode = copilot.ChatCodeResponse{}
+	resp = fmt.Sprintf("[%s]", resp)
 	err = json.Unmarshal([]byte(resp), &langCode)
 	return langCode, err
 }

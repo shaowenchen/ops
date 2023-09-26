@@ -4,7 +4,7 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-type ChatCodeResponse Langcode
+type ChatCodeResponse []Langcode
 
 type Langcode struct {
 	Language string `json:"language"`

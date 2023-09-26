@@ -3,7 +3,6 @@ package copilot
 import (
 	"bufio"
 	"fmt"
-
 	"os"
 	"strings"
 
@@ -18,6 +17,8 @@ import (
 var copilotOpt option.CopilotOption
 var verbose string
 
+const welcome = `Welcome to Opscli Copilot. Please type "exit" or "q" to quit.`
+const prompt = "Opscli> "
 const defaultEndpoint = "https://api.openai.com/v1"
 const defaultModel = "gpt-3.5-turbo"
 
@@ -39,9 +40,10 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) (err error) {
 	// Create History List
 	askHistory := copilot.RoleContentList{}
 	// Start Chat
+	logger.Info.Println(welcome)
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print(">")
+		fmt.Printf(prompt)
 		ask, _ := reader.ReadString('\n')
 		ask = strings.TrimSpace(ask)
 
@@ -60,38 +62,40 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) (err error) {
 		if copilot.IsCanBeSolvedWithCode(reply) {
 			codeHistory := copilot.RoleContentList{}
 			codeHistory.Merge(&askHistory)
-			langcode, err := ChatCode(logger, opt, &codeHistory, reply)
+			langcodes, err := ChatCode(logger, opt, &codeHistory, reply)
 			if err != nil {
 				logger.Error.Printf("Chat error: %v\n", err)
 				continue
 			}
-			needRun := false
-			if opt.Silence {
-				needRun = true
-			} else {
-				logger.Info.Println(langcode.Content)
-				logger.Info.Printf("Would you like to run this code? (y/n)\n%s\n", langcode.Code)
-				confirm, _ := reader.ReadString('\n')
-				confirm = strings.TrimSpace(confirm)
-				if confirm == "y" {
-					needRun = true
-				} else if confirm == "n" {
-					continue
+			for _, langcode := range langcodes {
+				authorized := false
+				if opt.Silence {
+					authorized = true
+				} else {
+					logger.Info.Println(langcode.Content)
+					logger.Info.Printf("Would you like to run this code? (y/n)\n%s\n", langcode.Code)
+					confirm, _ := reader.ReadString('\n')
+					confirm = strings.TrimSpace(confirm)
+					if confirm == "y" {
+						authorized = true
+					} else if confirm == "n" {
+						continue
+					}
 				}
-			}
-			if needRun {
-				hc, err := host.NewHostConnBase64(nil)
-				if err != nil {
-					logger.Error.Println(err)
-					break
+				if authorized {
+					hc, err := host.NewHostConnBase64(nil)
+					if err != nil {
+						logger.Error.Println(err)
+						break
+					}
+					stdout, err := hc.ExecWithExecutor(false, strings.ToLower(langcode.Language), "-c", langcode.Code)
+					if err != nil {
+						logger.Error.Println(err)
+						break
+					}
+					codeHistory.AddChatPairContent(langcode.Content, "Code execution returns: "+stdout)
+					logger.Info.Println(stdout)
 				}
-				stdout, err := hc.ExecWithExecutor(false, strings.ToLower(langcode.Language), "-c", langcode.Code)
-				if err != nil {
-					logger.Error.Println(err)
-					break
-				}
-				codeHistory.AddChatPairContent(langcode.Content, "Code execution returns: "+stdout)
-				logger.Info.Println(stdout)
 			}
 		} else {
 			logger.Info.Println(reply)
