@@ -91,8 +91,7 @@ func ChatRecursion(logger *log.Logger, opt opsopt.CopilotOption, maxTryTimes int
 	if authorized {
 		hc, _ := host.NewHostConnBase64(nil)
 		reply, err = hc.ExecWithExecutor(false, strings.ToLower(langcode.Language), "-c", langcode.Code)
-		codeHistory.AddRunCodePairContent(langcode.Content, reply)
-
+		codeHistory.AddRunCodePairContent(langcode.Code, reply)
 	} else {
 		reply = ReplyNotAuthorized
 		return

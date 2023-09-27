@@ -52,7 +52,7 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 		ask = strings.TrimSpace(ask)
 		reply, err := ChatRecursion(logger, opt, maxTryTimes, &askHistory, ask, ReplyHasNotStarted, stdFd, oldState, rawState, terminal, confirmTerminal)
 		if err != nil {
-			PrintTerm(stdFd, oldState, rawState, "main for: " + err.Error())
+			PrintTerm(stdFd, oldState, rawState, err.Error())
 			continue
 		}
 		PrintTerm(stdFd, oldState, rawState, reply)
@@ -74,9 +74,9 @@ func fillParameters(opt *option.CopilotOption) {
 
 func init() {
 	CopilotCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
-	CopilotCmd.Flags().StringVarP(&copilotOpt.Endpoint, "endpoint", "", "", "e.g. https://api.openai.com/v1")
-	CopilotCmd.Flags().StringVarP(&copilotOpt.Model, "model", "", "", "e.g. gpt-3.5-turbo")
-	CopilotCmd.Flags().StringVarP(&copilotOpt.Key, "key", "", "", "e.g. sk-xxx")
+	CopilotCmd.Flags().StringVarP(&copilotOpt.Endpoint, "endpoint", "e", "", "e.g. https://api.openai.com/v1")
+	CopilotCmd.Flags().StringVarP(&copilotOpt.Model, "model", "m", "", "e.g. gpt-3.5-turbo")
+	CopilotCmd.Flags().StringVarP(&copilotOpt.Key, "key", "k", "", "e.g. sk-xxx")
 	CopilotCmd.Flags().IntVarP(&copilotOpt.History, "history", "", 5, "")
 	CopilotCmd.Flags().BoolVarP(&copilotOpt.Silence, "silence", "s", false, "")
 }
