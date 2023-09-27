@@ -1,10 +1,13 @@
 package copilot
 
 import (
+	"fmt"
+	"strings"
+
 	openai "github.com/sashabaranov/go-openai"
 )
 
-type ChatCodeResponse []Langcode
+type ChatCodeResponse Langcode
 
 type Langcode struct {
 	Language string `json:"language"`
@@ -49,6 +52,18 @@ func (rcl *RoleContentList) AddAssistantContent(content string) *RoleContentList
 
 func (rcl *RoleContentList) AddChatPairContent(ask, reply string) *RoleContentList {
 	return rcl.AddUserContent(ask).AddAssistantContent(reply)
+}
+
+func (rcl *RoleContentList) AddRunCodePairContent(code, reply string) *RoleContentList {
+	content := fmt.Sprintf("After run code:\n%s\n System output: %s\n", code, reply)
+	return rcl.AddUserContent(content)
+}
+
+func (rcl *RoleContentList) IsEndWithRunCodePair() bool {
+	if len(*rcl) == 0 {
+		return false
+	}
+	return strings.HasSuffix((*rcl)[len(*rcl)-1].Content, "After run code:")
 }
 
 func (rcl *RoleContentList) Merge(merge *RoleContentList) *RoleContentList {

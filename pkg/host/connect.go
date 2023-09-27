@@ -63,7 +63,7 @@ func (c *HostConnection) Shell(sudo bool, content string) (stdout string, err er
 		}
 		content = strings.ReplaceAll(content, rawCallFunc, stdout)
 	}
-	return c.execBash(sudo, content)
+	return c.execSh(sudo, content)
 }
 
 func (c *HostConnection) shellFuncMap(sudo bool, funcFull string) (stdout string, err error) {
@@ -81,13 +81,13 @@ func (c *HostConnection) install(sudo bool, component string) (stdout string, er
 		if !c.isInChina() {
 			proxy = constants.DefaultProxy
 		}
-		return c.execBash(sudo, utils.ShellInstallOpscli(proxy))
+		return c.execSh(sudo, utils.ShellInstallOpscli(proxy))
 	}
 	return
 }
 
 func (c *HostConnection) isInChina() (ok bool) {
-	_, err := c.execBash(false, utils.ShellIsInChina())
+	_, err := c.execSh(false, utils.ShellIsInChina())
 	if err != nil {
 		return true
 	}
@@ -227,21 +227,17 @@ func (c *HostConnection) connecting() (err error) {
 	return nil
 }
 
-func (c *HostConnection) execBash(sudo bool, cmd string) (stdout string, err error) {
-	return c.ExecWithExecutor(sudo, "bash", "-c", cmd)
-}
-
-func (c *HostConnection) execPython(sudo bool, cmd string) (stdout string, err error) {
-	return c.ExecWithExecutor(sudo, "python", "-c", cmd)
+func (c *HostConnection) execSh(sudo bool, cmd string) (stdout string, err error) {
+	return c.ExecWithExecutor(sudo, "sh", "-c", cmd)
 }
 
 func (c *HostConnection) ExecWithExecutor(sudo bool, executor, param, cmd string) (stdout string, err error) {
-	cmd = utils.BuildBase64Cmd(sudo, cmd)
+	cmd = utils.BuildBase64CmdWithExecutor(sudo, cmd, executor)
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
-		runner := exec.Command(executor, param, cmd)
+		runner := exec.Command("bash", "-c", cmd)
 		if sudo {
-			runner = exec.Command("sudo", executor, param, cmd)
+			runner = exec.Command("sudo", "bash", "-c", cmd)
 		}
 		var out, errout bytes.Buffer
 		runner.Stdout = &out
@@ -299,19 +295,19 @@ func (c *HostConnection) ExecWithExecutor(sudo bool, executor, param, cmd string
 }
 
 func (c *HostConnection) mv(sudo bool, src, dst string) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellMv(src, dst))
+	return c.execSh(sudo, utils.ShellMv(src, dst))
 }
 
 func (c *HostConnection) copy(sudo bool, src, dst string) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellCopy(src, dst))
+	return c.execSh(sudo, utils.ShellCopy(src, dst))
 }
 
 func (c *HostConnection) chown(sudo bool, idU, idG, src string) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellChown(idU, idG, src))
+	return c.execSh(sudo, utils.ShellChown(idU, idG, src))
 }
 
 func (c *HostConnection) rm(sudo bool, dst string) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellRm(dst))
+	return c.execSh(sudo, utils.ShellRm(dst))
 }
 
 func (c *HostConnection) cmdPull(sudo bool, src, dst string) (err error) {
@@ -319,7 +315,7 @@ func (c *HostConnection) cmdPull(sudo bool, src, dst string) (err error) {
 	if err != nil {
 		return err
 	}
-	output, err := c.execBash(sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
+	output, err := c.execSh(sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
 	if err != nil {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
@@ -453,71 +449,71 @@ func (c *HostConnection) fileMd5(sudo bool, filepath string) (md5 string, err er
 	if sudo {
 		cmd = fmt.Sprintf("sudo %s", cmd)
 	}
-	return c.execBash(sudo, cmd)
+	return c.execSh(sudo, cmd)
 }
 
 func (c *HostConnection) makeDir(sudo bool, filepath string) (err error) {
-	_, err = c.execBash(sudo, utils.ShellMakeDir(utils.SplitDirPath(filepath)))
+	_, err = c.execSh(sudo, utils.ShellMakeDir(utils.SplitDirPath(filepath)))
 	return
 }
 
 func (c *HostConnection) getIDU() (idu string, err error) {
-	return c.execBash(false, fmt.Sprintf("id -u"))
+	return c.execSh(false, fmt.Sprintf("id -u"))
 }
 
 func (c *HostConnection) getIDG() (idg string, err error) {
-	return c.execBash(false, fmt.Sprintf("id -g"))
+	return c.execSh(false, fmt.Sprintf("id -g"))
 }
 
 func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellCPUTotal())
+	return c.execSh(sudo, utils.ShellCPUTotal())
 }
 
 func (c *HostConnection) getCPULoad1(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellCPULoad1())
+	return c.execSh(sudo, utils.ShellCPULoad1())
 }
 
 func (c *HostConnection) getCPUUsagePercent(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellCPUUsagePercent())
+	return c.execSh(sudo, utils.ShellCPUUsagePercent())
 }
 
 func (c *HostConnection) getMemTotal(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellMemTotal())
+	return c.execSh(sudo, utils.ShellMemTotal())
 }
 
 func (c *HostConnection) getMemUsagePercent(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellMemUsagePercent())
+	return c.execSh(sudo, utils.ShellMemUsagePercent())
 }
 
 func (c *HostConnection) getHosname(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellHostname())
+	return c.execSh(sudo, utils.ShellHostname())
 }
 
 func (c *HostConnection) getDiskTotal(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellDiskTotal())
+	return c.execSh(sudo, utils.ShellDiskTotal())
 }
 
 func (c *HostConnection) getArch(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellArch())
+	return c.execSh(sudo, utils.ShellArch())
 }
 
 func (c *HostConnection) getDiskUsagePercent(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellDiskUsagePercent())
+	return c.execSh(sudo, utils.ShellDiskUsagePercent())
 }
 
 func (c *HostConnection) getKernelVersion(sudo bool) (stdout string, err error) {
-	return c.execBash(sudo, utils.ShellKernelVersion())
+	return c.execSh(sudo, utils.ShellKernelVersion())
 }
 
 func (c *HostConnection) getDistribution(sudo bool) (cpu string, err error) {
-	return c.execBash(sudo, utils.ShellDistribution())
+	return c.execSh(sudo, utils.ShellDistribution())
 }
 
 func (c *HostConnection) getTempfileName(name string) string {
 	nameSplit := strings.Split(name, "/")
 	name = nameSplit[len(nameSplit)-1]
 	cmd := "pwd"
-	stdout, err := c.execBash(false, cmd)
+	stdout, err := c.execSh(false, cmd)
 	if err != nil {
 		return name
 	}

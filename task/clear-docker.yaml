@@ -29,3 +29,6 @@ spec:
     - name: Clear Build Cache
       content: DOCKER_CLI_EXPERIMENTAL=enabled docker buildx prune --filter "until=72h" -f
       allowfailure: "true"
+    - name: Clear System Cache
+      content: docker system prune -f
+      allowfailure: "true"

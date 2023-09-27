@@ -59,8 +59,8 @@ func DecodingBase64ToString(src string) (dst string, err error) {
 	return
 }
 
-func BuildBase64Cmd(sudo bool, rawCmd string) string {
-	return fmt.Sprintf("base64 -d <<< %s | %s sh", EncodingStringToBase64(rawCmd), GetSudoString(sudo))
+func BuildBase64CmdWithExecutor(sudo bool, rawCmd string, executor string) string {
+	return fmt.Sprintf("base64 -d <<< %s | %s %s", EncodingStringToBase64(rawCmd), GetSudoString(sudo), executor)
 }
 
 func RemoveStartEndMark(raw string) string {
@@ -119,4 +119,8 @@ func MergeError(err error, err2 error) error {
 		return err
 	}
 	return err2
+}
+
+func CodeBlock(code string) string {
+	return fmt.Sprintf("%s\n%s\n%s\n", strings.Repeat("\u2193", 30), code, strings.Repeat("\u2191", 30))
 }

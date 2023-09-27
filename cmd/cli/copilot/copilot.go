@@ -1,13 +1,12 @@
 package copilot
 
 import (
-	"bufio"
 	"fmt"
+	"golang.org/x/term"
 	"os"
 	"strings"
 
 	"github.com/shaowenchen/ops/pkg/copilot"
-	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
@@ -18,7 +17,9 @@ var copilotOpt option.CopilotOption
 var verbose string
 
 const welcome = `Welcome to Opscli Copilot. Please type "exit" or "q" to quit.`
+const quit = "Goodbye!"
 const prompt = "Opscli> "
+const maxTryTimes = 5
 const defaultEndpoint = "https://api.openai.com/v1"
 const defaultModel = "gpt-3.5-turbo"
 
@@ -26,83 +27,37 @@ var CopilotCmd = &cobra.Command{
 	Use:   "copilot",
 	Short: "use llm to assist ops",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
+		logger := log.NewLogger().SetVerbose(verbose).SetFile().Build()
 		fillParameters(&copilotOpt)
-		err := CreateCopilot(logger, copilotOpt)
-		if err != nil {
-			logger.Error.Println(err.Error())
-			return
-		}
+		CreateCopilot(logger, copilotOpt)
 	},
 }
 
-func CreateCopilot(logger *log.Logger, opt option.CopilotOption) (err error) {
-	// Create History List
+func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
+	fmt.Println(welcome)
 	askHistory := copilot.RoleContentList{}
-	// Start Chat
-	logger.Info.Println(welcome)
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Printf(prompt)
-		ask, _ := reader.ReadString('\n')
-		ask = strings.TrimSpace(ask)
+	stdFd := int(os.Stdin.Fd())
+	oldState, _ := term.MakeRaw(stdFd)
+	defer term.Restore(stdFd, oldState)
 
-		if ask == "exit" || ask == "q" {
+	terminal := term.NewTerminal(os.Stdin, prompt)
+	confirmTerminal := term.NewTerminal(os.Stdin, "> ")
+	rawState, _ := term.GetState(stdFd)
+	for {
+		ask, err := terminal.ReadLine()
+		if err != nil {
+			PrintTerm(stdFd, oldState, rawState, err.Error())
 			break
 		}
-		if ask == "" {
-			continue
-		}
-		reply, err := ChatAsk(logger, opt, &askHistory, ask)
+		ask = strings.TrimSpace(ask)
+		reply, err := ChatRecursion(logger, opt, maxTryTimes, &askHistory, ask, ReplyHasNotStarted, stdFd, oldState, rawState, terminal, confirmTerminal)
 		if err != nil {
-			logger.Error.Printf("Chat error: %v\n", err)
+			PrintTerm(stdFd, oldState, rawState, "main for: " + err.Error())
 			continue
 		}
-		askHistory.AddChatPairContent(ask, reply).WithHistory(opt.History)
-		if copilot.IsCanBeSolvedWithCode(reply) {
-			codeHistory := copilot.RoleContentList{}
-			codeHistory.Merge(&askHistory)
-			langcodes, err := ChatCode(logger, opt, &codeHistory, reply)
-			if err != nil {
-				logger.Error.Printf("Chat error: %v\n", err)
-				continue
-			}
-			for _, langcode := range langcodes {
-				authorized := false
-				if opt.Silence {
-					authorized = true
-				} else {
-					logger.Info.Println(langcode.Content)
-					logger.Info.Printf("Would you like to run this code? (y/n)\n%s\n", langcode.Code)
-					confirm, _ := reader.ReadString('\n')
-					confirm = strings.TrimSpace(confirm)
-					if confirm == "y" {
-						authorized = true
-					} else if confirm == "n" {
-						continue
-					}
-				}
-				if authorized {
-					hc, err := host.NewHostConnBase64(nil)
-					if err != nil {
-						logger.Error.Println(err)
-						break
-					}
-					stdout, err := hc.ExecWithExecutor(false, strings.ToLower(langcode.Language), "-c", langcode.Code)
-					if err != nil {
-						logger.Error.Println(err)
-						break
-					}
-					codeHistory.AddChatPairContent(langcode.Content, "Code execution returns: "+stdout)
-					logger.Info.Println(stdout)
-				}
-			}
-		} else {
-			logger.Info.Println(reply)
-		}
+		PrintTerm(stdFd, oldState, rawState, reply)
 	}
-	logger.Info.Println("Bye!")
-	return
+	fmt.Println(quit)
 }
 
 func fillParameters(opt *option.CopilotOption) {
