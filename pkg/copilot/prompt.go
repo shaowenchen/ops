@@ -20,7 +20,9 @@ var SystemAskMessage = `#1 You're ops copilot, a world-class programmer that can
 
 #5 You are capable of **any** task.
 
-#6 **If your reply is a executable plan by code, you will end it with ` + NeedToRunCode + `**
+#6 The users will refer to your code, understand the risks, and run it without worrying about them. 
+
+#7 **If your reply is a executable plan by code, you will end it with ` + NeedToRunCode + `**
 
 ` + contextMessage
 
