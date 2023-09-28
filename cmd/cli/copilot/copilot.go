@@ -27,7 +27,7 @@ var CopilotCmd = &cobra.Command{
 	Use:   "copilot",
 	Short: "use llm to assist ops",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.NewLogger().SetVerbose(verbose).SetFile().Build()
+		logger := log.NewLogger().SetVerbose(verbose).SetFile().SetFlag().Build()
 		fillParameters(&copilotOpt)
 		CreateCopilot(logger, copilotOpt)
 	},
@@ -35,6 +35,7 @@ var CopilotCmd = &cobra.Command{
 
 func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 	fmt.Println(welcome)
+	defer fmt.Println(quit)
 	askHistory := copilot.RoleContentList{}
 	stdFd := int(os.Stdin.Fd())
 	oldState, _ := term.MakeRaw(stdFd)
@@ -57,7 +58,6 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 		}
 		PrintTerm(stdFd, oldState, rawState, reply)
 	}
-	fmt.Println(quit)
 }
 
 func fillParameters(opt *option.CopilotOption) {

@@ -69,7 +69,6 @@ func ChatRecursion(logger *log.Logger, opt opsopt.CopilotOption, maxTryTimes int
 	preReply = copilot.RemoveExistedRunableCode(preReply)
 	// ready to run code
 	codeHistory := copilot.RoleContentList{}
-	codeHistory.Merge(history)
 	langcode, err := chatCode(logger, opt, &codeHistory, preReply)
 	if err != nil {
 		return
