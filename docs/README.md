@@ -4,7 +4,7 @@ Ops 是一个运维工具项目。它的目标是提供一个简单的运维工�
 
 ## 架构
 
-![](/blog/images/2023/04/ops-arch.png)
+![](https://www.chenshaowen.com/blog/images/2023/04/ops-arch.png)
 
 ## Quick Start
 
