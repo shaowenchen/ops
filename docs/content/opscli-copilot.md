@@ -3,7 +3,7 @@
 ### 参数说明
 
 ```bash
-opscli copilot --help
+/usr/local/bin/opscli copilot --help
 
 use llm to assist ops
 
@@ -27,7 +27,7 @@ copilot 会默认从环境变量获取 `OPENAI_API_HOST`、`OPENAI_API_BASE`、`
 ### 使用
 
 ```bash
-opscli copilot
+/usr/local/bin/opscli copilot
 
 Welcome to Opscli Copilot. Please type "exit" or "q" to quit.
 Opscli>

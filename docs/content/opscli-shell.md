@@ -1,6 +1,6 @@
 ## opscli shell command
 
-### 指定操作目标清单 
+### 指定操作目标清单
 
 - 指定主机
 
@@ -9,6 +9,8 @@
 通过 `--username` 指定用户名，`--password` 指定密码。
 
 - 批量主机
+
+通过文件指定:
 
 `-i hosts.txt`
 
@@ -20,6 +22,10 @@ cat hosts.txt
 ```
 
 opscli 会从每行中正则匹配 ip 地址，作为目标地址。
+
+通过逗号分割指定:
+
+`-i 1.1.1.1,2.2.2.2`
 
 - 集群全部节点
 
@@ -36,34 +42,6 @@ opscli 会从每行中正则匹配 ip 地址，作为目标地址。
 ```
 
 node1 为节点名称。
-
-### 安装
-
-- 单机
-
-```bash
-curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
-```
-
-- 批量
-
-```bash
-/usr/local/bin/opscli shell --content "curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -" -i hosts.txt
-```
-
-### 升级
-
-- 单机
-
-```bash
-sudo /usr/local/bin/opscli upgrade
-```
-
-- 批量
-
-```bash
-/usr/local/bin/opscli shell --content "sudo /usr/local/bin/opscli upgrade" -i hosts.txt
-```
 
 ### 查看集群镜像
 

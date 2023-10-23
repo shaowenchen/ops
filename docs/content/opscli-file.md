@@ -49,7 +49,7 @@ export sk=
 - 上传本地文件 `./tmp.log` 到对象存储 `s3://logs/tmp.log`
 
 ```bash
-/usr/local/bin/opscli  file --direction upload --localfile ./tmp.log --remotefile s3://logs/tmp.log --bucket obs-test
+/usr/local/bin/opscli file --direction upload --localfile ./tmp.log --remotefile s3://logs/tmp.log --bucket obs-test
 ```
 
 `--bucket` 为 S3 bucket 名称，`--region` 为 S3 bucket 所在区域，`--endpoint` 为 S3 bucket 的 endpoint，`--direction` 为上传方向，`--localfile` 为本地文件，`--remotefile` 为远程文件。
