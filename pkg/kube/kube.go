@@ -19,7 +19,7 @@ import (
 )
 
 func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shellOpt option.ShellOption, kubeOpt option.KubeOption) (stdout string, err error) {
-	logger.Info.Println("> Run shell on", node.Name)
+	logger.Info.Println("> Run shell on ", node.Name)
 	namespacedName, err := utils.GetOrCreateNamespacedName(client, constants.OpsNamespace, fmt.Sprintf("shell-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)

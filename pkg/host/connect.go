@@ -268,14 +268,25 @@ func (c *HostConnection) ExecWithExecutor(sudo bool, executor, param, cmd string
 		line   = ""
 		r      = bufio.NewReader(out)
 	)
+	printLogStream := false
+	hasPrintCache := false
+	time.AfterFunc(time.Second*3, func() {
+		printLogStream = true
+	})
 	for {
 		b, err := r.ReadByte()
 		if err != nil {
 			break
 		}
 		output = append(output, b)
-
+		if printLogStream && !hasPrintCache {
+			fmt.Print(string(output))
+			hasPrintCache = !hasPrintCache
+		}
 		if b == byte('\n') {
+			if printLogStream {
+				fmt.Print(line)
+			}
 			line = ""
 			continue
 		}
