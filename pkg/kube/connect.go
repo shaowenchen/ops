@@ -50,6 +50,9 @@ func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
 	kc = &KubeConnection{}
 	kc.RestConfig, err = utils.GetRestConfig(kubeconfigPath)
 	if err != nil {
+		kc.RestConfig, err = utils.GetInClusterConfig()
+	}
+	if err != nil {
 		return
 	}
 	kc.BuildClients()
