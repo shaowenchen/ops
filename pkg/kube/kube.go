@@ -33,7 +33,7 @@ func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shell
 }
 
 func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.FileOption, kubeOption option.KubeOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(client, kubeOption.OpsNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
+	namespacedName, err := utils.GetOrCreateNamespacedName(client, kubeOption.OpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
 	}

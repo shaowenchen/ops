@@ -164,7 +164,7 @@ func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt opsopt.ShellOpti
 }
 
 func (kc *KubeConnection) FileonNode(logger *opslog.Logger, node *corev1.Node, option opsopt.FileOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, option.OpsNamespace, fmt.Sprintf("file-%s", time.Now().Format("2006-01-02-15-04-05")))
+	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, option.OpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
 	}
