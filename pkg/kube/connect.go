@@ -134,7 +134,7 @@ func (kc *KubeConnection) GetExpiredDays() (days int, err error) {
 }
 
 func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt opsopt.ShellOption, kubeOpt opsopt.KubeOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, kubeOpt.OpsNamespace, fmt.Sprintf("shell-%s", time.Now().Format("2006-01-02-15-04-05")))
+	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, kubeOpt.OpsNamespace, fmt.Sprintf("ops-shell-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
 	}
