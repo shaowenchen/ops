@@ -18,8 +18,6 @@ opscli shell --content "apt-get install fio -y" --nodename node1
 
 - 在节点上测试磁盘 IO 性能
 
-bs = 4k iodepth = 1：随机读/写测试，能反映硬盘的时延性能
-
 ```bash
 opscli task -f ~/.ops/task/get-diskio-byfio.yaml --size 1g --filename=/tmp/testfile --nodename node1
 ```
@@ -57,5 +55,5 @@ lat (usec): min=34, max=457722, avg=57.78, stdev=1630.32 -> 4k 读延时为 57.7
 
 (8/8) Rand_Write_Latency_Testing
 
-lat (usec): min=35, max=664838, avg=385.12, stdev=5335.64 -> 4k 写延时为 57.78 us
+lat (usec): min=35, max=664838, avg=385.12, stdev=5335.64 -> 4k 写延时为 385.12 us
 ```
