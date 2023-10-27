@@ -7,17 +7,21 @@ spec:
   desc: fio will destroy data on filename path
   variables:
     filename: "/tmp/testfile"
-    sizeg: 2
+    size: 100m
   steps:
-    - name: Rand_Write_Testing
-      content: fio -direct=1 -iodepth=128 -rw=randwrite -ioengine=libaio -bs=4k -size=${sizeg}G -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Rand_Write_Testing
     - name: Rand_Read_Testing
-      content: fio -direct=1 -iodepth=128 -rw=randread -ioengine=libaio -bs=4k -size=${sizeg}G -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Rand_Read_Testing
-    - name: Write_PPS_Testing
-      content: fio -direct=1 -iodepth=64 -rw=write -ioengine=libaio -bs=1024k -size=${sizeg}G -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Write_PPS_Testing
-    - name: Read_PPS_Testing
-      content: fio -direct=1 -iodepth=64 -rw=read -ioengine=libaio -bs=1024k -size=${sizeg}G -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Read_PPS_Testing
-    - name: Rand_Write_Latency_Testing
-      content: fio -direct=1 -iodepth=1 -rw=randwrite -ioengine=libaio -bs=4k -size=${sizeg}G -numjobs=1 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Rand_Write_Latency_Testing
+      content: fio -direct=1 -iodepth=128 -rw=randread -ioengine=libaio -bs=4k -size=${size} -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Rand_Read_Testing
+    - name: Rand_Write_Testing
+      content: fio -direct=1 -iodepth=128 -rw=randwrite -ioengine=libaio -bs=4k -size=${size} -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Rand_Write_Testing
+    - name: Sequ_Read_Testing
+      content: fio -direct=1 -iodepth=32 -rw=read -ioengine=libaio -bs=128k -size=${size} -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Sequ_Read_Testing
+    - name: Sequ_Write_Testing
+      content: fio -direct=1 -iodepth=32 -rw=write -ioengine=libaio -bs=128k -size=${size} -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Sequ_Write_Testing
+    - name: Rand_Read_IOPS_Testing
+      content: fio -direct=1 -iodepth=32 -rw=randread -ioengine=libaio -bs=4k -size=${size} -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Read_IOPS_Testing
+    - name: Rand_Write_IOPS_Testing
+      content: fio -direct=1 -iodepth=32 -rw=randwrite -ioengine=libaio -bs=4k -size=${size} -numjobs=1 -runtime=1000 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Write_IOPS_Testing
     - name: Rand_Read_Latency_Testing
-      content: fio -direct=1 -iodepth=1 -rw=randread -ioengine=libaio -bs=4k -size=${sizeg}G -numjobs=1 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Rand_Read_Latency_Testing
+      content: fio -direct=1 -iodepth=1 -rw=randread -ioengine=libaio -bs=4k -size=${size} -numjobs=1 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Rand_Read_Latency_Testing
+    - name: Rand_Write_Latency_Testing
+      content: fio -direct=1 -iodepth=1 -rw=randwrite -ioengine=libaio -bs=4k -size=${size} -numjobs=1 -group_reporting -filename=${filename} --allow_mounted_write=1 -name=Rand_Write_Latency_Testing
