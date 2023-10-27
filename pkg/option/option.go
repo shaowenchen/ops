@@ -16,6 +16,7 @@ type HostOption struct {
 }
 
 type KubeOption struct {
+	OpsNamespace string
 	NodeName     string
 	RuntimeImage string
 	All          bool

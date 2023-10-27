@@ -5,7 +5,7 @@ import (
 )
 
 const AllNamespaces = "all"
-const OpsNamespace = "ops-system"
+const DefaultOpsNamespace = "ops-system"
 const DefaultNamespace = "default"
 
 const LabelNodeRoleMaster = "node-role.kubernetes.io/master"

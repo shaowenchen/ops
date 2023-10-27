@@ -93,6 +93,7 @@ func init() {
 	FileCmd.Flags().IntVar(&hostOpt.Port, "port", 22, "")
 
 	FileCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
+	FileCmd.Flags().StringVarP(&kubeOpt.OpsNamespace, "opsnamespace", "", constants.DefaultOpsNamespace, "ops work namespace")
 
 	FileCmd.Flags().StringVarP(&s3Opt.Region, "region", "", "ap-southeast-3", "")
 	FileCmd.Flags().StringVarP(&s3Opt.Endpoint, "endpoint", "", "obs.ap-southeast-3.myhuaweicloud.com", "")
