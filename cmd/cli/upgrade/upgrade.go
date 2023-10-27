@@ -16,7 +16,7 @@ var UpgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade to latest version",
 	Run: func(cmd *cobra.Command, args []string) {
-		upgrade := exec.Command("bash", "-c", utils.ShellInstallOpscli(proxy))
+		upgrade := exec.Command("sh", "-c", utils.ShellInstallOpscli(proxy))
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 		upgrade.Stdout = &stdout
