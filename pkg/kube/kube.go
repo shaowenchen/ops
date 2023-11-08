@@ -2,6 +2,7 @@ package kube
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -87,7 +88,9 @@ func GetNodes(logger *log.Logger, client *kubernetes.Clientset, kubeOpt option.K
 			nodeList = append(nodeList, node)
 		}
 	}
-
+	if len(nodeList) == 0 {
+		err = errors.New("no node found")
+	}
 	return
 }
 

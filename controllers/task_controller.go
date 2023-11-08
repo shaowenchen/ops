@@ -196,9 +196,10 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 		clusterCmd := func() {
 			c := &opsv1.Cluster{}
 			kubeOpt := option.KubeOption{
-				NodeName:     t.GetSpec().NameRef,
+				NodeName:     t.GetSpec().NodeName,
 				All:          t.GetSpec().All,
 				RuntimeImage: t.GetSpec().RuntimeImage,
+				OpsNamespace: constants.DefaultOpsNamespace,
 			}
 			err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, c)
 			if err != nil {
