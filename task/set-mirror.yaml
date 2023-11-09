@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: set-mirror
+  namespace: ops-system
+spec:
+  desc: Set os package mirror to aliyun
+  variables:
+    proxy: https://ghproxy.com/
+  steps:
+    - name: Set mirror
+      content: curl -sfL ${proxy}https://raw.githubusercontent.com/shaowenchen/hubimage/main/mirror/get.sh | sh -
