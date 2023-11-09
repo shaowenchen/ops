@@ -68,6 +68,7 @@ type TaskReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	// default to reconcile all namespace, if ACTIVE_NAMESPACE is set, only reconcile ACTIVE_NAMESPACE
 	actionNs := os.Getenv("ACTIVE_NAMESPACE")
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
@@ -105,7 +106,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if t.Spec.RuntimeImage == "" {
 		t.Spec.RuntimeImage = constants.DefaultRuntimeImage
 	}
-	// had run
+	// had run once, skip
 	if t.Status.RunStatus != "" && t.GetSpec().Crontab == "" {
 		return ctrl.Result{}, nil
 	}
@@ -311,8 +312,7 @@ func (r *TaskReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 	if lastT.Status.RunStatus == opsv1.StatusRunning {
 		lastT.Status.StartTime = &metav1.Time{Time: time.Now()}
 	}
-	// err = r.Client.Status().Update(ctx, lastT)
-	err = r.Client.Update(ctx, lastT)
+	err = r.Client.Status().Update(ctx, lastT)
 	if err != nil {
 		logger.Error.Println(err, "update task status error")
 	}
