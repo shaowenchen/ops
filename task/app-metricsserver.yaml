@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: add metricsServer
   variables:
-    proxy: https://ghproxy.com/
+    proxy: https://mirror.ghproxy.com/
     action: apply
     version: 0.5.0
     kubeconfig: "/etc/kubernetes/admin.conf"

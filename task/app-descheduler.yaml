@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: install descheduler
   variables:
-    proxy: https://ghproxy.com/
+    proxy: https://mirror.ghproxy.com/
     action: apply
     kubeconfig: "/etc/kubernetes/admin.conf"
   steps:

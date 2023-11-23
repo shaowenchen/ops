@@ -7,7 +7,7 @@ spec:
   desc: Install Velero Client && Server
   variables:
     velero_version: v1.9.2
-    download_url: https://ghproxy.com/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
+    download_url: https://mirror.ghproxy.com/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
     region: ap-southeast-3
     endpoint: https://obs.ap-southeast-3.myhuaweicloud.com
     bucket:

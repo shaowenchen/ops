@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: Install Opscli
   variables:
-    proxy: https://ghproxy.com/
+    proxy: https://mirror.ghproxy.com/
   steps:
     - name: Install Opscli
       content: curl -sfL ${proxy}https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -

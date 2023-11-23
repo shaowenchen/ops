@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: Set os package mirror to aliyun
   variables:
-    proxy: https://ghproxy.com/
+    proxy: https://mirror.ghproxy.com/
   steps:
     - name: Set mirror
       content: curl -sfL ${proxy}https://raw.githubusercontent.com/shaowenchen/hubimage/main/mirror/get.sh | sh -
