@@ -17,6 +17,7 @@ var hostOpt option.HostOption
 var fileOpt option.FileOption
 var kubeOpt option.KubeOption
 var s3Opt option.S3FileOption
+var serverOpt option.FileServerOption
 var inventory string
 var verbose string
 
@@ -28,6 +29,12 @@ var FileCmd = &cobra.Command{
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
+		// upstream is server
+		if serverOpt.Api != "" {
+			ServerFile(logger, fileOpt, serverOpt)
+			return
+		}
+		// upstream is s3、image、local
 		fileOpt.Filling()
 		if fileOpt.StorageType == constants.RemoteStorageTypeS3 {
 			S3File(logger, fileOpt, s3Opt)
@@ -78,6 +85,10 @@ func S3File(logger *log.Logger, option option.FileOption, s3option option.S3File
 	return storage.S3File(logger, option, s3option)
 }
 
+func ServerFile(logger *log.Logger, option option.FileOption, serverOpt option.FileServerOption) (err error) {
+	return storage.ServerFile(logger, option, serverOpt)
+}
+
 func init() {
 	FileCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
 	FileCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
@@ -85,6 +96,7 @@ func init() {
 	FileCmd.Flags().StringVarP(&fileOpt.LocalFile, "localfile", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.RemoteFile, "remotefile", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.Direction, "direction", "d", "", "")
+	FileCmd.Flags().StringVarP(&fileOpt.AesKey, "aeskey", "", storage.UnSetFlag, "if you want to encrypt or decrypt file, please provide a aes key")
 
 	FileCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	FileCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
@@ -100,4 +112,6 @@ func init() {
 	FileCmd.Flags().StringVarP(&s3Opt.Bucket, "bucket", "", "", "")
 	FileCmd.Flags().StringVarP(&s3Opt.AK, "ak", "", "", "")
 	FileCmd.Flags().StringVarP(&s3Opt.SK, "sk", "", "", "")
+
+	FileCmd.Flags().StringVarP(&serverOpt.Api, "api", "", "", "")
 }

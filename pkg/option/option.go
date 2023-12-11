@@ -58,6 +58,11 @@ type FileOption struct {
 	StorageImage string
 	Direction    string
 	Sudo         bool
+	AesKey       string
+}
+
+type FileServerOption struct {
+	Api string
 }
 
 func (f *FileOption) Filling() {
