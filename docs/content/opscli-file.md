@@ -67,7 +67,7 @@ unset ak
 unset sk
 ```
 
-### 本地文件分发到远程
+### 本地文件分发到远程主机上
 
 - 上传本地文件 `./tmp.log` 到远程主机 `/tmp/tmp.log`
 
@@ -80,5 +80,20 @@ unset sk
 ```bash
 /usr/local/bin/opscli file --direction download --localfile ./tmp1.log --remotefile /tmp/tmp.log -i 1.2.3.4 --port 2222 --username root
 ```
+
+### 本地文件上传到 API Server，可加密
+
+> 提供本地加解密，与服务器端进行文件传输
+
+- 上传本地文件 `./tmp.log` 到 API Server
+
+```bash
+/usr/local/bin/opscli file --direction upload --api https://uploadapi.vinqi.info/api/v1/files --aeskey "" --localfile ./tmp.log
+
+Please use the following command to download the file:
+opscli file --api https://uploadapi.vinqi.info/api/v1/files --aeskey xxxxxxxxxxx --direction download --remotefile https://download_url_link.com.aes
+```
+
+这里的 api 提供上传服务，aeskey 为空字符串时自动生成一个随机秘钥，如果不设置 aeskey 默认为 unset 将不会进行文件加密。
 
 ### 从镜像中提取文件到集群主机

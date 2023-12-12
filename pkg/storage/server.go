@@ -41,7 +41,7 @@ func ServerFile(logger *log.Logger, fileOpt option.FileOption, serverOpt option.
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		logger.Info.Println("Congratulations, upload file successfully! Below is the command to download:")
+		logger.Info.Println("Please use the following command to download the file:")
 		logger.Info.Println(buildDowloadOpscliCmd(serverOpt.Api, resp, hex.EncodeToString([]byte(fileOpt.AesKey))))
 	} else if utils.IsDownloadDirection(fileOpt.Direction) || fileOpt.LocalFile == "" {
 		if fileOpt.LocalFile == "" {
@@ -76,7 +76,7 @@ func buildDowloadOpscliCmd(api, resp, aesKey string) string {
 	} else {
 		return fmt.Sprintf("No url found in response: %s", resp)
 	}
-	return fmt.Sprintf("opscli file --remotefile %s --direction download --api %s --aeskey %s", downloadUrl, api, aesKey)
+	return fmt.Sprintf("opscli file --api %s --aeskey %s --direction download --remotefile %s", downloadUrl, api, aesKey)
 }
 
 func getFileToLocal(downloadUrl, localFilePath string) (err error) {
