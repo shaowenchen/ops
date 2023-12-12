@@ -76,7 +76,7 @@ func buildDowloadOpscliCmd(api, resp, aesKey string) string {
 	} else {
 		return fmt.Sprintf("No url found in response: %s", resp)
 	}
-	return fmt.Sprintf("opscli file --api %s --aeskey %s --direction download --remotefile %s", downloadUrl, api, aesKey)
+	return fmt.Sprintf("opscli file --api %s --aeskey %s --direction download --remotefile %s", api, aesKey, downloadUrl)
 }
 
 func getFileToLocal(downloadUrl, localFilePath string) (err error) {
