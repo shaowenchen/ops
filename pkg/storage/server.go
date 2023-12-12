@@ -4,27 +4,26 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
-
-	"github.com/shaowenchen/ops/pkg/log"
-	"github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/utils"
 )
 
 func ServerFile(logger *log.Logger, fileOpt option.FileOption, serverOpt option.FileServerOption) (err error) {
 	if serverOpt.Api == "" {
 		return fmt.Errorf("please provide a valid api")
 	}
-	if utils.IsUploadDirection(fileOpt.Direction) {
+	if utils.IsUploadDirection(fileOpt.Direction) || fileOpt.RemoteFile == "" {
 		if fileOpt.AesKey != UnSetFlag {
 			if fileOpt.AesKey == "" {
 				aesKey, err := GetDefaultRandomKey()
-				logger.Info.Println("aesKey: ", hex.EncodeToString(aesKey))
 				if err != nil {
 					return err
 				}
@@ -42,8 +41,9 @@ func ServerFile(logger *log.Logger, fileOpt option.FileOption, serverOpt option.
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		logger.Info.Println(resp)
-	} else if utils.IsDownloadDirection(fileOpt.Direction) {
+		logger.Info.Println("Congratulations, upload file successfully! Below is the command to download:")
+		logger.Info.Println(buildDowloadOpscliCmd(serverOpt.Api, resp, hex.EncodeToString([]byte(fileOpt.AesKey))))
+	} else if utils.IsDownloadDirection(fileOpt.Direction) || fileOpt.LocalFile == "" {
 		if fileOpt.LocalFile == "" {
 			fileOpt.LocalFile = filepath.Base(fileOpt.RemoteFile)
 		}
@@ -65,6 +65,18 @@ func ServerFile(logger *log.Logger, fileOpt option.FileOption, serverOpt option.
 		logger.Error.Println(err)
 	}
 	return
+}
+
+func buildDowloadOpscliCmd(api, resp, aesKey string) string {
+	var urlRegex = regexp.MustCompile(`https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`)
+	subs := urlRegex.FindStringSubmatch(resp)
+	downloadUrl := ""
+	if len(subs) > 0 {
+		downloadUrl = subs[0]
+	} else {
+		return fmt.Sprintf("No url found in response: %s", resp)
+	}
+	return fmt.Sprintf("opscli file --remotefile %s --direction download --api %s --aeskey %s", downloadUrl, api, aesKey)
 }
 
 func getFileToLocal(downloadUrl, localFilePath string) (err error) {
