@@ -1,0 +1,34 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: app-nydus
+  namespace: ops-system
+spec:
+  desc: Install nydus
+  variables:
+    proxy: https://mirror.ghproxy.com/
+    version: 2.2.4
+    rpcversion: 0.13.4
+    arch: amd64
+    os: linux
+  steps:
+    - name: Download nydus
+      content: wget ${proxy}https://github.com/dragonflyoss/nydus/releases/download/v${version}/nydus-static-v${version}-${os}-${arch}.tgz
+    - name: Extract nydus-static
+      content: tar -xzf nydus-static-v${version}-${os}-${arch}.tgz
+    - name: Move nydus-static config
+      content: rm -rf nydus-static/configs
+    - name: Move nydus-static binary
+      content: mv -f nydus-static/* /usr/local/bin/
+    - name: Clean nydus-static
+      content: rm -rf nydus-static-v${version}-${os}-${arch}.tgz nydus-static
+    - name: Download nydus-snapshotter
+      content: wget ${proxy}https://github.com/containerd/nydus-snapshotter/releases/download/v${rpcversion}/nydus-snapshotter-v${rpcversion}-x86_64.tgz
+    - name: Extract nydus-snapshotter
+      content: tar -xzf nydus-snapshotter-v${rpcversion}-x86_64.tgz
+    - name: Move nydus-snapshotter
+      content: mv -f nydus-snapshotter/* /usr/local/bin/
+    - name: Clean nydus-snapshotter
+      content: rm -rf nydus-snapshotter-v${rpcversion}-x86_64.tgz nydus-snapshotter
+    - name: Verson
+      content: containerd-nydus-grpc --version

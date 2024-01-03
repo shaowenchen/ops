@@ -12,11 +12,15 @@ spec:
   steps:
     - name: Download nerdctl
       content: wget ${proxy}https://github.com/containerd/nerdctl/releases/download/v${version}/nerdctl-${version}-linux-${arch}.tar.gz
-    - name: Extract nerdctl to dir
+    - name: Extract
       content: tar -xzf nerdctl-${version}-linux-${arch}.tar.gz
-    - name: Move nerdctl
+    - name: Move
       content: mv nerdctl /usr/local/bin/nerdctl
-    - name: Clean up
+    - name: Clean
       content: rm -rf nerdctl-${version}-linux-${arch}.tar.gz containerd-rootless-setuptool.sh containerd-rootless.sh
+    - name: make etc dir
+      content: mkdir -p /etc/nerdctl
+    - name: config
+      content: echo 'namespace = "k8s.io"' > /etc/nerdctl/nerdctl.toml
     - name: Verson
       content: nerdctl --version
