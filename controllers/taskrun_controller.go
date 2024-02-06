@@ -79,7 +79,7 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		tr.Spec.RuntimeImage = opsconstants.DefaultRuntimeImage
 	}
 	// had run once, skip
-	if tr.Status.RunStatus != "" {
+	if tr.Status.RunStatus != "" && tr.Status.RunStatus != opsv1.StatusInit {
 		return ctrl.Result{}, nil
 	}
 	// get task
@@ -151,9 +151,11 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		err = r.runTaskOnHost(cliLogger, ctx, t, tr, h)
 		cliLogger.Flush()
 		if err != nil {
+			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
 			logger.Error.Println(err)
 			return
 		}
+		r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
 	} else if t.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
 		c := &opsv1.Cluster{}
 		kubeOpt := opsoption.KubeOption{
@@ -173,9 +175,11 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		err = r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
 		cliLogger.Flush()
 		if err != nil {
+			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
 			logger.Error.Println(err)
 			return
 		}
+		r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
 	}
 	return
 }

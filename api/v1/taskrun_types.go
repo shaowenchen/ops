@@ -84,7 +84,7 @@ type TaskRunStep struct {
 
 func (t *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutput, stepStatus string) {
 	if t.TaskRunNodeStatus == nil {
-		return
+		t.TaskRunNodeStatus = make(map[string]*TaskRunNodeStatus)
 	}
 	if _, ok := t.TaskRunNodeStatus[nodeName]; !ok {
 		t.TaskRunNodeStatus[nodeName] = &TaskRunNodeStatus{}
