@@ -30,6 +30,7 @@ import (
 	opsoption "github.com/shaowenchen/ops/pkg/option"
 	opstask "github.com/shaowenchen/ops/pkg/task"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -66,6 +67,10 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
 	tr := &opsv1.TaskRun{}
 	err := r.Client.Get(ctx, req.NamespacedName, tr)
+
+	if apierrors.IsNotFound(err) {
+		return ctrl.Result{}, nil
+	}
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -95,17 +100,19 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{}, nil
 }
 
-func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
+func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) {
 	trs := &opsv1.TaskRunList{}
 	maxHistory := t.GetSpec().TaskRunHistoryLimit
 	if maxHistory == 0 {
 		maxHistory = opsv1.DefaultMaxTaskrunHistory
 	}
-	err = r.Client.List(ctx, trs,
+	err := r.Client.List(ctx,
+		trs,
 		client.InNamespace(t.GetNamespace()),
-		client.MatchingFields{".spec.taskRef.name": t.Name})
+		client.MatchingFields{".spec.taskRef": t.Name})
 	if err != nil {
-		return err
+		logger.Error.Println(err)
+		return
 	}
 
 	sort.Slice(trs.Items, func(i, j int) bool {
@@ -121,8 +128,7 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 			}
 		}
 	}
-
-	return nil
+	return
 }
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
@@ -246,6 +252,12 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.TaskRun{}, ".spec.taskRef", func(rawObj client.Object) []string {
+		tr := rawObj.(*opsv1.TaskRun)
+		return []string{tr.Spec.TaskRef}
+	}); err != nil {
+		return err
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.TaskRun{}).
 		Complete(r)
