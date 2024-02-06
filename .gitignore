@@ -1,4 +1,3 @@
-
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -27,3 +26,5 @@ Dockerfile.cross
 __*
 docs/node_modules
 docs/_book
+
+.env

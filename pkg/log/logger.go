@@ -136,7 +136,8 @@ func (l *Logger) Flush() string {
 	if l.File != nil {
 		multiWriter = io.MultiWriter(multiWriter, l.File)
 	}
+	content := l.Buffer.String()
 	io.Copy(multiWriter, l.Buffer)
 	defer l.Buffer.Reset()
-	return l.Buffer.String()
+	return content
 }

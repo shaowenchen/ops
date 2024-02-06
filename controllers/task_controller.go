@@ -167,7 +167,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 	r.updateStatusMap[t.GetUniqueKey()] = &sync.Mutex{}
 	t.Status.NewTaskRun()
 	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
-	if t.GetSpec().TypeRef == "host" || t.GetSpec().TypeRef == "" {
+	if t.GetSpec().TypeRef == opsv1.TaskTypeRefHost || t.GetSpec().TypeRef == "" {
 		hostCmd := func() {
 			h := &opsv1.Host{}
 			err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, h)
@@ -193,7 +193,7 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 		} else {
 			hostCmd()
 		}
-	} else if t.GetSpec().TypeRef == "cluster" {
+	} else if t.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
 		clusterCmd := func() {
 			c := &opsv1.Cluster{}
 			kubeOpt := option.KubeOption{

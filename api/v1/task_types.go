@@ -44,6 +44,9 @@ type TaskSpec struct {
 	RuntimeImage string            `json:"runtimeImage,omitempty"`
 }
 
+const TaskTypeRefHost = "host"
+const TaskTypeRefCluster = "cluster"
+
 type Step struct {
 	When         string     `json:"when,omitempty"`
 	Name         string     `json:"name,omitempty"`

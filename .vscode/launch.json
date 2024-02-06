@@ -11,7 +11,7 @@
             "mode": "debug",
             "cwd": "${workspaceFolder}",
             "program": "cmd/cli/main.go",
-            "args": ["task", "-f", "~/Documents/sre/opscli/alert/alert-promql-pending.yaml", "-i", "~/Documents/sre/opscli/kcicd-prod", "--incluster"],
+            "args": ["task", "-f", "", "-i", "", "--incluster"],
             "env": {}
         },
         {
@@ -21,8 +21,8 @@
             "mode": "debug",
             "cwd": "${workspaceFolder}",
             "program": "cmd/server/main.go",
-            "args": [],
-            "env": {}
+            "args": ["-c", "default.toml"],
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "name": "controller",

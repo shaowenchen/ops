@@ -1,62 +1,96 @@
 package server
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
-	v1 "github.com/shaowenchen/ops/api/v1"
-	"github.com/shaowenchen/ops/pkg/host"
-	"github.com/shaowenchen/ops/pkg/log"
-	"github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/task"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 )
 
-func Healthz(c *gin.Context) {
-	c.JSON(http.StatusOK, "OK")
+type Pagination struct {
+	PageSize uint         `form:"page_size" json:"page_size"`
+	Page     uint         `form:"page" json:"page"`
+	List     []opsv1.Task `json:"list"`
+	Total    uint         `json:"total"`
 }
 
-func GetTask(c *gin.Context) {
-	taskExample := v1.Task{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "example-task",
-			Namespace: "default",
-		},
-		Spec: v1.TaskSpec{
-			Name: "This is a task example",
-			Desc: "This desc about thie task",
-			Steps: []v1.Step{
-				{
-					Name:    "Show OS info",
-					Content: "uname -a",
-				},
-			},
-		},
+func paginator(dataList []opsv1.Task, pageSize, page uint) (pagination Pagination) {
+	pagination.List = []opsv1.Task{}
+	pagination.PageSize = pageSize
+	pagination.Page = page
+	pagination.Total = uint(len(dataList))
+
+	maxPage := pagination.Total / pageSize
+	if pagination.Total%pageSize != 0 {
+		maxPage++
 	}
-	c.JSON(http.StatusOK, taskExample)
+	if page > maxPage || page == 0 {
+		return
+	}
+
+	start := (page - 1) * pageSize
+	end := start + pageSize
+	if end > pagination.Total {
+		end = pagination.Total
+	}
+	if end > start {
+		pagination.List = dataList[start:end]
+	}
+	return
 }
 
-func CreateTask(c *gin.Context) {
-	dataBytes, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-	}
-	t := &v1.Task{}
-	err = json.Unmarshal(dataBytes, t)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-	}
-	logger := log.NewLogger().SetVerbose("").SetStd().SetFile().WaitFlush().Build()
-	hosts := host.GetHosts(logger, option.HostOption{}, "")
-	for _, h := range hosts {
-		hc, err := host.NewHostConnBase64(h)
-		if err != nil {
-			logger.Error.Println(err)
+func showNotAuthorized(c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, gin.H{
+		"code":    -1,
+		"message": "not authorized",
+	})
+}
+func showError(c *gin.Context, message string) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":    -1,
+		"message": message,
+	})
+}
+
+func showData(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data":    data,
+	})
+}
+
+func showSuccess(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+	})
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if GlobalConfig.Server.Token == "" {
+			c.Next()
 			return
 		}
-		task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			showNotAuthorized(c)
+			return
+		}
+
+		headerParts := strings.SplitN(authHeader, " ", 2)
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			showError(c, "invalid Authorization")
+			return
+		}
+
+		if headerParts[1] != GlobalConfig.Server.Token {
+			showError(c, "invalid token")
+			return
+		}
+
+		c.Next()
 	}
-	c.JSON(http.StatusOK, logger.Flush())
 }

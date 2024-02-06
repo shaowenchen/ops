@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"github.com/shaowenchen/ops/pkg/constants"
@@ -50,6 +51,14 @@ func GetClientByRestconfig(restConfig *rest.Config) (client *kubernetes.Clientse
 func GetRestConfig(kubeconfigPath string) (*rest.Config, error) {
 	if len(kubeconfigPath) > 0 {
 		return clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	}
+	// try KUBECONFIG
+	if kubeconfig := os.Getenv("KUBECONFIG"); len(kubeconfig) > 0 {
+		return clientcmd.BuildConfigFromFlags("", kubeconfig)
+	}
+	// try inCluster
+	if _, err := rest.InClusterConfig(); err == nil {
+		return rest.InClusterConfig()
 	}
 	return nil, fmt.Errorf("could not locate a kubeconfig")
 }
