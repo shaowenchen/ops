@@ -33,6 +33,7 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 
+	crdv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/controllers"
 	//+kubebuilder:scaffold:imports
 )
@@ -46,6 +47,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(opsv1.AddToScheme(scheme))
+	utilruntime.Must(crdv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -109,6 +111,13 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Cluster")
+		os.Exit(1)
+	}
+	if err = (&controllers.TaskRunReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "TaskRun")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

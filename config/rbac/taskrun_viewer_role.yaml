@@ -1,0 +1,27 @@
+# permissions for end users to view taskruns.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: taskrun-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: ops
+    app.kubernetes.io/part-of: ops
+    app.kubernetes.io/managed-by: kustomize
+  name: taskrun-viewer-role
+rules:
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - taskruns
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - taskruns/status
+  verbs:
+  - get

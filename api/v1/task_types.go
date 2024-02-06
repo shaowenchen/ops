@@ -17,8 +17,6 @@ limitations under the License.
 package v1
 
 import (
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -30,18 +28,18 @@ import (
 type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	Crontab      string            `json:"crontab,omitempty"`
-	Variables    map[string]string `json:"variables,omitempty"`
-	Steps        []Step            `json:"steps,omitempty"`
-	Name         string            `json:"name,omitempty"`
-	Desc         string            `json:"desc,omitempty"`
-	TypeRef      string            `json:"typeref,omitempty"`
-	NameRef      string            `json:"nameref,omitempty"`
-	InCluster    bool              `json:"incluster,omitempty"`
-	NodeName     string            `json:"nodename,omitempty"`
-	All          bool              `json:"all,omitempty"`
-	RuntimeImage string            `json:"runtimeImage,omitempty"`
+	Crontab             string            `json:"crontab,omitempty"`
+	Variables           map[string]string `json:"variables,omitempty"`
+	Steps               []Step            `json:"steps,omitempty"`
+	Name                string            `json:"name,omitempty"`
+	Desc                string            `json:"desc,omitempty"`
+	TypeRef             string            `json:"typeRef,omitempty"`
+	NameRef             string            `json:"nameRef,omitempty"`
+	InCluster           bool              `json:"incluster,omitempty"`
+	NodeName            string            `json:"nodeName,omitempty"`
+	All                 bool              `json:"all,omitempty"`
+	RuntimeImage        string            `json:"runtimeImage,omitempty"`
+	TaskRunHistoryLimit int               `json:"taskRunHistoryLimit,omitempty"`
 }
 
 const TaskTypeRefHost = "host"
@@ -75,55 +73,15 @@ type Alert struct {
 type TaskStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	TaskRunStatus map[string]*TaskRunStatus `json:"taskRunStatus,omitempty"`
-	RunStatus     string                    `json:"runStatus,omitempty"`
-	StartTime     *metav1.Time              `json:"startTime,omitempty"`
-}
-
-type TaskRunStatus struct {
-	TaskRunStep []*TaskRunStep `json:"taskRunStep,omitempty"`
-	RunStatus   string         `json:"runStatus,omitempty"`
-	StartTime   *metav1.Time   `json:"startTime,omitempty"`
-}
-
-type TaskRunStep struct {
-	StepName   string `json:"stepName,omitempty"`
-	StepCmd    string `json:"stepCmd,omitempty"`
-	StepOutput string `json:"stepOutput,omitempty"`
-	StepStatus string `json:"stepStatus,omitempty"`
-}
-
-func (t *TaskStatus) NewTaskRun() {
-	t.TaskRunStatus = make(map[string]*TaskRunStatus)
-	t.RunStatus = StatusRunning
-	t.StartTime = nil
-}
-
-func (t *TaskStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutput, stepStatus string) {
-	if t.TaskRunStatus == nil {
-		return
-	}
-	if _, ok := t.TaskRunStatus[nodeName]; !ok {
-		t.TaskRunStatus[nodeName] = &TaskRunStatus{}
-	}
-	t.TaskRunStatus[nodeName].TaskRunStep = append(t.TaskRunStatus[nodeName].TaskRunStep, &TaskRunStep{
-		StepName:   stepName,
-		StepCmd:    stepCmd,
-		StepOutput: stepOutput,
-		StepStatus: stepStatus,
-	})
-	t.TaskRunStatus[nodeName].StartTime = &metav1.Time{Time: time.Now()}
-	t.TaskRunStatus[nodeName].RunStatus = stepStatus
+	RunStatus string       `json:"runStatus,omitempty"`
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
-// +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeref`
-// +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameref`
-// +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodename`
-// +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
+// +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
 type Task struct {

@@ -4,12 +4,13 @@ import (
 	"strconv"
 	"strings"
 
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/task"
+	opstask "github.com/shaowenchen/ops/pkg/task"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -44,7 +45,7 @@ var TaskCmd = &cobra.Command{
 }
 
 func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
-	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.FilePath))
+	tasks, err := opstask.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.FilePath))
 	if err != nil {
 		logger.Error.Println(err)
 		return err
@@ -56,12 +57,13 @@ func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.Host
 			continue
 		}
 		for _, t := range tasks {
+			tr := opsv1.NewTaskRun(&t)
 			hc, err := host.NewHostConnBase64(h)
 			if err != nil {
 				logger.Error.Println(err)
 				continue
 			}
-			err = task.RunTaskOnHost(logger, &t, hc, taskOpt)
+			err = opstask.RunTaskOnHost(logger, &t, &tr, hc, taskOpt)
 			if err != nil {
 				logger.Error.Println(err)
 				continue
@@ -72,12 +74,11 @@ func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.Host
 }
 
 func KubeTask(logger *log.Logger, taskOpt option.TaskOption, kubeOpt option.KubeOption, inventory string) (err error) {
-	tasks, err := task.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.FilePath))
+	tasks, err := opstask.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.FilePath))
 	if err != nil {
 		logger.Error.Println(err)
 		return err
 	}
-
 	kc, err := kube.NewKubeConnection(inventory)
 	if err != nil {
 		logger.Error.Println(err)
@@ -86,7 +87,8 @@ func KubeTask(logger *log.Logger, taskOpt option.TaskOption, kubeOpt option.Kube
 	nodes, err := kube.GetNodes(logger, kc.Client, kubeOpt)
 	for _, node := range nodes {
 		for _, t := range tasks {
-			err = task.RunTaskOnKube(logger, &t, kc, &node, taskOpt, kubeOpt)
+			tr := opsv1.NewTaskRun(&t)
+			err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, kubeOpt)
 			if err != nil {
 				logger.Error.Println(err)
 			}

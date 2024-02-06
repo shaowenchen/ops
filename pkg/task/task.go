@@ -24,7 +24,7 @@ func GetValidStatusError(status string, err error) string {
 	return status
 }
 
-func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection, taskOpt option.TaskOption) error {
+func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, hc *host.HostConnection, taskOpt option.TaskOption) error {
 	allVars, err := GetRealVariables(t, taskOpt)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 		stepFunc := GetHostStepFunc(s)
 		stepStatus, stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
 		stepStatus = GetValidStatusError(stepStatus, stepErr)
-		t.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, stepStatus)
+		tr.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, stepStatus)
 		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["status"] = stepStatus
 		logger.Debug.Println("Content: ", s.Content)
@@ -68,7 +68,7 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, hc *host.HostConnection
 	return err
 }
 
-func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, taskOpt option.TaskOption, kubeOpt option.KubeOption) error {
+func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *kube.KubeConnection, node *corev1.Node, taskOpt option.TaskOption, kubeOpt option.KubeOption) error {
 	allVars, err := GetRealVariables(t, taskOpt)
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection
 		stepFunc := GetKubeStepFunc(s)
 		stepStatus, stepOutput, stepErr := stepFunc(logger, t, kc, node, s, taskOpt, kubeOpt)
 		stepStatus = GetValidStatusError(stepStatus, stepErr)
-		t.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, stepStatus)
+		tr.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, stepStatus)
 		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["status"] = stepStatus
 		logger.Debug.Println("Content: ", s.Content)

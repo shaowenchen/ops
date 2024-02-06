@@ -5,8 +5,8 @@ metadata:
   namespace: ops-system
 spec:
   crontab: "1 20 * * *"
-  nameref: prod
-  typeref: cluster
+  nameRef: prod
+  typeRef: cluster
   nodename: anymaster
   desc: clear Kubernetes resource
   steps:

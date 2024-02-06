@@ -182,6 +182,7 @@ func CreateTaskRun(c *gin.Context) {
 		return
 	}
 	task := &opsv1.Task{}
+	tr := &opsv1.TaskRun{}
 	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 		Namespace: req.Namespace,
 		Name:      req.Task,
@@ -218,7 +219,7 @@ func CreateTaskRun(c *gin.Context) {
 			showError(c, err.Error())
 			return
 		}
-		err = opstask.RunTaskOnHost(cliLogger, task, hc, opsoption.TaskOption{})
+		err = opstask.RunTaskOnHost(cliLogger, task, tr, hc, opsoption.TaskOption{})
 		if err != nil {
 			showError(c, err.Error())
 			return
@@ -256,7 +257,7 @@ func CreateTaskRun(c *gin.Context) {
 			return
 		}
 		for _, node := range nodes {
-			opstask.RunTaskOnKube(cliLogger, task, kc, &node, opsoption.TaskOption{}, kubeOpt)
+			opstask.RunTaskOnKube(cliLogger, task, tr, kc, &node, opsoption.TaskOption{}, kubeOpt)
 		}
 		showData(c, cliLogger.Flush())
 		return

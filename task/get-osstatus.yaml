@@ -5,8 +5,8 @@ metadata:
   namespace: ops-system
 spec:
   crontab: "*/10 * * * *"
-  nameref: dev2
-  typeref: cluster
+  nameRef: dev2
+  typeRef: cluster
   all: true
   desc: Get OS Info
   steps:

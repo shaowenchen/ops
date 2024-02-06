@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  labels:
+    app.kubernetes.io/name: taskrun
+    app.kubernetes.io/instance: taskrun-sample
+    app.kubernetes.io/part-of: ops
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ops
+  name: taskrun-sample
+spec:
+  # TODO(user): Add fields here

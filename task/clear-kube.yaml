@@ -5,8 +5,8 @@ metadata:
   namespace: ops-system
 spec:
   crontab: "*/2 * * * *"
-  nameref: dev1
-  typeref: cluster
+  nameRef: dev1
+  typeRef: cluster
   desc: clear Kubernetes resource
   steps:
     - name: clear Evicted pod

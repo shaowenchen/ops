@@ -36,12 +36,7 @@ import (
 	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/host"
-	"github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
-	"github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/task"
-	"github.com/shaowenchen/ops/pkg/utils"
 )
 
 // TaskReconciler reconciles a Task object
@@ -112,7 +107,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	}
 
 	// create task
-	r.createTask(logger, ctx, t)
+	r.createTaskrun(logger, ctx, t)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -157,7 +152,7 @@ func (r *TaskReconciler) deleteTask(ctx context.Context, namespacedName types.Na
 	return nil
 }
 
-func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (err error) {
+func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (err error) {
 	_, ok := r.crontabMap[t.GetUniqueKey()]
 	if ok {
 		logger.Info.Println(fmt.Sprintf("clear ticker for task %s", t.GetUniqueKey()))
@@ -165,131 +160,17 @@ func (r *TaskReconciler) createTask(logger *opslog.Logger, ctx context.Context, 
 	}
 	r.crontabRunningMap[t.GetUniqueKey()] = &sync.Mutex{}
 	r.updateStatusMap[t.GetUniqueKey()] = &sync.Mutex{}
-	t.Status.NewTaskRun()
 	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
-	if t.GetSpec().TypeRef == opsv1.TaskTypeRefHost || t.GetSpec().TypeRef == "" {
-		hostCmd := func() {
-			h := &opsv1.Host{}
-			err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, h)
-			// if hostname is empty, use localhost
-			if len(t.GetSpec().NameRef) > 0 && err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
-			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-			err = r.runTaskOnHost(cliLogger, ctx, t, h)
-			cliLogger.Flush()
-			if err != nil {
-				logger.Error.Println(err)
-			}
-		}
-		if t.GetSpec().Crontab != "" {
-			r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, hostCmd)
-			logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
-			if err != nil {
-				return err
-			}
-		} else {
-			hostCmd()
-		}
-	} else if t.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
-		clusterCmd := func() {
-			c := &opsv1.Cluster{}
-			kubeOpt := option.KubeOption{
-				NodeName:     t.GetSpec().NodeName,
-				All:          t.GetSpec().All,
-				RuntimeImage: t.GetSpec().RuntimeImage,
-				OpsNamespace: constants.DefaultOpsNamespace,
-			}
-			err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, c)
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
-			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-			err = r.runTaskOnKube(cliLogger, ctx, t, c, kubeOpt)
-			cliLogger.Flush()
-			if err != nil {
-				logger.Error.Println(err)
-			}
-		}
-		if t.GetSpec().Crontab != "" {
-			r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, clusterCmd)
-			logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
-			if err != nil {
-				return err
-			}
-		} else {
-			clusterCmd()
-		}
-	}
-	return
-}
-
-func (r *TaskReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, h *opsv1.Host) (err error) {
-	lock := r.crontabRunningMap[t.GetUniqueKey()]
-	getLock := lock.TryLock()
-	if !getLock {
-		logger.Info.Println(fmt.Sprintf("skiped，task %s is running", t.GetUniqueKey()))
-		lock.Unlock()
-		return
-	}
-	hc, err := host.NewHostConnBase64(h)
-	if err != nil {
-		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
-		lock.Unlock()
-		return err
-	}
-	t.Status.NewTaskRun()
-	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusRunning)
-	err = task.RunTaskOnHost(logger, t, hc, option.TaskOption{})
-	if err != nil {
-		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
-		lock.Unlock()
-	} else {
-		r.commitStatus(logger, ctx, t, nil, opsv1.StatusSuccessed)
-	}
-	lock.Unlock()
-	return
-}
-
-func (r *TaskReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, c *opsv1.Cluster, kubeOpt option.KubeOption) (err error) {
-	lock := r.crontabRunningMap[t.GetUniqueKey()]
-	getLock := lock.TryLock()
-	if !getLock {
-		logger.Info.Println(fmt.Sprintf("skiped，task %s is running", t.GetUniqueKey()))
-		return
-	}
-	kc, err := kube.NewClusterConnection(c)
-	if err != nil {
-		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
-		lock.Unlock()
-		return err
-	}
-	nodes, err := kube.GetNodes(logger, kc.Client, kubeOpt)
-	if err != nil || len(nodes) == 0 {
-		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
-		lock.Unlock()
-		return err
-	}
-	t.Status.NewTaskRun()
-	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusRunning)
-	for _, node := range nodes {
-		err = utils.MergeError(err, task.RunTaskOnKube(logger, t, kc, &node, option.TaskOption{}, kubeOpt))
+	if t.GetSpec().Crontab != "" {
+		r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, func() {
+			tr := opsv1.NewTaskRun(t)
+			r.Client.Create(ctx, &tr)
+		})
+		logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
 		if err != nil {
-			r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusFailed)
-		} else {
-			r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusSuccessed)
+			return err
 		}
 	}
-	if err != nil {
-		r.commitStatus(logger, ctx, t, nil, opsv1.StatusFailed)
-	} else {
-		r.commitStatus(logger, ctx, t, nil, opsv1.StatusSuccessed)
-	}
-	lock.Unlock()
 	return
 }
 

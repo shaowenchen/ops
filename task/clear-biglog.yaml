@@ -4,15 +4,14 @@ metadata:
   name: clear-biglog
   namespace: ops-system
 spec:
-  crontab: "0 15 * * 1"
-  nameref: prod
-  typeref: cluster
-  all: true
+  crontab: "* * * * *"
+  nameRef: dev1
+  typeRef: host
   desc: clear runc log in special path
   variables:
     size: 100M
-    clear: false
-    usage: 50
+    clear: "false"
+    usage: "50"
     logpath: /var/log
     logname: "*log*"
   steps:

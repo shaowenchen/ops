@@ -59,7 +59,8 @@ const StatusFiring = "firing"
 // +kubebuilder:printcolumn:name="Running",type=string,JSONPath=`.status.runningPod`
 // +kubebuilder:printcolumn:name="TotalPod",type=string,JSONPath=`.status.pod`
 // +kubebuilder:printcolumn:name="CertDays",type=string,JSONPath=`.status.certNotAfterDays`
-// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.heartstatus`
+// +kubebuilder:printcolumn:name="HeartTime",type=date,JSONPath=`.status.heartTime`
+// +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartstatus`
 type Cluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

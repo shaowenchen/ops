@@ -34,8 +34,11 @@ spec:
     - jsonPath: .status.certNotAfterDays
       name: CertDays
       type: string
+    - jsonPath: .status.heartTime
+      name: HeartTime
+      type: date
     - jsonPath: .status.heartstatus
-      name: Status
+      name: HeartStatus
       type: string
     name: v1
     schema:
