@@ -5,18 +5,16 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	opsv1 "github.com/shaowenchen/ops/api/v1"
 )
 
-type Pagination struct {
-	PageSize uint         `form:"page_size" json:"page_size"`
-	Page     uint         `form:"page" json:"page"`
-	List     []opsv1.Task `json:"list"`
-	Total    uint         `json:"total"`
+type Pagination[T any] struct {
+	PageSize uint `form:"page_size" json:"page_size"`
+	Page     uint `form:"page" json:"page"`
+	List     []T  `json:"list"`
+	Total    uint `json:"total"`
 }
 
-func paginator(dataList []opsv1.Task, pageSize, page uint) (pagination Pagination) {
-	pagination.List = []opsv1.Task{}
+func paginator[T any](dataList []T, pageSize, page uint) (pagination Pagination[T]) {
 	pagination.PageSize = pageSize
 	pagination.Page = page
 	pagination.Total = uint(len(dataList))

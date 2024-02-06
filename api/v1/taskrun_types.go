@@ -44,7 +44,7 @@ type TaskRunSpec struct {
 func NewTaskRun(t *Task) TaskRun {
 	return TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: t.Name,
+			GenerateName: t.Name + "-",
 			Namespace:    t.Namespace,
 		},
 		Spec: TaskRunSpec{

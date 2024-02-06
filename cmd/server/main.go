@@ -17,5 +17,5 @@ func main() {
 	gin.SetMode(server.GlobalConfig.Server.RunMode)
 	server.SetupRouter(r)
 	server.SetHealthzRouter(r)
-	r.Run(":8080")
+	r.Run(":8000")
 }

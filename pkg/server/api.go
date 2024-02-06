@@ -3,20 +3,13 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	opsconstants "github.com/shaowenchen/ops/pkg/constants"
-	opshost "github.com/shaowenchen/ops/pkg/host"
-	opskube "github.com/shaowenchen/ops/pkg/kube"
-	opslog "github.com/shaowenchen/ops/pkg/log"
-	opsoption "github.com/shaowenchen/ops/pkg/option"
-	opstask "github.com/shaowenchen/ops/pkg/task"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
-	"k8s.io/apimachinery/pkg/types"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -70,6 +63,30 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 	err = client.Create(context.TODO(), task)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
+func PutTask(c *gin.Context) {
+	dataBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+	}
+	task := &opsv1.Task{}
+	err = json.Unmarshal(dataBytes, task)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Update(context.TODO(), task)
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -145,17 +162,80 @@ func ListTask(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	showData(c, paginator(taskList.Items, req.PageSize, req.Page))
+	showData(c, paginator[opsv1.Task](taskList.Items, req.PageSize, req.Page))
+}
+
+func GetTaskRun(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Taskrun   string `uri:"taskrun"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	taskRun := &opsv1.TaskRun{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Taskrun,
+	}, taskRun)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, taskRun)
+}
+
+func ListTaskRun(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
+	}
+	var req = Params{
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	taskRunList := &opsv1.TaskRunList{}
+	if req.Namespace == "all" {
+		err = client.List(context.TODO(), taskRunList)
+	} else {
+		err = client.List(context.TODO(), taskRunList, runtimeClient.InNamespace(req.Namespace))
+	}
+	if err != nil {
+		return
+	}
+	showData(c, paginator[opsv1.TaskRun](taskRunList.Items, req.PageSize, req.Page))
 }
 
 func CreateTaskRun(c *gin.Context) {
 	type Params struct {
-		Namespace string `uri:"namespace"`
-		Task      string `uri:"task"`
-	}
-	type Body struct {
-		NameRef   string            `json:"nameref"`
-		TypeRef   string            `json:"typeref"`
+		Namespace string            `uri:"namespace"`
+		TaskRef   string            `json:"taskRef"`
+		NameRef   string            `json:"nameRef"`
+		TypeRef   string            `json:"typeRef"`
 		All       bool              `json:"all"`
 		Variables map[string]string `json:"variables"`
 	}
@@ -165,15 +245,18 @@ func CreateTaskRun(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	var body = Body{}
-	err = c.ShouldBindJSON(&body)
+	err = c.ShouldBindJSON(&req)
 	if err != nil {
 		showError(c, "get body error "+err.Error())
 		return
 	}
 	// validate
-	if body.NameRef == "" {
-		showError(c, "NameRef is required")
+	if req.NameRef == "" {
+		showError(c, "nameRef is required")
+		return
+	}
+	if req.TaskRef == "" {
+		showError(c, "taskRef is required")
 		return
 	}
 	client, err := getRuntimeClient("")
@@ -181,89 +264,57 @@ func CreateTaskRun(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
+	// get task
 	task := &opsv1.Task{}
-	tr := &opsv1.TaskRun{}
 	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 		Namespace: req.Namespace,
-		Name:      req.Task,
+		Name:      req.TaskRef,
 	}, task)
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
-	// merge variables
-	if body.NameRef != "" {
-		task.Spec.NameRef = body.NameRef
+	taskRun := opsv1.NewTaskRun(task)
+	taskRun.Spec.NameRef = req.NameRef
+	if req.All {
+		taskRun.Spec.All = req.All
 	}
-	if body.TypeRef != "" {
-		task.Spec.TypeRef = body.TypeRef
+	if req.Variables != nil {
+		taskRun.Spec.Variables = req.Variables
 	}
-	for k, v := range body.Variables {
-		task.Spec.Variables[k] = v
-	}
-	if body.All {
-		task.Spec.All = body.All
+	err = client.Create(context.TODO(), &taskRun)
+	if err != nil {
+		showError(c, err.Error())
+		return
 	}
 
-	if task.GetSpec().TypeRef == opsv1.TaskTypeRefHost || task.GetSpec().TypeRef == "" {
-		h := &opsv1.Host{}
-		err := client.Get(context.TODO(), types.NamespacedName{Namespace: task.GetNamespace(), Name: task.GetSpec().NameRef}, h)
-		// if hostname is empty, use localhost
-		if len(task.GetSpec().NameRef) > 0 && err != nil {
-			showError(c, err.Error())
-			return
-		}
-		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-		hc, err := opshost.NewHostConnBase64(h)
-		if err != nil {
-			showError(c, err.Error())
-			return
-		}
-		err = opstask.RunTaskOnHost(cliLogger, task, tr, hc, opsoption.TaskOption{})
-		if err != nil {
-			showError(c, err.Error())
-			return
-		}
-		res := cliLogger.Flush()
-		showData(c, res)
-		return
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
 
-	} else if task.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
-		cluster := &opsv1.Cluster{}
-		kubeOpt := opsoption.KubeOption{
-			NodeName:     task.GetSpec().NodeName,
-			All:          task.GetSpec().All,
-			RuntimeImage: task.GetSpec().RuntimeImage,
-			OpsNamespace: opsconstants.DefaultOpsNamespace,
-		}
-		err := client.Get(context.TODO(), types.NamespacedName{Namespace: task.GetNamespace(), Name: task.GetSpec().NameRef}, cluster)
-		if err != nil {
-			fmt.Println(err.Error())
+	ticker := time.NewTicker(3 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			latest := &opsv1.TaskRun{}
+			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+				Namespace: taskRun.Namespace,
+				Name:      taskRun.Name,
+			}, latest)
+			if err != nil {
+				showError(c, err.Error())
+				return
+			}
+			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed {
+				showData(c, latest)
+				return
+			}
+
+		case <-ctx.Done():
+			showError(c, "timeout")
 			return
 		}
-		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-		kc, err := opskube.NewClusterConnection(cluster)
-		if err != nil {
-			showError(c, err.Error())
-			return
-		}
-		nodes, err := opskube.GetNodes(cliLogger, kc.Client, kubeOpt)
-		if err != nil {
-			showError(c, err.Error())
-			return
-		}
-		if len(nodes) == 0 {
-			showError(c, "no nodes found")
-			return
-		}
-		for _, node := range nodes {
-			opstask.RunTaskOnKube(cliLogger, task, tr, kc, &node, opsoption.TaskOption{}, kubeOpt)
-		}
-		showData(c, cliLogger.Flush())
-		return
-	} else {
-		showError(c, "unsupported task refType")
-		return
 	}
 }
 

@@ -135,7 +135,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	r.commitStatus(logger, ctx, t, tr, opsv1.StatusInit)
 	if t.GetSpec().TypeRef == opsv1.TaskTypeRefHost || t.GetSpec().TypeRef == "" {
 		h := &opsv1.Host{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, h)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, h)
 		if err != nil {
 			logger.Error.Println(err)
 			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
@@ -164,7 +164,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			RuntimeImage: t.GetSpec().RuntimeImage,
 			OpsNamespace: opsconstants.DefaultOpsNamespace,
 		}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: t.GetSpec().NameRef}, c)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, c)
 		if err != nil {
 			logger.Error.Println(err)
 			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
