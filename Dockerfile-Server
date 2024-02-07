@@ -1,10 +1,11 @@
-FROM golang:1.19 as builder
-WORKDIR /workspace
+FROM hubimage/builder-golang:1.19 as builder
 COPY . .
-RUN go build  -o bin/ops-server cmd/server/main.go
+RUN go build -o bin/ops-server cmd/server/main.go
 
-FROM ubuntu:latest
-WORKDIR /
-COPY --from=builder /workspace/bin/ops-server .
-ENTRYPOINT ["/ops-server"]
-Expose 8080
+FROM hubimage/runtime-ubuntu:22.04
+RUN chown -R 65532:65532 /runtime
+COPY --from=builder /builder/bin/ops-server .
+COPY --from=builder /builder/default.yaml .
+USER 65532:65532
+ENTRYPOINT ["./ops-server", "-c", "./default.yaml"]
+Expose 80

@@ -28,3 +28,5 @@ docs/node_modules
 docs/_book
 
 .env
+web/node_modules
+web/public
