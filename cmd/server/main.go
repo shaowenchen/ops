@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/gin-gonic/gin"
 	"github.com/shaowenchen/ops/pkg/server"
+	"github.com/shaowenchen/ops/web"
 )
 
 func init() {
@@ -17,5 +18,6 @@ func main() {
 	gin.SetMode(server.GlobalConfig.Server.RunMode)
 	server.SetupRouter(r)
 	server.SetHealthzRouter(r)
+	web.SetupRouter(r)
 	r.Run(":80")
 }

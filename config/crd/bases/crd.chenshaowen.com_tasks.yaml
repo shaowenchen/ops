@@ -22,6 +22,9 @@ spec:
     - jsonPath: .spec.typeRef
       name: TypeRef
       type: string
+    - jsonPath: .spec.nameRef
+      name: NameRef
+      type: string
     - jsonPath: .status.startTime
       name: StartTime
       type: date

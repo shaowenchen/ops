@@ -51,6 +51,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Server Selector labels
+*/}}
+{{- define "ops.serverSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "ops.name" . }}-server
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "ops.serviceAccountName" -}}

@@ -1,9 +1,14 @@
 FROM hubimage/builder-golang:1.19 as builder
 COPY . .
-RUN go build -o bin/ops-server cmd/server/main.go
+RUN make build-server
+
+FROM hubimage/builder-node:18 AS builder-web
+COPY . .
+RUN make build-web
 
 FROM hubimage/runtime-ubuntu:22.04
 COPY --from=builder /builder/bin/ops-server .
 COPY --from=builder /builder/default.toml .
+COPY --from=builder-web /builder/web/dist ./web/dist
 ENTRYPOINT ["./ops-server", "-c", "./default.toml"]
 Expose 80

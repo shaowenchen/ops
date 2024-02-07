@@ -68,6 +68,12 @@ test: manifests generate fmt vet envtest ## Run tests.
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/ops-controller-manager main.go
 
+build-server:
+	go build -o bin/ops-server cmd/server/main.go
+
+build-web:
+	cd web && yarn && yarn build
+
 .PHONY: run
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go

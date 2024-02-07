@@ -82,6 +82,7 @@ type TaskStatus struct {
 
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
+// +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
 type Task struct {
