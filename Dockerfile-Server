@@ -3,9 +3,7 @@ COPY . .
 RUN go build -o bin/ops-server cmd/server/main.go
 
 FROM hubimage/runtime-ubuntu:22.04
-RUN chown -R 65532:65532 /runtime
 COPY --from=builder /builder/bin/ops-server .
 COPY --from=builder /builder/default.toml .
-USER 65532:65532
 ENTRYPOINT ["./ops-server", "-c", "./default.toml"]
 Expose 80
