@@ -22,8 +22,9 @@ func SetupRouter(r *gin.Engine) {
 }
 
 func SetHealthzRouter(r *gin.Engine) {
-	healthz := r.Group("/api/healthz")
+	root := r.Group("/")
 	{
-		healthz.GET("/", Healthz)
+		root.GET("healthz", Healthz)
+		root.GET("readyz", Healthz)
 	}
 }
