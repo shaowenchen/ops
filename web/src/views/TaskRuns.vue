@@ -5,7 +5,7 @@ import { useTaskRunsStore } from '@/stores';
 var dataList = ref([]);
 async function fresh() {
     const store = useTaskRunsStore();
-    dataList.value = await store.list("ops-system");
+    dataList.value = await store.list("all");
 }
 fresh();
 </script>
@@ -19,7 +19,7 @@ fresh();
                     <th>Name</th>
                     <th>TaskRef</th>
                     <th>NameRef</th>
-                    <th>nodeName</th>
+                    <th>NodeName</th>
                     <th>All</th>
                     <th>Start Time</th>
                     <th>Run Status</th>

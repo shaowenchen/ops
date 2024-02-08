@@ -16,7 +16,78 @@ import (
 func Healthz(c *gin.Context) {
 	c.JSON(http.StatusOK, "OK")
 }
-
+func ListHost(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
+	}
+	var req = Params{
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	hostList := &opsv1.HostList{}
+	if req.Namespace == "all" {
+		err = client.List(context.TODO(), hostList)
+	} else {
+		err = client.List(context.TODO(), hostList, runtimeClient.InNamespace(req.Namespace))
+	}
+	if err != nil {
+		return
+	}
+	showData(c, paginator[opsv1.Host](hostList.Items, req.PageSize, req.Page))
+}
+func ListCluster(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
+	}
+	var req = Params{
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	clusterList := &opsv1.ClusterList{}
+	if req.Namespace == "all" {
+		err = client.List(context.TODO(), clusterList)
+	} else {
+		err = client.List(context.TODO(), clusterList, runtimeClient.InNamespace(req.Namespace))
+	}
+	if err != nil {
+		return
+	}
+	showData(c, paginator[opsv1.Cluster](clusterList.Items, req.PageSize, req.Page))
+}
 func GetTask(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`

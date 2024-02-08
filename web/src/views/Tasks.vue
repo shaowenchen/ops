@@ -5,7 +5,7 @@ import { useTasksStore } from '@/stores';
 var dataList = ref([]);
 async function fresh() {
     const store = useTasksStore();
-    dataList.value = await store.list("ops-system");
+    dataList.value = await store.list("all");
 }
 fresh();
 </script>

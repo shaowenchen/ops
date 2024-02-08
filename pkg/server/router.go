@@ -5,6 +5,14 @@ import (
 )
 
 func SetupRouter(r *gin.Engine) {
+	v1Hosts := r.Group("/api/v1/namespaces/:namespace/hosts").Use(AuthMiddleware())
+	{
+		v1Hosts.GET("", ListHost)
+	}
+	v1Clusters := r.Group("/api/v1/namespaces/:namespace/clusters").Use(AuthMiddleware())
+	{
+		v1Clusters.GET("", ListCluster)
+	}
 	v1Tasks := r.Group("/api/v1/namespaces/:namespace/tasks").Use(AuthMiddleware())
 	{
 		v1Tasks.GET("", ListTask)

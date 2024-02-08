@@ -1,9 +1,11 @@
 <script setup>
-</script>
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+router.push('/tasks');
+</script>
 <template>
     <div class="card m-3">
-        Webcome
     </div>
 </template>
 
