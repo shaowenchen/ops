@@ -9,22 +9,31 @@ export const useTaskRunsStore = defineStore({
   }),
   actions: {
     async list(namespace) {
-      const analysis = await fetchWrapper.get(
+      const res = await fetchWrapper.get(
         `/api/v1/namespaces/${namespace}/taskruns`
       );
-      return analysis.data.list;
+      return res.data.list;
     },
     async get(namespace, name) {
-      const analysis = await fetchWrapper.get(
+      const res = await fetchWrapper.get(
         `/api/v1/namespaces/${namespace}/taskruns/${name}`
       );
-      return analysis.data.list;
+      return res.data.list;
     },
     async delete(namespace, name) {
-      const analysis = await fetchWrapper.delete(
+      const res = await fetchWrapper.delete(
         `/api/v1/namespaces/${namespace}/taskruns/${name}`
       );
-      return analysis.data.list;
+      return res.data.list;
+    },
+    async create(namespace, taskRef, nameRef) {
+      const res = await fetchWrapper.post(
+        `/api/v1/namespaces/${namespace}/taskruns/`,
+        {
+          taskRef: taskRef,
+          nameRef: nameRef,
+        }
+      );
     },
   },
 });

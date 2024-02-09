@@ -8,6 +8,7 @@
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
     },
     "dependencies": {
+        "element-plus": "^2.5.5",
         "pinia": "^2.0.13",
         "vee-validate": "^4.5.11",
         "vue-router": "^4.0.14",
