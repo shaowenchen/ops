@@ -8,9 +8,24 @@ async function fresh() {
     dataList.value = await store.list("all");
 }
 fresh();
+
+var dialogVisible = ref(false);
+var selectedItem = ref(null);
+function view(item) {
+    dialogVisible.value = true;
+    selectedItem.value = item.item;
+}
+
 </script>
 
 <template>
+    <el-dialog v-model="dialogVisible" title="TaskRun Details">
+        <div class="card-body">
+            <div class="form-group">
+                <pre>{{ selectedItem?.status }}</pre>
+            </div>
+        </div>
+    </el-dialog>
     <div class="card m-3">
         <table class="table table-bordered">
             <thead>
@@ -21,8 +36,9 @@ fresh();
                     <th>NameRef</th>
                     <th>NodeName</th>
                     <th>All</th>
-                    <th>Start Time</th>
+                    <th>Create Time</th>
                     <th>Run Status</th>
+                    <th>Log</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,8 +49,11 @@ fresh();
                     <td>{{ item.spec.nameRef }}</td>
                     <td>{{ item.spec.nodeName }}</td>
                     <td>{{ item.spec.all }}</td>
-                    <td>{{ item.status.startTime }}</td>
+                    <td>{{ item.metadata.creationTimestamp }}</td>
                     <td>{{ item.status.runStatus }}</td>
+                    <td>
+                        <el-button type="primary" @click="view({ item })">View</el-button>
+                    </td>
                 </tr>
             </tbody>
         </table>

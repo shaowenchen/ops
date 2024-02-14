@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 
 import { fetchWrapper } from "@/helpers";
+import { useAlertStore } from "./alert.store";
 
 export const useTaskRunsStore = defineStore({
   id: "taskruns",
@@ -26,14 +27,21 @@ export const useTaskRunsStore = defineStore({
       );
       return res.data.list;
     },
-    async create(namespace, taskRef, nameRef) {
+    async create(namespace, taskRef, typeRef, nameRef) {
       const res = await fetchWrapper.post(
-        `/api/v1/namespaces/${namespace}/taskruns/`,
+        `/api/v1/namespaces/${namespace}/taskruns`,
         {
           taskRef: taskRef,
+          typeRef: typeRef,
           nameRef: nameRef,
         }
       );
+      if (res.code == 0) {
+        useAlertStore().success(res.message);
+      } else {
+        useAlertStore().error(res.message);
+      }
+      return res;
     },
   },
 });

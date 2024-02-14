@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -298,6 +299,10 @@ func ListTaskRun(c *gin.Context) {
 	if err != nil {
 		return
 	}
+	sort.Slice(taskRunList.Items, func(i, j int) bool {
+		return taskRunList.Items[i].ObjectMeta.CreationTimestamp.Time.After(taskRunList.Items[j].ObjectMeta.CreationTimestamp.Time)
+	})
+	// item.status.startTime
 	showData(c, paginator[opsv1.TaskRun](taskRunList.Items, req.PageSize, req.Page))
 }
 

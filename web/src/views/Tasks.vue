@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { useTasksStore, useTaskRunsStore } from '@/stores';
+import { ref } from "vue";
+import { useTasksStore, useTaskRunsStore, useHostsStore, useClustersStore } from "@/stores";
 
 var dataList = ref([]);
 async function fresh() {
@@ -9,16 +9,36 @@ async function fresh() {
 }
 fresh();
 
-var dialogVisble = ref(false)
-var selectedItem = ref(null)
+var dialogVisble = ref(false);
+var selectedItem = ref(null);
 async function confirm() {
     const store = useTaskRunsStore();
-    dataList.value = await store.create();
+    await store.create(selectedItem.value.metadata.namespace, selectedItem.value.metadata.name, selectedItem.value.spec.typeRef, selectedItem.value.spec.nameRef);
     dialogVisble.value = false;
 }
 
 function close() {
+    selectedItem.value = null;
     dialogVisble.value = false;
+}
+
+var hosts = ref([]);
+var clusters = ref([]);
+
+function getNameRefList() {
+    if (selectedItem.value.spec.typeRef === 'host') {
+        return hosts.value
+    } else if (selectedItem.value.spec.typeRef === 'cluster') {
+        return clusters.value
+    }
+    return []
+}
+
+async function open() {
+    const hostStore = useHostsStore();
+    hosts.value = await hostStore.list("all");
+    const clusterStore = useClustersStore();
+    clusters.value = await clusterStore.list("all");
 }
 
 function run(item) {
@@ -28,33 +48,31 @@ function run(item) {
 </script>
 
 <template>
-    <el-dialog title="Create TaskRun" v-model="dialogVisble" width="30%" :before-close="close">
-        <div class="card-body" v-if="selectedItem">
+    <el-dialog title="Create TaskRun" v-model="dialogVisble" width="30%" :before-close="close" @open="open">
+        <div class="card-body">
             <div class="form-group">
                 <label>Namespace</label>
-                <input name="namespace" type="text" :value="selectedItem?.value?.metadata?.namespace"
-                    class="form-control" />
+                <input name="name" type="text" disabled :value="selectedItem?.metadata?.namespace" class="form-control" />
             </div>
             <div class="form-group">
                 <label>Name</label>
-                <input name="name" type="text" :value="selectedItem?.value?.metadata?.name" class="form-control" />
+                <input name="name" type="text" disabled :value="selectedItem?.metadata?.name" class="form-control" />
             </div>
             <div class="form-group">
                 <label>Description</label>
-                <input name="desc" type="text" :value="selectedItem?.value?.spec?.desc" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Steps</label>
-                <input name="steps" type="text" :value="selectedItem?.value?.spec?.steps" class="form-control" />
+                <input name="desc" type="text" disabled :value="selectedItem?.spec?.desc" class="form-control" />
             </div>
             <div class="form-group">
                 <label>TypeRef</label>
-                <input name="typeRef" type="text" :value="selectedItem?.value?.spec?.typeRef" class="form-control" />
+                <el-select v-model="selectedItem.spec.typeRef" class="w-100" placeholder="Select">
+                    <el-option label="Host" value="host" />
+                    <el-option label="Cluster" value="cluster" />
+                </el-select>
+
             </div>
-            <div class="form-group">
-                <label>NameRef</label>
-                <input name="nameRef" type="text" :value="selectedItem?.value?.spec?.nameRef" class="form-control" />
-            </div>
+            <el-select v-model="selectedItem.spec.nameRef" v-if="selectedItem.spec.typeRef">
+                <el-option v-for="item in getNameRefList()" :key="item.metadata.name" :value="item.metadata.name" />
+            </el-select>
         </div>
         <template #footer>
             <span class="dialog-footer">
@@ -86,7 +104,9 @@ function run(item) {
                     <td>{{ item.spec.nameRef }}</td>
                     <td>{{ item.status.startTime }}</td>
                     <td>{{ item.status.runStatus }}</td>
-                    <td><el-button type="primary" @click="run({ item })">run</el-button></td>
+                    <td>
+                        <el-button type="primary" @click="run({ item })">Run</el-button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -95,7 +115,7 @@ function run(item) {
 
 <style scoped>
 .card-body {
-    width: 500px;
+    width: 300px;
 }
 
 .form-item {
