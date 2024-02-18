@@ -3,49 +3,51 @@ import { ref } from 'vue';
 import { useClustersStore } from '@/stores';
 
 var dataList = ref([]);
-async function fresh() {
+var currentPage = ref(1);
+var pageSize = ref(10);
+var total    = ref(0);
+async function loadData() {
     const store = useClustersStore();
-    dataList.value = await store.list("all");
+    var res = await store.list("all", pageSize.value, currentPage.value);
+    dataList.value = res.list
+    total.value = res.total
 }
-fresh();
+loadData();
+
+function onPaginationChange() {
+    loadData();
+} 
+
+function onPageSizeChange() {
+    loadData();
+}
 </script>
 
 <template>
-    <div class="card m-3">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Namespace</th>
-                    <th>Name</th>
-                    <th>Server</th>
-                    <th>Version</th>
-                    <th>Node</th>
-                    <th>Running</th>
-                    <th>TotalPod</th>
-                    <th>CertDays</th>
-                    <th>HeartTime</th>
-                    <th>HeartStatus</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="item in dataList">
-                    <td>{{ item.metadata.namespace }}</td>
-                    <td>{{ item.metadata.name }}</td>
-                    <td>{{ item.spec.server }}</td>
-                    <td>{{ item.status.version }}</td>
-                    <td>{{ item.status.node }}</td>
-                    <td>{{ item.status.runningPod }}</td>
-                    <td>{{ item.status.pod }}</td>
-                    <td>{{ item.status.certNotAfterDays }}</td>
-                    <td>{{ item.status.heartTime }}</td>
-                    <td>{{ item.status.heartstatus }}</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="container">
+        <el-table :data="dataList" border size="default">
+            <el-table-column prop="metadata.namespace" label="Namespace" />
+            <el-table-column prop="metadata.name" label="Name" />
+            <el-table-column prop="spec.server" label="Server" />
+            <el-table-column prop="status.version" label="Version" />
+            <el-table-column prop="status.node" label="Node" />
+            <el-table-column prop="status.runningPod" label="RunningPod" />
+            <el-table-column prop="status.pod" label="Pod" />
+            <el-table-column prop="status.certNotAfterDays" label="CertNotAfterDays" />
+            <el-table-column prop="status.heartTime" label="HeartTime" />
+            <el-table-column prop="status.heartstatus" label="HeartStatus" />
+        </el-table>
+        <el-pagination @current-change="onPaginationChange" @size-change="onPageSizeChange"
+            v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30]"
+            layout="total, sizes, prev, pager, next" :total="total">
+        </el-pagination>
     </div>
 </template>
 
 <style scoped>
+.contaner {
+    margin-left: 7em;
+}
 .form-control {
     display: inline-block;
     width: 80%;

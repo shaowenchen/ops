@@ -8,11 +8,11 @@ export const useHostsStore = defineStore({
     alert: null,
   }),
   actions: {
-    async list(namespace) {
+    async list(namespace, page_size = 10, page = 1) {
       const res = await fetchWrapper.get(
-        `/api/v1/namespaces/${namespace}/hosts`
+        `/api/v1/namespaces/${namespace}/hosts?page_size=${page_size}&page=${page}`
       );
-      return res.data.list;
+      return res.data;
     }
   },
 });

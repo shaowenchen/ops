@@ -3,51 +3,53 @@ import { ref } from 'vue';
 import { useHostsStore } from '@/stores';
 
 var dataList = ref([]);
-async function fresh() {
+var currentPage = ref(1);
+var pageSize = ref(10);
+var total = ref(0);
+async function loadData() {
     const store = useHostsStore();
-    dataList.value = await store.list("all");
+    var res = await store.list("all", pageSize.value, currentPage.value);
+    dataList.value = res.list
+    total.value = res.total
 }
-fresh();
+loadData();
+
+function onPaginationChange() {
+    loadData();
+}
+
+function onPageSizeChange() {
+    loadData();
+}
 </script>
 
 <template>
-    <div class="card m-3">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Namespace</th>
-                    <th>Name</th>
-                    <th>Hostname</th>
-                    <th>Address</th>
-                    <th>Distribution</th>
-                    <th>Arch</th>
-                    <th>CPU</th>
-                    <th>Mem</th>
-                    <th>Disk</th>
-                    <th>HeartTime</th>
-                    <th>HeartStatus</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="item in dataList">
-                    <td>{{ item.metadata.namespace }}</td>
-                    <td>{{ item.metadata.name }}</td>
-                    <td>{{ item.status.hostname }}</td>
-                    <td>{{ item.spec.address }}</td>
-                    <td>{{ item.status.distribution }}</td>
-                    <td>{{ item.status.arch }}</td>
-                    <td>{{ item.status.cputotal }}</td>
-                    <td>{{ item.status.memtotal }}</td>
-                    <td>{{ item.status.disktotal }}</td>
-                    <td>{{ item.status.heartTime }}</td>
-                    <td>{{ item.status.heartStatus }}</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="container">
+        <el-table :data="dataList" border size="default">
+            <el-table-column prop="metadata.namespace" label="Namespace" />
+            <el-table-column prop="metadata.name" label="Name" />
+            <el-table-column prop="status.hostname" label="Hostname" />
+            <el-table-column prop="spec.address" label="Address" />
+            <el-table-column prop="status.distribution" label="Distribution" />
+            <el-table-column prop="status.arch" label="Arch" />
+            <el-table-column prop="status.cputotal" label="CPU" />
+            <el-table-column prop="status.memtotal" label="Mem" />
+            <el-table-column prop="status.disktotal" label="Disk" />
+            <el-table-column prop="status.heartTime" label="HeartTime" />
+            <el-table-column prop="status.heartStatus" label="HeartStatus" />
+        </el-table>
+        <el-pagination @current-change="onPaginationChange" @size-change="onPageSizeChange"
+            v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30]"
+            layout="total, sizes, prev, pager, next" :total="total">
+        </el-pagination>
     </div>
 </template>
 
 <style scoped>
+.contaner {
+    margin-left: 7em;
+}
+
 .form-control {
     display: inline-block;
     width: 80%;

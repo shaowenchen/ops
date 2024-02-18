@@ -3,22 +3,34 @@ import { ref } from "vue";
 import { useTasksStore, useTaskRunsStore, useHostsStore, useClustersStore } from "@/stores";
 
 var dataList = ref([]);
-async function fresh() {
+var currentPage = ref(1);
+var pageSize = ref(10);
+var total = ref(0);
+async function loadData() {
     const store = useTasksStore();
-    dataList.value = await store.list("all");
+    var res = await store.list("all", pageSize.value, currentPage.value);
+    dataList.value = res.list
+    total.value = res.total
 }
-fresh();
+loadData();
+function onPaginationChange() {
+    loadData();
+}
+
+function onPageSizeChange() {
+    loadData();
+}
 
 var dialogVisble = ref(false);
 var selectedItem = ref(null);
 async function confirm() {
     const store = useTaskRunsStore();
-    await store.create(selectedItem.value.metadata.namespace, selectedItem.value.metadata.name, selectedItem.value.spec.typeRef, selectedItem.value.spec.nameRef);
+    await store.create(selectedItem.metadata.namespace, selectedItem.metadata.name, selectedItem.spec.typeRef, selectedItem.spec.nameRef);
     dialogVisble.value = false;
 }
 
 function close() {
-    selectedItem.value = null;
+    selectedItem = null;
     dialogVisble.value = false;
 }
 
@@ -26,99 +38,91 @@ var hosts = ref([]);
 var clusters = ref([]);
 
 function getNameRefList() {
-    if (selectedItem.value.spec.typeRef === 'host') {
-        return hosts.value
-    } else if (selectedItem.value.spec.typeRef === 'cluster') {
-        return clusters.value
+    debugger
+    if (selectedItem.spec.typeRef === 'host') {
+        return hosts.value.list
+    } else if (selectedItem.spec.typeRef === 'cluster') {
+        return clusters.value.list
     }
     return []
 }
 
 async function open() {
     const hostStore = useHostsStore();
-    hosts.value = await hostStore.list("all");
+    hosts.value = await hostStore.list("all", 999, 1);
     const clusterStore = useClustersStore();
-    clusters.value = await clusterStore.list("all");
+    clusters.value = await clusterStore.list("all", 999, 1);
 }
 
 function run(item) {
-    selectedItem.value = item.item;
+    selectedItem = item;
     dialogVisble.value = true;
 }
 </script>
 
 <template>
-    <el-dialog title="Create TaskRun" v-model="dialogVisble" width="30%" :before-close="close" @open="open">
-        <div class="card-body">
-            <div class="form-group">
-                <label>Namespace</label>
-                <input name="name" type="text" disabled :value="selectedItem?.metadata?.namespace" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Name</label>
-                <input name="name" type="text" disabled :value="selectedItem?.metadata?.name" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <input name="desc" type="text" disabled :value="selectedItem?.spec?.desc" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>TypeRef</label>
-                <el-select v-model="selectedItem.spec.typeRef" class="w-100" placeholder="Select">
-                    <el-option label="Host" value="host" />
-                    <el-option label="Cluster" value="cluster" />
-                </el-select>
+    <div class="container">
+        <el-dialog title="Create TaskRun" v-model="dialogVisble" width="30%" :before-close="close" @open="open">
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Namespace</label>
+                    <input name="name" type="text" disabled :value="selectedItem?.metadata?.namespace"
+                        class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input name="name" type="text" disabled :value="selectedItem?.metadata?.name" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input name="desc" type="text" disabled :value="selectedItem?.spec?.desc" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>TypeRef</label>
+                    <el-select v-model="selectedItem.spec.typeRef" class="w-100" placeholder="Select">
+                        <el-option label="Host" value="host" />
+                        <el-option label="Cluster" value="cluster" />
+                    </el-select>
 
+                </div>
+                <div class="form-group">
+                    <label>NameRef</label>
+                    <el-select v-model="selectedItem.spec.nameRef" v-if="selectedItem.spec.typeRef">
+                        <el-option v-for="item in getNameRefList()" :key="item.metadata.name" :value="item.metadata.name" />
+                    </el-select>
+                </div>
             </div>
-            <div class="form-group">
-                <label>NameRef</label>
-                <el-select v-model="selectedItem.spec.nameRef" v-if="selectedItem.spec.typeRef">
-                    <el-option v-for="item in getNameRefList()" :key="item.metadata.name" :value="item.metadata.name" />
-                </el-select>
-            </div>
-        </div>
-        <template #footer>
-            <span class="dialog-footer">
-                <el-button @click="close">Cancel</el-button>
-                <el-button type="primary" @click="confirm">Run</el-button>
-            </span>
-        </template>
-    </el-dialog>
-    <div class="card m-3">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Namespace</th>
-                    <th>Name</th>
-                    <th>Crontab</th>
-                    <th>TypeRef</th>
-                    <th>NameRef</th>
-                    <th>Start Time</th>
-                    <th>Run Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="item in dataList">
-                    <td>{{ item.metadata.namespace }}</td>
-                    <td>{{ item.metadata.name }}</td>
-                    <td>{{ item.spec.crontab }}</td>
-                    <td>{{ item.spec.typeRef }}</td>
-                    <td>{{ item.spec.nameRef }}</td>
-                    <td>{{ item.status.startTime }}</td>
-                    <td>{{ item.status.runStatus }}</td>
-                    <td>
-                        <el-button type="primary" @click="run({ item })">Run</el-button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="close">Cancel</el-button>
+                    <el-button type="primary" @click="confirm">Run</el-button>
+                </span>
+            </template>
+        </el-dialog>
+        <el-table :data="dataList" border size="default">
+            <el-table-column prop="metadata.namespace" label="Namespace" />
+            <el-table-column prop="metadata.name" label="Name" />
+            <el-table-column prop="spec.crontab" label="Crontab" />
+            <el-table-column prop="spec.typeRef" label="TypeRef" />
+            <el-table-column prop="spec.nameRef" label="NameRef" />
+            <el-table-column prop="status.startTime" label="Start Time" />
+            <el-table-column prop="status.runStatus" label="Run Status" />
+            <el-table-column label="Actions">
+                <template #default="scope">
+                    <el-button type="primary" @click="run(scope.row)">Run</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination @current-change="onPaginationChange" @size-change="onPageSizeChange"
+            v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30]"
+            layout="total, sizes, prev, pager, next" :total="total">
+        </el-pagination>
     </div>
 </template>
 
 <style scoped>
-.card-body {
-    width: 300px;
+.contaner {
+    margin-left: 7em;
 }
 
 .form-item {

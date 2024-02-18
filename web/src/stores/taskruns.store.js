@@ -9,23 +9,23 @@ export const useTaskRunsStore = defineStore({
     alert: null,
   }),
   actions: {
-    async list(namespace) {
+    async list(namespace, page_size = 10, page = 1) {
       const res = await fetchWrapper.get(
-        `/api/v1/namespaces/${namespace}/taskruns`
+        `/api/v1/namespaces/${namespace}/taskruns?page_size=${page_size}&page=${page}`
       );
-      return res.data.list;
+      return res.data;
     },
     async get(namespace, name) {
       const res = await fetchWrapper.get(
         `/api/v1/namespaces/${namespace}/taskruns/${name}`
       );
-      return res.data.list;
+      return res.data;
     },
     async delete(namespace, name) {
       const res = await fetchWrapper.delete(
         `/api/v1/namespaces/${namespace}/taskruns/${name}`
       );
-      return res.data.list;
+      return res.data;
     },
     async create(namespace, taskRef, typeRef, nameRef) {
       const res = await fetchWrapper.post(
