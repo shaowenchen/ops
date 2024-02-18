@@ -38,7 +38,6 @@ var hosts = ref([]);
 var clusters = ref([]);
 
 function getNameRefList() {
-    debugger
     if (selectedItem.spec.typeRef === 'host') {
         return hosts.value.list
     } else if (selectedItem.spec.typeRef === 'cluster') {
