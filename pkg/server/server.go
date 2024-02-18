@@ -38,10 +38,10 @@ func paginator[T any](dataList []T, pageSize, page uint) (pagination Pagination[
 	return
 }
 
-func showNotAuthorized(c *gin.Context) {
+func showNotAuthorized(c *gin.Context, message string) {
 	c.JSON(http.StatusUnauthorized, gin.H{
 		"code":    -1,
-		"message": "not authorized",
+		"message": "not authorized, " + message,
 	})
 }
 func showError(c *gin.Context, message string) {
@@ -74,18 +74,21 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			showNotAuthorized(c)
+			showNotAuthorized(c, "empty Authorization")
+			c.Abort()
 			return
 		}
 
 		headerParts := strings.SplitN(authHeader, " ", 2)
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			showError(c, "invalid Authorization")
+			showNotAuthorized(c, "invalid Authorization")
+			c.Abort()
 			return
 		}
 
 		if headerParts[1] != GlobalConfig.Server.Token {
-			showError(c, "invalid token")
+			showNotAuthorized(c, "invalid token")
+			c.Abort()
 			return
 		}
 

@@ -70,9 +70,12 @@ function run(item) {
                 </el-select>
 
             </div>
-            <el-select v-model="selectedItem.spec.nameRef" v-if="selectedItem.spec.typeRef">
-                <el-option v-for="item in getNameRefList()" :key="item.metadata.name" :value="item.metadata.name" />
-            </el-select>
+            <div class="form-group">
+                <label>NameRef</label>
+                <el-select v-model="selectedItem.spec.nameRef" v-if="selectedItem.spec.typeRef">
+                    <el-option v-for="item in getNameRefList()" :key="item.metadata.name" :value="item.metadata.name" />
+                </el-select>
+            </div>
         </div>
         <template #footer>
             <span class="dialog-footer">

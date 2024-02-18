@@ -1,3 +1,7 @@
+import { useLoginStore } from "@/stores";
+
+import { router } from "@/router";
+
 export const fetchWrapper = {
   get: request("GET"),
   post: request("POST"),
@@ -9,13 +13,17 @@ function request(method) {
   return (url, body) => {
     const requestOptions = {
       method,
-      headers: {
-      },
+      headers: {},
       body: null,
     };
     if (body) {
       requestOptions.headers["Content-Type"] = "application/json";
       requestOptions.body = JSON.stringify(body);
+    }
+    const loginStore = useLoginStore();
+    const token = loginStore.get();
+    if (token) {
+      requestOptions.headers["Authorization"] = `Bearer ${token}`;
     }
     return fetch(url, requestOptions).then(handleResponse);
   };
@@ -29,9 +37,10 @@ async function handleResponse(response) {
 
   // check for error response
   if (!response.ok) {
-    if ([401, 403].includes(response.status) && user) {
-      // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-      logout();
+    if ([401, 403].includes(response.status)) {
+      const loginStore = useLoginStore();
+      loginStore.clear();
+      router.push({ name: "login" });
     }
 
     // get error message from body or default to response status
