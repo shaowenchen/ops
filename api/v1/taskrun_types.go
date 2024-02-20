@@ -41,6 +41,10 @@ type TaskRunSpec struct {
 	RuntimeImage string            `json:"runtimeImage,omitempty"`
 }
 
+func (tr *TaskRun) GetSpec() *TaskRunSpec {
+	return &tr.Spec
+}
+
 func NewTaskRun(t *Task) TaskRun {
 	return TaskRun{
 		ObjectMeta: metav1.ObjectMeta{

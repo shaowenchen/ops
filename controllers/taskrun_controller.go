@@ -133,7 +133,7 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
 	r.commitStatus(logger, ctx, t, tr, opsv1.StatusInit)
-	if t.GetSpec().TypeRef == opsv1.TaskTypeRefHost || t.GetSpec().TypeRef == "" {
+	if tr.GetSpec().TypeRef == opsv1.TaskTypeRefHost || tr.GetSpec().TypeRef == "" {
 		h := &opsv1.Host{}
 		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, h)
 		if err != nil {
@@ -156,7 +156,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			return
 		}
 		r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
-	} else if t.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
+	} else if tr.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
 		c := &opsv1.Cluster{}
 		kubeOpt := opsoption.KubeOption{
 			NodeName:     t.GetSpec().NodeName,
