@@ -4,10 +4,8 @@ metadata:
   name: get-osstatus
   namespace: ops-system
 spec:
-  crontab: "*/10 * * * *"
-  nameRef: dev2
-  typeRef: cluster
-  all: true
+  nameRef: dev1
+  typeRef: host
   desc: Get OS Info
   steps:
     - name: Kernel Version

@@ -4,7 +4,6 @@ metadata:
   name: clear-kube
   namespace: ops-system
 spec:
-  crontab: "*/2 * * * *"
   nameRef: dev1
   typeRef: cluster
   desc: clear Kubernetes resource

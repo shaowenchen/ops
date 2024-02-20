@@ -4,7 +4,6 @@ metadata:
   name: clear-opstask
   namespace: ops-system
 spec:
-  crontab: "1 20 * * *"
   nameRef: prod
   typeRef: cluster
   nodename: anymaster

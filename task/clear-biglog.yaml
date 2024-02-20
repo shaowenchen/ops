@@ -4,7 +4,6 @@ metadata:
   name: clear-biglog
   namespace: ops-system
 spec:
-  crontab: "* * * * *"
   nameRef: dev1
   typeRef: host
   desc: clear runc log in special path
