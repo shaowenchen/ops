@@ -358,6 +358,9 @@ func CreateTaskRun(c *gin.Context) {
 	if req.Variables != nil {
 		taskRun.Spec.Variables = req.Variables
 	}
+	if req.TypeRef != "" {
+		taskRun.Spec.TypeRef = req.TypeRef
+	}
 	err = client.Create(context.TODO(), &taskRun)
 	if err != nil {
 		showError(c, err.Error())
