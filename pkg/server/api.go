@@ -51,6 +51,16 @@ func ListHost(c *gin.Context) {
 	if err != nil {
 		return
 	}
+	// clear sensitive info
+	for i := range hostList.Items {
+		hostList.Items[i].Spec.PrivateKey = ""
+		hostList.Items[i].Spec.Password = ""
+	}
+	// clear unused fields
+	for i := range hostList.Items {
+		hostList.Items[i].ManagedFields = nil
+		hostList.Items[i].Annotations = nil
+	}
 	showData(c, paginator[opsv1.Host](hostList.Items, req.PageSize, req.Page))
 }
 func ListCluster(c *gin.Context) {
@@ -86,6 +96,15 @@ func ListCluster(c *gin.Context) {
 	}
 	if err != nil {
 		return
+	}
+	// clear sensitive info
+	for i := range clusterList.Items {
+		clusterList.Items[i].Spec.Token = ""
+	}
+	// clear unused fields
+	for i := range clusterList.Items {
+		clusterList.Items[i].ManagedFields = nil
+		clusterList.Items[i].Annotations = nil
 	}
 	showData(c, paginator[opsv1.Cluster](clusterList.Items, req.PageSize, req.Page))
 }
