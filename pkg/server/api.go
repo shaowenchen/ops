@@ -22,6 +22,7 @@ func ListHost(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Source    string `form:"source"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -51,23 +52,39 @@ func ListHost(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	// clear sensitive info
-	for i := range hostList.Items {
-		hostList.Items[i].Spec.PrivateKey = ""
-		hostList.Items[i].Spec.Password = ""
+	if req.Source == "copilot" {
+		type CopilotResponse struct {
+			Name     string `json:"name"`
+			Desc     string `json:"desc"`
+			Address  string `json:"host"`
+			Hostname string `json:"hostname"`
+		}
+		var res []CopilotResponse
+		for i := range hostList.Items {
+			res = append(res, CopilotResponse{
+				Name:     hostList.Items[i].Name,
+				Desc:     hostList.Items[i].Spec.Desc,
+				Address:  hostList.Items[i].Spec.Address,
+				Hostname: hostList.Items[i].Status.Hostname,
+			})
+		}
+		showData(c, res)
+	} else {
+		// clear sensitive info
+		for i := range hostList.Items {
+			hostList.Items[i].Spec.PrivateKey = ""
+			hostList.Items[i].Spec.Password = ""
+		}
+		showData(c, paginator[opsv1.Host](hostList.Items, req.PageSize, req.Page))
 	}
-	// clear unused fields
-	for i := range hostList.Items {
-		hostList.Items[i].ManagedFields = nil
-		hostList.Items[i].Annotations = nil
-	}
-	showData(c, paginator[opsv1.Host](hostList.Items, req.PageSize, req.Page))
+
 }
 func ListCluster(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Source    string `form:"source"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -97,16 +114,27 @@ func ListCluster(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	// clear sensitive info
-	for i := range clusterList.Items {
-		clusterList.Items[i].Spec.Token = ""
+	if req.Source == "copilot" {
+		type CopilotResponse struct {
+			Name string `json:"name"`
+			Desc string `json:"desc"`
+		}
+		var res []CopilotResponse
+		for i := range clusterList.Items {
+			res = append(res, CopilotResponse{
+				Name: clusterList.Items[i].Name,
+				Desc: clusterList.Items[i].Spec.Desc,
+			})
+		}
+		showData(c, res)
+	} else {
+		// clear sensitive info
+		for i := range clusterList.Items {
+			clusterList.Items[i].Spec.Token = ""
+			clusterList.Items[i].Spec.Config = ""
+		}
+		showData(c, paginator[opsv1.Cluster](clusterList.Items, req.PageSize, req.Page))
 	}
-	// clear unused fields
-	for i := range clusterList.Items {
-		clusterList.Items[i].ManagedFields = nil
-		clusterList.Items[i].Annotations = nil
-	}
-	showData(c, paginator[opsv1.Cluster](clusterList.Items, req.PageSize, req.Page))
 }
 func GetTask(c *gin.Context) {
 	type Params struct {

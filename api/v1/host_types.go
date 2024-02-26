@@ -28,6 +28,7 @@ import (
 type HostSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Desc           string `json:"desc,omitempty"`
 	Address        string `yaml:"address,omitempty" json:"address,omitempty"`
 	Port           int    `yaml:"port,omitempty" json:"port,omitempty"`
 	Username       string `yaml:"username,omitempty" json:"username,omitempty"`

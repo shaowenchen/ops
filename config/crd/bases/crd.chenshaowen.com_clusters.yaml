@@ -61,6 +61,8 @@ spec:
             properties:
               config:
                 type: string
+              desc:
+                type: string
               server:
                 type: string
               token:

@@ -26,6 +26,7 @@ import (
 
 // ClusterSpec defines the desired state of Cluster
 type ClusterSpec struct {
+	Desc   string `json:"desc,omitempty"`
 	Server string `json:"server,omitempty"`
 	Config string `json:"config,omitempty"`
 	Token  string `json:"token,omitempty"`
