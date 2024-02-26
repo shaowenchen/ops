@@ -4,9 +4,6 @@ metadata:
   name: clear-docker
   namespace: ops-system
 spec:
-  nameRef: prod
-  typeRef: cluster
-  all: true
   desc: Docker Clear
   steps:
     - name: Clear container exit more than 30m

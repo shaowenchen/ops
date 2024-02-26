@@ -4,9 +4,7 @@ metadata:
   name: get-osstatus
   namespace: ops-system
 spec:
-  nameRef: dev1
-  typeRef: host
-  desc: Get OS Info
+  desc: View status information about the host
   steps:
     - name: Kernel Version
       content: uname -r
@@ -32,4 +30,3 @@ spec:
       content: echo `find /proc/*/fd/* -type l -lname 'anon_inode:inotify' -print 2>/dev/null | cut -d/ -f3 |xargs -I '{}' -- ps --no-headers -o '%U %p %c' -p '{}' | sort | uniq -c | sort -nr | awk 'BEGIN {max = 0} {if ($1+0 > max+0) max=$1} END {print max}'` `/sbin/sysctl fs.inotify.max_user_watches|awk '{print $3}'` |awk '{printf "%.2f%%/%s\n", $1*100/$2, $2}'
     - name: User Processes
       content: echo `ps -U root -u root -o comm= | wc -l`/`cat /proc/1/limits |grep processes | awk '{ print $4}'`
-

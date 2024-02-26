@@ -4,8 +4,6 @@ metadata:
   name: clear-kube
   namespace: ops-system
 spec:
-  nameRef: dev1
-  typeRef: cluster
   desc: clear Kubernetes resource
   steps:
     - name: clear Evicted pod

@@ -4,10 +4,8 @@ metadata:
   name: clear-opstask
   namespace: ops-system
 spec:
-  nameRef: prod
-  typeRef: cluster
   nodename: anymaster
   desc: clear Kubernetes resource
   steps:
     - name: clear ops task pod
-      content: kubectl -n ops-system delete  pod -l ops=task 
+      content: kubectl -n ops-system delete  pod -l ops=task
