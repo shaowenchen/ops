@@ -7,6 +7,7 @@ import (
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/log"
 	option "github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
@@ -82,6 +83,9 @@ func GetNodes(logger *log.Logger, client *kubernetes.Clientset, kubeOpt option.K
 	}
 	for _, node := range nodes.Items {
 		if len(kubeOpt.NodeName) == 0 && utils.IsMasterNode(&node) {
+			nodeList = append(nodeList, node)
+			return
+		} else if kubeOpt.NodeName == constants.AnyMaster && utils.IsMasterNode(&node) {
 			nodeList = append(nodeList, node)
 			return
 		} else if kubeOpt.NodeName == node.Name {

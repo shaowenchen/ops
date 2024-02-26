@@ -37,3 +37,5 @@ const (
 func GetCurrentUserKubeConfigPath() string {
 	return filepath.Join(GetCurrentUserHomeDir(), ".kube", "config")
 }
+
+const AnyMaster = "anymaster"
