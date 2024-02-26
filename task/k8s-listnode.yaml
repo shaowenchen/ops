@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: list all nodes in K8s
   nodeName: anymaster
+  all: false
   steps:
     - name: list nodes
       content: kubectl get nodes | awk '{print $1}'

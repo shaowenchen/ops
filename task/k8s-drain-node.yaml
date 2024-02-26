@@ -4,9 +4,10 @@ metadata:
   name: drain-node
   namespace: ops-system
 spec:
-  desc: Drain Kubernetes Node
+  desc: drain Kubernetes Node
   variables:
     node_name: ""
+  all: false
   steps:
     - name: Cordon Node
       content: kubectl cordon ${node_name}

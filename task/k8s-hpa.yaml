@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: add hpa for deployment
+  all: false
   variables:
     name:
     resource_type: deploy

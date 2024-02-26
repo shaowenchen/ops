@@ -4,7 +4,8 @@ metadata:
   name: get-osstatus
   namespace: ops-system
 spec:
-  desc: View status information about the host
+  desc: get status information about the host
+  all: false
   steps:
     - name: Kernel Version
       content: uname -r
