@@ -289,8 +289,6 @@ func ListTask(c *gin.Context) {
 			Variables map[string]string `json:"variables,omitempty"`
 			TypeRef   string            `json:"typeRef,omitempty"`
 			NameRef   string            `json:"nameRef,omitempty"`
-			NodeName  string            `json:"nodeName,omitempty"`
-			All       bool              `json:"all,omitempty"`
 		}
 		var res []CopilotResponse
 		for _, item := range taskList.Items {
@@ -300,8 +298,6 @@ func ListTask(c *gin.Context) {
 				Variables: item.Spec.Variables,
 				TypeRef:   item.Spec.TypeRef,
 				NameRef:   item.Spec.NameRef,
-				NodeName:  item.Spec.NodeName,
-				All:       item.Spec.All,
 			})
 		}
 		showData(c, res)
