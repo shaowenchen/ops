@@ -252,6 +252,7 @@ func ListTask(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Source    string `form:"source"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -279,6 +280,31 @@ func ListTask(c *gin.Context) {
 		err = client.List(context.TODO(), taskList, runtimeClient.InNamespace(req.Namespace))
 	}
 	if err != nil {
+		return
+	}
+	if req.Source == "copilot" {
+		type CopilotResponse struct {
+			Name      string            `json:"name"`
+			Desc      string            `json:"desc"`
+			Variables map[string]string `json:"variables,omitempty"`
+			TypeRef   string            `json:"typeRef,omitempty"`
+			NameRef   string            `json:"nameRef,omitempty"`
+			NodeName  string            `json:"nodeName,omitempty"`
+			All       bool              `json:"all,omitempty"`
+		}
+		var res []CopilotResponse
+		for _, item := range taskList.Items {
+			res = append(res, CopilotResponse{
+				Name:      item.Name,
+				Desc:      item.Spec.Desc,
+				Variables: item.Spec.Variables,
+				TypeRef:   item.Spec.TypeRef,
+				NameRef:   item.Spec.NameRef,
+				NodeName:  item.Spec.NodeName,
+				All:       item.Spec.All,
+			})
+		}
+		showData(c, res)
 		return
 	}
 	showData(c, paginator[opsv1.Task](taskList.Items, req.PageSize, req.Page))
