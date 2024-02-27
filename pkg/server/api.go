@@ -372,14 +372,14 @@ func CreateTaskRun(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	err = c.ShouldBindQuery(&req)
-	if err != nil {
-		showError(c, err.Error())
-		return
-	}
 	err = c.ShouldBindJSON(&req)
 	if err != nil {
 		showError(c, "get body error "+err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
 		return
 	}
 	// validate
