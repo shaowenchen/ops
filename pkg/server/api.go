@@ -364,6 +364,7 @@ func CreateTaskRun(c *gin.Context) {
 		TypeRef   string            `json:"typeRef"`
 		All       bool              `json:"all"`
 		Variables map[string]string `json:"variables"`
+		Source    string            `json:"source"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -436,6 +437,10 @@ func CreateTaskRun(c *gin.Context) {
 				return
 			}
 			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed {
+				if req.Source == "copilot" {
+					showDataSouceCopilot(c, latest.Status.TaskRunNodeStatus)
+					return
+				}
 				showData(c, latest)
 				return
 			}
