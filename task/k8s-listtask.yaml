@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: k8s-listtask
+  namespace: ops-system
+spec:
+  desc: list all task in K8s
+  variables:
+    namespace: "ops-system"
+  nodeName: anymaster
+  all: false
+  steps:
+    - name: list tasks
+      content: kubectl get task -n ${namespace} -o custom-columns=NAME:.metadata.name,DESCRIPTION:.spec.desc
