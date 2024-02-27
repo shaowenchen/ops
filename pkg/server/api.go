@@ -68,7 +68,7 @@ func ListHost(c *gin.Context) {
 				Hostname: hostList.Items[i].Status.Hostname,
 			})
 		}
-		showData(c, res)
+		showDataSouceCopilot(c, res)
 	} else {
 		// clear sensitive info
 		for i := range hostList.Items {
@@ -126,7 +126,7 @@ func ListCluster(c *gin.Context) {
 				Desc: clusterList.Items[i].Spec.Desc,
 			})
 		}
-		showData(c, res)
+		showDataSouceCopilot(c, res)
 	} else {
 		// clear sensitive info
 		for i := range clusterList.Items {
@@ -300,7 +300,7 @@ func ListTask(c *gin.Context) {
 				NameRef:   item.Spec.NameRef,
 			})
 		}
-		showData(c, res)
+		showDataSouceCopilot(c, res)
 		return
 	}
 	showData(c, paginator[opsv1.Task](taskList.Items, req.PageSize, req.Page))
