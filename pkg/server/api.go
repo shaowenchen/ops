@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -53,22 +55,13 @@ func ListHost(c *gin.Context) {
 		return
 	}
 	if req.Source == "copilot" {
-		type CopilotResponse struct {
-			Name     string `json:"name"`
-			Desc     string `json:"desc"`
-			Address  string `json:"host"`
-			Hostname string `json:"hostname"`
+		var b strings.Builder
+		b.WriteString("| namespace | name | desc | address | hostname |\n")
+		b.WriteString("|-|-|-|-|-|\n")
+		for _, item := range hostList.Items {
+			b.WriteString(fmt.Sprintf("| %s | %s | %s | %s | %s |\n", item.Namespace, item.Name, item.Spec.Desc, item.Spec.Address, item.Status.Hostname))
 		}
-		var res []CopilotResponse
-		for i := range hostList.Items {
-			res = append(res, CopilotResponse{
-				Name:     hostList.Items[i].Name,
-				Desc:     hostList.Items[i].Spec.Desc,
-				Address:  hostList.Items[i].Spec.Address,
-				Hostname: hostList.Items[i].Status.Hostname,
-			})
-		}
-		showDataSouceCopilot(c, res)
+		showDataSouceCopilot(c, b.String())
 	} else {
 		// clear sensitive info
 		for i := range hostList.Items {
@@ -115,18 +108,14 @@ func ListCluster(c *gin.Context) {
 		return
 	}
 	if req.Source == "copilot" {
-		type CopilotResponse struct {
-			Name string `json:"name"`
-			Desc string `json:"desc"`
+		var b strings.Builder
+		b.WriteString("| namespace | name | desc | \n")
+		b.WriteString("|-|-|-|\n")
+		for _, item := range clusterList.Items {
+			b.WriteString(fmt.Sprintf("| %s | %s | %s |\n", item.Namespace, item.Name, item.Spec.Desc))
 		}
-		var res []CopilotResponse
-		for i := range clusterList.Items {
-			res = append(res, CopilotResponse{
-				Name: clusterList.Items[i].Name,
-				Desc: clusterList.Items[i].Spec.Desc,
-			})
-		}
-		showDataSouceCopilot(c, res)
+
+		showDataSouceCopilot(c, b.String())
 	} else {
 		// clear sensitive info
 		for i := range clusterList.Items {
