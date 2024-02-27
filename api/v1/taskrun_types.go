@@ -86,21 +86,21 @@ type TaskRunStep struct {
 	StepStatus string `json:"stepStatus,omitempty"`
 }
 
-func (t *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutput, stepStatus string) {
-	if t.TaskRunNodeStatus == nil {
-		t.TaskRunNodeStatus = make(map[string]*TaskRunNodeStatus)
+func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutput, stepStatus string) {
+	if tr.TaskRunNodeStatus == nil {
+		tr.TaskRunNodeStatus = make(map[string]*TaskRunNodeStatus)
 	}
-	if _, ok := t.TaskRunNodeStatus[nodeName]; !ok {
-		t.TaskRunNodeStatus[nodeName] = &TaskRunNodeStatus{}
+	if _, ok := tr.TaskRunNodeStatus[nodeName]; !ok {
+		tr.TaskRunNodeStatus[nodeName] = &TaskRunNodeStatus{}
 	}
-	t.TaskRunNodeStatus[nodeName].TaskRunStep = append(t.TaskRunNodeStatus[nodeName].TaskRunStep, &TaskRunStep{
+	tr.TaskRunNodeStatus[nodeName].TaskRunStep = append(tr.TaskRunNodeStatus[nodeName].TaskRunStep, &TaskRunStep{
 		StepName:   stepName,
 		StepCmd:    stepCmd,
 		StepOutput: stepOutput,
 		StepStatus: stepStatus,
 	})
-	t.TaskRunNodeStatus[nodeName].StartTime = &metav1.Time{Time: time.Now()}
-	t.TaskRunNodeStatus[nodeName].RunStatus = stepStatus
+	tr.TaskRunNodeStatus[nodeName].StartTime = &metav1.Time{Time: time.Now()}
+	tr.TaskRunNodeStatus[nodeName].RunStatus = stepStatus
 }
 
 //+kubebuilder:object:root=true
