@@ -114,7 +114,6 @@ func ListCluster(c *gin.Context) {
 		for _, item := range clusterList.Items {
 			b.WriteString(fmt.Sprintf("| %s | %s | %s |\n", item.Namespace, item.Name, item.Spec.Desc))
 		}
-
 		showDataSouceCopilot(c, b.String())
 	} else {
 		// clear sensitive info
@@ -272,24 +271,17 @@ func ListTask(c *gin.Context) {
 		return
 	}
 	if req.Source == "copilot" {
-		type CopilotResponse struct {
-			Name      string            `json:"name"`
-			Desc      string            `json:"desc"`
-			Variables map[string]string `json:"variables,omitempty"`
-			TypeRef   string            `json:"typeRef,omitempty"`
-			NameRef   string            `json:"nameRef,omitempty"`
-		}
-		var res []CopilotResponse
+		var b strings.Builder
+		b.WriteString("| namespace | name | desc | variables |\n")
+		b.WriteString("|-|-|-|-|\n")
 		for _, item := range taskList.Items {
-			res = append(res, CopilotResponse{
-				Name:      item.Name,
-				Desc:      item.Spec.Desc,
-				Variables: item.Spec.Variables,
-				TypeRef:   item.Spec.TypeRef,
-				NameRef:   item.Spec.NameRef,
-			})
+			var vars string
+			for k, v := range item.Spec.Variables {
+				vars += fmt.Sprintf("%s=%s,", k, v)
+			}
+			b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", item.Namespace, item.Name, item.Spec.Desc, vars))
 		}
-		showDataSouceCopilot(c, res)
+		showDataSouceCopilot(c, b.String())
 		return
 	}
 	showData(c, paginator[opsv1.Task](taskList.Items, req.PageSize, req.Page))
