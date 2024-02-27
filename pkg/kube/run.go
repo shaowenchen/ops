@@ -14,6 +14,9 @@ import (
 )
 
 func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string, incluster bool) (pod *corev1.Pod, err error) {
+	if image == "" {
+		image = constants.DefaultRuntimeImage
+	}
 	shellBase64 := utils.EncodingStringToBase64(shell)
 	priviBool := true
 	tolerations := []v1.Toleration{}
