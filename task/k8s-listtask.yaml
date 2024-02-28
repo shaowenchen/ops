@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: list all task in K8s
   variables:
-    namespace: "ops-system"
+    namespace: ops-system
   nodeName: anymaster
   all: false
   steps:

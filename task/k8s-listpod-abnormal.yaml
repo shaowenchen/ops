@@ -7,7 +7,7 @@ spec:
   desc: list abnormal pods in specified namespace
   nodeName: anymaster
   variables:
-    namespace: "default"
+    namespace: default
   all: false
   steps:
     - name: list pods

@@ -213,7 +213,10 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	}
 	r.commitStatus(logger, ctx, t, tr, opsv1.StatusRunning)
 	for _, node := range nodes {
-		err = opsutils.MergeError(err, opstask.RunTaskOnKube(logger, t, tr, kc, &node, opsoption.TaskOption{}, kubeOpt))
+		err = opsutils.MergeError(err, opstask.RunTaskOnKube(logger, t, tr, kc, &node,
+			opsoption.TaskOption{
+				Variables: tr.GetSpec().Variables,
+			}, kubeOpt))
 		if err != nil {
 			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
 		} else {
