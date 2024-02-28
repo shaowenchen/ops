@@ -4,7 +4,7 @@ metadata:
   name: list-reqlimit
   namespace: ops-system
 spec:
-  desc: list request and limit
+  desc: list request and limit in specified namespace within a Kubernetes cluster
   variables:
     namespace: "all"
   steps:

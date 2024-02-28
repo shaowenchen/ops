@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: cordon-node
+  namespace: ops-system
+spec:
+  desc: cordon special node within a Kubernetes cluster.
+  nodeName: anymaster
+  variables:
+    node_name: "what node you want to cordon"
+  steps:
+    - name: cordon node
+      content: kubectl cordon ${node_name}

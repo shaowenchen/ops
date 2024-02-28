@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: get-status-gpu
+  namespace: ops-system
+spec:
+  desc: get gpu status using nvidia-smi in special host
+  steps:
+    - name: Check nvidia-smi
+      content: command -v nvidia-smi
+    - name: Show GPU Usage
+      content: nvidia-smi --query-gpu=name,temperature.gpu,utilization.gpu,memory.total,utilization.memory --format=csv,noheader

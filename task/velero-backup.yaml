@@ -4,7 +4,7 @@ metadata:
   name: velero-backup
   namespace: ops-system
 spec:
-  desc: Backup Kubernetes Using Velero
+  desc: backup Kubernetes Using Velero
   variables:
     cluster_name: test
     version: 4

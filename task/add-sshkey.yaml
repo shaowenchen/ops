@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: task-sample
+  name: add-sshkey
   namespace: ops-system
 spec:
-  desc: Add Key
+  desc: add ssh key to specified host
   variables:
     key_content:
   steps:

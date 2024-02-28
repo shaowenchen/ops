@@ -1,0 +1,18 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: set-reqlimit
+  namespace: ops-system
+spec:
+  desc: add request and limit, e.g. Deployment\StatefulSet\DaemonSet
+  variables:
+    namespace: ops-system
+    name: ""
+    kind: Deployment
+  steps:
+    - name: add request limit
+      kubernetes:
+        action: SetReqLimit
+        kind: ${kind}
+        name: ${name}
+        namespace: ${namespace}

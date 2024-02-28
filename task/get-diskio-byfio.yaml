@@ -4,7 +4,7 @@ metadata:
   name: get-diskio-byfio
   namespace: ops-system
 spec:
-  desc: fio will destroy data on filename path
+  desc: run fio to test disk and get a report in special path for special host
   variables:
     filename: "/tmp/testfile"
     size: 100m

@@ -1,0 +1,16 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: install-metricsserver
+  namespace: ops-system
+spec:
+  desc: install metrics server for Kubernetes
+  nodename: anymaster
+  variables:
+    proxy: https://mirror.ghproxy.com/
+    action: apply
+    version: 0.5.0
+    kubeconfig: "/etc/kubernetes/admin.conf"
+  steps:
+    - name: ${action} MetricsServer
+      content: kubectl --kubeconfig ${kubeconfig} ${action} -f ${proxy}https://raw.githubusercontent.com/shaowenchen/hubimage/master/observation/v${version}-metrics-server.yaml

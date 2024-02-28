@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: describe-pod
+  namespace: ops-system
+spec:
+  desc: get pod details info in special namespace within a Kubernetes cluster.
+  nodeName: anymaster
+  variables:
+    namespace: "what namespace you want to get details"
+    podname: "what pod you want to get details"
+  steps:
+    - name: get details
+      content: "kubectl get pod -n ${namespace} ${podname} -o=json | jq '{Name: .metadata.name, Namespace: .metadata.namespace, Volumes: .spec.volumes, Node: .spec.nodeName, Events: .status.conditions}'"

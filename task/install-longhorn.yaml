@@ -1,0 +1,15 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: install-longhorn
+  namespace: ops-system
+spec:
+  desc: install longhorn in Kubernetes
+  nodename: anymaster
+  variables:
+    action: apply
+    version: 1.4.0
+    kubeconfig: "/etc/kubernetes/admin.conf"
+  steps:
+    - name: ${action} longhorn
+      content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://raw.githubusercontent.com/longhorn/longhorn/v${version}/deploy/longhorn.yaml

@@ -4,7 +4,7 @@ metadata:
   name: set-hubimage
   namespace: ops-system
 spec:
-  desc: Set hubimage
+  desc: set deployments,daemonsets,statefulsets image to dockerhub hubimage repo for Kubernetes cluster
   variables:
     namespace: ops-system
     resource: deployments,daemonsets,statefulsets

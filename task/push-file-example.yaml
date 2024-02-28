@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: push-file
+  namespace: ops-system
+spec:
+  desc: push local file to remote file example
+  steps:
+    - name: Push To Remote
+      remotefile: /etc/hosts
+      localfile: /etc/hosts
+      direction: upload

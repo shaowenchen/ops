@@ -1,0 +1,11 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: list-node
+  namespace: ops-system
+spec:
+  desc: list all nodes in special Kubernetes cluster
+  nodeName: anymaster
+  steps:
+    - name: list nodes
+      content: kubectl get nodes | awk '{print $1 $2}'

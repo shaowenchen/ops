@@ -4,7 +4,7 @@ metadata:
   name: clear-biglog
   namespace: ops-system
 spec:
-  desc: clear runc log in special path
+  desc: clear runc log in special path for special host
   variables:
     size: 100M
     clear: "false"

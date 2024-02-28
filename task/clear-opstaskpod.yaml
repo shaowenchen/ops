@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: clear-opstaskpod
+  namespace: ops-system
+spec:
+  nodename: anymaster
+  desc: clear ops task pod in special namespace within a Kubernetes cluster.
+  variables:
+    namespace: "what namespace you want to clear"
+  steps:
+    - name: clear ops task pod
+      content: kubectl -n ${namespace} delete  pod -l ops=task

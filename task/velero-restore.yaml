@@ -4,7 +4,7 @@ metadata:
   name: velero-restore
   namespace: ops-system
 spec:
-  desc: Restore Kubernetes Using Velero
+  desc: restore Kubernetes Using Velero
   variables:
     velero_version: v1.9.2
     cluster_name: test

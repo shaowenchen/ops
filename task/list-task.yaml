@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: k8s-listtask
+  namespace: ops-system
+spec:
+  desc: list all tasks in specified namespace within a Kubernetes cluster
+  variables:
+    namespace: "what namespace you want to list"
+  nodeName: anymaster
+  steps:
+    - name: list tasks
+      content: kubectl get task.crd.chenshaowen.com -n ${namespace} -o custom-columns=NAME:.metadata.name,DESCRIPTION:.spec.desc

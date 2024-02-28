@@ -1,0 +1,32 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: clear-kubernetes
+  namespace: ops-system
+spec:
+  desc: clear exception pods in special namespace within a Kubernetes cluster.
+  nodename: anymaster
+  variables:
+    namespace: "what namespace you want to clear"
+  steps:
+    - name: clear Evicted pod
+      content: kubectl get pods ${namespace} -o wide | grep Evicted | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear Error pod
+      content: kubectl get pods ${namespace} -o wide | grep Error | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear Completed pod
+      content: kubectl get pods ${namespace} -o wide | grep Completed | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear ErrImagePull pod
+      content: kubectl get pods ${namespace} -o wide | grep ErrImagePull | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear ImagePullBackOff pod
+      content: kubectl get pods ${namespace} -o wide | grep ImagePullBackOff | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear CrashLoopBackOff pod
+      content: kubectl get pods ${namespace} -o wide | grep CrashLoopBackOff | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
+    - name: clear Terminating pod
+      content: kubectl get pods ${namespace} -o wide | grep Terminating | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+      allowfailure: "true"
