@@ -19,9 +19,6 @@ spec:
     - jsonPath: .spec.crontab
       name: Crontab
       type: string
-    - jsonPath: .spec.typeRef
-      name: TypeRef
-      type: string
     - jsonPath: .status.startTime
       name: StartTime
       type: date
