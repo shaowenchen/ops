@@ -7,7 +7,6 @@ spec:
   desc: drain Kubernetes Node
   variables:
     node_name: ""
-  all: false
   steps:
     - name: Cordon Node
       content: kubectl cordon ${node_name}

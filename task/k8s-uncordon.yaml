@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: k8s-uncordon
+  namespace: ops-system
+spec:
+  desc: uncordon special node in Kubernetes
+  nodeName: anymaster
+  variables:
+    node_name: "what node you want to uncordon"
+  steps:
+    - name: uncordon node
+      content: kubectl uncordon ${node_name}

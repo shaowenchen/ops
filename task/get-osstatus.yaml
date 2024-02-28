@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: get status information about the host
-  all: false
   steps:
     - name: Kernel Version
       content: uname -r

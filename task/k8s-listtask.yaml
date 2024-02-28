@@ -8,7 +8,6 @@ spec:
   variables:
     namespace: ops-system
   nodeName: anymaster
-  all: false
   steps:
     - name: list tasks
       content: kubectl get task.crd.chenshaowen.com -n ${namespace} -o custom-columns=NAME:.metadata.name,DESCRIPTION:.spec.desc

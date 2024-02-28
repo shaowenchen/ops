@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: k8s-toppod-mem
+  namespace: ops-system
+spec:
+  desc: list topK usage memory of pods in specified namespace
+  nodeName: anymaster
+  variables:
+    namespace: default
+    topk: "20"
+  steps:
+    - name: list topK usage memory of pods in specified namespace
+      content: kubectl top pod --sort-by=memory -n ${namespace} | head -$((${topk}+1))

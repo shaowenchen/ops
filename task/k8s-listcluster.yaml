@@ -4,11 +4,10 @@ metadata:
   name: k8s-listcluster
   namespace: ops-system
 spec:
-  desc: list all clusters in K8s
+  desc: list all clusters in Kubernetes
   variables:
-    namespace: "ops-system"
+    namespace: ops-system
   nodeName: anymaster
-  all: false
   steps:
     - name: list clusters
       content: kubectl get clusters.crd.chenshaowen.com -n ${namespace} -o custom-columns=NAME:.metadata.name,DESCRIPTION:.spec.desc

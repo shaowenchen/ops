@@ -8,7 +8,6 @@ spec:
   nodeName: anymaster
   variables:
     namespace: default
-  all: false
   steps:
     - name: list pods
       content: kubectl get pod -n ${namespace} | grep -vE 'Running|Completed|Succeeded' |  awk '{print $1, $2, $5}'
