@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/shaowenchen/ops/pkg/constants"
 )
 
 func GetEnvDefault(key, defaultValue string) string {
@@ -111,6 +113,43 @@ func GetAbsoluteFilePath(path string) string {
 		return path
 	}
 	return path
+}
+
+func GetTaskAbsoluteFilePath(proxy, path string) string {
+	if strings.HasPrefix(path, "/") {
+		return path
+	} else if strings.HasPrefix(path, "~/") {
+		dirname, _ := os.UserHomeDir()
+		path = filepath.Join(dirname, path[2:])
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return ""
+		}
+		return path
+	} else if strings.HasPrefix(path, "./") {
+		dirname, _ := os.Getwd()
+		path = filepath.Join(dirname, path[2:])
+		return path
+	}
+	if !strings.HasSuffix(path, ".yaml") {
+		path = path + ".yaml"
+	}
+	// try local task
+	localTaskPath := constants.GetOpsTaskDir() + "/" + path
+	if _, err := os.Stat(localTaskPath); !os.IsNotExist(err) {
+		return localTaskPath
+	}
+	// try cloud task
+	cloudTaskPath := constants.GetCloudTaskDir() + "/" + path
+	cmd := ShellDownloadFile(proxy, cloudTaskPath, localTaskPath)
+	runner := exec.Command("bash", "-c", cmd)
+	var out, errout bytes.Buffer
+	runner.Stdout = &out
+	runner.Stderr = &errout
+	err := runner.Run()
+	if err != nil {
+		return ""
+	}
+	return localTaskPath
 }
 
 func ReadFile(path string) (buff string, err error) {

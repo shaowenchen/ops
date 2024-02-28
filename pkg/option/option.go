@@ -34,7 +34,9 @@ type S3FileOption struct {
 type TaskOption struct {
 	Sudo      bool
 	FilePath  string
+	Proxy     string
 	Variables map[string]string
+	Clear      bool
 }
 
 type ShellOption struct {

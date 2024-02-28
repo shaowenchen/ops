@@ -36,20 +36,20 @@ var TaskCmd = &cobra.Command{
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventoryType := utils.GetInventoryType(inventory)
+		tasks, err := opstask.ReadTaskYaml(utils.GetTaskAbsoluteFilePath(taskOpt.Proxy, taskOpt.FilePath))
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
 		if inventoryType == constants.InventoryTypeHosts {
-			HostTask(logger, taskOpt, hostOpt, inventory)
+			HostTask(logger, tasks, taskOpt, hostOpt, inventory)
 		} else if inventoryType == constants.InventoryTypeKubernetes {
-			KubeTask(logger, taskOpt, kubeOpt, inventory)
+			KubeTask(logger, tasks, taskOpt, kubeOpt, inventory)
 		}
 	},
 }
 
-func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
-	tasks, err := opstask.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.FilePath))
-	if err != nil {
-		logger.Error.Println(err)
-		return err
-	}
+func HostTask(logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
 	hs := host.GetHosts(logger, hostOpt, inventory)
 	for _, h := range hs {
 		if err != nil {
@@ -73,12 +73,7 @@ func HostTask(logger *log.Logger, taskOpt option.TaskOption, hostOpt option.Host
 	return
 }
 
-func KubeTask(logger *log.Logger, taskOpt option.TaskOption, kubeOpt option.KubeOption, inventory string) (err error) {
-	tasks, err := opstask.ReadTaskYaml(utils.GetAbsoluteFilePath(taskOpt.FilePath))
-	if err != nil {
-		logger.Error.Println(err)
-		return err
-	}
+func KubeTask(logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, kubeOpt option.KubeOption, inventory string) (err error) {
 	kc, err := kube.NewKubeConnection(inventory)
 	if err != nil {
 		logger.Error.Println(err)
@@ -115,6 +110,8 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				taskOption.Sudo = fieldValue == "true"
 			} else if fieldName == "filepath" || fieldName == "f" {
 				taskOption.FilePath = fieldValue
+			} else if fieldName == "proxy" {
+				taskOption.Proxy = fieldValue
 			} else if fieldName == "verbose" || fieldName == "v" {
 				verbose = fieldValue
 			} else if fieldName == "all" {
@@ -137,6 +134,9 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				hostOpt.PrivateKeyPath = fieldValue
 			} else {
 				taskOption.Variables[fieldName] = fieldValue
+			}
+			if taskOption.Proxy == "" {
+				taskOption.Proxy = constants.DefaultProxy
 			}
 		}
 	}

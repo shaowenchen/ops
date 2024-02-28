@@ -64,6 +64,10 @@ func GetOpsTaskDir() string {
 	return filepath.Join(GetOpsDir(), "task")
 }
 
+func GetCloudTaskDir() string {
+	return "https://raw.githubusercontent.com/shaowenchen/ops/main/task"
+}
+
 func GetOpsLogsDir() string {
 	return filepath.Join(GetOpsDir(), "logs")
 }

@@ -11,7 +11,8 @@
       "mode": "debug",
       "cwd": "${workspaceFolder}",
       "program": "cmd/cli/main.go",
-      "args": ["task", "-f", "", "-i", "", "--incluster"],
+      // "args": ["task", "-f", "get-osstatus.yaml", "-i", "", "--incluster"],
+      "args": ["create", "task", "-i", "get-osstatus.yaml"],
       "env": {}
     },
     {

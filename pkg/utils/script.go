@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+func ShellDownloadFile(proxy, sourceUrl, distPath string) string {
+	return fmt.Sprintf(`curl -sfL %s -o %s`, GetAvailableUrl(sourceUrl, proxy), distPath)
+}
+
 func ShellIsInChina() string {
 	return `curl --connect-timeout 2 https://raw.githubusercontent.com/`
 }

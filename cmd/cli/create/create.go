@@ -14,7 +14,7 @@ var CreateCmd = &cobra.Command{
 var hostOpt option.HostOption
 var clusterOpt option.ClusterOption
 var clusterSpec opsv1.ClusterSpec
-var taskpath string
+var taskOpt option.TaskOption
 var inventory string
 var verbose string
 
