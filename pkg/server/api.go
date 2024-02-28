@@ -377,11 +377,6 @@ func CreateTaskRun(c *gin.Context) {
 		showError(c, "get body error "+err.Error())
 		return
 	}
-	err = c.ShouldBindQuery(&req)
-	if err != nil {
-		showError(c, err.Error())
-		return
-	}
 	// validate
 	if req.NameRef == "" {
 		showError(c, "nameRef is required")
@@ -412,7 +407,9 @@ func CreateTaskRun(c *gin.Context) {
 		taskRun.Spec.All = req.All
 	}
 	if req.Variables != nil {
-		taskRun.Spec.Variables = req.Variables
+		for k, v := range req.Variables {
+			taskRun.Spec.Variables[k] = v
+		}
 	}
 	if req.TypeRef != "" {
 		taskRun.Spec.TypeRef = req.TypeRef
