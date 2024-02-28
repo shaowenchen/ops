@@ -26,6 +26,7 @@ import (
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opshost "github.com/shaowenchen/ops/pkg/host"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -122,7 +123,29 @@ func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Contex
 	return
 }
 
+func filledHostFromSecret(h *opsv1.Host, client client.Client, secretRef string) error {
+	secret := &corev1.Secret{}
+	err := client.Get(context.TODO(), types.NamespacedName{Name: secretRef, Namespace: h.Namespace}, secret)
+	if err != nil {
+		return err
+	}
+	if secret.Data["privatekey"] != nil {
+		h.Spec.PrivateKey = string(secret.Data["privatekey"])
+	}
+	if secret.Data["passsword"] != nil {
+		h.Spec.Password = string(secret.Data["passsword"])
+	}
+	return nil
+}
+
 func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context, h *opsv1.Host) (err error) {
+	if h.Spec.SecretRef != "" {
+		err = filledHostFromSecret(h, r.Client, h.Spec.SecretRef)
+		if err != nil {
+			logger.Error.Println(err, "failed to fill host secretRef")
+			return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)
+		}
+	}
 	hc, err := opshost.NewHostConnBase64(h)
 	if err != nil {
 		logger.Error.Println(err, "failed to create host connection")

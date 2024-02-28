@@ -72,13 +72,13 @@ spec:
                 type: string
               port:
                 type: integer
-              privatekey:
+              privateKey:
                 type: string
-              privatekeypath:
+              privateKeyPath:
                 type: string
-              secretref:
+              secretRef:
                 type: string
-              timeoutseconds:
+              timeoutSeconds:
                 format: int64
                 type: integer
               username:

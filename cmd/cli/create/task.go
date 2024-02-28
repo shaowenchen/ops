@@ -5,29 +5,34 @@ import (
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
+var tTaskOpt option.TaskOption
+var tClusterOpt option.ClusterOption
+var tVerbose string
+
 var taskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "create task resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
+		logger := log.NewLogger().SetVerbose(tVerbose).SetStd().SetFile().Build()
 		Createtask(logger)
 	},
 }
 
 func Createtask(logger *log.Logger) (err error) {
-	kubeconfigPath := utils.GetAbsoluteFilePath(clusterOpt.Kubeconfig)
+	kubeconfigPath := utils.GetAbsoluteFilePath(tClusterOpt.Kubeconfig)
 	restConfig, err := utils.GetRestConfig(kubeconfigPath)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
 
-	taskText, err := utils.ReadFile(utils.GetTaskAbsoluteFilePath(taskOpt.Proxy, taskOpt.FilePath))
+	taskText, err := utils.ReadFile(utils.GetTaskAbsoluteFilePath(tTaskOpt.Proxy, tTaskOpt.FilePath))
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -36,16 +41,16 @@ func Createtask(logger *log.Logger) (err error) {
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	if clusterOpt.Name != "" {
-		t.Name = clusterOpt.Name
+	if tClusterOpt.Name != "" {
+		t.Name = tClusterOpt.Name
 	}
-	if clusterOpt.Namespace != "" {
-		t.Namespace = clusterOpt.Namespace
+	if tClusterOpt.Namespace != "" {
+		t.Namespace = tClusterOpt.Namespace
 	}
 	if t.Namespace == "" {
 		t.Namespace = constants.DefaultOpsNamespace
 	}
-	err = kube.CreateTask(logger, restConfig, t, taskOpt.Clear)
+	err = kube.CreateTask(logger, restConfig, t, tTaskOpt.Clear)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -54,13 +59,13 @@ func Createtask(logger *log.Logger) (err error) {
 }
 
 func init() {
-	taskCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
-	taskCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kuebconfig", "", "~/.kube/config", "")
-	taskCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "", "")
-	taskCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")
+	taskCmd.Flags().StringVarP(&tVerbose, "verbose", "v", "", "")
+	taskCmd.Flags().StringVarP(&tClusterOpt.Kubeconfig, "kuebconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
+	taskCmd.Flags().StringVarP(&tClusterOpt.Namespace, "namespace", "", constants.DefaultOpsNamespace, "")
+	taskCmd.Flags().StringVarP(&tClusterOpt.Name, "name", "", "", "")
 
-	taskCmd.Flags().BoolVarP(&taskOpt.Clear, "clear", "", false, "")
-	taskCmd.Flags().StringVarP(&taskOpt.FilePath, "inventory", "i", "", "")
+	taskCmd.Flags().BoolVarP(&tTaskOpt.Clear, "clear", "", false, "")
+	taskCmd.Flags().StringVarP(&tTaskOpt.FilePath, "inventory", "i", "", "")
 	taskCmd.MarkFlagRequired("inventory")
-	taskCmd.Flags().StringVarP(&taskOpt.Proxy, "proxy", "", constants.DefaultProxy, "")
+	taskCmd.Flags().StringVarP(&tTaskOpt.Proxy, "proxy", "", constants.DefaultProxy, "")
 }

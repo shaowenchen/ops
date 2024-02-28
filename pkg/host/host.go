@@ -10,14 +10,14 @@ import (
 	"github.com/shaowenchen/ops/pkg/utils"
 )
 
-func File(logger *log.Logger, h *opsv1.Host, option option.FileOption, hostOption option.HostOption) (err error) {
+func File(logger *log.Logger, h *opsv1.Host, fileOpt option.FileOption, hostOption option.HostOption) (err error) {
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
 	if err != nil {
 		logger.Error.Println(err)
 		return err
 	}
-	return c.File(option.Sudo, option.Direction, option.LocalFile, option.RemoteFile)
+	return c.File(fileOpt.Sudo, fileOpt.Direction, fileOpt.LocalFile, fileOpt.RemoteFile)
 }
 
 func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOption option.HostOption) (err error) {
@@ -33,10 +33,10 @@ func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOpt
 	return
 }
 
-func GetHosts(logger *log.Logger, option option.HostOption, inventory string) (hosts []*opsv1.Host) {
+func GetHosts(logger *log.Logger, clusterOpt option.ClusterOption, hostOpt option.HostOption, inventory string) (hosts []*opsv1.Host) {
 	hs, _ := utils.AnalysisHostsParameter(inventory)
 	for _, addr := range hs {
-		hosts = append(hosts, opsv1.NewHost(constants.DefaultNamespace, strings.ReplaceAll(addr, ".", "-"), addr, option.Port, option.Username, option.Password, option.PrivateKey, option.PrivateKeyPath, constants.DefaultTimeoutSeconds))
+		hosts = append(hosts, opsv1.NewHost(clusterOpt.Namespace, strings.ReplaceAll(addr, ".", "-"), addr, hostOpt.Port, hostOpt.Username, hostOpt.Password, hostOpt.PrivateKey, hostOpt.PrivateKeyPath, constants.DefaultTimeoutSeconds, hostOpt.SecretRef))
 	}
 	return
 }

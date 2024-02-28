@@ -50,7 +50,7 @@ var TaskCmd = &cobra.Command{
 }
 
 func HostTask(logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
-	hs := host.GetHosts(logger, hostOpt, inventory)
+	hs := host.GetHosts(logger, option.ClusterOption{}, hostOpt, inventory)
 	for _, h := range hs {
 		if err != nil {
 			logger.Error.Println(err)

@@ -146,6 +146,14 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			logger.Error.Println(err)
 			return
 		}
+		// filled host
+		if h.Spec.SecretRef != "" {
+			err = filledHostFromSecret(h, r.Client, h.Spec.SecretRef)
+			if err != nil {
+				logger.Error.Println("fill host secretRef error", err)
+				return
+			}
+		}
 		logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 		err = r.runTaskOnHost(cliLogger, ctx, t, tr, h)

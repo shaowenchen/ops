@@ -12,7 +12,8 @@
       "cwd": "${workspaceFolder}",
       "program": "cmd/cli/main.go",
       // "args": ["task", "-f", "get-osstatus.yaml", "-i", "", "--incluster"],
-      "args": ["create", "task", "-i", "get-osstatus.yaml"],
+      // "args": ["create", "task", "-i", "get-osstatus.yaml"],
+      "args": ["create", "host", "-i", "1.1.1.1"],
       "env": {}
     },
     {

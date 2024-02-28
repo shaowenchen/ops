@@ -1,6 +1,8 @@
 package create
 
 import (
+	"strings"
+
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -10,12 +12,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var hClusterOpt option.ClusterOption
+var hHostOpt option.HostOption
+var hInventory string
+var hVerbose string
+
 var hostCmd = &cobra.Command{
 	Use:   "host",
 	Short: "create host resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
-		err := CreateHost(logger, clusterOpt, hostOpt, inventory)
+		logger := log.NewLogger().SetVerbose(hVerbose).SetStd().SetFile().Build()
+		err := CreateHost(logger, hClusterOpt, hHostOpt, hInventory)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -30,7 +37,7 @@ func CreateHost(logger *log.Logger, clusterOpt option.ClusterOption, hostOpt opt
 		logger.Error.Println(err)
 		return
 	}
-	if hostOpt.PrivateKey == "" {
+	if hostOpt.SecretRef == "" && hostOpt.PrivateKey == "" {
 		hostOpt.PrivateKey, err = utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(hostOpt.PrivateKey)
 		if err != nil {
@@ -38,12 +45,15 @@ func CreateHost(logger *log.Logger, clusterOpt option.ClusterOption, hostOpt opt
 		}
 	}
 	hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
-	hs := host.GetHosts(logger, hostOpt, inventory)
+	hs := host.GetHosts(logger, clusterOpt, hostOpt, inventory)
 
 	for _, h := range hs {
 		h.Namespace = clusterOpt.Namespace
 		// one name, one host
 		if len(hs) == 1 {
+			if clusterOpt.Name == "" {
+				clusterOpt.Name = strings.ReplaceAll(h.Spec.Address, ".", "-")
+			}
 			hs[0].Name = clusterOpt.Name
 		}
 		// no name, multi host
@@ -52,22 +62,21 @@ func CreateHost(logger *log.Logger, clusterOpt option.ClusterOption, hostOpt opt
 			logger.Error.Println(err)
 		}
 	}
-
 	return
 }
 
 func init() {
-	hostCmd.Flags().StringVarP(&verbose, "verbose", "v", "", "")
-	hostCmd.Flags().StringVarP(&clusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
-	hostCmd.Flags().StringVarP(&clusterOpt.Namespace, "namespace", "", "ops-system", "")
-	hostCmd.Flags().StringVarP(&clusterOpt.Name, "name", "", "", "")
-	hostCmd.MarkFlagRequired("name")
-	hostCmd.Flags().BoolVarP(&clusterOpt.Clear, "clear", "", false, "")
+	hostCmd.Flags().StringVarP(&hVerbose, "verbose", "v", "", "")
+	hostCmd.Flags().StringVarP(&hClusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
+	hostCmd.Flags().StringVarP(&hClusterOpt.Namespace, "namespace", "", constants.DefaultOpsNamespace, "")
+	hostCmd.Flags().StringVarP(&hClusterOpt.Name, "name", "", "", "")
+	hostCmd.Flags().BoolVarP(&hClusterOpt.Clear, "clear", "", false, "")
 
-	hostCmd.Flags().StringVarP(&hostOpt.Username, "username", "", "root", "")
-	hostCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
-	hostCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", "~/.ssh/id_rsa", "")
-	hostCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
+	hostCmd.Flags().StringVarP(&hHostOpt.Username, "username", "", "root", "")
+	hostCmd.Flags().StringVarP(&hHostOpt.Password, "password", "", "", "")
+	hostCmd.Flags().StringVarP(&hHostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")
+	hostCmd.Flags().StringVarP(&hHostOpt.SecretRef, "secretref", "", "", "")
+	hostCmd.Flags().StringVarP(&hInventory, "inventory", "i", "", "")
 	hostCmd.MarkFlagRequired("inventory")
-	hostCmd.Flags().IntVar(&hostOpt.Port, "port", 22, "")
+	hostCmd.Flags().IntVar(&hHostOpt.Port, "port", 22, "")
 }

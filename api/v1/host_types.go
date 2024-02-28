@@ -33,10 +33,10 @@ type HostSpec struct {
 	Port           int    `json:"port,omitempty" yaml:"port,omitempty"`
 	Username       string `json:"username,omitempty" yaml:"username,omitempty"`
 	Password       string `json:"password,omitempty" yaml:"password,omitempty"`
-	PrivateKey     string `json:"privatekey,omitempty" yaml:"privatekey,omitempty"`
-	PrivateKeyPath string `json:"privatekeypath,omitempty" yaml:"privatekeypath,omitempty"`
-	TimeOutSeconds int64  `json:"timeoutseconds,omitempty" yaml:"timeoutseconds,omitempty" `
-	SecretRef      string `json:"secretref,omitempty" yaml:"secretref,omitempty"`
+	PrivateKey     string `json:"privateKey,omitempty" yaml:"privateKey,omitempty"`
+	PrivateKeyPath string `json:"privateKeyPath,omitempty" yaml:"privateKeyPath,omitempty"`
+	TimeOutSeconds int64  `json:"timeoutSeconds,omitempty" yaml:"timeoutSeconds,omitempty" `
+	SecretRef      string `json:"secretRef,omitempty" yaml:"secretRef,omitempty"`
 }
 
 // HostStatus defines the observed state of Host
@@ -89,7 +89,7 @@ func (h *Host) GetSpec() HostSpec {
 	return h.Spec
 }
 
-func NewHost(namespace, name, address string, port int, username, password, privateKey, privateKeyPath string, timeoutSeconds int64) (h *Host) {
+func NewHost(namespace, name, address string, port int, username, password, privateKey, privateKeyPath string, timeoutSeconds int64, secretRef string) (h *Host) {
 	return &Host{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
@@ -103,6 +103,7 @@ func NewHost(namespace, name, address string, port int, username, password, priv
 			PrivateKey:     privateKey,
 			PrivateKeyPath: privateKeyPath,
 			TimeOutSeconds: timeoutSeconds,
+			SecretRef:      secretRef,
 		},
 	}
 }
