@@ -28,33 +28,34 @@ import (
 type HostSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Desc           string `json:"desc,omitempty"`
-	Address        string `yaml:"address,omitempty" json:"address,omitempty"`
-	Port           int    `yaml:"port,omitempty" json:"port,omitempty"`
-	Username       string `yaml:"username,omitempty" json:"username,omitempty"`
-	Password       string `yaml:"password,omitempty" json:"password,omitempty"`
-	PrivateKey     string `yaml:"privatekey,omitempty" json:"privatekey,omitempty"`
-	PrivateKeyPath string `yaml:"privatekeypath,omitempty" json:"privatekeypath,omitempty"`
-	TimeOutSeconds int64  `yaml:"timeoutseconds,omitempty" json:"timeoutseconds,omitempty"`
+	Desc           string `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Address        string `json:"address,omitempty" yaml:"address,omitempty"`
+	Port           int    `json:"port,omitempty" yaml:"port,omitempty"`
+	Username       string `json:"username,omitempty" yaml:"username,omitempty"`
+	Password       string `json:"password,omitempty" yaml:"password,omitempty"`
+	PrivateKey     string `json:"privatekey,omitempty" yaml:"privatekey,omitempty"`
+	PrivateKeyPath string `json:"privatekeypath,omitempty" yaml:"privatekeypath,omitempty"`
+	TimeOutSeconds int64  `json:"timeoutseconds,omitempty" yaml:"timeoutseconds,omitempty" `
+	SecretRef      string `json:"secretref,omitempty" yaml:"secretref,omitempty"`
 }
 
 // HostStatus defines the observed state of Host
 type HostStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Hostname         string       `yaml:"hostname,omitempty" json:"hostname,omitempty"`
-	KernelVersion    string       `yaml:"kernelversion,omitempty" json:"kernelversion,omitempty"`
-	Distribution     string       `yaml:"distribution,omitempty" json:"distribution,omitempty"`
-	Arch             string       `yaml:"arch,omitempty" json:"arch,omitempty"`
-	DiskTotal        string       `yaml:"disktotal,omitempty" json:"disktotal,omitempty"`
-	DiskUsagePercent string       `yaml:"diskusagepercent,omitempty" json:"diskusagepercent,omitempty"`
-	CPUTotal         string       `yaml:"cputotal,omitempty" json:"cputotal,omitempty"`
-	CPULoad1         string       `yaml:"cpuload1,omitempty" json:"cpuload1,omitempty"`
-	CPUUsagePercent  string       `yaml:"cpuusagepercent,omitempty" json:"cpuusagepercent,omitempty"`
-	MemTotal         string       `yaml:"memtotal,omitempty" json:"memtotal,omitempty"`
-	MemUsagePercent  string       `yaml:"memusagepercent,omitempty" json:"memusagepercent,omitempty"`
-	HeartStatus      string       `yaml:"heartStatus,omitempty" json:"heartStatus,omitempty"`
-	HeartTime        *metav1.Time `yaml:"heartTime,omitempty" json:"heartTime,omitempty"`
+	Hostname         string       `json:"hostname,omitempty" yaml:"hostname,omitempty"`
+	KernelVersion    string       `json:"kernelVersion,omitempty" yaml:"kernelVersion,omitempty"`
+	Distribution     string       `json:"distribution,omitempty" yaml:"distribution,omitempty" `
+	Arch             string       `json:"arch,omitempty" yaml:"arch,omitempty" `
+	DiskTotal        string       `json:"diskTotal,omitempty" yaml:"diskTotal,omitempty" `
+	DiskUsagePercent string       `json:"diskUsagePercent,omitempty" yaml:"diskUsagePercent,omitempty" `
+	CPUTotal         string       `json:"cpuTotal,omitempty" yaml:"cpuTotal,omitempty" `
+	CPULoad1         string       `json:"cpuLoad1,omitempty" yaml:"cpuLoad1,omitempty"`
+	CPUUsagePercent  string       `json:"cpuUsagePercent,omitempty" yaml:"cpuUsagePercent,omitempty"`
+	MemTotal         string       `json:"memTotal,omitempty" yaml:"memTotal,omitempty" `
+	MemUsagePercent  string       `json:"memUsagePercent,omitempty" yaml:"memUsagePercent,omitempty"`
+	HeartStatus      string       `json:"heartStatus,omitempty" yaml:"heartStatus,omitempty"`
+	HeartTime        *metav1.Time `json:"heartTime,omitempty" yaml:"heartTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -64,17 +65,17 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="Address",type=string,JSONPath=`.spec.address`
 // +kubebuilder:printcolumn:name="Distribution",type=string,JSONPath=`.status.distribution`
 // +kubebuilder:printcolumn:name="Arch",type=string,JSONPath=`.status.arch`
-// +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cputotal`
-// +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memtotal`
-// +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.disktotal`
+// +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cpuTotal`
+// +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memTotal`
+// +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.diskTotal`
 // +kubebuilder:printcolumn:name="HeartTime",type=date,JSONPath=`.status.heartTime`
 // +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartStatus`
 type Host struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
-	Spec   HostSpec   `json:"spec,omitempty"`
-	Status HostStatus `json:"status,omitempty"`
+	Spec   HostSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Status HostStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 func (h *Host) GetUniqueKey() string {
@@ -110,9 +111,9 @@ func NewHost(namespace, name, address string, port int, username, password, priv
 
 // HostList contains a list of Host
 type HostList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Host `json:"items"`
+	metav1.TypeMeta `json:",inline" yaml:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Items           []Host `json:"items" yaml:"items"`
 }
 
 func init() {

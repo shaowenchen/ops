@@ -17,8 +17,9 @@ limitations under the License.
 package v1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -32,13 +33,13 @@ const (
 type TaskRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	TaskRef      string            `json:"taskRef,omitempty"`
-	Variables    map[string]string `json:"variables,omitempty"`
-	TypeRef      string            `json:"typeRef,omitempty"`
-	NameRef      string            `json:"nameRef,omitempty"`
-	NodeName     string            `json:"nodeName,omitempty"`
-	All          bool              `json:"all,omitempty"`
-	RuntimeImage string            `json:"runtimeImage,omitempty"`
+	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
+	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	TypeRef      string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
+	NameRef      string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
+	NodeName     string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	All          bool              `json:"all,omitempty" yaml:"all,omitempty"`
+	RuntimeImage string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
 }
 
 func (tr *TaskRun) GetSpec() *TaskRunSpec {
@@ -67,23 +68,23 @@ func NewTaskRun(t *Task) TaskRun {
 type TaskRunStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	TaskRunNodeStatus map[string]*TaskRunNodeStatus `json:"taskrunNodeStatus,omitempty"`
-	RunStatus         string                        `json:"runStatus,omitempty"`
-	StartTime         *metav1.Time                  `json:"startTime,omitempty"`
+	TaskRunNodeStatus map[string]*TaskRunNodeStatus `json:"taskrunNodeStatus,omitempty" yaml:"taskrunNodeStatus,omitempty"`
+	RunStatus         string                        `json:"runStatus,omitempty" yaml:"runStatus,omitempty"`
+	StartTime         *metav1.Time                  `json:"startTime,omitempty" yaml:"startTime,omitempty"`
 }
 
 type TaskRunNodeStatus struct {
-	NodeName    string         `json:"nodeName,omitempty"`
-	TaskRunStep []*TaskRunStep `json:"taskRunStep,omitempty"`
-	RunStatus   string         `json:"runStatus,omitempty"`
-	StartTime   *metav1.Time   `json:"startTime,omitempty"`
+	NodeName    string         `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	TaskRunStep []*TaskRunStep `json:"taskRunStep,omitempty" yaml:"taskRunStep,omitempty"`
+	RunStatus   string         `json:"runStatus,omitempty" yaml:"runStatus,omitempty"`
+	StartTime   *metav1.Time   `json:"startTime,omitempty" yaml:"startTime,omitempty"`
 }
 
 type TaskRunStep struct {
-	StepName   string `json:"stepName,omitempty"`
-	StepCmd    string `json:"stepCmd,omitempty"`
-	StepOutput string `json:"stepOutput,omitempty"`
-	StepStatus string `json:"stepStatus,omitempty"`
+	StepName   string `json:"stepName,omitempty" yaml:"stepName,omitempty"`
+	StepCmd    string `json:"stepCmd,omitempty" yaml:"stepCmd,omitempty"`
+	StepOutput string `json:"stepOutput,omitempty" yaml:"stepOutput,omitempty"`
+	StepStatus string `json:"stepStatus,omitempty" yaml:"stepStatus,omitempty"`
 }
 
 func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepOutput, stepStatus string) {
@@ -115,20 +116,20 @@ func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepO
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
 // TaskRun is the Schema for the taskruns API
 type TaskRun struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
-	Spec   TaskRunSpec   `json:"spec,omitempty"`
-	Status TaskRunStatus `json:"status,omitempty"`
+	Spec   TaskRunSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Status TaskRunStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
 // TaskRunList contains a list of TaskRun
 type TaskRunList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []TaskRun `json:"items"`
+	metav1.TypeMeta `json:",inline" yaml:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Items           []TaskRun `json:"items" yaml:"items"`
 }
 
 func init() {

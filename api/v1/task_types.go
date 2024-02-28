@@ -28,53 +28,53 @@ import (
 type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Crontab             string            `json:"crontab,omitempty"`
-	Variables           map[string]string `json:"variables,omitempty"`
-	Steps               []Step            `json:"steps,omitempty"`
-	Name                string            `json:"name,omitempty"`
-	Desc                string            `json:"desc,omitempty"`
-	TypeRef             string            `json:"typeRef,omitempty"`
-	NameRef             string            `json:"nameRef,omitempty"`
-	InCluster           bool              `json:"incluster,omitempty"`
-	NodeName            string            `json:"nodeName,omitempty"`
-	All                 bool              `json:"all,omitempty"`
-	RuntimeImage        string            `json:"runtimeImage,omitempty"`
-	TaskRunHistoryLimit int               `json:"taskRunHistoryLimit,omitempty"`
+	Crontab             string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
+	Variables           map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Steps               []Step            `json:"steps,omitempty" yaml:"steps,omitempty"`
+	Name                string            `json:"name,omitempty" yaml:"name,omitempty"`
+	Desc                string            `json:"desc,omitempty" yaml:"desc,omitempty"`
+	TypeRef             string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
+	NameRef             string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
+	InCluster           bool              `json:"incluster,omitempty" yaml:"incluster,omitempty"`
+	NodeName            string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	All                 bool              `json:"all,omitempty" yaml:"all,omitempty"`
+	RuntimeImage        string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
+	TaskRunHistoryLimit int               `json:"taskRunHistoryLimit,omitempty" yaml:"taskRunHistoryLimit,omitempty"`
 }
 
 const TaskTypeRefHost = "host"
 const TaskTypeRefCluster = "cluster"
 
 type Step struct {
-	When         string     `json:"when,omitempty"`
-	Name         string     `json:"name,omitempty"`
-	Content      string     `json:"content,omitempty"`
-	LocalFile    string     `json:"localfile,omitempty"`
-	RemoteFile   string     `json:"remotefile,omitempty"`
-	Direction    string     `json:"direction,omitempty"`
-	AllowFailure string     `json:"allowfailure,omitempty"`
-	Kubernetes   Kubernetes `json:"kubernetes,omitempty"`
-	Alert        Alert      `json:"alert,omitempty"`
+	When         string     `json:"when,omitempty" yaml:"when,omitempty"`
+	Name         string     `json:"name,omitempty" yaml:"name,omitempty"`
+	Content      string     `json:"content,omitempty" yaml:"content,omitempty"`
+	LocalFile    string     `json:"localfile,omitempty" yaml:"localfile,omitempty"`
+	RemoteFile   string     `json:"remotefile,omitempty" yaml:"remotefile,omitempty"`
+	Direction    string     `json:"direction,omitempty" yaml:"direction,omitempty"`
+	AllowFailure string     `json:"allowfailure,omitempty" yaml:"allowfailure,omitempty"`
+	Kubernetes   Kubernetes `json:"kubernetes,omitempty" yaml:"kubernetes,omitempty"`
+	Alert        Alert      `json:"alert,omitempty" yaml:"alert,omitempty"`
 }
 
 type Kubernetes struct {
-	Action    string `json:"action,omitempty"`
-	Kind      string `json:"kind,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
+	Action    string `json:"action,omitempty" yaml:"action,omitempty"`
+	Kind      string `json:"kind,omitempty" yaml:"kind,omitempty"`
+	Name      string `json:"name,omitempty" yaml:"name,omitempty"`
+	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 }
 
 type Alert struct {
-	Url string `json:"url,omitempty"`
-	If  string `json:"if,omitempty"`
+	Url string `json:"url,omitempty" yaml:"url,omitempty"`
+	If  string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
 // TaskStatus defines the observed state of Task
 type TaskStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	RunStatus string       `json:"runStatus,omitempty"`
-	StartTime *metav1.Time `json:"startTime,omitempty"`
+	RunStatus string       `json:"runStatus,omitempty" yaml:"runStatus,omitempty"`
+	StartTime *metav1.Time `json:"startTime,omitempty" yaml:"startTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -86,11 +86,11 @@ type TaskStatus struct {
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
 type Task struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
-	Spec   TaskSpec   `json:"spec,omitempty"`
-	Status TaskStatus `json:"status,omitempty"`
+	Spec   TaskSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Status TaskStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 func (t *Task) GetUniqueKey() string {
@@ -108,9 +108,9 @@ func (t *Task) GetSpec() *TaskSpec {
 
 // TaskList contains a list of Task
 type TaskList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Task `json:"items"`
+	metav1.TypeMeta `json:",inline" yaml:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Items           []Task `json:"items" yaml:"items"`
 }
 
 func init() {

@@ -26,23 +26,23 @@ import (
 
 // ClusterSpec defines the desired state of Cluster
 type ClusterSpec struct {
-	Desc   string `json:"desc,omitempty"`
-	Server string `json:"server,omitempty"`
-	Config string `json:"config,omitempty"`
-	Token  string `json:"token,omitempty"`
+	Desc   string `json:"desc,omitempty" yaml:"desc,omitempty" `
+	Server string `json:"server,omitempty" yaml:"server,omitempty" `
+	Config string `json:"config,omitempty" yaml:"config,omitempty"`
+	Token  string `json:"token,omitempty" yaml:"token,omitempty"`
 }
 
 // ClusterStatus defines the observed state of Cluster
 type ClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Version          string       `json:"version,omitempty"`
-	Node             int          `json:"node,omitempty"`
-	Pod              int          `json:"pod,omitempty"`
-	RunningPod       int          `json:"runningPod,omitempty"`
-	HeartTime        *metav1.Time `json:"heartTime,omitempty"`
-	HeartStatus      string       `json:"heartstatus,omitempty"`
-	CertNotAfterDays int          `json:"certNotAfterDays,omitempty"`
+	Version          string       `json:"version,omitempty" yaml:"version,omitempty"`
+	Node             int          `json:"node,omitempty" yaml:"node,omitempty"`
+	Pod              int          `json:"pod,omitempty" yaml:"pod,omitempty"`
+	RunningPod       int          `json:"runningPod,omitempty" yaml:"runningPod,omitempty"`
+	HeartTime        *metav1.Time `json:"heartTime,omitempty" yaml:"heartTime,omitempty"`
+	HeartStatus      string       `json:"heartstatus,omitempty" yaml:"heartstatus,omitempty"`
+	CertNotAfterDays int          `json:"certNotAfterDays,omitempty" yaml:"certNotAfterDays,omitempty"`
 }
 
 const StatusSuccessed = "successed"
@@ -63,11 +63,11 @@ const StatusFiring = "firing"
 // +kubebuilder:printcolumn:name="HeartTime",type=date,JSONPath=`.status.heartTime`
 // +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartstatus`
 type Cluster struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
-	Spec   ClusterSpec   `json:"spec,omitempty"`
-	Status ClusterStatus `json:"status,omitempty"`
+	Spec   ClusterSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Status ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 func (c *Cluster) GetSpec() *ClusterSpec {
@@ -103,9 +103,9 @@ func NewCluster(namespace, name, server, config, token string) *Cluster {
 
 // ClusterList contains a list of Cluster
 type ClusterList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Cluster `json:"items"`
+	metav1.TypeMeta `json:",inline" yaml:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Items           []Cluster `json:"items" yaml:"items"`
 }
 
 func init() {

@@ -36,7 +36,7 @@ type TaskOption struct {
 	FilePath  string
 	Proxy     string
 	Variables map[string]string
-	Clear      bool
+	Clear     bool
 }
 
 type ShellOption struct {
