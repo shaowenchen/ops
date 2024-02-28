@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: k8s-toppod-cpu
+  name: top-pod-bycpu
   namespace: ops-system
 spec:
   desc: list topK usage cpu of pods in specified namespace

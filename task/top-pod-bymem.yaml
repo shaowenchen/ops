@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: k8s-toppod-mem
+  name: top-pod-bymem
   namespace: ops-system
 spec:
   desc: list topK usage memory of pods in specified namespace

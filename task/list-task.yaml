@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: k8s-listtask
+  name: list-task
   namespace: ops-system
 spec:
   desc: list all tasks in specified namespace within a Kubernetes cluster
