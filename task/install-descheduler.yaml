@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `install-descheduler` to install descheduler in Kubernetes 
+  nodename: anymaster
   variables:
     proxy: https://mirror.ghproxy.com/
     action: apply

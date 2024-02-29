@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `set-hubimage` to set deployments,daemonsets,statefulsets image to dockerhub hubimage repo for Kubernetes cluster
+  nodename: anymaster
   variables:
     namespace: ops-system
     resource: deployments,daemonsets,statefulsets

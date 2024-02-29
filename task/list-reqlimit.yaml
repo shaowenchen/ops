@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `list-reqlimit` to list request and limit in specified namespace within a Kubernetes cluster
+  nodeName: anymaster
   variables:
     namespace: "all"
   steps:

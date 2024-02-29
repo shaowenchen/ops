@@ -5,14 +5,15 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `drain-node` to drain Kubernetes Node
+  nodeName: anymaster
   variables:
-    node_name: ""
+    node: ""
   steps:
     - name: Cordon Node
-      content: kubectl cordon ${node_name}
+      content: kubectl cordon ${node}
     - name: Drain Node
-      content: kubectl drain ${node_name} --ignore-daemonsets
+      content: kubectl drain ${node} --ignore-daemonsets
     - name: Show Node on Kubernetes
       content: kubectl get node
     - name: Show Pod on Node
-      content: kubectl get pod -A |grep ${node_name}
+      content: kubectl get pod -A |grep ${node}

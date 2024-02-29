@@ -7,10 +7,10 @@ spec:
   desc: use task `top-node-pods-bycpu` to list topK usage cpu of pods in specified node
   nodeName: anymaster
   variables:
-    node_name: ""
+    node: ""
     topk: "20"
   steps:
     - name: list topK usage cpu of pods in specified node
       content: |
         echo "NAME                    CPU(m)          MEMORY(Mi) "
-        kubectl get pods -A -o wide | grep ${node_name} | awk '{print $1, $2}' | while read ns pod; do kubectl top pod  --no-headers -n "$ns" "$pod"; done 2>&1 | grep -v "NotFound" | awk '{sub(/m/, "", $2); sub(/Mi/, "", $3); print}' | sort -k2,2nr
+        kubectl get pods -A -o wide | grep ${node} | awk '{print $1, $2}' | while read ns pod; do kubectl top pod  --no-headers -n "$ns" "$pod"; done 2>&1 | grep -v "NotFound" | awk '{sub(/m/, "", $2); sub(/Mi/, "", $3); print}' | sort -k2,2nr

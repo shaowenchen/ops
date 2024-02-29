@@ -7,8 +7,8 @@ spec:
   desc: use task `inspect-node` to get node details info within a Kubernetes cluster.
   nodeName: anymaster
   variables:
-    node_name: ""
+    node: ""
   steps:
     - name: get node details
-      content: kubectl describe node ${node_name}
+      content: kubectl describe node ${node}
 

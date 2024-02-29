@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `list-podsimage` to list pod image in specified namespace within a Kubernetes cluster
+  nodeName: anymaster
   variables:
     namespace: ops-system
   steps:

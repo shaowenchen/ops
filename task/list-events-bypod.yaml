@@ -1,14 +1,14 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: inspect-pod-events
+  name: list-events-bypod
   namespace: ops-system
 spec:
-  desc: use task `inspect-pod-events` to get pod topk events info within a Kubernetes cluster.
+  desc: use task `list-events-bypod` to get pod topk events info within a Kubernetes cluster.
   nodeName: anymaster
   variables:
     topk: "50"
     podname: ""
   steps:
-    - name: get pod events
+    - name: list pod events
       content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1}' | xargs -L1 kubectl get events -n |grep ${podname} | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}

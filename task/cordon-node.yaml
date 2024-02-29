@@ -7,7 +7,7 @@ spec:
   desc: use task `cordon-node` to cordon specified node within a Kubernetes cluster.
   nodeName: anymaster
   variables:
-    node_name: ""
+    node: ""
   steps:
     - name: cordon node
-      content: kubectl cordon ${node_name}
+      content: kubectl cordon ${node}
