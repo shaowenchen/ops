@@ -1,0 +1,15 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: top-node-pods-bycpu
+  namespace: ops-system
+spec:
+  desc: use task `top-node-pods-bycpu` to list topK usage cpu of pods in specified node
+  nodeName: anymaster
+  variables:
+    node_name: ""
+    topk: "10"
+  steps:
+    - name: list topK usage cpu of pods in specified node
+      content: |
+        kubectl top pod --all-namespaces --sort-by=cpu | grep ${node_name} | head -$((${topk}+1))

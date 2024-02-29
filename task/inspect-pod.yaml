@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: inspect-pod
+  namespace: ops-system
+spec:
+  desc: use task `inspect-pod` to get pod details info in specified namespace within a Kubernetes cluster.
+  nodeName: anymaster
+  variables:
+    namespace: ""
+    podname: ""
+  steps:
+    - name: get details
+      content: kubectl describe pod ${podname} -n ${namespace}
