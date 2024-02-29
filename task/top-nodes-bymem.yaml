@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: top-node-bymem
+  name: top-nodes-bymem
   namespace: ops-system
 spec:
-  desc: use task `top-node-bymem` to list topK usage memory of nodes in specified cluster
+  desc: use task `top-nodes-bymem` to list topK usage memory of nodes in specified cluster
   nodeName: anymaster
   variables:
     topk: "20"

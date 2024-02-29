@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: list-cluster
+  name: list-clusters
   namespace: ops-system
 spec:
-  desc: use task `list-cluster` to list all **clusters** in specified Kubernetes
+  desc: use task `list-clusters` to list all **clusters** in specified Kubernetes
   variables:
     namespace: ops-system
   nodeName: anymaster

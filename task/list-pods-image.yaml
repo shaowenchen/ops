@@ -1,14 +1,14 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: list-podimage
+  name: list-pods-image
   namespace: ops-system
 spec:
-  desc: use task `list-podimage` to list pod image in specified namespace within a Kubernetes cluster
+  desc: use task `list-podsimage` to list pod image in specified namespace within a Kubernetes cluster
   variables:
     namespace: ops-system
   steps:
-    - name: list pod image
+    - name: list pods image
       when: ${namespace} != "all"
       content: kubectl get pod -o custom-columns='POD-NAME:.metadata.name,NAMESPACE:.metadata.namespace,CONTAINER-IMAGES:.spec.containers[*].image' -n ${namespace}
     - name: list all pod image

@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: top-pod-bycpu
+  name: top-pods-bycpu
   namespace: ops-system
 spec:
-  desc: use task `top-pod-bycpu` to list topK usage cpu of pods in specified namespace and specified node
+  desc: use task `top-pods-bycpu` to list topK usage cpu of pods in specified namespace and specified node
   nodeName: anymaster
   variables:
     namespace: default

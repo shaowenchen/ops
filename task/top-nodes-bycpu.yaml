@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: top-node-bycpu
+  name: top-nodes-bycpu
   namespace: ops-system
 spec:
-  desc: use task `top-node-bycpu` to list topK usage cpu of nodes in specified cluster
+  desc: use task `top-nodes-bycpu` to list topK usage cpu of nodes in specified cluster
   nodeName: anymaster
   variables:
     topk: "20"
