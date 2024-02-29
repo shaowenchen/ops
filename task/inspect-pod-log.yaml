@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: inspect-pod-log
+  namespace: ops-system
+spec:
+  desc: use task `inspect-pod-log` to get pod topk logs info within a Kubernetes cluster.
+  nodeName: anymaster
+  variables:
+    podname: ""
+    topk: "50"
+  steps:
+    - name: get pods
+      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl logs pod --tail=${topk} -n
