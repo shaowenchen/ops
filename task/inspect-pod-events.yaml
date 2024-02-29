@@ -11,4 +11,4 @@ spec:
     podname: ""
   steps:
     - name: get pod events
-      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1}' | xargs -L1 kubectl get events -n  | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}
+      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1}' | xargs -L1 kubectl get events -n |grep ${podname} | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}
