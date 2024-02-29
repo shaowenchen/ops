@@ -7,6 +7,8 @@ spec:
   desc: use task `check-npu-drop` to check whether the npu card has been dropped in specified host
   nodeName: anynode
   steps:
+    - name: Check npu-smi
+      content: command -v npu-smi
     - name: NPU Model
       content: npu-smi info -t board -i 0 -c 0 | grep -oP 'Chip Name\s*:\s*\K[^\n]+'
     - name: Check NPU Number Between lspci and npu-smi
