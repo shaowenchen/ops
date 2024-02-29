@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: list-task
+  name: list-tasks
   namespace: ops-system
 spec:
   desc: use task `list-task` to list all **tasks** in specified namespace within a Kubernetes cluster
