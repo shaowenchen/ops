@@ -441,8 +441,8 @@ func CreateTaskRun(c *gin.Context) {
 			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed {
 				if req.Source == "copilot" {
 					var b strings.Builder
-					for nodeName, nodeRunStatus := range latest.Status.TaskRunNodeStatus {
-						b.WriteString(fmt.Sprintf("## TaskRun on %s\n", nodeName))
+					for _, nodeRunStatus := range latest.Status.TaskRunNodeStatus {
+						b.WriteString(fmt.Sprintf("## TaskRun %s on %s %s %s\n", latest.Spec.TaskRef, latest.Spec.TypeRef, latest.Spec.NameRef, latest.Spec.NodeName))
 						for _, step := range nodeRunStatus.TaskRunStep {
 							b.WriteString(fmt.Sprintf("- StepName: %s\n", step.StepName))
 							b.WriteString(fmt.Sprintf("- StepOutput:\n%s\n", step.StepOutput))
