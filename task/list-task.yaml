@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: use task `list-task` to list all tasks in specified namespace within a Kubernetes cluster
   variables:
-    namespace: "what namespace you want to list"
+    namespace: NEED_TO_BE_SPECIFIED_NAMESPACE
   nodeName: anymaster
   steps:
     - name: list tasks
