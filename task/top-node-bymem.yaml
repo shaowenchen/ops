@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: top-node-bymem
+  namespace: ops-system
+spec:
+  desc: use task `top-node-bymem` to list topK usage memory of nodes in specified cluster
+  nodeName: anymaster
+  variables:
+    topk: "20"
+  steps:
+    - name: list topK usage memory of nodes
+      content: kubectl top node --sort-by=memory | head -$((${topk}+1))

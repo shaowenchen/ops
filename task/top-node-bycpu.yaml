@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: top-node-bycpu
+  namespace: ops-system
+spec:
+  desc: use task `top-node-bycpu` to list topK usage cpu of nodes in specified cluster
+  nodeName: anymaster
+  variables:
+    topk: "20"
+  steps:
+    - name: list topK usage cpu of nodes
+      content: kubectl top node --sort-by=cpu | head -$((${topk}+1))
