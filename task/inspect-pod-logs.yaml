@@ -10,5 +10,5 @@ spec:
     podname: ""
     topk: "50"
   steps:
-    - name: get pods
+    - name: get pod topk logs
       content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl logs --tail=${topk} -n
