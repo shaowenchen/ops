@@ -4,11 +4,10 @@ metadata:
   name: inspect-pod
   namespace: ops-system
 spec:
-  desc: use task `inspect-pod` to get pod details info in specified namespace within a Kubernetes cluster.
+  desc: use task `inspect-pod` to get pod details info within a Kubernetes cluster.
   nodeName: anymaster
   variables:
-    namespace: ""
     podname: ""
   steps:
     - name: get details
-      content: kubectl describe pod ${podname} -n ${namespace}
+      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl describe pod -n
