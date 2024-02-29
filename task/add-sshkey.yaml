@@ -4,7 +4,7 @@ metadata:
   name: add-sshkey
   namespace: ops-system
 spec:
-  desc: add ssh key to specified host
+  desc: use task `add-sshkey` to add ssh key to specified host
   variables:
     key_content:
   steps:

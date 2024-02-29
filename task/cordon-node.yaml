@@ -4,7 +4,7 @@ metadata:
   name: cordon-node
   namespace: ops-system
 spec:
-  desc: cordon special node within a Kubernetes cluster.
+  desc: use task `cordon-node` to cordon specified node within a Kubernetes cluster.
   nodeName: anymaster
   variables:
     node_name: "what node you want to cordon"

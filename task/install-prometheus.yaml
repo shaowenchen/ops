@@ -4,7 +4,7 @@ metadata:
   name: install-prometheus
   namespace: ops-system
 spec:
-  desc: install prometheus in Kubernetes
+  desc: use task `install-prometheus` to install prometheus in Kubernetes
   nodename: anymaster
   variables:
     namespace: monitor

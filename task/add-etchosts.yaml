@@ -4,7 +4,7 @@ metadata:
   name: add-etchosts
   namespace: ops-system
 spec:
-  desc: add hosts to /etc/hosts for specified host
+  desc: use task `add-etchosts` to add hosts to /etc/hosts for specified host
   variables:
     ip: ""
     domain: ""

@@ -4,7 +4,7 @@ metadata:
   name: alert-http-status
   namespace: ops-system
 spec:
-  desc: check specified url http status, if not expected, send notification
+  desc: use task `alert-http-status` to check specified url http status, if not expected, send notification
   # crontab: "1/* * * * *"
   variables:
     url: https://www.chenshaowen.com/

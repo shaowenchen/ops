@@ -4,7 +4,7 @@ metadata:
   name: list-cluster
   namespace: ops-system
 spec:
-  desc: list all clusters in Kubernetes
+  desc: use task `list-cluster` to list all clusters in specified Kubernetes
   variables:
     namespace: ops-system
   nodeName: anymaster

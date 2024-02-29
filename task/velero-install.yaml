@@ -4,7 +4,7 @@ metadata:
   name: velero-install
   namespace: ops-system
 spec:
-  desc: install Velero Client && Server
+  desc: use task `velero-install` to install Velero Client && Server
   variables:
     velero_version: v1.9.2
     download_url: https://mirror.ghproxy.com/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz

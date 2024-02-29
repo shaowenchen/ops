@@ -4,7 +4,7 @@ metadata:
   name: describe-pod
   namespace: ops-system
 spec:
-  desc: get pod details info in special namespace within a Kubernetes cluster.
+  desc: use task `describe-pod` to get pod details info in specified namespace within a Kubernetes cluster.
   nodeName: anymaster
   variables:
     namespace: "what namespace you want to get details"

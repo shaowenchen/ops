@@ -4,7 +4,7 @@ metadata:
   name: renew-kubernetes-cert
   namespace: ops-system
 spec:
-  desc: renew Kubernetes certificates for special host
+  desc: use task `renew-kubernetes-cert` to renew Kubernetes certificates for specified host
   steps:
     - name: Check
       content: kubeadm certs check-expiration

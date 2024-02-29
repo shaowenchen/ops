@@ -4,7 +4,7 @@ metadata:
   name: clear-kubernetes
   namespace: ops-system
 spec:
-  desc: clear exception pods in special namespace within a Kubernetes cluster.
+  desc: use task `clear-kubernetes` to clear exception pods in specified namespace within a Kubernetes cluster.
   nodename: anymaster
   variables:
     namespace: "what namespace you want to clear"

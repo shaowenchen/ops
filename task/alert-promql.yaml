@@ -4,7 +4,7 @@ metadata:
   name: alert-promql
   namespace: ops-system
 spec:
-  desc: check promql and get result, if not expected, send notification
+  desc: use task `alert-promql` to check promql and get result, if not expected, send notification
   # crontab: "1/* * * * *"
   variables:
     if: "abs(max(tekton_pipelines_controller_running_pipelineruns_count) - count(count by (pod, label_tekton_dev_pipeline_run)(kube_pod_labels{label_tekton_dev_task_run!=''}) and on (pod) kube_pod_container_status_running{} > 0) ) > 2"

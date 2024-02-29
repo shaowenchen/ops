@@ -4,7 +4,7 @@ metadata:
   name: drain-node
   namespace: ops-system
 spec:
-  desc: drain Kubernetes Node
+  desc: use task `drain-node` to drain Kubernetes Node
   variables:
     node_name: "what node you want to drain"
   steps:

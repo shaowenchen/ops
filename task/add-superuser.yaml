@@ -4,7 +4,7 @@ metadata:
   name: add-superuser
   namespace: ops-system
 spec:
-  desc: add a super user to specified host
+  desc: use task `add-superuser` to add a super user to specified host
   variables:
     name: ""
     passwd: ""

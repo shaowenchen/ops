@@ -4,7 +4,7 @@ metadata:
   name: set-kubernete-kernel
   namespace: ops-system
 spec:
-  desc: set a better kernel parameters for Kubernetes in special host
+  desc: use task `set-kubernete-kernel` to set a better kernel parameters for Kubernetes in specified host
   steps:
     - name: Free Mem
       content: echo 3 > /proc/sys/vm/drop_caches

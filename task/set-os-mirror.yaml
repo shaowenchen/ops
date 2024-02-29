@@ -4,7 +4,7 @@ metadata:
   name: set-os-mirror
   namespace: ops-system
 spec:
-  desc: set os mirror friendly to China for special host
+  desc: use task `set-os-mirror` to set os mirror friendly to China for specified host
   variables:
     proxy: https://mirror.ghproxy.com/
   steps:

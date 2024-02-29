@@ -4,7 +4,7 @@ metadata:
   name: set-reqlimit
   namespace: ops-system
 spec:
-  desc: add request and limit, e.g. Deployment\StatefulSet\DaemonSet
+  desc: use task `set-reqlimit` to add request and limit, e.g. Deployment\StatefulSet\DaemonSet
   variables:
     namespace: ops-system
     name: ""

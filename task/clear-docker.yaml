@@ -4,7 +4,7 @@ metadata:
   name: clear-docker
   namespace: ops-system
 spec:
-  desc: clear docker unused resource, including container, image, network, volume for special host
+  desc: use task `clear-docker` to clear docker unused resource, including container, image, network, volume for specified host
   steps:
     - name: Clear container exit more than 30m
       content: docker container prune -f --filter "until=$(date +'%Y-%m-%dT%H:%M:%S' --date='-30 minutes')"

@@ -4,7 +4,7 @@ metadata:
   name: top-pod-bycpu
   namespace: ops-system
 spec:
-  desc: list topK usage cpu of pods in specified namespace
+  desc: use task `top-pod-bycpu` to list topK usage cpu of pods in specified namespace
   nodeName: anymaster
   variables:
     namespace: default

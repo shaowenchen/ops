@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: get-status-os
+  name: get-os-status
   namespace: ops-system
 spec:
-  desc: get status information of OS in special host
+  desc: use task `get-os-status` to get status information of OS in specified host
   steps:
     - name: Kernel Version
       content: uname -r

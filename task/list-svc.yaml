@@ -4,7 +4,7 @@ metadata:
   name: list-svc
   namespace: ops-system
 spec:
-  desc: list svc in specified namespace within a Kubernetes cluster
+  desc: use task `list-svc` to list svc in specified namespace within a Kubernetes cluster
   variables:
     namespace: ops-system
   steps:
