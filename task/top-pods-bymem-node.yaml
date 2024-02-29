@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: top-node-pods-bymem
+  name: top-pods-bymem-node
   namespace: ops-system
 spec:
   desc: use task `top-node-pods-bymem` to list topK usage memory of pods in specified node
