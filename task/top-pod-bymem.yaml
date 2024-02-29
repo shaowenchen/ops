@@ -10,5 +10,15 @@ spec:
     namespace: default
     topk: "20"
   steps:
-    - name: list topK usage memory of pods in specified namespace
-      content: kubectl top pod --sort-by=memory -n ${namespace} | head -$((${topk}+1))
+    - name: list topK usage memory of pods
+      content: |
+        if [ -n "${node_name}" ]; then
+          FILTER="--field-selector spec.nodeName=${node_name}"
+        fi
+
+        if [ -n "${namespace}" ]; then
+          NAMESPACE="-n ${namespace}" 
+        fi
+
+        kubectl top pod ${NAMESPACE} ${FILTER} --sort-by=memory \
+          | head -$((${topk}+1))

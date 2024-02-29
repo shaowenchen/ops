@@ -4,11 +4,22 @@ metadata:
   name: top-pod-bycpu
   namespace: ops-system
 spec:
-  desc: use task `top-pod-bycpu` to list topK usage cpu of pods in specified namespace
+  desc: use task `top-pod-bycpu` to list topK usage cpu of pods in specified namespace and specified node
   nodeName: anymaster
   variables:
     namespace: default
+    node_name: ""
     topk: "20"
   steps:
-    - name: list topK usage cpu of pods in specified namespace
-      content: kubectl top pod --sort-by=cpu -n ${namespace} | head -$((${topk}+1))
+    - name: list topK usage cpu of pods
+      content: |
+        if [ -n "${node_name}" ]; then
+          FILTER="--field-selector spec.nodeName=${node_name}"
+        fi
+
+        if [ -n "${namespace}" ]; then
+          NAMESPACE="-n ${namespace}" 
+        fi
+
+        kubectl top pod ${NAMESPACE} ${FILTER} --sort-by=cpu \
+          | head -$((${topk}+1))
