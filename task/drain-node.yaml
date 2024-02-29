@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: use task `drain-node` to drain Kubernetes Node
   variables:
-    node_name: NEED_TO_BE_SPECIFIED_NODE_YOU_WANT_TO_DRAIN
+    node_name: ""
   steps:
     - name: Cordon Node
       content: kubectl cordon ${node_name}

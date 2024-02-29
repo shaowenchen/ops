@@ -7,7 +7,7 @@ spec:
   desc: use task `clear-kubernetes` to clear exception pods in specified namespace within a Kubernetes cluster.
   nodename: anymaster
   variables:
-    namespace: NEED_TO_BE_SPECIFIED_NAMESPACE_YOU_WANT_TO_CLEAR
+    namespace: ""
   steps:
     - name: clear Evicted pod
       content: kubectl get pods ${namespace} -o wide | grep Evicted | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
