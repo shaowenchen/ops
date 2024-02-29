@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: check-npu-drop
+  namespace: ops-system
+spec:
+  desc: use task `check-npu-drop` to check whether the npu card has been dropped in specified host
+  nodeName: anynode
+  steps:
+    - name: NPU Model
+      content: npu-smi info -t board -i 0 -c 0 | grep -oP 'Chip Name\s*:\s*\K[^\n]+'
+    - name: Check NPU Number Between lspci and npu-smi
+      content: |
+        [ $(($(lspci |grep 'Processing accelerators: Huawei' | wc -l))) -eq $(($(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+'))) ] && echo "OK - NPU count matches: $(lspci |grep 'Processing accelerators: Huawei' | wc -l)" || echo "ERROR - NPU count mismatch: $(lspci |grep 'Processing accelerators: Huawei' | wc -l) vs $(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+')"
+    - name: Revision FF
+      content: |
+        if lspci |grep 'Processing accelerators: Huawei' | grep -q "rev ff"; then echo "ERROR - 'rev ff' found in lspci output"; else echo "OK - No 'rev ff' found"; fi

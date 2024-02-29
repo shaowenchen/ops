@@ -1,0 +1,20 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: check-gpu-drop
+  namespace: ops-system
+spec:
+  desc: use task `check-gpu-drop` to check whether the gpu card has been dropped in specified host
+  nodeName: anynode
+  steps:
+    - name: GPU Model
+      content: nvidia-smi --query-gpu=gpu_name --format=csv,noheader
+    - name: Check GPU Number Between lspci and nvidia-smi
+      content: |
+        [ $(($(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l))) -eq $(($(nvidia-smi -L | wc -l))) ] && echo "OK - GPU count matches: $(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l)" || echo "ERROR - GPU count mismatch: $(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l) vs $(nvidia-smi -L | wc -l)"
+    - name: Revision FF
+      content: |
+        if lspci -d 10de: | grep -q "rev ff"; then echo "ERROR - 'rev ff' found in lspci output"; else echo "OK - No 'rev ff' found"; fi
+    - name: XID == 79
+      content: |
+        if dmesg -T | grep -i "NVRM: Xid" > /dev/null; then echo "ERROR - Xid error found in dmesg"; else echo "OK - No Xid error found"; fi
