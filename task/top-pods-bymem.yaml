@@ -14,11 +14,8 @@ spec:
       content: |
         if [ -n "${node_name}" ]; then
           FILTER="--field-selector spec.nodeName=${node_name}"
-        fi
-
-        if [ -n "${namespace}" ]; then
+        else if [ -n "${namespace}" ]; then
           NAMESPACE="-n ${namespace}" 
         fi
 
-        kubectl top pod ${NAMESPACE} ${FILTER} --sort-by=memory \
-          | head -$((${topk}+1))
+        kubectl top pod ${NAMESPACE} ${FILTER} --sort-by=memory | head -$((${topk}+1))
