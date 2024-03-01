@@ -320,8 +320,9 @@ func CreateTaskRun(c *gin.Context) {
 	type Params struct {
 		Namespace string            `uri:"namespace"`
 		TaskRef   string            `json:"taskRef"`
-		NameRef   string            `json:"nameRef"`
 		TypeRef   string            `json:"typeRef"`
+		NameRef   string            `json:"nameRef"`
+		NodeName  string            `json:"nodeName"`
 		All       bool              `json:"all"`
 		Variables map[string]string `json:"variables"`
 	}
@@ -376,6 +377,10 @@ func CreateTaskRun(c *gin.Context) {
 	if req.TypeRef != "" {
 		taskRun.Spec.TypeRef = req.TypeRef
 	}
+	if req.NodeName != "" {
+		taskRun.Spec.NodeName = req.NodeName
+	}
+	taskRun.Namespace = req.Namespace
 	err = client.Create(context.TODO(), &taskRun)
 	if err != nil {
 		showError(c, err.Error())
