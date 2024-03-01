@@ -366,6 +366,9 @@ func CreateTaskRun(c *gin.Context) {
 		taskRun.Spec.All = req.All
 	}
 	if req.Variables != nil {
+		if taskRun.Spec.Variables == nil {
+			taskRun.Spec.Variables = make(map[string]string)
+		}
 		for k, v := range req.Variables {
 			taskRun.Spec.Variables[k] = v
 		}
