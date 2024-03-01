@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `check-npu-drop` to check whether the npu card has been dropped in specified host
-  nodeName: anymaster
   steps:
     - name: Check npu-smi
       content: command -v npu-smi

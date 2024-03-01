@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `check-gpu-drop` to check whether the gpu card has been dropped in specified host
-  nodeName: anymaster
   steps:
     - name: Check nvidia-smi
       content: command -v nvidia-smi
