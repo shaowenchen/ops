@@ -3,11 +3,9 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +22,6 @@ func ListHost(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
-		Source    string `form:"source"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -54,30 +51,18 @@ func ListHost(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	if req.Source == "copilot" {
-		var b strings.Builder
-		b.WriteString("| namespace | name | desc | address | hostname |\n")
-		b.WriteString("|-|-|-|-|-|\n")
-		for _, item := range hostList.Items {
-			b.WriteString(fmt.Sprintf("| %s | %s | %s | %s | %s |\n", item.Namespace, item.Name, item.Spec.Desc, item.Spec.Address, item.Status.Hostname))
-		}
-		showDataSouceCopilot(c, b.String())
-	} else {
-		// clear sensitive info
-		for i := range hostList.Items {
-			hostList.Items[i].Spec.PrivateKey = ""
-			hostList.Items[i].Spec.Password = ""
-		}
-		showData(c, paginator[opsv1.Host](hostList.Items, req.PageSize, req.Page))
+	// clear sensitive info
+	for i := range hostList.Items {
+		hostList.Items[i].Spec.PrivateKey = ""
+		hostList.Items[i].Spec.Password = ""
 	}
-
+	showData(c, paginator[opsv1.Host](hostList.Items, req.PageSize, req.Page))
 }
 func ListCluster(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
-		Source    string `form:"source"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -107,22 +92,12 @@ func ListCluster(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	if req.Source == "copilot" {
-		var b strings.Builder
-		b.WriteString("| namespace | name | desc | \n")
-		b.WriteString("|-|-|-|\n")
-		for _, item := range clusterList.Items {
-			b.WriteString(fmt.Sprintf("| %s | %s | %s |\n", item.Namespace, item.Name, item.Spec.Desc))
-		}
-		showDataSouceCopilot(c, b.String())
-	} else {
-		// clear sensitive info
-		for i := range clusterList.Items {
-			clusterList.Items[i].Spec.Token = ""
-			clusterList.Items[i].Spec.Config = ""
-		}
-		showData(c, paginator[opsv1.Cluster](clusterList.Items, req.PageSize, req.Page))
+	// clear sensitive info
+	for i := range clusterList.Items {
+		clusterList.Items[i].Spec.Token = ""
+		clusterList.Items[i].Spec.Config = ""
 	}
+	showData(c, paginator[opsv1.Cluster](clusterList.Items, req.PageSize, req.Page))
 }
 func GetTask(c *gin.Context) {
 	type Params struct {
@@ -240,7 +215,6 @@ func ListTask(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
-		Source    string `form:"source"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -268,20 +242,6 @@ func ListTask(c *gin.Context) {
 		err = client.List(context.TODO(), taskList, runtimeClient.InNamespace(req.Namespace))
 	}
 	if err != nil {
-		return
-	}
-	if req.Source == "copilot" {
-		var b strings.Builder
-		b.WriteString("| namespace | name | desc | variables |\n")
-		b.WriteString("|-|-|-|-|\n")
-		for _, item := range taskList.Items {
-			var vars string
-			for k, v := range item.Spec.Variables {
-				vars += fmt.Sprintf("%s=%s,", k, v)
-			}
-			b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", item.Namespace, item.Name, item.Spec.Desc, vars))
-		}
-		showDataSouceCopilot(c, b.String())
 		return
 	}
 	showData(c, paginator[opsv1.Task](taskList.Items, req.PageSize, req.Page))
@@ -364,7 +324,6 @@ func CreateTaskRun(c *gin.Context) {
 		TypeRef   string            `json:"typeRef"`
 		All       bool              `json:"all"`
 		Variables map[string]string `json:"variables"`
-		Source    string            `json:"source"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -420,7 +379,7 @@ func CreateTaskRun(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
 	defer cancel()
 
 	ticker := time.NewTicker(3 * time.Second)
@@ -439,19 +398,6 @@ func CreateTaskRun(c *gin.Context) {
 				return
 			}
 			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed {
-				if req.Source == "copilot" {
-					var b strings.Builder
-					for _, nodeRunStatus := range latest.Status.TaskRunNodeStatus {
-						b.WriteString(fmt.Sprintf("## TaskRun %s on %s %s %s\n", latest.Spec.TaskRef, latest.Spec.TypeRef, latest.Spec.NameRef, latest.Spec.NodeName))
-						for _, step := range nodeRunStatus.TaskRunStep {
-							b.WriteString(fmt.Sprintf("- StepName: %s\n", step.StepName))
-							b.WriteString(fmt.Sprintf("- StepOutput:\n%s\n", step.StepOutput))
-							b.WriteString(fmt.Sprintf("- StepStatus: %s\n", step.StepStatus))
-						}
-					}
-					showDataSouceCopilot(c, b.String())
-					return
-				}
 				showData(c, latest)
 				return
 			}

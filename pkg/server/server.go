@@ -59,10 +59,6 @@ func showData(c *gin.Context, data interface{}) {
 	})
 }
 
-func showDataSouceCopilot(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusOK, data)
-}
-
 func showSuccess(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    0,
