@@ -167,9 +167,9 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	} else if tr.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
 		c := &opsv1.Cluster{}
 		kubeOpt := opsoption.KubeOption{
-			NodeName:     t.GetSpec().NodeName,
-			All:          t.GetSpec().All,
-			RuntimeImage: t.GetSpec().RuntimeImage,
+			NodeName:     tr.GetSpec().NodeName,
+			All:          tr.GetSpec().All,
+			RuntimeImage: tr.GetSpec().RuntimeImage,
 			OpsNamespace: opsconstants.DefaultOpsNamespace,
 		}
 		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, c)
