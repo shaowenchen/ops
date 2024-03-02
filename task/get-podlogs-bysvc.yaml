@@ -1,15 +1,15 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: inspect-pod-logs-bysvc
+  name: get-podlogs-bysvc
   namespace: ops-system
 spec:
-  desc: use task `inspect-pod-logs-bysvc` to get pod topk logs info by specified svc\service to query within a Kubernetes cluster.
+  desc: use task `get-podlogs-bysvc` to get pod topk logs info by svc\service name to query within a Kubernetes cluster.
   nodeName: anymaster
   variables:
     service: ""
     svc: ""
     topk: "50"
   steps:
-    - name: get pod topk logs by specified service
+    - name: get pod topk logs by service name
       content: kubectl get service --all-namespaces | grep ${service}${svc} | awk '{print $1}' | xargs -L1 kubectl logs -l app=${service}${svc} --tail=${topk} -n
