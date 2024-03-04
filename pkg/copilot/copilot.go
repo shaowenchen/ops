@@ -87,3 +87,12 @@ func (rcl *RoleContentList) GetOpenaiChatCompletionMessages() (messageList []ope
 	}
 	return
 }
+
+func (rcl *RoleContentList) GetOpenaiChatCompletionMessagesWithSystem(system string) (messageList []openai.ChatCompletionMessage) {
+	messageList = rcl.GetOpenaiChatCompletionMessages()
+	messageList = append(messageList, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleSystem,
+		Content: system,
+	})
+	return
+}
