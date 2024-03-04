@@ -9,7 +9,7 @@ spec:
     - name: Check nvidia-smi
       content: command -v nvidia-smi
     - name: Show GPU Usage
-      content: nvidia-smi --query-gpu=name,temperature.gpu,utilization.gpu,memory.total,utilization.memory --format=csv,noheader
+      content: nvidia-smi --query-gpu=index,name,temperature.gpu,utilization.gpu,memory.total,utilization.memory --format=csv
     - name: Show GPU Temperature
       content: nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits
     - name: Find XID
