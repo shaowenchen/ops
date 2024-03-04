@@ -1,0 +1,15 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: delete-pod
+  namespace: ops-system
+spec:
+  desc: use task `delete-pod` to restart or delete pod in specified namespace within a Kubernetes cluster.
+  nodeName: anymaster
+  variables:
+    podname: ""
+  steps:
+    - name: delete pod
+      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl delete pod -n
+    - name: get pod
+      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl get pod -n
