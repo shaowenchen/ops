@@ -10,4 +10,4 @@ spec:
     namespace: ops-system
   steps:
     - name: get svc info
-      content: kubectl get service -A -o=custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,IP:.spec.clusterIP,PORT:.spec.ports[*].targetPort' 
+      content: kubectl get svc -A -o=custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,IP:.spec.clusterIP,PORT:.spec.ports[*].targetPort' 
