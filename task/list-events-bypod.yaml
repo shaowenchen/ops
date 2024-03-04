@@ -4,7 +4,7 @@ metadata:
   name: list-events-bypod
   namespace: ops-system
 spec:
-  desc: use task `list-events-bypod` to get pod topk events info within a Kubernetes cluster.
+  desc: use task `list-events-bypod` to get pod topk events in cluster, must to set `podname`, avaliable to set `topk`
   nodeName: anymaster
   variables:
     topk: "50"
