@@ -4,7 +4,7 @@ metadata:
   name: list-pods
   namespace: ops-system
 spec:
-  desc: use task `list-pods` to list **pods** in specified namespace within a Kubernetes cluster
+  desc: use task `list-pods` to list **pods** in cluster, variables must to set `namespace`
   nodeName: anymaster
   variables:
     namespace: default

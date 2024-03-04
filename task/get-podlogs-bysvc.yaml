@@ -4,7 +4,7 @@ metadata:
   name: get-podlogs-bysvc
   namespace: ops-system
 spec:
-  desc: use task `get-podlogs-bysvc` to get pod topk logs info by service name to query in cluster, must to set `service`, avaliable to set `topk`
+  desc: use task `get-podlogs-bysvc` to get pod logs in cluster, variables must to set `service`, avaliable to set `topk`
   nodeName: anymaster
   variables:
     service: ""

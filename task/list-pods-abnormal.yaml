@@ -4,7 +4,7 @@ metadata:
   name: list-pods-abnormal
   namespace: ops-system
 spec:
-  desc: use task `list-pods-abnormal` to list **abnormal pods*** in specified namespace within a Kubernetes cluster
+  desc: use task `list-pods-abnormal` to list **abnormal pods*** in cluster, variables must to set `namespace`
   nodeName: anymaster
   variables:
     namespace: default

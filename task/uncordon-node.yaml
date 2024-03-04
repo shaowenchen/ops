@@ -4,7 +4,7 @@ metadata:
   name: uncordon-node
   namespace: ops-system
 spec:
-  desc: use task `uncordon-node` to uncordon specified node in Kubernetes
+  desc: use task `uncordon-node` to uncordon node in cluster, variables must to set `node`
   nodeName: anymaster
   variables:
     node: ""

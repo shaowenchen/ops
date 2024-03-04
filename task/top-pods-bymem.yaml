@@ -4,7 +4,7 @@ metadata:
   name: top-pods-bymem
   namespace: ops-system
 spec:
-  desc: use task `top-pods-bymem` to list topK usage memory of pods in specified namespace
+  desc: use task `top-pods-bymem` to list topK usage memory of pods cluster, variables must to set `namespace`, avaliable to set `topk`
   nodeName: anymaster
   variables:
     namespace: default

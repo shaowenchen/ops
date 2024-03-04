@@ -4,11 +4,11 @@ metadata:
   name: list-events-bypod
   namespace: ops-system
 spec:
-  desc: use task `list-events-bypod` to get pod topk events in cluster, must to set `podname`, avaliable to set `topk`
+  desc: use task `list-events-bypod` to get pod events in cluster, variables must to set `pod`, avaliable to set `topk`
   nodeName: anymaster
   variables:
     topk: "50"
-    podname: ""
+    pod: ""
   steps:
     - name: list pod events
-      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1}' | xargs -L1 kubectl get events -n |grep ${podname} | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}
+      content: kubectl get pod --all-namespaces | grep ${pod} | awk '{print $1}' | xargs -L1 kubectl get events -n |grep ${pod} | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}

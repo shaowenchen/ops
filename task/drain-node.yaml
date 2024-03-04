@@ -4,7 +4,7 @@ metadata:
   name: drain-node
   namespace: ops-system
 spec:
-  desc: use task `drain-node` to drain Kubernetes Node
+  desc: use task `drain-node` to drain node in cluster, variables must to set `node` 
   nodeName: anymaster
   variables:
     node: ""
