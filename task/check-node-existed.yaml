@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: check-node-existed
+  namespace: ops-system
+spec:
+  desc: use task `check-node-existed` to check whether the node existed, variables must to set `node`
+  variables:
+    node: ""
+  steps:
+    - name: Check node existed
+      content: |
+        found="false"; if [ -z "$node" ]; then echo "node is empty"; else if kubectl get node ${node} &>/dev/null; then echo "Node ${node} is existed"; found="true"; else echo "Node ${node} is not existed"; fi; fi

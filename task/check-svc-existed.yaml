@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: check-svc-existed
+  namespace: ops-system
+spec:
+  desc: use task `check-svc-existed` to check whether the service existed and get service namespace, variables must to set `service`
+  variables:
+    service: ""
+  steps:
+    - name: Check service existed
+      content: |
+        found="false"; if [ -z "$service" ]; then echo "service is empty"; else for ns in $(kubectl get namespaces --no-headers | awk '{print $1}'); do if kubectl get service ${service} -n $ns &>/dev/null; then echo "Pod ${service} existed in $ns"; found="true"; fi; done; if [ "$found" = "false" ]; then echo "Pod ${service} not found"; fi; fi
