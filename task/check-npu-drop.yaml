@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: use task `check-npu-drop` to check whether the npu card has been dropped in specified host
   variables:
-    desired_npu_count: 16
+    desired_npu_count: "16"
   steps:
     - name: Check npu-smi
       content: command -v npu-smi
