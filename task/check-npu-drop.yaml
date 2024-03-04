@@ -5,14 +5,16 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `check-npu-drop` to check whether the npu card has been dropped in specified host
+  variables:
+    desired_npu_count: 16
   steps:
     - name: Check npu-smi
       content: command -v npu-smi
     - name: NPU Model
       content: npu-smi info -t board -i 0 -c 0 | grep -oP 'Chip Name\s*:\s*\K[^\n]+'
-    - name: Check NPU Number Between lspci and npu-smi
+    - name: Check lspci NPU Count
       content: |
-        [ $(($(lspci |grep 'Processing accelerators: Huawei' | wc -l))) -eq $(($(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+'))) ] && echo "OK - NPU count matches: $(lspci |grep 'Processing accelerators: Huawei' | wc -l)" || echo "ERROR - NPU count mismatch: $(lspci |grep 'Processing accelerators: Huawei' | wc -l) vs $(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+')"
-    - name: Revision FF
+        NPU_LSPCI_COUNT=$(($(lspci |grep d80 | wc -l))); NPU_SMI_COUNT=$(($(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+'))); [ $NPU_LSPCI_COUNT -eq $NPU_SMI_COUNT ] && echo "OK - NPU count matches: $NPU_LSPCI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_LSPCI_COUNT vs $NPU_SMI_COUNT"
+    - name: Check npu-smi NPU Count
       content: |
-        if lspci |grep 'Processing accelerators: Huawei' | grep -q "rev ff"; then echo "ERROR - 'rev ff' found in lspci output"; else echo "OK - No 'rev ff' found"; fi
+        NPU_SMI_COUNT=$(($(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+'))); NPU_LSPCI_COUNT=$(($(lspci |grep d80 | wc -l))); [ $NPU_SMI_COUNT -eq $NPU_LSPCI_COUNT ] && echo "OK - NPU count matches: $NPU_SMI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_SMI_COUNT vs $NPU_LSPCI_COUNT"

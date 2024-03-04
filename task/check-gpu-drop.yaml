@@ -5,14 +5,19 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `check-gpu-drop` to check whether the gpu card has been dropped in specified host
+  variables:
+    desired_gpu_count: 8
   steps:
     - name: Check nvidia-smi
       content: command -v nvidia-smi
     - name: GPU Model
       content: nvidia-smi --query-gpu=gpu_name --format=csv,noheader
-    - name: Check GPU Number Between lspci and nvidia-smi
+    - name: Check lspci GPU Count
       content: |
-        [ $(($(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l))) -eq $(($(nvidia-smi -L | wc -l))) ] && echo "OK - GPU count matches: $(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l)" || echo "ERROR - GPU count mismatch: $(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l) vs $(nvidia-smi -L | wc -l)"
+        GPU_LSPCI_COUNT=$(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l); if [ $GPU_LSPCI_COUNT -eq ${desired_gpu_count} ]; then echo "OK - lspci GPU count matches ${desired_gpu_count}"; else echo "ERROR - lspci GPU count mismatch: $GPU_LSPCI_COUNT vs ${desired_gpu_count}"; fi
+    - name: Check nvidia-smi GPU Count
+      content: |
+        GPU_SMI_COUNT=$(nvidia-smi -L | wc -l); if [ $GPU_SMI_COUNT -eq ${desired_gpu_count} ]; then echo "OK - nvidia-smi GPU count matches ${desired_gpu_count}"; else echo "ERROR - nvidia-smi GPU count mismatch: $GPU_SMI_COUNT vs ${desired_gpu_count}"; fi
     - name: Revision FF
       content: |
         if lspci -d 10de: | grep -q "rev ff"; then echo "ERROR - 'rev ff' found in lspci output"; else echo "OK - No 'rev ff' found"; fi
