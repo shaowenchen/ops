@@ -10,8 +10,6 @@ spec:
       content: command -v nvidia-smi
     - name: Show GPU Usage
       content: nvidia-smi --query-gpu=index,name,temperature.gpu,utilization.gpu,memory.total,utilization.memory --format=csv
-    - name: Show GPU Temperature
-      content: nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits
     - name: Find XID
       content: |
         if dmesg -T | grep -i "NVRM: Xid" > /dev/null; then echo "ERROR - Xid error found in dmesg"; else echo "OK - No Xid error found"; fi
