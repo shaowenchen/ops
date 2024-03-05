@@ -4,7 +4,7 @@ metadata:
   name: cordon-node
   namespace: ops-system
 spec:
-  desc: use task `cordon-node` to cordon node in cluster, variables must to set `node`
+  desc: use task `cordon-node` to cordon node in cluster, variables must to set `node`. You can't use task `cordon-node` unless I specifically state that.
   nodeName: anymaster
   variables:
     node: ""
