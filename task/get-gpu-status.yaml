@@ -13,6 +13,6 @@ spec:
     - name: Find XID
       content: |
         if dmesg -T | grep -i "NVRM: Xid" > /dev/null; then echo "ERROR - Xid error found in dmesg"; else echo "OK - No Xid error found"; fi
-    - nmae: Check LSPCI FF
+    - name: Check LSPCI FF
       content: |
         if lspci | grep -q "rev ff"; then echo "ERROR - 'rev ff' found in lspci output"; else echo "OK - No 'rev ff' found"; fi
