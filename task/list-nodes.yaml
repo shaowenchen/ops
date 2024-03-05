@@ -4,8 +4,8 @@ metadata:
   name: list-nodes
   namespace: ops-system
 spec:
-  desc: use task `list-nodes` to list all **nodes** in specified Kubernetes cluster
+  desc: use task `list-nodes` to list all **nodes** in cluster
   nodeName: anymaster
   steps:
     - name: list nodes
-      content: kubectl get nodes | awk '{print $1 $2}'
+      content: kubectl get nodes
