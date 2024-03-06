@@ -150,9 +150,11 @@ func filledHostFromSecret(h *opsv1.Host, client client.Client, secretRef string)
 		secretCache = make(map[string]*corev1.Secret)
 	}
 	if secretCache[secretRef] != nil {
+		println("cache secret")
 		secret = secretCache[secretRef]
 	} else {
-		err := client.Get(context.TODO(), types.NamespacedName{Name: secretRef, Namespace: h.Namespace}, secret)
+		println("new secret")
+		err := client.Get(context.Background(), types.NamespacedName{Name: secretRef, Namespace: h.Namespace}, secret)
 		if err != nil {
 			return err
 		}
