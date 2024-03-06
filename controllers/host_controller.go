@@ -141,6 +141,7 @@ func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Contex
 
 func filledHostFromSecret(h *opsv1.Host, client client.Client, secretRef string) error {
 	secret := &corev1.Secret{}
+	println("secretRef: ", secretRef, " namespace: ", h.Namespace)
 	err := client.Get(context.TODO(), types.NamespacedName{Name: secretRef, Namespace: h.Namespace}, secret)
 	if err != nil {
 		return err
