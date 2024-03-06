@@ -192,7 +192,6 @@ func (c *HostConnection) connecting() (err error) {
 	}
 	privateKey, err := utils.DecodingBase64ToString(c.Host.Spec.PrivateKey)
 	if err != nil {
-
 		return err
 	}
 	authMethods := make([]ssh.AuthMethod, 0)

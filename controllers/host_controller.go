@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"time"
@@ -130,10 +131,12 @@ func filledHostFromSecret(h *opsv1.Host, client client.Client, secretRef string)
 		return err
 	}
 	if secret.Data["privatekey"] != nil {
-		h.Spec.PrivateKey = string(secret.Data["privatekey"])
+		privateKey := secret.Data["privatekey"]
+		h.Spec.PrivateKey = base64.StdEncoding.EncodeToString(privateKey)
 	}
 	if secret.Data["passsword"] != nil {
-		h.Spec.Password = string(secret.Data["passsword"])
+		password := secret.Data["passsword"]
+		h.Spec.Password = base64.StdEncoding.EncodeToString(password)
 	}
 	return nil
 }
