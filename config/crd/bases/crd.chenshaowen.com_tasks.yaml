@@ -62,6 +62,10 @@ spec:
                 type: string
               runtimeImage:
                 type: string
+              selector:
+                additionalProperties:
+                  type: string
+                type: object
               steps:
                 items:
                   properties:

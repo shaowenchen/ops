@@ -71,7 +71,43 @@ func LogicExpression(exp string, ifEmptyDefault bool) (result bool, err error) {
 			return false, err
 		}
 		return left <= right, nil
+	} else if strings.HasPrefix(exp, "startwith") {
+		parms := strings.TrimPrefix(exp, "startwith")
+		parmsPair := splitFuncParms(parms)
+		if len(parmsPair) == 2 {
+			return strings.HasPrefix(parmsPair[0], parmsPair[1]), nil
+		}
+	} else if strings.HasPrefix(exp, "endwith") {
+		parms := strings.TrimPrefix(exp, "endwith")
+		parmsPair := splitFuncParms(parms)
+		if len(parmsPair) == 2 {
+			return strings.HasSuffix(parmsPair[0], parmsPair[1]), nil
+		}
+	} else if strings.HasPrefix(exp, "not startwith") {
+		parms := strings.TrimPrefix(exp, "not startwith(")
+		parms = strings.TrimSuffix(parms, ")")
+		parmsPair := splitFuncParms(parms)
+		if len(parmsPair) == 2 {
+			return !strings.HasPrefix(parmsPair[0], parmsPair[1]), nil
+		}
+	} else if strings.HasPrefix(exp, "not endwith") {
+		parms := strings.TrimPrefix(exp, "not endwith(")
+		parms = strings.TrimSuffix(parms, ")")
+		parmsPair := splitFuncParms(parms)
+		if len(parmsPair) == 2 {
+			return !strings.HasSuffix(parmsPair[0], parmsPair[1]), nil
+		}
 	}
 
 	return
+}
+
+func splitFuncParms(parms string) []string {
+	parms = strings.TrimPrefix(parms, "(")
+	parms = strings.TrimSuffix(parms, ")")
+	parmsPair := strings.Split(parms, ",")
+	for i := range parmsPair {
+		parmsPair[i] = strings.TrimSpace(parmsPair[i])
+	}
+	return parmsPair
 }

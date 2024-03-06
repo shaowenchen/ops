@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"errors"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -44,7 +44,7 @@ func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 		return
 	}
 	for _, f := range fileArray {
-		yfile, err1 := ioutil.ReadFile(f)
+		yfile, err1 := os.ReadFile(f)
 		if err1 != nil {
 			return nil, err1
 		}

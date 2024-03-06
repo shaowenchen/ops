@@ -163,13 +163,42 @@ func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Contex
 	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
 	if t.GetSpec().Crontab != "" {
 		r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, func() {
-			tr := opsv1.NewTaskRun(t)
-			r.Client.Create(ctx, &tr)
+			// create taskrun
+			if t.Spec.Selector == nil {
+				tr := opsv1.NewTaskRun(t)
+				r.Client.Create(ctx, &tr)
+			} else {
+				// find slector hosts and create taskrun
+				if t.Spec.TypeRef == opsv1.TaskTypeRefHost {
+					hosts := r.getSelectorHosts(logger, ctx, t)
+					for _, h := range hosts {
+						tr := opsv1.NewTaskRun(t)
+						tr.Spec.NameRef = h.GetUniqueKey()
+						r.Client.Create(ctx, &tr)
+					}
+				} else if t.Spec.TypeRef == opsv1.TaskTypeRefCluster {
+					// todo
+				}
+			}
+
 		})
 		logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
 		if err != nil {
 			return err
 		}
+	}
+	return
+}
+
+func (r *TaskReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (hosts []opsv1.Host) {
+	hostList := &opsv1.HostList{}
+	err := r.Client.List(ctx, hostList, client.MatchingLabels(t.Spec.Selector))
+	if err != nil {
+		logger.Error.Println(err, "failed to list hosts")
+		return
+	}
+	for _, h := range hostList.Items {
+		hosts = append(hosts, h)
 	}
 	return
 }

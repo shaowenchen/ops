@@ -68,11 +68,11 @@ func ShellMemUsagePercent() string {
 }
 
 func ShellDiskTotal() string {
-	return `df -H | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $2}'`
+	return `df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/ | head -n 1 | awk '{ print $2 }'`
 }
 
 func ShellDiskUsagePercent() string {
-	return `df -H | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`
+	return `df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`
 }
 
 func ShellHostname() string {

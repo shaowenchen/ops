@@ -146,6 +146,11 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			logger.Error.Println(err)
 			return
 		}
+		// fill variables
+		if tr.Spec.Variables == nil {
+			tr.Spec.Variables = make(map[string]string)
+		}
+		tr.Spec.Variables["hostname"] = h.GetHostname()
 		// filled host
 		if h.Spec.SecretRef != "" {
 			err = filledHostFromSecret(h, r.Client, h.Spec.SecretRef)

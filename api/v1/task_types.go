@@ -34,6 +34,7 @@ type TaskSpec struct {
 	Name                string            `json:"name,omitempty" yaml:"name,omitempty"`
 	Desc                string            `json:"desc,omitempty" yaml:"desc,omitempty"`
 	TypeRef             string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
+	Selector            map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
 	NameRef             string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
 	InCluster           bool              `json:"incluster,omitempty" yaml:"incluster,omitempty"`
 	NodeName            string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
