@@ -6,6 +6,8 @@ metadata:
 spec:
   desc: use task `alert-gpu-drop` to check gpu drop in specified host
   crontab: "*/10 * * * *"
+  selector:
+      alert-gpu-drop: enabled
   typeRef: host
   variables:
     notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="

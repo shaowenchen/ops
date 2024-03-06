@@ -1,0 +1,35 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: alert-npu-drop
+  namespace: ops-system
+spec:
+  desc: use task `alert-npu-drop` to check npu drop in specified host
+  crontab: "*/10 * * * *"
+  selector:
+    alert-npu-drop: enabled
+  typeRef: host
+  variables:
+    desired_npu_count: "16"
+    notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+  steps:
+    - name: Check npu-smi
+      content: command -v npu-smi
+    - name: notifaction
+      when: not endwith(${result}, npu-smi)
+      content: |
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can't find command nvidia-smi" } }'
+    - name: Check lspci NPU Count
+      content: |
+        NPU_LSPCI_COUNT=$(($(lspci |grep d80 | wc -l))); [ $NPU_LSPCI_COUNT -eq ${desired_npu_count} ] && echo "OK - NPU count matches: $NPU_LSPCI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_LSPCI_COUNT vs desired_npu_count ${desired_npu_count}"
+    - name: notifaction
+      when: not startwith(${result}, OK)
+      content: |
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} lspci NPU count mismatch: ${desired_npu_count}" } }'
+    - name: Check npu-smi NPU Count
+      content: |
+        NPU_SMI_COUNT=$(($(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+'))); [ $NPU_SMI_COUNT -eq ${desired_npu_count} ] && echo "OK - NPU count matches: $NPU_SMI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_SMI_COUNT vs desired_npu_count ${desired_npu_count}"
+    - name: notifaction
+      when: not startwith(${result}, OK)
+      content: |
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} npu-smi NPU count mismatch: ${desired_npu_count}" } }
