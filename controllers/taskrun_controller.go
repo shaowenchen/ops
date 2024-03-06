@@ -147,12 +147,8 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			return
 		}
 		// fill variables
-		if tr.Spec.Variables == nil {
-			tr.Spec.Variables = make(map[string]string)
-		}
-		if tr.Spec.Variables["hostname"] == "" {
-			println("add variable hostname " + h.GetHostname())
-			tr.Spec.Variables["hostname"] = h.GetHostname()
+		extraVariables := map[string]string{
+			"hostname": h.GetHostname(),
 		}
 		// filled host
 		if h.Spec.SecretRef != "" {
@@ -164,7 +160,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		}
 		logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-		err = r.runTaskOnHost(cliLogger, ctx, t, tr, h)
+		err = r.runTaskOnHost(cliLogger, ctx, t, tr, h, extraVariables)
 		cliLogger.Flush()
 		if err != nil {
 			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
@@ -200,14 +196,16 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	return
 }
 
-func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host) (err error) {
+func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host, variables map[string]string) (err error) {
 	hc, err := opshost.NewHostConnBase64(h)
 	if err != nil {
 		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
 		return err
 	}
 	r.commitStatus(logger, ctx, t, tr, opsv1.StatusRunning)
-	err = opstask.RunTaskOnHost(logger, t, tr, hc, opsoption.TaskOption{})
+	err = opstask.RunTaskOnHost(logger, t, tr, hc, opsoption.TaskOption{
+		Variables: variables,
+	})
 	if err != nil {
 		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
 	} else {

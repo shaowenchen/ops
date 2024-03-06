@@ -13,16 +13,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func GetRealVariables(tr *opsv1.TaskRun, taskOpt option.TaskOption) (map[string]string, error) {
+func GetRealVariables(t *opsv1.Task, taskOpt option.TaskOption) (map[string]string, error) {
 	globalVariables := make(map[string]string)
 	// cli > env > yaml
-	utils.MergeMap(globalVariables, tr.Spec.Variables)
+	utils.MergeMap(globalVariables, t.Spec.Variables)
 	utils.MergeMap(globalVariables, utils.GetAllOsEnv())
 	utils.MergeMap(globalVariables, taskOpt.Variables)
 
 	globalVariables = RenderVarsVariables(globalVariables)
 	// check variable in task is not empty
-	for key := range tr.Spec.Variables {
+	for key := range t.Spec.Variables {
 		if len(globalVariables[key]) == 0 {
 			return nil, errors.New("please set variable: " + key)
 		}
