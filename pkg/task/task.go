@@ -25,7 +25,7 @@ func GetValidStatusError(status string, err error) string {
 }
 
 func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, hc *host.HostConnection, taskOpt option.TaskOption) error {
-	allVars, err := GetRealVariables(t, taskOpt)
+	allVars, err := GetRealVariables(tr, taskOpt)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, hc *
 }
 
 func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *kube.KubeConnection, node *corev1.Node, taskOpt option.TaskOption, kubeOpt option.KubeOption) error {
-	allVars, err := GetRealVariables(t, taskOpt)
+	allVars, err := GetRealVariables(tr, taskOpt)
 	if err != nil {
 		return err
 	}
