@@ -173,7 +173,7 @@ func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Contex
 					hosts := r.getSelectorHosts(logger, ctx, t)
 					for _, h := range hosts {
 						tr := opsv1.NewTaskRun(t)
-						tr.Spec.NameRef = h.GetUniqueKey()
+						tr.Spec.NameRef = h.Name
 						r.Client.Create(ctx, &tr)
 					}
 				} else if t.Spec.TypeRef == opsv1.TaskTypeRefCluster {

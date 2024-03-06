@@ -47,7 +47,7 @@ var FileCmd = &cobra.Command{
 }
 
 func HostFile(logger *log.Logger, fileOpt option.FileOption, hostOpt option.HostOption, inventory string) (err error) {
-	hs := host.GetHosts(logger, option.ClusterOption{},hostOpt, inventory)
+	hs := host.GetHosts(logger, option.ClusterOption{}, hostOpt, inventory)
 	if utils.IsDownloadDirection(fileOpt.Direction) && len(hs) != 1 {
 		errMsg := "need only one host while downloading"
 		logger.Error.Println(errMsg)

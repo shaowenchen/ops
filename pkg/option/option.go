@@ -13,7 +13,7 @@ type HostOption struct {
 	Password       string
 	PrivateKey     string
 	PrivateKeyPath string
-	SecretRef     string
+	SecretRef      string
 }
 
 type KubeOption struct {

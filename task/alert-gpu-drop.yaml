@@ -1,0 +1,46 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: alert-gpu-drop
+  namespace: ops-system
+spec:
+  desc: use task `alert-gpu-drop` to check gpu drop in specified host
+  crontab: "*/10 * * * *"
+  typeRef: host
+  variables:
+    notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+  steps:
+    - name: Check nvidia-smi
+      content: command -v nvidia-smi
+    - name: notifaction
+      when: not endwith(${result}, nvidia-smi)
+      content: |
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can't find command nvidia-smi" } }'
+    - name: Check lspci GPU Count
+      content: |
+        GPU_LSPCI_COUNT=$(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l); if [ $GPU_LSPCI_COUNT -eq ${desired_gpu_count} ]; then echo "OK - lspci GPU count matches ${desired_gpu_count}"; else echo "ERROR - lspci GPU count mismatch: $GPU_LSPCI_COUNT vs ${desired_gpu_count}"; fi
+    - name: notifaction
+      when: not startwith(${result}, OK)
+      content: |
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} lspci GPU count mismatch: $GPU_LSPCI_COUNT vs ${desired_gpu_count}" } }'
+    - name: Check nvidia-smi GPU Count
+      content: |
+        GPU_SMI_COUNT=$(nvidia-smi -L | wc -l); if [ $GPU_SMI_COUNT -eq ${desired_gpu_count} ]; then echo "OK - nvidia-smi GPU count matches ${desired_gpu_count}"; else echo "ERROR - nvidia-smi GPU count mismatch: $GPU_SMI_COUNT vs ${desired_gpu_count}"; fi
+    - name: notifaction
+      when: not startwith(${result}, OK)
+      content: |
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} nvidia-smi GPU count mismatch: $GPU_SMI_COUNT vs ${desired_gpu_count}" } }'
+    - name: Revision FF
+      content: |
+        if lspci -d 10de: | grep -q "rev ff"; then echo "ERROR - 'rev ff' found in lspci output"; else echo "OK - No 'rev ff' found"; fi
+    - name: notifaction
+      when: not startwith(${result}, OK)
+      content: |
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} 'rev ff' found in lspci output" } }'
+    - name: XID == 79
+      content: |
+        if dmesg -T | grep -i "NVRM: Xid" > /dev/null; then echo "ERROR - Xid error found in dmesg"; else echo "OK - No Xid error found"; fi
+    - name: notifaction
+      when: not startwith(${result}, OK)
+      content: |
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} Xid error found in dmesg" } }'
