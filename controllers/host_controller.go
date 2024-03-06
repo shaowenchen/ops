@@ -20,6 +20,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"os"
+	"sync"
+	"time"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opshost "github.com/shaowenchen/ops/pkg/host"
@@ -29,11 +33,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sync"
-	"time"
 )
 
 // HostReconciler reconciles a Host object
@@ -43,6 +44,9 @@ type HostReconciler struct {
 	timeTickerStopChans map[string]chan bool
 	tickerMutex         sync.RWMutex
 }
+
+var secretCache map[string]*corev1.Secret
+var secretCacheMutex sync.RWMutex
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=hosts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=hosts/status,verbs=get;update;patch
@@ -141,11 +145,19 @@ func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Contex
 
 func filledHostFromSecret(h *opsv1.Host, client client.Client, secretRef string) error {
 	secret := &corev1.Secret{}
-	println("secretRef: ", secretRef, " namespace: ", h.Namespace)
-	err := client.Get(context.TODO(), types.NamespacedName{Name: secretRef, Namespace: h.Namespace}, secret)
-	if err != nil {
-		return err
+	secretCacheMutex.Lock()
+	if secretCache == nil {
+		secretCache = make(map[string]*corev1.Secret)
 	}
+	if secretCache[secretRef] != nil {
+		secret = secretCache[secretRef]
+	} else {
+		err := client.Get(context.TODO(), types.NamespacedName{Name: secretRef, Namespace: h.Namespace}, secret)
+		if err != nil {
+			return err
+		}
+	}
+	secretCacheMutex.Unlock()
 	if secret.Data["privatekey"] != nil {
 		privateKey := secret.Data["privatekey"]
 		h.Spec.PrivateKey = base64.StdEncoding.EncodeToString(privateKey)
