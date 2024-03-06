@@ -45,9 +45,6 @@ type HostReconciler struct {
 	tickerMutex         sync.RWMutex
 }
 
-var secretCache map[string]*corev1.Secret
-var secretCacheMutex sync.RWMutex
-
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=hosts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=hosts/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=hosts/finalizers,verbs=update
@@ -145,21 +142,10 @@ func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Contex
 
 func filledHostFromSecret(h *opsv1.Host, client client.Client, secretRef string) error {
 	secret := &corev1.Secret{}
-	secretCacheMutex.Lock()
-	if secretCache == nil {
-		secretCache = make(map[string]*corev1.Secret)
+	err := client.Get(context.Background(), types.NamespacedName{Name: secretRef, Namespace: h.Namespace}, secret)
+	if err != nil {
+		return err
 	}
-	if secretCache[secretRef] != nil {
-		println("cache secret")
-		secret = secretCache[secretRef]
-	} else {
-		println("new secret")
-		err := client.Get(context.Background(), types.NamespacedName{Name: secretRef, Namespace: h.Namespace}, secret)
-		if err != nil {
-			return err
-		}
-	}
-	secretCacheMutex.Unlock()
 	if secret.Data["privatekey"] != nil {
 		privateKey := secret.Data["privatekey"]
 		h.Spec.PrivateKey = base64.StdEncoding.EncodeToString(privateKey)
