@@ -10,6 +10,7 @@ spec:
       alert-gpu-drop: enabled
   typeRef: host
   variables:
+    desired_gpu_count: "8"
     notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
   steps:
     - name: Check nvidia-smi
