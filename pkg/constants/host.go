@@ -11,7 +11,7 @@ import (
 )
 
 const LocalHostIP = "127.0.0.1"
-const DefaultTimeoutSeconds = 30
+const DefaultTimeoutSeconds = 10
 
 const (
 	InventoryTypeKubernetes = "kubernetes"
