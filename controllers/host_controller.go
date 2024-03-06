@@ -20,9 +20,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"os"
-	"time"
-	"sync"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opshost "github.com/shaowenchen/ops/pkg/host"
@@ -32,8 +29,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sync"
+	"time"
 )
 
 // HostReconciler reconciles a Host object
@@ -41,7 +41,7 @@ type HostReconciler struct {
 	client.Client
 	Scheme              *runtime.Scheme
 	timeTickerStopChans map[string]chan bool
-	tickerMutex               sync.Mutex 
+	tickerMutex         sync.RWMutex
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=hosts,verbs=get;list;watch;create;update;patch;delete
@@ -89,7 +89,9 @@ func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *HostReconciler) deleteHost(ctx context.Context, namespacedName types.NamespacedName) error {
+	r.tickerMutex.RLock()
 	_, ok := r.timeTickerStopChans[namespacedName.String()]
+	r.tickerMutex.RUnlock()
 	if ok {
 		r.timeTickerStopChans[namespacedName.String()] <- true
 		r.tickerMutex.Lock()
@@ -101,7 +103,9 @@ func (r *HostReconciler) deleteHost(ctx context.Context, namespacedName types.Na
 
 func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Context, h *opsv1.Host) (err error) {
 	// if ticker exist, return
+	r.tickerMutex.RLock()
 	_, ok := r.timeTickerStopChans[h.GetUniqueKey()]
+	r.tickerMutex.RUnlock()
 	if ok {
 		return
 	}
@@ -117,6 +121,7 @@ func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Contex
 	logger.Info.Println(fmt.Sprintf("start ticker for host %s", h.GetUniqueKey()))
 	go func() {
 		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-r.timeTickerStopChans[h.GetUniqueKey()]:

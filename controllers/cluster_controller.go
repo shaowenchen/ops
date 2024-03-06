@@ -42,7 +42,7 @@ type ClusterReconciler struct {
 	client.Client
 	Scheme              *runtime.Scheme
 	timeTickerStopChans map[string]chan bool
-	tickerMutex         sync.Mutex
+	tickerMutex         sync.RWMutex
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=clusters,verbs=get;list;watch;create;update;patch;delete
@@ -89,7 +89,9 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ClusterReconciler) deleteCluster(ctx context.Context, namespacedName types.NamespacedName) error {
+	r.tickerMutex.RLock()
 	_, ok := r.timeTickerStopChans[namespacedName.String()]
+	r.tickerMutex.RUnlock()
 	if ok {
 		r.timeTickerStopChans[namespacedName.String()] <- true
 		r.tickerMutex.Lock()
@@ -101,7 +103,9 @@ func (r *ClusterReconciler) deleteCluster(ctx context.Context, namespacedName ty
 
 func (r *ClusterReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Context, c *opsv1.Cluster) {
 	// if ticker exist, return
+	r.tickerMutex.RLock()
 	_, ok := r.timeTickerStopChans[c.GetUniqueKey()]
+	r.tickerMutex.RUnlock()
 	if ok {
 		return
 	}
@@ -117,6 +121,7 @@ func (r *ClusterReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Con
 	logger.Info.Println(fmt.Sprintf("start ticker for cluster %s", c.GetUniqueKey()))
 	go func() {
 		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-r.timeTickerStopChans[c.GetUniqueKey()]:
