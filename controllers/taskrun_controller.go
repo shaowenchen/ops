@@ -114,14 +114,20 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 		logger.Error.Println(err)
 		return
 	}
+	finishedTaskruns := []opsv1.TaskRun{}
+	for _, tr := range trs.Items {
+		if tr.Status.RunStatus != opsv1.StatusEmpty && tr.Status.RunStatus != opsv1.StatusRunning && tr.Status.RunStatus != opsv1.StatusInit {
+			finishedTaskruns = append(finishedTaskruns, tr)
+		}
+	}
 
-	sort.Slice(trs.Items, func(i, j int) bool {
-		return trs.Items[i].Status.StartTime.Before(trs.Items[j].Status.StartTime)
+	sort.Slice(finishedTaskruns, func(i, j int) bool {
+		return finishedTaskruns[i].Status.StartTime.Before(finishedTaskruns[j].Status.StartTime)
 	})
 
-	if len(trs.Items) > int(maxHistory) {
-		trs.Items = trs.Items[:len(trs.Items)-int(maxHistory)]
-		for _, tr := range trs.Items {
+	if len(finishedTaskruns) > int(maxHistory) {
+		finishedTaskruns = finishedTaskruns[:len(finishedTaskruns)-int(maxHistory)]
+		for _, tr := range finishedTaskruns {
 			err := r.Client.Delete(ctx, &tr)
 			if err != nil {
 				logger.Error.Println(err)

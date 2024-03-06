@@ -50,6 +50,7 @@ const StatusFailed = "failed"
 const StatusRunning = "running"
 const StatusInit = "init"
 const StatusFiring = "firing"
+const StatusEmpty = ""
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
