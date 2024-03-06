@@ -22,6 +22,8 @@ import (
 	"os"
 	"time"
 
+	"sync"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
@@ -40,6 +42,7 @@ type ClusterReconciler struct {
 	client.Client
 	Scheme              *runtime.Scheme
 	timeTickerStopChans map[string]chan bool
+	tickerMutex         sync.Mutex
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=clusters,verbs=get;list;watch;create;update;patch;delete
@@ -89,6 +92,9 @@ func (r *ClusterReconciler) deleteCluster(ctx context.Context, namespacedName ty
 	_, ok := r.timeTickerStopChans[namespacedName.String()]
 	if ok {
 		r.timeTickerStopChans[namespacedName.String()] <- true
+		r.tickerMutex.Lock()
+		delete(r.timeTickerStopChans, namespacedName.String())
+		r.tickerMutex.Unlock()
 	}
 	return nil
 }
@@ -100,9 +106,13 @@ func (r *ClusterReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Con
 		return
 	}
 	if r.timeTickerStopChans == nil {
+		r.tickerMutex.Lock()
 		r.timeTickerStopChans = make(map[string]chan bool)
+		r.tickerMutex.Unlock()
 	}
+	r.tickerMutex.Lock()
 	r.timeTickerStopChans[c.GetUniqueKey()] = make(chan bool)
+	r.tickerMutex.Unlock()
 	// create ticker
 	logger.Info.Println(fmt.Sprintf("start ticker for cluster %s", c.GetUniqueKey()))
 	go func() {
@@ -111,7 +121,9 @@ func (r *ClusterReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Con
 			select {
 			case <-r.timeTickerStopChans[c.GetUniqueKey()]:
 				ticker.Stop()
+				r.tickerMutex.Lock()
 				delete(r.timeTickerStopChans, c.GetUniqueKey())
+				r.tickerMutex.Unlock()
 				logger.Info.Println(fmt.Sprintf("stop ticker for cluster %s", c.GetUniqueKey()))
 				return
 			case <-ticker.C:
