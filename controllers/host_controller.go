@@ -133,6 +133,7 @@ func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Contex
 				logger.Info.Println(fmt.Sprintf("stop ticker for host %s", h.GetUniqueKey()))
 				return
 			case <-ticker.C:
+				logger.Info.Println(fmt.Sprintf("run ticker for host %s", h.GetUniqueKey()))
 				r.updateStatus(logger, ctx, h)
 			}
 		}

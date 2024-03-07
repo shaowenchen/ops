@@ -132,6 +132,7 @@ func (r *ClusterReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Con
 				logger.Info.Println(fmt.Sprintf("stop ticker for cluster %s", c.GetUniqueKey()))
 				return
 			case <-ticker.C:
+				logger.Info.Println(fmt.Sprintf("run ticker for cluster %s", c.GetUniqueKey()))
 				r.updateStatus(logger, ctx, c)
 			}
 		}
