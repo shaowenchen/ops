@@ -32,4 +32,4 @@ spec:
     - name: notifaction
       when: not startwith(${result}, OK)
       content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} npu-smi NPU count mismatch: ${desired_npu_count}" } }
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} npu-smi NPU count mismatch: ${desired_npu_count}" } }'

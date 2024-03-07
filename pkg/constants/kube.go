@@ -19,7 +19,7 @@ const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
 const DefaultRuntimeImage = "docker.io/library/ubuntu:20.04"
 
-const SyncResourceStatusHeatSeconds = 60 * 15
+const SyncResourceStatusHeatSeconds = 60 * 5
 
 const (
 	ContainersReady string = "ContainersReady"
