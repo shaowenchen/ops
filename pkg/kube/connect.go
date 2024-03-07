@@ -77,16 +77,41 @@ func (kc *KubeConnection) BuildClients() (err error) {
 }
 
 func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
+	anyOneIsOk := false
 	version, err1 := kc.GetVersion()
-	err = utils.MergeError(err, err1)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
+
 	nodes, err1 := kc.GetNodes()
-	err = utils.MergeError(err, err1)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
+
 	allPods, err1 := kc.GetAllPods()
-	err = utils.MergeError(err, err1)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
+
 	allRunningPods, err1 := kc.GetAllRunningPods()
-	err = utils.MergeError(err, err1)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
+
 	days, err1 := kc.GetExpiredDays()
-	err = utils.MergeError(err, err1)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
 
 	status = &opsv1.ClusterStatus{
 		Version:          version,
@@ -96,6 +121,10 @@ func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
 		HeartTime:        &metav1.Time{Time: time.Now()},
 		HeartStatus:      opsv1.StatusSuccessed,
 		CertNotAfterDays: days,
+	}
+
+	if !anyOneIsOk {
+		status.HeartStatus = opsv1.StatusFailed
 	}
 	return
 }

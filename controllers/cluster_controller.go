@@ -149,9 +149,8 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	status, err := kc.GetStatus()
 	if err != nil {
 		logger.Error.Println(err, "failed to get cluster status")
-		return r.commitStatus(logger, ctx, c, nil, opsv1.StatusFailed)
 	}
-	err = r.commitStatus(logger, ctx, c, status, opsv1.StatusSuccessed)
+	err = r.commitStatus(logger, ctx, c, status, "")
 	return
 }
 

@@ -174,9 +174,8 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 	status, err := hc.GetStatus(ctx, false)
 	if err != nil {
 		logger.Error.Println(err, "failed to get host status")
-		return r.commitStatus(logger, ctx, h, status, opsv1.StatusFailed)
 	}
-	err = r.commitStatus(logger, ctx, h, status, opsv1.StatusSuccessed)
+	err = r.commitStatus(logger, ctx, h, status, "")
 	return
 }
 
