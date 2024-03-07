@@ -2,6 +2,8 @@ package create
 
 import (
 	"context"
+	"strings"
+
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -9,7 +11,6 @@ import (
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 var hClusterOpt option.ClusterOption
@@ -22,7 +23,7 @@ var hostCmd = &cobra.Command{
 	Short: "create host resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(hVerbose).SetStd().SetFile().Build()
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
 		defer cancel()
 		err := CreateHost(ctx, logger, hClusterOpt, hHostOpt, hInventory)
 		if err != nil {

@@ -172,7 +172,7 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 		logger.Error.Println(err, "failed to create host connection")
 		return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)
 	}
-	ctxTimeout, cancel := context.WithTimeout(ctx, constants.DefaultTaskStepTimeoutSeconds)
+	ctxTimeout, cancel := context.WithTimeout(ctx, constants.DefaultTaskStepTimeoutDuration)
 	defer cancel()
 	status, err := hc.GetStatus(ctxTimeout, false)
 	if err != nil {

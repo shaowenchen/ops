@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -21,7 +22,7 @@ var taskCmd = &cobra.Command{
 	Short: "create task resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(tVerbose).SetStd().SetFile().Build()
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
 		defer cancel()
 		Createtask(ctx, logger)
 	},

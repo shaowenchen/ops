@@ -3,6 +3,7 @@ package create
 import (
 	"context"
 	"fmt"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -21,7 +22,7 @@ var clusterCmd = &cobra.Command{
 	Short: "create cluster resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(cVerbose).SetStd().SetFile().Build()
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
 		defer cancel()
 		err := CreateCluster(ctx, logger, cClusterOpt, cVerbose)
 		if err != nil {

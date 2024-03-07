@@ -2,6 +2,9 @@ package task
 
 import (
 	"context"
+	"strconv"
+	"strings"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
@@ -11,8 +14,6 @@ import (
 	opstask "github.com/shaowenchen/ops/pkg/task"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
-	"strconv"
-	"strings"
 )
 
 var taskOpt option.TaskOption
@@ -37,7 +38,7 @@ var TaskCmd = &cobra.Command{
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventoryType := utils.GetInventoryType(inventory)
 		tasks, err := opstask.ReadTaskYaml(utils.GetTaskAbsoluteFilePath(taskOpt.Proxy, taskOpt.FilePath))
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
 		defer cancel()
 		if err != nil {
 			logger.Error.Println(err)

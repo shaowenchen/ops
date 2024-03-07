@@ -3,6 +3,7 @@ package file
 import (
 	"context"
 	"errors"
+
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -29,7 +30,7 @@ var FileCmd = &cobra.Command{
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
 		defer cancel()
 		// upstream is server
 		if serverOpt.Api != "" {
