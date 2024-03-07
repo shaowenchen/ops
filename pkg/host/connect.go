@@ -148,12 +148,13 @@ func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv
 		err = err1
 	}
 
-	diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo, constants.DefaultShellTimeoutSeconds)
-	if err1 == nil {
-		anyOneIsOk = true
-	} else {
-		err = err1
-	}
+	// diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo, constants.DefaultShellTimeoutSeconds)
+	// if err1 == nil {
+	// 	anyOneIsOk = true
+	// } else {
+	// 	err = err1
+	// }
+	diskUsagePercent := "0"
 
 	cpuTotal, err1 := c.getCPUTotal(ctx, sudo)
 	if err1 == nil {

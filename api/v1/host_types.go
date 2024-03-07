@@ -90,6 +90,9 @@ func (h *Host) GetSpec() HostSpec {
 }
 
 func (h *Host) GetHostname() string {
+	if h.Status.Hostname == "" {
+		return h.Name
+	}
 	return h.Status.Hostname
 }
 
