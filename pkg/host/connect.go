@@ -141,20 +141,19 @@ func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv
 		err = err1
 	}
 
-	diskTotal, err1 := c.getDiskTotal(ctx, sudo)
+	diskTotal, err1 := c.getDiskTotal(ctx, sudo, constants.DefaultShellTimeoutSeconds)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
 		err = err1
 	}
 
-	// diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo, constants.DefaultShellTimeoutSeconds)
-	// if err1 == nil {
-	// 	anyOneIsOk = true
-	// } else {
-	// 	err = err1
-	// }
-	diskUsagePercent := "0"
+	diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo, constants.DefaultShellTimeoutSeconds)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
 
 	cpuTotal, err1 := c.getCPUTotal(ctx, sudo)
 	if err1 == nil {
@@ -553,8 +552,8 @@ func (c *HostConnection) getHosname(ctx context.Context, sudo bool) (stdout stri
 	return c.execSh(ctx, sudo, utils.ShellHostname())
 }
 
-func (c *HostConnection) getDiskTotal(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellDiskTotal())
+func (c *HostConnection) getDiskTotal(ctx context.Context, sudo bool, timeoutSeconds int) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellDiskTotal(timeoutSeconds))
 }
 
 func (c *HostConnection) getArch(ctx context.Context, sudo bool) (stdout string, err error) {

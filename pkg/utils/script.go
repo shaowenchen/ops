@@ -67,8 +67,8 @@ func ShellMemUsagePercent() string {
 	return `free -m | awk 'NR==2{printf "%.2f%\n", $3*100/$2 }'`
 }
 
-func ShellDiskTotal() string {
-	return `df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/ | head -n 1 | awk '{ print $2 }'`
+func ShellDiskTotal(timeout int) string {
+	return fmt.Sprintf(`timeout %d df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/ | head -n 1 | awk '{ print $2 }'`, timeout)
 }
 
 func ShellDiskUsagePercent(timeout int) string {
