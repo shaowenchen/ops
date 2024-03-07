@@ -166,7 +166,9 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 			return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)
 		}
 	}
+	fmt.Printf("ready to connect host %s\n", h.GetUniqueKey())
 	hc, err := opshost.NewHostConnBase64(h)
+	fmt.Printf("connected host %s\n", h.GetUniqueKey())
 	if err != nil {
 		logger.Error.Println(err, "failed to create host connection")
 		return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)

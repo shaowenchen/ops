@@ -18,7 +18,7 @@ spec:
     - name: notifaction
       when: not endwith(${result}, nvidia-smi)
       content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can't find command nvidia-smi" } }'
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can not find command nvidia-smi" } }'
     - name: Check lspci GPU Count
       content: |
         GPU_LSPCI_COUNT=$(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l); if [ $GPU_LSPCI_COUNT -eq ${desired_gpu_count} ]; then echo "OK - lspci GPU count matches ${desired_gpu_count}"; else echo "ERROR - lspci GPU count mismatch: $GPU_LSPCI_COUNT vs ${desired_gpu_count}"; fi
