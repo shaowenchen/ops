@@ -71,8 +71,8 @@ func ShellDiskTotal() string {
 	return `df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/ | head -n 1 | awk '{ print $2 }'`
 }
 
-func ShellDiskUsagePercent() string {
-	return `df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`
+func ShellDiskUsagePercent(timeout int) string {
+	return fmt.Sprintf(`timeout %d df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`, timeout)
 }
 
 func ShellHostname() string {
