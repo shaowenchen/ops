@@ -1,8 +1,7 @@
 package create
 
 import (
-	"strings"
-
+	"context"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -10,6 +9,7 @@ import (
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 var hClusterOpt option.ClusterOption
@@ -22,7 +22,9 @@ var hostCmd = &cobra.Command{
 	Short: "create host resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(hVerbose).SetStd().SetFile().Build()
-		err := CreateHost(logger, hClusterOpt, hHostOpt, hInventory)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		defer cancel()
+		err := CreateHost(ctx, logger, hClusterOpt, hHostOpt, hInventory)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -30,7 +32,7 @@ var hostCmd = &cobra.Command{
 	},
 }
 
-func CreateHost(logger *log.Logger, clusterOpt option.ClusterOption, hostOpt option.HostOption, inventory string) (err error) {
+func CreateHost(ctx context.Context, logger *log.Logger, clusterOpt option.ClusterOption, hostOpt option.HostOption, inventory string) (err error) {
 	kubeconfigPath := utils.GetAbsoluteFilePath(clusterOpt.Kubeconfig)
 	restConfig, err := utils.GetRestConfig(kubeconfigPath)
 	if err != nil {
@@ -57,7 +59,7 @@ func CreateHost(logger *log.Logger, clusterOpt option.ClusterOption, hostOpt opt
 			hs[0].Name = clusterOpt.Name
 		}
 		// no name, multi host
-		err = kube.CreateHost(logger, restConfig, h, clusterOpt.Clear)
+		err = kube.CreateHost(ctx, logger, restConfig, h, clusterOpt.Clear)
 		if err != nil {
 			logger.Error.Println(err)
 		}

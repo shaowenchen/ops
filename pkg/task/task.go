@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -24,7 +25,7 @@ func GetValidStatusError(status string, err error) string {
 	return status
 }
 
-func RunTaskOnHost(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, hc *host.HostConnection, taskOpt option.TaskOption) error {
+func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, hc *host.HostConnection, taskOpt option.TaskOption) error {
 	allVars, err := GetRealVariables(t, taskOpt)
 	if err != nil {
 		return err
@@ -122,12 +123,12 @@ func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection
 }
 
 func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, stdout string, err error) {
-	stdout, err = c.Shell(option.Sudo, step.Content)
+	stdout, err = c.Shell(context.TODO(), option.Sudo, step.Content)
 	return
 }
 
 func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, output string, err error) {
-	err = c.File(option.Sudo, step.Direction, step.LocalFile, step.RemoteFile)
+	err = c.File(context.Background(), option.Sudo, step.Direction, step.LocalFile, step.RemoteFile)
 	return
 }
 

@@ -10,9 +10,9 @@ import (
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func CreateHost(logger *opslog.Logger, restConfig *rest.Config, host *opsv1.Host, clear bool) (err error) {
+func CreateHost(ctx context.Context, logger *opslog.Logger, restConfig *rest.Config, host *opsv1.Host, clear bool) (err error) {
 
-	client, err := GetOpsClient(logger, restConfig)
+	client, err := GetOpsClient(ctx, logger, restConfig)
 	if err != nil {
 		return
 	}
@@ -24,8 +24,8 @@ func CreateHost(logger *opslog.Logger, restConfig *rest.Config, host *opsv1.Host
 	return
 }
 
-func CreateCluster(logger *opslog.Logger, restConfig *rest.Config, cluster *opsv1.Cluster, clear bool) (err error) {
-	client, err := GetOpsClient(logger, restConfig)
+func CreateCluster(ctx context.Context, logger *opslog.Logger, restConfig *rest.Config, cluster *opsv1.Cluster, clear bool) (err error) {
+	client, err := GetOpsClient(ctx, logger, restConfig)
 	if err != nil {
 		return
 	}
@@ -37,7 +37,7 @@ func CreateCluster(logger *opslog.Logger, restConfig *rest.Config, cluster *opsv
 	return
 }
 
-func CreateTask(logger *opslog.Logger, restConfig *rest.Config, t *opsv1.Task, clear bool) (err error) {
+func CreateTask(ctx context.Context, logger *opslog.Logger, restConfig *rest.Config, t *opsv1.Task, clear bool) (err error) {
 	scheme, err := opsv1.SchemeBuilder.Build()
 	if err != nil {
 		return

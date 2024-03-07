@@ -1,8 +1,8 @@
 package file
 
 import (
+	"context"
 	"errors"
-
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -29,6 +29,8 @@ var FileCmd = &cobra.Command{
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		defer cancel()
 		// upstream is server
 		if serverOpt.Api != "" {
 			ServerFile(logger, fileOpt, serverOpt)
@@ -39,14 +41,14 @@ var FileCmd = &cobra.Command{
 		if fileOpt.StorageType == constants.RemoteStorageTypeS3 {
 			S3File(logger, fileOpt, s3Opt)
 		} else if fileOpt.StorageType == constants.RemoteStorageTypeImage {
-			KubeFile(logger, fileOpt, kubeOpt, inventory)
+			KubeFile(ctx, logger, fileOpt, kubeOpt, inventory)
 		} else if fileOpt.StorageType == constants.RemoteStorageTypeLocal {
-			HostFile(logger, fileOpt, hostOpt, inventory)
+			HostFile(ctx, logger, fileOpt, hostOpt, inventory)
 		}
 	},
 }
 
-func HostFile(logger *log.Logger, fileOpt option.FileOption, hostOpt option.HostOption, inventory string) (err error) {
+func HostFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption, hostOpt option.HostOption, inventory string) (err error) {
 	hs := host.GetHosts(logger, option.ClusterOption{}, hostOpt, inventory)
 	if utils.IsDownloadDirection(fileOpt.Direction) && len(hs) != 1 {
 		errMsg := "need only one host while downloading"
@@ -54,7 +56,7 @@ func HostFile(logger *log.Logger, fileOpt option.FileOption, hostOpt option.Host
 		return errors.New(errMsg)
 	}
 	for _, h := range hs {
-		err = host.File(logger, h, fileOpt, hostOpt)
+		err = host.File(ctx, logger, h, fileOpt, hostOpt)
 		if err != nil {
 			logger.Error.Println(err)
 		}
@@ -62,13 +64,13 @@ func HostFile(logger *log.Logger, fileOpt option.FileOption, hostOpt option.Host
 	return
 }
 
-func KubeFile(logger *log.Logger, fileOpt option.FileOption, kubeOpt option.KubeOption, inventory string) (err error) {
+func KubeFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption, kubeOpt option.KubeOption, inventory string) (err error) {
 	client, err := utils.NewKubernetesClient(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	nodeList, err := kube.GetNodes(logger, client, kubeOpt)
+	nodeList, err := kube.GetNodes(ctx, logger, client, kubeOpt)
 	if err != nil {
 		logger.Error.Println(err)
 	}

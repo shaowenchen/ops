@@ -209,7 +209,7 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 		return err
 	}
 	r.commitStatus(logger, ctx, t, tr, opsv1.StatusRunning)
-	err = opstask.RunTaskOnHost(logger, t, tr, hc, opsoption.TaskOption{
+	err = opstask.RunTaskOnHost(ctx, logger, t, tr, hc, opsoption.TaskOption{
 		Variables: variables,
 	})
 	if err != nil {
@@ -226,7 +226,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
 		return err
 	}
-	nodes, err := opskube.GetNodes(logger, kc.Client, kubeOpt)
+	nodes, err := opskube.GetNodes(ctx, logger, kc.Client, kubeOpt)
 	if err != nil || len(nodes) == 0 {
 		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
 		return err

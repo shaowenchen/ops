@@ -1,8 +1,8 @@
 package create
 
 import (
+	"context"
 	"fmt"
-
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -21,8 +21,9 @@ var clusterCmd = &cobra.Command{
 	Short: "create cluster resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(cVerbose).SetStd().SetFile().Build()
-
-		err := CreateCluster(logger, cClusterOpt, cVerbose)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		defer cancel()
+		err := CreateCluster(ctx, logger, cClusterOpt, cVerbose)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return
@@ -30,7 +31,7 @@ var clusterCmd = &cobra.Command{
 	},
 }
 
-func CreateCluster(logger *log.Logger, clusterOpt option.ClusterOption, inventory string) (err error) {
+func CreateCluster(ctx context.Context, logger *log.Logger, clusterOpt option.ClusterOption, inventory string) (err error) {
 	clusterOpt.Kubeconfig = utils.GetAbsoluteFilePath(clusterOpt.Kubeconfig)
 	restConfig, err := utils.GetRestConfig(clusterOpt.Kubeconfig)
 	if err != nil {
@@ -47,7 +48,7 @@ func CreateCluster(logger *log.Logger, clusterOpt option.ClusterOption, inventor
 	}
 	cClusterSpec.Config = utils.EncodingStringToBase64(config)
 	cluster := opsv1.NewCluster(clusterOpt.Namespace, clusterOpt.Name, cClusterSpec.Server, cClusterSpec.Config, cClusterSpec.Token)
-	err = kube.CreateCluster(logger, restConfig, cluster, clusterOpt.Clear)
+	err = kube.CreateCluster(ctx, logger, restConfig, cluster, clusterOpt.Clear)
 	if err != nil {
 		logger.Error.Println(err)
 	}

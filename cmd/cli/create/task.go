@@ -1,6 +1,7 @@
 package create
 
 import (
+	"context"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -20,11 +21,13 @@ var taskCmd = &cobra.Command{
 	Short: "create task resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(tVerbose).SetStd().SetFile().Build()
-		Createtask(logger)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		defer cancel()
+		Createtask(ctx, logger)
 	},
 }
 
-func Createtask(logger *log.Logger) (err error) {
+func Createtask(ctx context.Context, logger *log.Logger) (err error) {
 	kubeconfigPath := utils.GetAbsoluteFilePath(tClusterOpt.Kubeconfig)
 	restConfig, err := utils.GetRestConfig(kubeconfigPath)
 	if err != nil {
@@ -50,7 +53,7 @@ func Createtask(logger *log.Logger) (err error) {
 	if t.Namespace == "" {
 		t.Namespace = constants.DefaultOpsNamespace
 	}
-	err = kube.CreateTask(logger, restConfig, t, tTaskOpt.Clear)
+	err = kube.CreateTask(ctx, logger, restConfig, t, tTaskOpt.Clear)
 	if err != nil {
 		logger.Error.Println(err)
 	}

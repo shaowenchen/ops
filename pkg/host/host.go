@@ -1,26 +1,26 @@
 package host
 
 import (
-	"strings"
-
+	"context"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
+	"strings"
 )
 
-func File(logger *log.Logger, h *opsv1.Host, fileOpt option.FileOption, hostOption option.HostOption) (err error) {
+func File(ctx context.Context, logger *log.Logger, h *opsv1.Host, fileOpt option.FileOption, hostOption option.HostOption) (err error) {
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
 	if err != nil {
 		logger.Error.Println(err)
 		return err
 	}
-	return c.File(fileOpt.Sudo, fileOpt.Direction, fileOpt.LocalFile, fileOpt.RemoteFile)
+	return c.File(ctx, fileOpt.Sudo, fileOpt.Direction, fileOpt.LocalFile, fileOpt.RemoteFile)
 }
 
-func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOption option.HostOption) (err error) {
+func Shell(ctx context.Context, logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOption option.HostOption) (err error) {
 	logger.Info.Println("> Run Shell on ", h.Spec.Address)
 	FillHostByOption(h, &hostOption)
 	c, err := NewHostConnBase64(h)
@@ -28,7 +28,7 @@ func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOpt
 		logger.Error.Println(err)
 		return err
 	}
-	stdout, err := c.Shell(option.Sudo, option.Content)
+	stdout, err := c.Shell(ctx, option.Sudo, option.Content)
 	logger.Info.Println(stdout)
 	return
 }
@@ -36,7 +36,7 @@ func Shell(logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOpt
 func GetHosts(logger *log.Logger, clusterOpt option.ClusterOption, hostOpt option.HostOption, inventory string) (hosts []*opsv1.Host) {
 	hs, _ := utils.AnalysisHostsParameter(inventory)
 	for _, addr := range hs {
-		hosts = append(hosts, opsv1.NewHost(clusterOpt.Namespace, strings.ReplaceAll(addr, ".", "-"), addr, hostOpt.Port, hostOpt.Username, hostOpt.Password, hostOpt.PrivateKey, hostOpt.PrivateKeyPath, constants.DefaultTimeoutSeconds, hostOpt.SecretRef))
+		hosts = append(hosts, opsv1.NewHost(clusterOpt.Namespace, strings.ReplaceAll(addr, ".", "-"), addr, hostOpt.Port, hostOpt.Username, hostOpt.Password, hostOpt.PrivateKey, hostOpt.PrivateKeyPath, constants.DefaultSSHTimeoutSeconds, hostOpt.SecretRef))
 	}
 	return
 }

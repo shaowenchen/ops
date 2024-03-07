@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"context"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -26,24 +27,26 @@ var ShellCmd = &cobra.Command{
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventoryType := utils.GetInventoryType(inventory)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		defer cancel()
 		if utils.IsExistsFile(shellOpt.Content) {
 			shellOpt.Content, _ = utils.ReadFile(shellOpt.Content)
 		}
 		if inventoryType == constants.InventoryTypeKubernetes {
-			KubeShell(logger, shellOpt, kubeOpt, inventory)
+			KubeShell(ctx, logger, shellOpt, kubeOpt, inventory)
 		} else if inventoryType == constants.InventoryTypeHosts {
-			HostShell(logger, shellOpt, hostOpt, inventory)
+			HostShell(ctx, logger, shellOpt, hostOpt, inventory)
 		}
 	},
 }
 
-func KubeShell(logger *log.Logger, shellOpt option.ShellOption, kubeOpt option.KubeOption, inventory string) (err error) {
+func KubeShell(ctx context.Context, logger *log.Logger, shellOpt option.ShellOption, kubeOpt option.KubeOption, inventory string) (err error) {
 	client, err := utils.NewKubernetesClient(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	nodeList, err := kube.GetNodes(logger, client, kubeOpt)
+	nodeList, err := kube.GetNodes(ctx, logger, client, kubeOpt)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -57,9 +60,9 @@ func KubeShell(logger *log.Logger, shellOpt option.ShellOption, kubeOpt option.K
 	return
 }
 
-func HostShell(logger *log.Logger, shellOpt option.ShellOption, hostOpt option.HostOption, inventory string) (err error) {
+func HostShell(ctx context.Context, logger *log.Logger, shellOpt option.ShellOption, hostOpt option.HostOption, inventory string) (err error) {
 	for _, h := range host.GetHosts(logger, option.ClusterOption{}, hostOpt, inventory) {
-		err = host.Shell(logger, h, shellOpt, hostOpt)
+		err = host.Shell(ctx, logger, h, shellOpt, hostOpt)
 		if err != nil {
 			logger.Error.Println(err)
 		}

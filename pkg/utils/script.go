@@ -72,7 +72,7 @@ func ShellDiskTotal() string {
 }
 
 func ShellDiskUsagePercent() string {
-	return `timeout 5s df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`
+	return `df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`
 }
 
 func ShellHostname() string {

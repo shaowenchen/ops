@@ -51,57 +51,57 @@ func NewHostConnBase64(h *opsv1.Host) (hc *HostConnection, err error) {
 	return
 }
 
-func (c *HostConnection) Shell(sudo bool, content string) (stdout string, err error) {
+func (c *HostConnection) Shell(ctx context.Context, sudo bool, content string) (stdout string, err error) {
 	reg := regexp.MustCompile(`\${[^\}]*}`)
 	funcStrList := reg.FindAllString(content, -1)
 	for _, callFunc := range funcStrList {
 		rawCallFunc := callFunc
 		callFunc = callFunc[2 : len(callFunc)-1]
-		stdout, err = c.shellFuncMap(sudo, callFunc)
+		stdout, err = c.shellFuncMap(ctx, sudo, callFunc)
 		if err != nil {
 			return stdout, err
 		}
 		content = strings.ReplaceAll(content, rawCallFunc, stdout)
 	}
-	return c.execSh(sudo, content)
+	return c.execSh(ctx, sudo, content)
 }
 
-func (c *HostConnection) shellFuncMap(sudo bool, funcFull string) (stdout string, err error) {
+func (c *HostConnection) shellFuncMap(ctx context.Context, sudo bool, funcFull string) (stdout string, err error) {
 	if funcFull == "installOpscli()" {
-		return c.install(sudo, "opscli")
+		return c.install(ctx, sudo, "opscli")
 	} else if funcFull == "distribution()" {
-		return c.getDistribution(sudo)
+		return c.getDistribution(ctx, sudo)
 	}
 	return
 }
 
-func (c *HostConnection) install(sudo bool, component string) (stdout string, err error) {
+func (c *HostConnection) install(ctx context.Context, sudo bool, component string) (stdout string, err error) {
 	if component == "opscli" {
 		proxy := ""
-		if !c.isInChina() {
+		if !c.isInChina(ctx) {
 			proxy = constants.DefaultProxy
 		}
-		return c.execSh(sudo, utils.ShellInstallOpscli(proxy))
+		return c.execSh(ctx, sudo, utils.ShellInstallOpscli(proxy))
 	}
 	return
 }
 
-func (c *HostConnection) isInChina() (ok bool) {
-	_, err := c.execSh(false, utils.ShellIsInChina())
+func (c *HostConnection) isInChina(ctx context.Context) (ok bool) {
+	_, err := c.execSh(ctx, false, utils.ShellIsInChina())
 	if err != nil {
 		return true
 	}
 	return false
 }
 
-func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string) (err error) {
+func (c *HostConnection) File(ctx context.Context, sudo bool, direction, localfile, remotefile string) (err error) {
 	if utils.IsDownloadDirection(direction) {
-		err = c.scpPull(sudo, remotefile, localfile)
+		err = c.scpPull(ctx, sudo, remotefile, localfile)
 		if err != nil {
 			return err
 		}
 	} else if utils.IsUploadDirection(direction) {
-		err = c.scpPush(sudo, localfile, remotefile)
+		err = c.scpPush(ctx, sudo, localfile, remotefile)
 		if err != nil {
 			return err
 		}
@@ -111,38 +111,37 @@ func (c *HostConnection) File(sudo bool, direction, localfile, remotefile string
 	return
 }
 
-func (c *HostConnection) GetStatus(sudo bool) (status *opsv1.HostStatus, err error) {
-	hostname, err1 := c.getHosname(sudo)
+func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv1.HostStatus, err error) {
+	hostname, err1 := c.getHosname(ctx, sudo)
+	err = utils.MergeError(err, err1)
+	kerneVersion, err1 := c.getKernelVersion(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	kerneVersion, err1 := c.getKernelVersion(sudo)
+	distribution, err1 := c.getDistribution(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	distribution, err1 := c.getDistribution(sudo)
+	arch, err1 := c.getArch(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	arch, err1 := c.getArch(sudo)
+	diskTotal, err1 := c.getDiskTotal(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	diskTotal, err1 := c.getDiskTotal(sudo)
+	diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	diskUsagePercent, err1 := c.getDiskUsagePercent(sudo)
+	cpuTotal, err1 := c.getCPUTotal(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	cpuTotal, err1 := c.getCPUTotal(sudo)
+	cpuLoad1, err1 := c.getCPULoad1(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	cpuLoad1, err1 := c.getCPULoad1(sudo)
+	cpuUsagePercent, err1 := c.getCPUUsagePercent(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	cpuUsagePercent, err1 := c.getCPUUsagePercent(sudo)
+	memTotal, err1 := c.getMemTotal(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
-	memTotal, err1 := c.getMemTotal(sudo)
-	err = utils.MergeError(err, err1)
-
-	memUsagePercent, err1 := c.getMemUsagePercent(sudo)
+	memUsagePercent, err1 := c.getMemUsagePercent(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
 	status = &opsv1.HostStatus{
@@ -226,11 +225,11 @@ func (c *HostConnection) connecting() (err error) {
 	return nil
 }
 
-func (c *HostConnection) execSh(sudo bool, cmd string) (stdout string, err error) {
-	return c.ExecWithExecutor(sudo, "sh", "-c", cmd)
+func (c *HostConnection) execSh(ctx context.Context, sudo bool, cmd string) (stdout string, err error) {
+	return c.ExecWithExecutor(ctx, sudo, "sh", "-c", cmd)
 }
 
-func (c *HostConnection) ExecWithExecutor(sudo bool, executor, param, cmd string) (stdout string, err error) {
+func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, executor, param, cmd string) (stdout string, err error) {
 	cmd = utils.BuildBase64CmdWithExecutor(sudo, cmd, executor)
 	// run in localhost
 	if c.Host.Spec.Address == constants.LocalHostIP {
@@ -273,59 +272,64 @@ func (c *HostConnection) ExecWithExecutor(sudo bool, executor, param, cmd string
 		printLogStream = true
 	})
 	for {
-		b, err := r.ReadByte()
-		if err != nil {
-			break
-		}
-		output = append(output, b)
-		if printLogStream && !hasPrintCache {
-			fmt.Print(string(output))
-			hasPrintCache = !hasPrintCache
-		}
-		if b == byte('\n') {
-			if printLogStream {
-				fmt.Print(line)
-			}
-			line = ""
-			continue
-		}
-
-		line += string(b)
-
-		if (strings.HasPrefix(line, "[sudo] password for ") || strings.HasPrefix(line, "Password")) && strings.HasSuffix(line, ": ") {
-			_, err = in.Write([]byte(c.Host.Spec.Password + "\n"))
+		select {
+		case <-ctx.Done():
+			goto END
+		default:
+			b, err := r.ReadByte()
 			if err != nil {
-				break
+				goto END
+			}
+			output = append(output, b)
+			if printLogStream && !hasPrintCache {
+				fmt.Print(string(output))
+				hasPrintCache = !hasPrintCache
+			}
+			if b == byte('\n') {
+				if printLogStream {
+					fmt.Print(line)
+				}
+				line = ""
+				continue
+			}
+
+			line += string(b)
+
+			if (strings.HasPrefix(line, "[sudo] password for ") || strings.HasPrefix(line, "Password")) && strings.HasSuffix(line, ": ") {
+				_, err = in.Write([]byte(c.Host.Spec.Password + "\n"))
+				if err != nil {
+					goto END
+				}
 			}
 		}
 	}
+END:
 	err = sess.Wait()
-
 	return strings.TrimRight(string(output), "\r\n"), err
 }
 
-func (c *HostConnection) mv(sudo bool, src, dst string) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellMv(src, dst))
+func (c *HostConnection) mv(ctx context.Context, sudo bool, src, dst string) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellMv(src, dst))
 }
 
-func (c *HostConnection) copy(sudo bool, src, dst string) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellCopy(src, dst))
+func (c *HostConnection) copy(ctx context.Context, sudo bool, src, dst string) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellCopy(src, dst))
 }
 
-func (c *HostConnection) chown(sudo bool, idU, idG, src string) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellChown(idU, idG, src))
+func (c *HostConnection) chown(ctx context.Context, sudo bool, idU, idG, src string) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellChown(idU, idG, src))
 }
 
-func (c *HostConnection) rm(sudo bool, dst string) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellRm(dst))
+func (c *HostConnection) rm(ctx context.Context, sudo bool, dst string) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellRm(dst))
 }
 
-func (c *HostConnection) cmdPull(sudo bool, src, dst string) (err error) {
-	srcmd5, err := c.fileMd5(sudo, src)
+func (c *HostConnection) cmdPull(ctx context.Context, sudo bool, src, dst string) (err error) {
+	srcmd5, err := c.fileMd5(ctx, sudo, src)
 	if err != nil {
 		return err
 	}
-	output, err := c.execSh(sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
+	output, err := c.execSh(ctx, sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
 	if err != nil {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
@@ -362,26 +366,26 @@ func (c *HostConnection) cmdPull(sudo bool, src, dst string) (err error) {
 	return nil
 }
 
-func (c *HostConnection) scpPull(sudo bool, src, dst string) (err error) {
+func (c *HostConnection) scpPull(ctx context.Context, sudo bool, src, dst string) (err error) {
 	originSrc := src
-	src = c.getTempfileName(src)
-	stdout, err := c.copy(sudo, originSrc, src)
+	src = c.getTempfileName(ctx, src)
+	stdout, err := c.copy(ctx, sudo, originSrc, src)
 	if err != nil {
 		return errors.New(stdout)
 	}
-	idU, err := c.getIDU()
+	idU, err := c.getIDU(ctx)
 	if err != nil {
 		return errors.New(stdout)
 	}
-	idG, err := c.getIDG()
+	idG, err := c.getIDG(ctx)
 	if err != nil {
 		return errors.New(stdout)
 	}
-	stdout, err = c.chown(sudo, idU, idG, src)
+	stdout, err = c.chown(ctx, sudo, idU, idG, src)
 	if err != nil {
 		return errors.New(stdout)
 	}
-	srcmd5, err := c.fileMd5(sudo, originSrc)
+	srcmd5, err := c.fileMd5(ctx, sudo, originSrc)
 	if err != nil {
 		return err
 	}
@@ -399,7 +403,7 @@ func (c *HostConnection) scpPull(sudo bool, src, dst string) (err error) {
 		return
 	}
 
-	stdout, err = c.rm(sudo, src)
+	stdout, err = c.rm(ctx, sudo, src)
 	if err != nil {
 		return errors.New(stdout)
 	}
@@ -416,9 +420,9 @@ func (c *HostConnection) scpPull(sudo bool, src, dst string) (err error) {
 	return
 }
 
-func (c *HostConnection) scpPush(sudo bool, src, dst string) (err error) {
+func (c *HostConnection) scpPush(ctx context.Context, sudo bool, src, dst string) (err error) {
 	originDst := dst
-	dst = c.getTempfileName(dst)
+	dst = c.getTempfileName(ctx, dst)
 	if c.Host.Spec.Address == constants.LocalHostIP {
 		return errors.New("remote address is localhost")
 	}
@@ -426,7 +430,7 @@ func (c *HostConnection) scpPush(sudo bool, src, dst string) (err error) {
 	if err != nil {
 		return err
 	}
-	err = c.makeDir(sudo, originDst)
+	err = c.makeDir(ctx, sudo, originDst)
 	if err != nil {
 		return err
 	}
@@ -437,12 +441,12 @@ func (c *HostConnection) scpPush(sudo bool, src, dst string) (err error) {
 	if err != nil {
 		return err
 	}
-	stdout, err := c.mv(sudo, dst, originDst)
+	stdout, err := c.mv(ctx, sudo, dst, originDst)
 	if err == nil && len(stdout) > 0 {
 		err = errors.New(stdout)
 	}
 
-	dstmd5, err1 := c.fileMd5(sudo, originDst)
+	dstmd5, err1 := c.fileMd5(ctx, sudo, originDst)
 	if err1 != nil {
 		return err1
 	}
@@ -453,77 +457,77 @@ func (c *HostConnection) scpPush(sudo bool, src, dst string) (err error) {
 	return
 }
 
-func (c *HostConnection) fileMd5(sudo bool, filepath string) (md5 string, err error) {
+func (c *HostConnection) fileMd5(ctx context.Context, sudo bool, filepath string) (md5 string, err error) {
 	filepath = utils.GetAbsoluteFilePath(filepath)
 	cmd := fmt.Sprintf("md5sum %s | cut -d\" \" -f1", filepath)
 	if sudo {
 		cmd = fmt.Sprintf("sudo %s", cmd)
 	}
-	return c.execSh(sudo, cmd)
+	return c.execSh(ctx, sudo, cmd)
 }
 
-func (c *HostConnection) makeDir(sudo bool, filepath string) (err error) {
-	_, err = c.execSh(sudo, utils.ShellMakeDir(utils.SplitDirPath(filepath)))
+func (c *HostConnection) makeDir(ctx context.Context, sudo bool, filepath string) (err error) {
+	_, err = c.execSh(ctx, sudo, utils.ShellMakeDir(utils.SplitDirPath(filepath)))
 	return
 }
 
-func (c *HostConnection) getIDU() (idu string, err error) {
-	return c.execSh(false, fmt.Sprintf("id -u"))
+func (c *HostConnection) getIDU(ctx context.Context) (idu string, err error) {
+	return c.execSh(ctx, false, fmt.Sprintf("id -u"))
 }
 
-func (c *HostConnection) getIDG() (idg string, err error) {
-	return c.execSh(false, fmt.Sprintf("id -g"))
+func (c *HostConnection) getIDG(ctx context.Context) (idg string, err error) {
+	return c.execSh(ctx, false, fmt.Sprintf("id -g"))
 }
 
-func (c *HostConnection) getCPUTotal(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellCPUTotal())
+func (c *HostConnection) getCPUTotal(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellCPUTotal())
 }
 
-func (c *HostConnection) getCPULoad1(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellCPULoad1())
+func (c *HostConnection) getCPULoad1(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellCPULoad1())
 }
 
-func (c *HostConnection) getCPUUsagePercent(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellCPUUsagePercent())
+func (c *HostConnection) getCPUUsagePercent(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellCPUUsagePercent())
 }
 
-func (c *HostConnection) getMemTotal(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellMemTotal())
+func (c *HostConnection) getMemTotal(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellMemTotal())
 }
 
-func (c *HostConnection) getMemUsagePercent(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellMemUsagePercent())
+func (c *HostConnection) getMemUsagePercent(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellMemUsagePercent())
 }
 
-func (c *HostConnection) getHosname(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellHostname())
+func (c *HostConnection) getHosname(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellHostname())
 }
 
-func (c *HostConnection) getDiskTotal(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellDiskTotal())
+func (c *HostConnection) getDiskTotal(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellDiskTotal())
 }
 
-func (c *HostConnection) getArch(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellArch())
+func (c *HostConnection) getArch(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellArch())
 }
 
-func (c *HostConnection) getDiskUsagePercent(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellDiskUsagePercent())
+func (c *HostConnection) getDiskUsagePercent(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellDiskUsagePercent())
 }
 
-func (c *HostConnection) getKernelVersion(sudo bool) (stdout string, err error) {
-	return c.execSh(sudo, utils.ShellKernelVersion())
+func (c *HostConnection) getKernelVersion(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellKernelVersion())
 }
 
-func (c *HostConnection) getDistribution(sudo bool) (cpu string, err error) {
-	return c.execSh(sudo, utils.ShellDistribution())
+func (c *HostConnection) getDistribution(ctx context.Context, sudo bool) (cpu string, err error) {
+	return c.execSh(ctx, sudo, utils.ShellDistribution())
 }
 
-func (c *HostConnection) getTempfileName(name string) string {
+func (c *HostConnection) getTempfileName(ctx context.Context, name string) string {
 	nameSplit := strings.Split(name, "/")
 	name = nameSplit[len(nameSplit)-1]
 	cmd := "pwd"
-	stdout, err := c.execSh(false, cmd)
+	stdout, err := c.execSh(ctx, false, cmd)
 	if err != nil {
 		return name
 	}

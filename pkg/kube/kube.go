@@ -71,7 +71,7 @@ func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kube
 	return
 }
 
-func GetNodes(logger *log.Logger, client *kubernetes.Clientset, kubeOpt option.KubeOption) (nodeList []v1.Node, err error) {
+func GetNodes(ctx context.Context, logger *log.Logger, client *kubernetes.Clientset, kubeOpt option.KubeOption) (nodeList []v1.Node, err error) {
 	nodes, err := utils.GetAllReadyNodesByClient(client)
 	if err != nil {
 		logger.Error.Println(err)
@@ -98,7 +98,7 @@ func GetNodes(logger *log.Logger, client *kubernetes.Clientset, kubeOpt option.K
 	return
 }
 
-func GetOpsClient(logger *log.Logger, restConfig *rest.Config) (client runtimeClient.Client, err error) {
+func GetOpsClient(ctx context.Context, logger *log.Logger, restConfig *rest.Config) (client runtimeClient.Client, err error) {
 	scheme, err := opsv1.SchemeBuilder.Build()
 	if err != nil {
 		return

@@ -1,9 +1,7 @@
 package task
 
 import (
-	"strconv"
-	"strings"
-
+	"context"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
@@ -13,6 +11,8 @@ import (
 	opstask "github.com/shaowenchen/ops/pkg/task"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
+	"strconv"
+	"strings"
 )
 
 var taskOpt option.TaskOption
@@ -37,19 +37,21 @@ var TaskCmd = &cobra.Command{
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventoryType := utils.GetInventoryType(inventory)
 		tasks, err := opstask.ReadTaskYaml(utils.GetTaskAbsoluteFilePath(taskOpt.Proxy, taskOpt.FilePath))
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutSeconds)
+		defer cancel()
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
 		if inventoryType == constants.InventoryTypeHosts {
-			HostTask(logger, tasks, taskOpt, hostOpt, inventory)
+			HostTask(ctx, logger, tasks, taskOpt, hostOpt, inventory)
 		} else if inventoryType == constants.InventoryTypeKubernetes {
-			KubeTask(logger, tasks, taskOpt, kubeOpt, inventory)
+			KubeTask(ctx, logger, tasks, taskOpt, kubeOpt, inventory)
 		}
 	},
 }
 
-func HostTask(logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
+func HostTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
 	hs := host.GetHosts(logger, option.ClusterOption{}, hostOpt, inventory)
 	for _, h := range hs {
 		if err != nil {
@@ -63,7 +65,7 @@ func HostTask(logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption,
 				logger.Error.Println(err)
 				continue
 			}
-			err = opstask.RunTaskOnHost(logger, &t, &tr, hc, taskOpt)
+			err = opstask.RunTaskOnHost(ctx, logger, &t, &tr, hc, taskOpt)
 			if err != nil {
 				logger.Error.Println(err)
 				continue
@@ -73,13 +75,13 @@ func HostTask(logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption,
 	return
 }
 
-func KubeTask(logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, kubeOpt option.KubeOption, inventory string) (err error) {
+func KubeTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, kubeOpt option.KubeOption, inventory string) (err error) {
 	kc, err := kube.NewKubeConnection(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return err
 	}
-	nodes, err := kube.GetNodes(logger, kc.Client, kubeOpt)
+	nodes, err := kube.GetNodes(ctx, logger, kc.Client, kubeOpt)
 	for _, node := range nodes {
 		for _, t := range tasks {
 			tr := opsv1.NewTaskRun(&t)

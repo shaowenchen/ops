@@ -25,6 +25,7 @@ import (
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/constants"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opshost "github.com/shaowenchen/ops/pkg/host"
 	opslog "github.com/shaowenchen/ops/pkg/log"
@@ -171,7 +172,9 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 		logger.Error.Println(err, "failed to create host connection")
 		return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)
 	}
-	status, err := hc.GetStatus(false)
+	ctxTimeout, cancel := context.WithTimeout(ctx, constants.DefaultTaskStepTimeoutSeconds)
+	defer cancel()
+	status, err := hc.GetStatus(ctxTimeout, false)
 	if err != nil {
 		logger.Error.Println(err, "failed to get host status")
 		return r.commitStatus(logger, ctx, h, status, opsv1.StatusFailed)
