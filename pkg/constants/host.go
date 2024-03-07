@@ -12,7 +12,8 @@ import (
 
 const LocalHostIP = "127.0.0.1"
 const DefaultSSHTimeoutSeconds = 30
-const DefaultTaskStepTimeoutDuration = 30 * time.Second
+const DefaultShellTimeoutSeconds = 30
+const DefaultShellTimeoutDuration = DefaultShellTimeoutSeconds * time.Second
 
 const (
 	InventoryTypeKubernetes = "kubernetes"

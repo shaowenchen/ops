@@ -22,7 +22,7 @@ var clusterCmd = &cobra.Command{
 	Short: "create cluster resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(cVerbose).SetStd().SetFile().Build()
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
 		err := CreateCluster(ctx, logger, cClusterOpt, cVerbose)
 		if err != nil {

@@ -28,7 +28,7 @@ var ShellCmd = &cobra.Command{
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventoryType := utils.GetInventoryType(inventory)
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
 		if utils.IsExistsFile(shellOpt.Content) {
 			shellOpt.Content, _ = utils.ReadFile(shellOpt.Content)

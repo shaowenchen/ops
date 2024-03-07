@@ -114,33 +114,54 @@ func (c *HostConnection) File(ctx context.Context, sudo bool, direction, localfi
 func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv1.HostStatus, err error) {
 	hostname, err1 := c.getHosname(ctx, sudo)
 	err = utils.MergeError(err, err1)
+
+	ctx, cancel := context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	kerneVersion, err1 := c.getKernelVersion(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	distribution, err1 := c.getDistribution(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	arch, err1 := c.getArch(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	diskTotal, err1 := c.getDiskTotal(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	cpuTotal, err1 := c.getCPUTotal(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	cpuLoad1, err1 := c.getCPULoad1(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	cpuUsagePercent, err1 := c.getCPUUsagePercent(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	memTotal, err1 := c.getMemTotal(ctx, sudo)
 	err = utils.MergeError(err, err1)
 
+	ctx, cancel = context.WithTimeout(ctx, constants.DefaultShellTimeoutDuration)
+	defer cancel()
 	memUsagePercent, err1 := c.getMemUsagePercent(ctx, sudo)
 	err = utils.MergeError(err, err1)
 

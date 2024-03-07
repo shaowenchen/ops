@@ -30,7 +30,7 @@ var FileCmd = &cobra.Command{
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
 		// upstream is server
 		if serverOpt.Api != "" {

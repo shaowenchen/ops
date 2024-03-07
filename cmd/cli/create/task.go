@@ -22,7 +22,7 @@ var taskCmd = &cobra.Command{
 	Short: "create task resource",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(tVerbose).SetStd().SetFile().Build()
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultTaskStepTimeoutDuration)
+		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
 		Createtask(ctx, logger)
 	},
