@@ -1,7 +1,0 @@
-apiVersion: crd.chenshaowen.com/v1
-kind: Task
-metadata:
-  name: no-task-need-to-run
-  namespace: ops-system
-spec:
-  desc: use task `no-task-need-to-run` means can't find any suitable task for intended action
