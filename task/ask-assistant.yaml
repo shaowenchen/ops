@@ -1,0 +1,7 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: ask-assistant
+  namespace: ops-system
+spec:
+  desc: use task `ask-assistant` to ask assistant to help you

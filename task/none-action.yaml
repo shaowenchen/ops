@@ -1,7 +1,0 @@
-apiVersion: crd.chenshaowen.com/v1
-kind: Task
-metadata:
-  name: none-action
-  namespace: ops-system
-spec:
-  desc: use task `none-action` means do nothing, just finish your process
