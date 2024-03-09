@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `check-node-existed` to check whether the node existed, variables must to set `node`
+  nodeName: anymaster
   variables:
     node: ""
   steps:

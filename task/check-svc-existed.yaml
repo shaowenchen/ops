@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `check-svc-existed` to check whether the svc existed and get svc namespace, variables must to set `svc`
+  nodeName: anymaster
   variables:
     svc: ""
   steps:
