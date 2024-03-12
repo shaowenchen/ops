@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: list-pods-bysvc
+  namespace: ops-system
+spec:
+  desc: use task `list-pods-bysvc` to list **pods** in cluster, variables must to set `namespace` and `svc`
+  nodeName: anymaster
+  variables:
+    namespace: ""
+    svc: ""
+  steps:
+    - name: list pods by svc
+      content: |
+        SELECTOR=$(kubectl get svc ${svc} -n ${namespace} -o jsonpath='{.spec.selector}' 2>/dev/null);
+        SELECTOR_ARGS=$(echo ${SELECTOR} | sed 's/{//;s/}//' | sed 's/,/ -l /g' | sed 's/:/=/g' | sed 's/^/-l /');
+        kubectl get pods ${SELECTOR_ARGS} -n ${namespace};
