@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: get-pod-error-logs-bysvc
+  namespace: ops-system
+spec:
+  desc: use task `get-pod-error-logs-bysvc` to get pod error logs in cluster, variables must to set `svc`, avaliable to set `topk`
+  nodeName: anymaster
+  variables:
+    svc: ""
+    topk: "100"
+  steps:
+    - name: get pod topk error logs by svc name
+      content: kubectl get svc --all-namespaces | grep ${svc} | awk '{print $1}' | xargs -L1 kubectl logs -l app=${svc} --tail=${topk} -n | grep -iE 'err|warn'

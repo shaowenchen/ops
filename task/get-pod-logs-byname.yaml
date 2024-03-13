@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: get-podlogs-byname
+  name: get-pod-logs-byname
   namespace: ops-system
 spec:
-  desc: use task `get-podlogs-byname` to get pod logs in cluster, variables must to set `podname`, avaliable to set `topk`
+  desc: use task `get-pod-logs-byname` to get pod logs in cluster, variables must to set `podname`, avaliable to set `topk`
   nodeName: anymaster
   variables:
     podname: ""
