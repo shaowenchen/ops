@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: get-pod-error-logs-byname
+  namespace: ops-system
+spec:
+  desc: use task `get-pod-error-logs-byname` to get pod error logs in cluster, variables must to set `podname`, avaliable to set `topk`
+  nodeName: anymaster
+  variables:
+    podname: ""
+    topk: "100"
+  steps:
+    - name: get pod topk error logs
+      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl logs --tail=${topk} -n | grep -iE 'err|warn'
