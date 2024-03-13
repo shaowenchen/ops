@@ -13,5 +13,5 @@ spec:
     - name: list pods by svc
       content: |
         SELECTOR=$(kubectl get svc ${svc} -n ${namespace} -o jsonpath='{.spec.selector}' 2>/dev/null);
-        SELECTOR_ARGS="-l '$(echo $SELECTOR | sed 's/{\|}\///g' | sed 's/\"//g' | sed 's/,/,/g' | sed 's/:/=/g' | sed 's/verion/version/g' | sed 's/}//')'";
-        kubectl get pods ${SELECTOR_ARGS} -o wide -n ${namespace};
+        SELECTOR_ARGS=$(echo $SELECTOR | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' | paste -sd "," -);
+        kubectl get pods -l ${SELECTOR_ARGS} -o wide -n ${namespace};
