@@ -7,8 +7,8 @@ spec:
   desc: use task `check-pod-existed` to check whether the pod existed and get pod namespace, variables must to set `pod`
   nodeName: anymaster
   variables:
-    pod: ""
+    podname: ""
   steps:
     - name: Check pod existed
       content: |
-        found="false"; if [ -z "$pod" ]; then echo "pod is empty"; else for ns in $(kubectl get namespaces --no-headers | awk '{print $1}'); do if kubectl get pod ${pod} -n $ns &>/dev/null; then echo "Pod ${pod} existed in $ns"; found="true"; fi; done; if [ "$found" = "false" ]; then echo "Pod ${pod} not found"; fi; fi
+        found="false"; if [ -z "${podname}" ]; then echo "pod is empty"; else for ns in $(kubectl get namespaces --no-headers | awk '{print $1}'); do if kubectl get pod ${podname} -n $ns &>/dev/null; then echo "Pod ${podname} existed in $ns"; found="true"; fi; done; if [ "$found" = "false" ]; then echo "Pod ${podname} not found"; fi; fi
