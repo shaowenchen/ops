@@ -1,0 +1,14 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: list-error-events-bysvc
+  namespace: ops-system
+spec:
+  desc: use task `list-error-events-bysvc` to get pod events in cluster, variables must to set `svc`, avaliable to set `topk`
+  nodeName: anymaster
+  variables:
+    topk: "50"
+    svc: ""
+  steps:
+    - name: list svc events
+      content: svc_name=${svc#atms-glb-}; kubectl get pod --all-namespaces | grep ${svc} | awk '{print $1}' | xargs -L1 kubectl get events -n |grep ${svc} | grep -i 'wan\|err' | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}
