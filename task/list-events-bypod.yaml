@@ -7,7 +7,7 @@ spec:
   desc: use task `list-events-bypod` to get pod events in cluster, variables must to set `pod`, avaliable to set `topk`
   nodeName: anymaster
   variables:
-    topk: "50"
+    topk: "10"
     podname: ""
   steps:
     - name: list pod events
