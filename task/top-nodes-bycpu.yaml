@@ -7,7 +7,7 @@ spec:
   desc: use task `top-nodes-bycpu` to list topK usage cpu of nodes in cluster, variables avaliable to set `topk`
   nodeName: anymaster
   variables:
-    topk: "20"
+    topk: "5"
   steps:
     - name: list topK usage cpu of nodes
       content: kubectl top node --sort-by=cpu | head -$((${topk}+1))

@@ -8,7 +8,7 @@ spec:
   nodeName: anymaster
   variables:
     node: ""
-    topk: "20"
+    topk: "5"
   steps:
     - name: list topK usage memory of pods in node
       content: |
