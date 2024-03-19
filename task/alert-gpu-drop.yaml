@@ -7,7 +7,7 @@ spec:
   desc: use task `alert-gpu-drop` to check gpu drop in specified host
   crontab: "*/10 * * * *"
   selector:
-      alert-gpu-drop: enabled
+    alert-gpu-drop: enabled
   typeRef: host
   variables:
     desired_gpu_count: "8"
@@ -40,9 +40,23 @@ spec:
       when: not startwith(${result}, OK)
       content: |
         curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} 'rev ff' found in lspci output" } }'
-    - name: XID == 79
+    - name: XID Error
       content: |
-        if dmesg -T | grep -i "NVRM: Xid" > /dev/null; then echo "ERROR - Xid error found in dmesg"; else echo "OK - No Xid error found"; fi
+        msg=$(dmesg --time-format iso | grep -i "NVRM: Xid" | tail -1)
+        if [ -n "$msg" ]; then
+            msg_date_time=$(echo "$msg" | awk -F'[,+]' '{print $1}')
+            now=$(date +'%Y-%m-%dT%H:%M:%S')
+            msg_timestamp=$(date -d "$msg_date_time" +%s)
+            now_timestamp=$(date -d "$now" +%s)
+            diff_minutes=$((($now_timestamp - $msg_timestamp) / 60))
+            if [ $diff_minutes -gt 20 ]; then
+                echo "OK - Ignoring message older than 20 minutes"
+            else
+                echo "$msg"
+            fi
+        else
+            echo "OK - No Xid error found"
+        fi
     - name: notifaction
       when: not startwith(${result}, OK)
       content: |
