@@ -11,4 +11,4 @@ spec:
   steps:
     - name: delete pod
       content: |
-        kubectl get pod --all-namespaces | grep ${pod} | awk '{print $1, $2}' | xargs -L1 kubectl delete pod -n
+        kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl delete pod -n
