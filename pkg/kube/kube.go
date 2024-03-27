@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -87,13 +88,17 @@ func GetNodes(ctx context.Context, logger *log.Logger, client *kubernetes.Client
 			return
 		} else if kubeOpt.NodeName == constants.AnyMaster && utils.IsMasterNode(&node) {
 			nodeList = append(nodeList, node)
-			return
 		} else if kubeOpt.NodeName == node.Name {
 			nodeList = append(nodeList, node)
 		}
 	}
 	if len(nodeList) == 0 {
 		err = errors.New("no node found")
+	}
+	// if anymaster, random a master to return
+	if kubeOpt.NodeName == constants.AnyMaster && len(nodeList) > 1 {
+		randomIndex := rand.Intn(len(nodeList))
+		nodeList = []v1.Node{nodeList[randomIndex]}
 	}
 	return
 }
