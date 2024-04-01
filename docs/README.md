@@ -11,7 +11,7 @@ Ops 是一个运维工具项目。它的目标是提供一个简单的运维工�
 Ops 项目包含了三个组件：
 
 - ops-cli，一个命令行工具，辅助运维人员在命令行终端完成一些自动化的运维工作
-- ops-server(完成度较低，等 Dashboard 一起开发)，一个 HTTP 服务，用于提供 HTTP API
+- ops-server 一个 HTTP 服务，用于提供 HTTP API，提供有一个 Dashboard 的界面
 - ops-controller，以 Operator 的形式管理主机、集群、任务等资源
 
 ## 生产实践
@@ -28,7 +28,6 @@ Ops 项目包含了三个组件：
 
 ## Todo
 
-- Dashboard UI，准备开发一个简单的页面
-- Taskhub，以 hub 的形式允许大家分享自己的 task
+- 按照 Task 组装 Pipeline 对接场景的思路，重写 Copilot
 
-欢迎一起交流，关注我的公众号，发送【微信号】，即可获取到我的微信号。
+欢迎一起交流，关注我的公众号，即可获取到我的微信号。
