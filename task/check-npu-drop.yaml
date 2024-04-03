@@ -10,11 +10,15 @@ spec:
   steps:
     - name: Check npu-smi
       content: command -v npu-smi
+      allowfailure: "true"
     - name: NPU Model
       content: npu-smi info -t board -i 0 -c 0 | grep -oP 'Chip Name\s*:\s*\K[^\n]+'
+      allowfailure: "true"
     - name: Check lspci NPU Count
       content: |
         NPU_LSPCI_COUNT=$(($(lspci |grep d80 | wc -l))); [ $NPU_LSPCI_COUNT -eq ${desired_npu_count} ] && echo "OK - NPU count matches: $NPU_LSPCI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_LSPCI_COUNT vs desired_npu_count ${desired_npu_count}"
+      allowfailure: "true"
     - name: Check npu-smi NPU Count
+      allowfailure: "true"
       content: |
         NPU_SMI_COUNT=$(($(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+'))); [ $NPU_SMI_COUNT -eq ${desired_npu_count} ] && echo "OK - NPU count matches: $NPU_SMI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_SMI_COUNT vs desired_npu_count ${desired_npu_count}"
