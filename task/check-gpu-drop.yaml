@@ -9,7 +9,7 @@ spec:
     desired_gpu_count: "8"
   steps:
     - name: Check nvidia-smi
-      content: command -v nvidia-smi
+      content: nvidia-smi
       allowfailure: "true"
     - name: GPU Model
       content: nvidia-smi --query-gpu=gpu_name --format=csv,noheader
