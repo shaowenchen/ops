@@ -17,10 +17,11 @@ RUN GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go
 
 FROM ubuntu:latest
 RUN apt-get update && \
-    apt-get install -y curl && \
+    apt-get install -y curl python3 python3-pip && \
     rm -rf /var/cache/apt/* && \
     rm -rf /root/.cache && \
     rm -rf /tmp/*
+RUN pip3 install --no-cache-dir requests
 RUN mkdir /app && chown -R 65532:65532 /app
 COPY --from=builder /workspace/ops-controller-manager /app/
 USER 65532:65532
