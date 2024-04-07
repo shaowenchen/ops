@@ -20,7 +20,7 @@ spec:
       allowfailure: "true"
       when: not endwith(${result}, npu-smi)
       content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can not find command nvidia-smi" } }'
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can not find command npu-smi" } }'
     - name: Check lspci NPU Count
       allowfailure: "true"
       content: |
