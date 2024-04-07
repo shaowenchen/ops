@@ -14,22 +14,28 @@ spec:
     notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
   steps:
     - name: Check npu-smi
+      allowfailure: "true"
       content: command -v npu-smi
     - name: notifaction
+      allowfailure: "true"
       when: not endwith(${result}, npu-smi)
       content: |
         curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can not find command nvidia-smi" } }'
     - name: Check lspci NPU Count
+      allowfailure: "true"
       content: |
         NPU_LSPCI_COUNT=$(($(lspci |grep d80 | wc -l))); [ $NPU_LSPCI_COUNT -eq ${desired_npu_count} ] && echo "OK - NPU count matches: $NPU_LSPCI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_LSPCI_COUNT vs desired_npu_count ${desired_npu_count}"
     - name: notifaction
+      allowfailure: "true"
       when: not startwith(${result}, OK)
       content: |
         curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} lspci NPU count mismatch: ${desired_npu_count}" } }'
     - name: Check npu-smi NPU Count
+      allowfailure: "true"
       content: |
         NPU_SMI_COUNT=$(($(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+'))); [ $NPU_SMI_COUNT -eq ${desired_npu_count} ] && echo "OK - NPU count matches: $NPU_SMI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_SMI_COUNT vs desired_npu_count ${desired_npu_count}"
     - name: notifaction
+      allowfailure: "true"
       when: not startwith(${result}, OK)
       content: |
         curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} npu-smi NPU count mismatch: ${desired_npu_count}" } }'

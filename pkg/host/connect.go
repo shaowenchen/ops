@@ -63,7 +63,7 @@ func (c *HostConnection) Shell(ctx context.Context, sudo bool, content string) (
 		}
 		content = strings.ReplaceAll(content, rawCallFunc, stdout)
 	}
-	return c.execSh(ctx, sudo, content)
+	return c.execScript(ctx, sudo, content)
 }
 
 func (c *HostConnection) shellFuncMap(ctx context.Context, sudo bool, funcFull string) (stdout string, err error) {
@@ -81,13 +81,13 @@ func (c *HostConnection) install(ctx context.Context, sudo bool, component strin
 		if !c.isInChina(ctx) {
 			proxy = constants.DefaultProxy
 		}
-		return c.execSh(ctx, sudo, utils.ShellInstallOpscli(proxy))
+		return c.execScript(ctx, sudo, utils.ShellInstallOpscli(proxy))
 	}
 	return
 }
 
 func (c *HostConnection) isInChina(ctx context.Context) (ok bool) {
-	_, err := c.execSh(ctx, false, utils.ShellIsInChina())
+	_, err := c.execScript(ctx, false, utils.ShellIsInChina())
 	if err != nil {
 		return true
 	}
@@ -278,6 +278,17 @@ func (c *HostConnection) execSh(ctx context.Context, sudo bool, cmd string) (std
 	return c.ExecWithExecutor(ctx, sudo, "sh", "-c", cmd)
 }
 
+func (c *HostConnection) execPython(ctx context.Context, sudo bool, cmd string) (stdout string, err error) {
+	return c.ExecWithExecutor(ctx, sudo, "python3", "-c", cmd)
+}
+
+func (c *HostConnection) execScript(ctx context.Context, sudo bool, cmd string) (stdout string, err error) {
+	if strings.HasPrefix(strings.TrimSpace(cmd), "#!/usr/bin/python") {
+		return c.execPython(ctx, sudo, cmd)
+	}
+	return c.execSh(ctx, sudo, cmd)
+}
+
 func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, executor, param, cmd string) (stdout string, err error) {
 	cmd = utils.BuildBase64CmdWithExecutor(sudo, cmd, executor)
 	// run in localhost
@@ -358,19 +369,19 @@ END:
 }
 
 func (c *HostConnection) mv(ctx context.Context, sudo bool, src, dst string) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellMv(src, dst))
+	return c.execScript(ctx, sudo, utils.ShellMv(src, dst))
 }
 
 func (c *HostConnection) copy(ctx context.Context, sudo bool, src, dst string) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellCopy(src, dst))
+	return c.execScript(ctx, sudo, utils.ShellCopy(src, dst))
 }
 
 func (c *HostConnection) chown(ctx context.Context, sudo bool, idU, idG, src string) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellChown(idU, idG, src))
+	return c.execScript(ctx, sudo, utils.ShellChown(idU, idG, src))
 }
 
 func (c *HostConnection) rm(ctx context.Context, sudo bool, dst string) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellRm(dst))
+	return c.execScript(ctx, sudo, utils.ShellRm(dst))
 }
 
 func (c *HostConnection) cmdPull(ctx context.Context, sudo bool, src, dst string) (err error) {
@@ -378,7 +389,7 @@ func (c *HostConnection) cmdPull(ctx context.Context, sudo bool, src, dst string
 	if err != nil {
 		return err
 	}
-	output, err := c.execSh(ctx, sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
+	output, err := c.execScript(ctx, sudo, fmt.Sprintf("cat %s | base64 -w 0", src))
 	if err != nil {
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
@@ -512,71 +523,71 @@ func (c *HostConnection) fileMd5(ctx context.Context, sudo bool, filepath string
 	if sudo {
 		cmd = fmt.Sprintf("sudo %s", cmd)
 	}
-	return c.execSh(ctx, sudo, cmd)
+	return c.execScript(ctx, sudo, cmd)
 }
 
 func (c *HostConnection) makeDir(ctx context.Context, sudo bool, filepath string) (err error) {
-	_, err = c.execSh(ctx, sudo, utils.ShellMakeDir(utils.SplitDirPath(filepath)))
+	_, err = c.execScript(ctx, sudo, utils.ShellMakeDir(utils.SplitDirPath(filepath)))
 	return
 }
 
 func (c *HostConnection) getIDU(ctx context.Context) (idu string, err error) {
-	return c.execSh(ctx, false, fmt.Sprintf("id -u"))
+	return c.execScript(ctx, false, fmt.Sprintf("id -u"))
 }
 
 func (c *HostConnection) getIDG(ctx context.Context) (idg string, err error) {
-	return c.execSh(ctx, false, fmt.Sprintf("id -g"))
+	return c.execScript(ctx, false, fmt.Sprintf("id -g"))
 }
 
 func (c *HostConnection) getCPUTotal(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellCPUTotal())
+	return c.execScript(ctx, sudo, utils.ShellCPUTotal())
 }
 
 func (c *HostConnection) getCPULoad1(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellCPULoad1())
+	return c.execScript(ctx, sudo, utils.ShellCPULoad1())
 }
 
 func (c *HostConnection) getCPUUsagePercent(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellCPUUsagePercent())
+	return c.execScript(ctx, sudo, utils.ShellCPUUsagePercent())
 }
 
 func (c *HostConnection) getMemTotal(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellMemTotal())
+	return c.execScript(ctx, sudo, utils.ShellMemTotal())
 }
 
 func (c *HostConnection) getMemUsagePercent(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellMemUsagePercent())
+	return c.execScript(ctx, sudo, utils.ShellMemUsagePercent())
 }
 
 func (c *HostConnection) getHosname(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellHostname())
+	return c.execScript(ctx, sudo, utils.ShellHostname())
 }
 
 func (c *HostConnection) getDiskTotal(ctx context.Context, sudo bool, timeoutSeconds int) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellDiskTotal(timeoutSeconds))
+	return c.execScript(ctx, sudo, utils.ShellDiskTotal(timeoutSeconds))
 }
 
 func (c *HostConnection) getArch(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellArch())
+	return c.execScript(ctx, sudo, utils.ShellArch())
 }
 
 func (c *HostConnection) getDiskUsagePercent(ctx context.Context, sudo bool, timeoutSeconds int) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellDiskUsagePercent(timeoutSeconds))
+	return c.execScript(ctx, sudo, utils.ShellDiskUsagePercent(timeoutSeconds))
 }
 
 func (c *HostConnection) getKernelVersion(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellKernelVersion())
+	return c.execScript(ctx, sudo, utils.ShellKernelVersion())
 }
 
 func (c *HostConnection) getDistribution(ctx context.Context, sudo bool) (cpu string, err error) {
-	return c.execSh(ctx, sudo, utils.ShellDistribution())
+	return c.execScript(ctx, sudo, utils.ShellDistribution())
 }
 
 func (c *HostConnection) getTempfileName(ctx context.Context, name string) string {
 	nameSplit := strings.Split(name, "/")
 	name = nameSplit[len(nameSplit)-1]
 	cmd := "pwd"
-	stdout, err := c.execSh(ctx, false, cmd)
+	stdout, err := c.execScript(ctx, false, cmd)
 	if err != nil {
 		return name
 	}

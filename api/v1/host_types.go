@@ -96,6 +96,10 @@ func (h *Host) GetHostname() string {
 	return h.Status.Hostname
 }
 
+func (h *Host) GetAddress() string {
+	return h.Spec.Address
+}
+
 func NewHost(namespace, name, address string, port int, username, password, privateKey, privateKeyPath string, timeoutSeconds int64, secretRef string) (h *Host) {
 	return &Host{
 		ObjectMeta: metav1.ObjectMeta{
