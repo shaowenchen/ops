@@ -66,10 +66,10 @@ spec:
                 error_message += build_error_message('gpu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
                 raise Exception(error_message)
             # 3. lspci check
-            output = subprocess.check_output(['lspci', '-d', '10de:', '|', 'grep', '-v', '1af1', '|', 'grep', '-v', 'Audio', '|', 'grep', '-v', 'USB'], universal_newlines=True)
+            output = subprocess.check_output(['lspci'], universal_newlines=True)
             card_count = 0
             error_message = ''
-            lines = [line for line in output.split('\n')]
+            lines = [line for line in output.split('\n') if 'controller: NVIDIA Corporation Device' in line]
             for index, line in enumerate(lines):
                 line = line.strip()
                 if 'NVIDIA' in line:
