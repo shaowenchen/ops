@@ -44,3 +44,6 @@ spec:
         echo "* soft nofile  1048576" >> /etc/security/limits.conf  
         sed -i "/* hard nofile/d" /etc/security/limits.conf ;
         echo "* hard nofile  1048576" >> /etc/security/limits.conf 
+    - name: set pipe-user-pages-soft
+      content: |+
+        echo "fs.pipe-user-pages-soft=262144" >> /etc/sysctl.conf && sysctl -p 
