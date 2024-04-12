@@ -1,0 +1,24 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alter-label-npu
+    namespace: ops-system
+spec:
+    desc: use task `alter-label-npu` to label host alert for gpu
+    crontab: "2 * * * *"
+    typeRef: Cluster
+    nodeName: anymaster
+    steps:
+        - name: alert-label-npu
+          content: |
+              hosts=$(kubectl -n ops-system get hosts | grep Huawei | awk '{print $1}')
+
+              for host in $hosts; do
+                  hostname=$(kubectl -n ops-system get hosts $host | awk '{print $2}')
+                  node_status=$(kubectl get node $hostname)
+                  if echo "$node_status" | grep -q "SchedulingDisabled"; then
+                      kubectl -n ops-system label host $host alert-npu-drop=disabled --overwrite
+                  else
+                      kubectl -n ops-system label host $host alert-npu-drop=enabled --overwrite
+                  fi
+              done

@@ -1,41 +1,86 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: alert-npu-drop
-  namespace: ops-system
+    name: alert-npu-drop
+    namespace: ops-system
 spec:
-  desc: use task `alert-npu-drop` to check npu drop in specified host
-  crontab: "*/10 * * * *"
-  selector:
-    alert-npu-drop: enabled
-  typeRef: host
-  variables:
-    desired_npu_count: "16"
-    notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
-  steps:
-    - name: Check npu-smi
-      allowfailure: "true"
-      content: command -v npu-smi
-    - name: notifaction
-      allowfailure: "true"
-      when: not endwith(${result}, npu-smi)
-      content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can not find command npu-smi" } }'
-    - name: Check lspci NPU Count
-      allowfailure: "true"
-      content: |
-        NPU_LSPCI_COUNT=$(($(lspci |grep d80 | wc -l))); [ $NPU_LSPCI_COUNT -eq ${desired_npu_count} ] && echo "OK - NPU count matches: $NPU_LSPCI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_LSPCI_COUNT vs desired_npu_count ${desired_npu_count}"
-    - name: notifaction
-      allowfailure: "true"
-      when: not startwith(${result}, OK)
-      content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} lspci NPU count mismatch: ${desired_npu_count}" } }'
-    - name: Check npu-smi NPU Count
-      allowfailure: "true"
-      content: |
-        NPU_SMI_COUNT=$(($(npu-smi info -l 2>&1 | grep -oP 'Total Count\s*:\s*\K\d+'))); [ $NPU_SMI_COUNT -eq ${desired_npu_count} ] && echo "OK - NPU count matches: $NPU_SMI_COUNT" || echo "ERROR - NPU count mismatch: $NPU_SMI_COUNT vs desired_npu_count ${desired_npu_count}"
-    - name: notifaction
-      allowfailure: "true"
-      when: not startwith(${result}, OK)
-      content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} npu-smi NPU count mismatch: ${desired_npu_count}" } }'
+    desc: use task `alert-npu-drop` to check npu drop in specified host
+    crontab: "*/10 * * * *"
+    selector:
+        alert-npu-drop: enabled
+    typeRef: host
+    variables:
+        desired_card_count: "16"
+        notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+    steps:
+        - name: alert-npu-drop
+          content: |
+              #!/usr/bin/python
+              import os
+              import subprocess
+              import requests
+              import json
+              from datetime import datetime
+
+              hostname = '${hostname}'
+              notifaction = '${notifaction}'
+              desired_card_count = int('${desired_card_count}')
+
+              card_id = ''
+              reason = '掉卡'
+
+              def send(message):
+                  payload = {
+                      'msgtype': 'text',
+                      'text': {
+                          'content': message
+                      }
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              def build_error_message(message, card_id=''):
+                  if card_id == '':
+                      return f'异常信息: {message}\n'
+                  return f'异常位置: {card_id}\n异常信息: {message}\n'
+
+              try:
+                  # 1. check npu-smi exists /usr/local/bin/npu-smi
+                  if not os.path.exists('/usr/local/bin/npu-smi'):
+                      raise Exception(build_error_message('找不到 npu-smi 命令'))
+                  # 2. check count from npu-smi
+                  # npu-smi info |grep 910
+                  output = subprocess.check_output(['/usr/local/bin/npu-smi', 'info'], universal_newlines=True)
+                  card_count = 0
+                  error_message = ''
+                  lines = [line for line in output.split('\n') if '910B' in line]
+                  for _, line in enumerate(lines):
+                      line = line.strip()
+                      if 'OK' in line:
+                          card_count += 1
+                      else:
+                          error_message += build_error_message(line, card_count)
+                  if card_count != desired_card_count:
+                      raise Exception(error_message)
+                  # 3. lspci check, lspci |grep d80
+                  output = subprocess.check_output(['lspci'], universal_newlines=True)
+                  card_count = 0
+                  error_message = ''
+                  lines = [line for line in output.split('\n') if 'd80' in line]
+                  for _, line in enumerate(lines):
+                      line = line.strip()
+                      if 'Huawei' in line:
+                          card_count += 1
+                  if card_count != desired_card_count:
+                      error_message = build_error_message('npu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
+                      raise Exception(error_message)
+              except Exception as e:
+                  error_message = str(e)
+              finally:
+                  if len(error_message) > 0:
+                      print(error_message)
+                      error_message = f'节点: {hostname} \n{error_message}异常判断: {reason}\n'
+                      send(error_message)

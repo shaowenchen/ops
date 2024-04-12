@@ -1,73 +1,87 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: alert-gpu-drop
-  namespace: ops-system
+    name: alert-gpu-drop
+    namespace: ops-system
 spec:
-  desc: use task `alert-gpu-drop` to check gpu drop in specified host
-  crontab: "*/10 * * * *"
-  selector:
-    alert-gpu-drop: enabled
-  typeRef: host
-  variables:
-    desired_gpu_count: "8"
-    notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
-  steps:
-    - name: Check nvidia-smi
-      allowfailure: "true"
-      content: command -v nvidia-smi
-    - name: notifaction
-      allowfailure: "true"
-      when: not endwith(${result}, nvidia-smi)
-      content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} can not find command nvidia-smi" } }'
-    - name: Check lspci GPU Count
-      allowfailure: "true"
-      content: |
-        GPU_LSPCI_COUNT=$(lspci -d 10de: | grep -v 1af1 | grep -v Audio | grep -v USB | wc -l); if [ $GPU_LSPCI_COUNT -eq ${desired_gpu_count} ]; then echo "OK - lspci GPU count matches ${desired_gpu_count}"; else echo "ERROR - lspci GPU count mismatch: $GPU_LSPCI_COUNT vs ${desired_gpu_count}"; fi
-    - name: notifaction
-      allowfailure: "true"
-      when: not startwith(${result}, OK)
-      content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} lspci GPU count mismatch: ${desired_gpu_count}" } }'
-    - name: Check nvidia-smi GPU Count
-      allowfailure: "true"
-      content: |
-        GPU_SMI_COUNT=$(nvidia-smi -L | wc -l); if [ $GPU_SMI_COUNT -eq ${desired_gpu_count} ]; then echo "OK - nvidia-smi GPU count matches ${desired_gpu_count}"; else echo "ERROR - nvidia-smi GPU count mismatch: $GPU_SMI_COUNT vs ${desired_gpu_count}"; fi
-    - name: notifaction
-      allowfailure: "true"
-      when: not startwith(${result}, OK)
-      content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} nvidia-smi GPU count mismatch: ${desired_gpu_count}" } }'
-    - name: Revision FF
-      allowfailure: "true"
-      content: |
-        if lspci -d 10de: | grep -q "rev ff"; then echo "ERROR - 'rev ff' found in lspci output"; else echo "OK - No 'rev ff' found"; fi
-    - name: notifaction
-      allowfailure: "true"
-      when: not startwith(${result}, OK)
-      content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} 'rev ff' found in lspci output" } }'
-    - name: XID Error
-      allowfailure: "true"
-      content: |
-        msg=$(dmesg --time-format iso | grep -i "NVRM: Xid" | tail -1)
-        if [ -n "$msg" ]; then
-            msg_date_time=$(echo "$msg" | awk -F'[,+]' '{print $1}')
-            now=$(date +'%Y-%m-%dT%H:%M:%S')
-            msg_timestamp=$(date -d "$msg_date_time" +%s)
-            now_timestamp=$(date -d "$now" +%s)
-            diff_minutes=$((($now_timestamp - $msg_timestamp) / 60))
-            if [ $diff_minutes -gt 20 ]; then
-                echo "OK - Ignoring message older than 20 minutes"
-            else
-                echo "$msg"
-            fi
-        else
-            echo "OK - No Xid error found"
-        fi
-    - name: notifaction
-      allowfailure: "true"
-      when: not startwith(${result}, OK)
-      content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${hostname} Xid error found in dmesg" } }'
+    desc: use task `alert-gpu-drop-py` to check gpu drop in specified host
+    crontab: "*/10 * * * *"
+    selector:
+        alert-gpu-drop: enabled
+    typeRef: host
+    variables:
+        desired_card_count: "8"
+        notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+    steps:
+        - name: alert-card-drop
+          content: |
+              #!/usr/bin/python
+              import os
+              import subprocess
+              import requests
+              import json
+              from datetime import datetime
+
+              hostname = '${hostname}'
+              notifaction = '${notifaction}'
+              desired_card_count = int('${desired_card_count}')
+
+              card_id = ''
+              reason = '掉卡'
+
+              def send(message):
+                  payload = {
+                      'msgtype': 'text',
+                      'text': {
+                          'content': message
+                      }
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              def build_error_message(message, card_id=''):
+                  if card_id == '':
+                      return f'异常信息: {message}\n'
+                  return f'异常位置: {card_id}\n异常信息: {message}\n'
+
+              try:
+                  # 1. check nvidia-smi exists /usr/bin/nvidia-sm
+                  if not os.path.exists('/usr/bin/nvidia-smi'):
+                      raise Exception(build_error_message('找不到 nvidia-smi 命令'))
+                  # 2. check count from nvidia-smi
+                  output = subprocess.check_output(['nvidia-smi' , '-L'], universal_newlines=True)
+                  card_count = 0
+                  error_message = ''
+                  lines = [line for line in output.split('\n') if line.startswith('GPU')]
+                  for index, line in enumerate(lines):
+                      line = line.strip()
+                      if line.startswith('GPU'):
+                          card_count += 1
+                      elif len(line) > 0:
+                          error_message += build_error_message(line, index)
+                  if card_count != desired_card_count:
+                      error_message += build_error_message('gpu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
+                      raise Exception(error_message)
+                  # 3. lspci check
+                  output = subprocess.check_output(['lspci'], universal_newlines=True)
+                  card_count = 0
+                  error_message = ''
+                  lines = [line for line in output.split('\n') if 'controller: NVIDIA Corporation Device' in line]
+                  for index, line in enumerate(lines):
+                      line = line.strip()
+                      if 'NVIDIA' in line:
+                          card_count += 1
+                      elif len(line) > 0:
+                          error_message += build_error_message(line, index)
+                  if card_count != desired_card_count:
+                      error_message += build_error_message('gpu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
+                      raise Exception(error_message)
+              except Exception as e:
+                  error_message = str(e)
+              finally:
+                  if len(error_message) > 0:
+                      error_message = f'节点: {hostname} \n{error_message}异常判断: {reason}\n'
+                      send(error_message)

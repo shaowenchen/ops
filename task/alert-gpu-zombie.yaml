@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-    name: alert-gpu-zombie-py
+    name: alert-gpu-zombie
     namespace: ops-system
 spec:
-    desc: use task `alert-gpu-zombie-py` to check gpu
+    desc: use task `alert-gpu-zombie` to check gpu
     crontab: "*/10 * * * *"
     selector:
         alert-gpu-zombie: enabled
