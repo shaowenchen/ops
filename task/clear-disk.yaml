@@ -1,0 +1,18 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: clear-disk
+  namespace: ops-system
+spec:
+  desc: use task `clear-disk` to clear disk
+  steps:
+    - name: clear image
+      content: nerdctl --namespace k8s.io image prune -f || docker image prune -a -f || true
+    - name: clear container
+      content: nerdctl --namespace k8s.io container prune -f || docker container prune -a -f || true
+    - name: clear network
+      content: nerdctl --namespace k8s.io network prune -f || docker network prune -a -f || true
+    - name: clear volume
+      content: nerdctl --namespace k8s.io volume prune -f || docker volume prune -a -f || true
+    - name: clear > 100M log
+      content: find /var/log -type f -name "*.log" -size +100M -exec rm -f {} \; || true
