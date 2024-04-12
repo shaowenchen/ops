@@ -29,13 +29,13 @@ spec:
       name: Disk
       type: string
     - jsonPath: .status.acceleratorVendor
-      name: AccelVendor
+      name: Vendor
       type: string
     - jsonPath: .status.acceleratorModel
-      name: AccelModel
+      name: Model
       type: string
     - jsonPath: .status.acceleratorCount
-      name: AccelCount
+      name: Count
       type: string
     - jsonPath: .status.heartTime
       name: HeartTime

@@ -68,9 +68,9 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cpuTotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memTotal`
 // +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.diskTotal`
-// +kubebuilder:printcolumn:name="AccelVendor",type=string,JSONPath=`.status.acceleratorVendor`
-// +kubebuilder:printcolumn:name="AccelModel",type=string,JSONPath=`.status.acceleratorModel`
-// +kubebuilder:printcolumn:name="AccelCount",type=string,JSONPath=`.status.acceleratorCount`
+// +kubebuilder:printcolumn:name="Vendor",type=string,JSONPath=`.status.acceleratorVendor`
+// +kubebuilder:printcolumn:name="Model",type=string,JSONPath=`.status.acceleratorModel`
+// +kubebuilder:printcolumn:name="Count",type=string,JSONPath=`.status.acceleratorCount`
 // +kubebuilder:printcolumn:name="HeartTime",type=date,JSONPath=`.status.heartTime`
 // +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartStatus`
 type Host struct {
