@@ -190,20 +190,43 @@ func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv
 		err = err1
 	}
 
+	accelVendor, err1 := c.getAcceleratorVendor(ctx, sudo)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
+	accelModel, err1 := c.getAcceleratorModel(ctx, sudo)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
+
+	accelCount, err1 := c.getAcceleratorCount(ctx, sudo)
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
+
 	status = &opsv1.HostStatus{
-		Hostname:         hostname,
-		KernelVersion:    kerneVersion,
-		Distribution:     distribution,
-		Arch:             arch,
-		DiskTotal:        diskTotal,
-		DiskUsagePercent: diskUsagePercent,
-		CPUTotal:         cpuTotal,
-		CPULoad1:         cpuLoad1,
-		CPUUsagePercent:  cpuUsagePercent,
-		MemTotal:         memTotal,
-		MemUsagePercent:  memUsagePercent,
-		HeartTime:        &metav1.Time{Time: time.Now()},
-		HeartStatus:      opsv1.StatusSuccessed,
+		Hostname:          hostname,
+		KernelVersion:     kerneVersion,
+		Distribution:      distribution,
+		Arch:              arch,
+		DiskTotal:         diskTotal,
+		DiskUsagePercent:  diskUsagePercent,
+		CPUTotal:          cpuTotal,
+		CPULoad1:          cpuLoad1,
+		CPUUsagePercent:   cpuUsagePercent,
+		MemTotal:          memTotal,
+		MemUsagePercent:   memUsagePercent,
+		AcceleratorVendor: accelVendor,
+		AcceleratorModel:  accelModel,
+		AcceleratorCount:  accelCount,
+		HeartTime:         &metav1.Time{Time: time.Now()},
+		HeartStatus:       opsv1.StatusSuccessed,
 	}
 	if !anyOneIsOk {
 		status.HeartStatus = opsv1.StatusFailed
@@ -581,6 +604,18 @@ func (c *HostConnection) getKernelVersion(ctx context.Context, sudo bool) (stdou
 
 func (c *HostConnection) getDistribution(ctx context.Context, sudo bool) (cpu string, err error) {
 	return c.execScript(ctx, sudo, utils.ShellDistribution())
+}
+
+func (c *HostConnection) getAcceleratorVendor(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execScript(ctx, sudo, utils.ShellAcceleratorVendor())
+}
+
+func (c *HostConnection) getAcceleratorModel(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execScript(ctx, sudo, utils.ShellAcceleratorModel())
+}
+
+func (c *HostConnection) getAcceleratorCount(ctx context.Context, sudo bool) (stdout string, err error) {
+	return c.execScript(ctx, sudo, utils.ShellAcceleratorCount())
 }
 
 func (c *HostConnection) getTempfileName(ctx context.Context, name string) string {

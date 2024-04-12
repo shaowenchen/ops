@@ -43,31 +43,34 @@ type HostSpec struct {
 type HostStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Hostname         string       `json:"hostname,omitempty" yaml:"hostname,omitempty"`
-	KernelVersion    string       `json:"kernelVersion,omitempty" yaml:"kernelVersion,omitempty"`
-	Distribution     string       `json:"distribution,omitempty" yaml:"distribution,omitempty" `
-	Arch             string       `json:"arch,omitempty" yaml:"arch,omitempty" `
-	DiskTotal        string       `json:"diskTotal,omitempty" yaml:"diskTotal,omitempty" `
-	DiskUsagePercent string       `json:"diskUsagePercent,omitempty" yaml:"diskUsagePercent,omitempty" `
-	CPUTotal         string       `json:"cpuTotal,omitempty" yaml:"cpuTotal,omitempty" `
-	CPULoad1         string       `json:"cpuLoad1,omitempty" yaml:"cpuLoad1,omitempty"`
-	CPUUsagePercent  string       `json:"cpuUsagePercent,omitempty" yaml:"cpuUsagePercent,omitempty"`
-	MemTotal         string       `json:"memTotal,omitempty" yaml:"memTotal,omitempty" `
-	MemUsagePercent  string       `json:"memUsagePercent,omitempty" yaml:"memUsagePercent,omitempty"`
-	HeartStatus      string       `json:"heartStatus,omitempty" yaml:"heartStatus,omitempty"`
-	HeartTime        *metav1.Time `json:"heartTime,omitempty" yaml:"heartTime,omitempty"`
+	Hostname          string       `json:"hostname,omitempty" yaml:"hostname,omitempty"`
+	KernelVersion     string       `json:"kernelVersion,omitempty" yaml:"kernelVersion,omitempty"`
+	Distribution      string       `json:"distribution,omitempty" yaml:"distribution,omitempty" `
+	Arch              string       `json:"arch,omitempty" yaml:"arch,omitempty" `
+	DiskTotal         string       `json:"diskTotal,omitempty" yaml:"diskTotal,omitempty" `
+	DiskUsagePercent  string       `json:"diskUsagePercent,omitempty" yaml:"diskUsagePercent,omitempty" `
+	CPUTotal          string       `json:"cpuTotal,omitempty" yaml:"cpuTotal,omitempty" `
+	CPULoad1          string       `json:"cpuLoad1,omitempty" yaml:"cpuLoad1,omitempty"`
+	CPUUsagePercent   string       `json:"cpuUsagePercent,omitempty" yaml:"cpuUsagePercent,omitempty"`
+	MemTotal          string       `json:"memTotal,omitempty" yaml:"memTotal,omitempty" `
+	MemUsagePercent   string       `json:"memUsagePercent,omitempty" yaml:"memUsagePercent,omitempty"`
+	AcceleratorVendor string       `json:"acceleratorVendor,omitempty" yaml:"acceleratorVendor,omitempty"`
+	AcceleratorModel  string       `json:"acceleratorModel,omitempty" yaml:"acceleratorModel,omitempty"`
+	AcceleratorCount  string       `json:"acceleratorCount,omitempty" yaml:"acceleratorCount,omitempty"`
+	HeartStatus       string       `json:"heartStatus,omitempty" yaml:"heartStatus,omitempty"`
+	HeartTime         *metav1.Time `json:"heartTime,omitempty" yaml:"heartTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
 // +kubebuilder:printcolumn:name="Hostname",type=string,JSONPath=`.status.hostname`
-// +kubebuilder:printcolumn:name="Address",type=string,JSONPath=`.spec.address`
-// +kubebuilder:printcolumn:name="Distribution",type=string,JSONPath=`.status.distribution`
-// +kubebuilder:printcolumn:name="Arch",type=string,JSONPath=`.status.arch`
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cpuTotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memTotal`
 // +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.diskTotal`
+// +kubebuilder:printcolumn:name="AccelVendor",type=string,JSONPath=`.status.acceleratorVendor`
+// +kubebuilder:printcolumn:name="AccelModel",type=string,JSONPath=`.status.acceleratorModel`
+// +kubebuilder:printcolumn:name="AccelCount",type=string,JSONPath=`.status.acceleratorCount`
 // +kubebuilder:printcolumn:name="HeartTime",type=date,JSONPath=`.status.heartTime`
 // +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartStatus`
 type Host struct {

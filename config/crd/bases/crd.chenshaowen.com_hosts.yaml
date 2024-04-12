@@ -19,15 +19,6 @@ spec:
     - jsonPath: .status.hostname
       name: Hostname
       type: string
-    - jsonPath: .spec.address
-      name: Address
-      type: string
-    - jsonPath: .status.distribution
-      name: Distribution
-      type: string
-    - jsonPath: .status.arch
-      name: Arch
-      type: string
     - jsonPath: .status.cpuTotal
       name: CPU
       type: string
@@ -36,6 +27,15 @@ spec:
       type: string
     - jsonPath: .status.diskTotal
       name: Disk
+      type: string
+    - jsonPath: .status.acceleratorVendor
+      name: AccelVendor
+      type: string
+    - jsonPath: .status.acceleratorModel
+      name: AccelModel
+      type: string
+    - jsonPath: .status.acceleratorCount
+      name: AccelCount
       type: string
     - jsonPath: .status.heartTime
       name: HeartTime
@@ -87,6 +87,12 @@ spec:
           status:
             description: HostStatus defines the observed state of Host
             properties:
+              acceleratorCount:
+                type: string
+              acceleratorModel:
+                type: string
+              acceleratorVendor:
+                type: string
               arch:
                 type: string
               cpuLoad1:

@@ -91,6 +91,17 @@ func ShellDistribution() string {
 	return `cat /etc/os-release 2>/dev/null | grep ^ID= | awk -F= '{print $2}' | sed 's/\"//g'`
 }
 
+func ShellAcceleratorVendor() string {
+	return `(lspci | grep -qi "accelerators: Huawei" && echo "Huawei") || (lspci | grep -qi "controller: NVIDIA" && echo "NVIDIA")`
+}
+
+func ShellAcceleratorModel() string {
+	return `(npu-smi info -t board -i 0 -c 0 2>/dev/null | grep "Chip Name" | awk '{print $NF}' && nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | awk '{print $2}' | head -1) || echo ""`
+}
+
+func ShellAcceleratorCount() string {
+	return `(npu_count=$(npu-smi info -l 2>/dev/null | grep -o 'Total Count\s*:\s*[0-9]\+' | awk '{print $NF}' | sed 's/ //g'); [ -n "$npu_count" ] && echo "$npu_count") || (nvidia_count=$(nvidia-smi -L 2>/dev/null | wc -l | awk '{print $1}'); [ "$nvidia_count" -gt 0 ] && echo "$nvidia_count") || echo ""`
+}
 func GetAvailableUrl(url string, proxy string) string {
 	if proxy != "" {
 		return proxy + url
