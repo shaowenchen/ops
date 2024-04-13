@@ -6,10 +6,10 @@ metadata:
 spec:
     desc: use task `alter-gpu-autolabel` to label host alert for gpu
     crontab: "2 * * * *"
-    typeRef: Cluster
+    TypeRef: cluster
     nodeName: anymaster
     steps:
-        - name: alert-card-drop
+        - name: auto-label
           content: |
               hosts=$(kubectl -n ops-system get hosts | grep NVIDIA | awk '{print $1}')
 

@@ -32,6 +32,14 @@ func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 	kc = &KubeConnection{
 		Cluster: c,
 	}
+	if c.Name == "" {
+		kc.RestConfig, err = utils.GetInClusterConfig()
+		if err != nil {
+			return
+		}
+		kc.BuildClients()
+		return
+	}
 	// try config
 	config, err := utils.DecodingBase64ToString(c.Spec.Config)
 	if err != nil {

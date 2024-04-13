@@ -182,13 +182,15 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			RuntimeImage: tr.GetSpec().RuntimeImage,
 			OpsNamespace: opsconstants.DefaultOpsNamespace,
 		}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, c)
-		if err != nil {
-			logger.Error.Println(err)
-			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
-			return
+		if tr.Spec.NameRef != "" {
+			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, c)
+			if err != nil {
+				logger.Error.Println(err)
+				r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+				return
+			}
+			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
 		}
-		logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 		err = r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
 		cliLogger.Flush()
