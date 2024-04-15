@@ -1,12 +1,12 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-    name: alter-label-gpu
+    name: alert-label-gpu
     namespace: ops-system
 spec:
-    desc: use task `alter-gpu-autolabel` to label host alert for gpu
+    desc: use task `alert-gpu-autolabel` to label host alert for gpu
     crontab: "2 * * * *"
-    TypeRef: cluster
+    typeRef: cluster
     nodeName: anymaster
     steps:
         - name: auto-label
