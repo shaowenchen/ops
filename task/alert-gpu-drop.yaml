@@ -69,7 +69,7 @@ spec:
                   output = subprocess.check_output(['lspci'], universal_newlines=True)
                   card_count = 0
                   error_message = ''
-                  lines = [line for line in output.split('\n') if 'controller: NVIDIA Corporation Device' in line]
+                  lines = [line for line in output.split('\n') if 'controller: NVIDIA Corporation' in line and 'USB' not in line]
                   for index, line in enumerate(lines):
                       line = line.strip()
                       if 'NVIDIA' in line:
