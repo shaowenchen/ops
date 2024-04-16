@@ -96,7 +96,7 @@ func ShellAcceleratorVendor() string {
 }
 
 func ShellAcceleratorModel() string {
-	return `(npu-smi info -t board -i 0 -c 0 2>/dev/null | grep "Chip Name" | awk '{print $NF}' && nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | awk '{print $NF}' | head -1) || echo ""`
+	return `(npu-smi info -t board -i 0 -c 0 2>/dev/null | grep "Chip Name" | awk '{print $NF}' && nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | cut -d' ' -f2- | head -1) || echo ""`
 }
 
 func ShellAcceleratorCount() string {
