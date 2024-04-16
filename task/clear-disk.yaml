@@ -16,3 +16,6 @@ spec:
       content: nerdctl --namespace k8s.io volume prune -f || docker volume prune -a -f || true
     - name: clear > 100M log
       content: find /var/log -type f -name "*.log" -size +100M -exec rm -f {} \; || true
+    - name: clear jfs cache data
+      content: |
+        find /data/jfs/cache2/mem -maxdepth 1 -type d -mtime +30 -exec rm -rf {} + || true
