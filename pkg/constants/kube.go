@@ -9,6 +9,8 @@ const DefaultOpsNamespace = "ops-system"
 const DefaultNamespace = "default"
 
 const LabelNodeRoleMaster = "node-role.kubernetes.io/master"
+const LabelNodeRoleControlPlane = "node-role.kubernetes.io/control-plane"
+
 const LabelNodeRoleWorker = "node-role.kubernetes.io/worker"
 
 const LabelOpsTaskKey = "ops"

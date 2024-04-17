@@ -202,6 +202,9 @@ func GetPodLog(ctx context.Context, client *kubernetes.Clientset, namespace, pod
 
 func IsMasterNode(node *corev1.Node) bool {
 	_, ok := node.Labels[constants.LabelNodeRoleMaster]
+	if !ok {
+		_, ok = node.Labels[constants.LabelNodeRoleControlPlane]
+	}
 	return ok
 }
 
