@@ -51,6 +51,14 @@ func NewTaskRun(t *Task) TaskRun {
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: t.Name + "-",
 			Namespace:    t.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: t.APIVersion,
+					Kind:       t.Kind,
+					Name:       t.Name,
+					UID:        t.UID,
+				},
+			},
 		},
 		Spec: TaskRunSpec{
 			TaskRef:      t.GetObjectMeta().GetName(),
