@@ -91,8 +91,11 @@ func Logic(input string) (result bool, err error) {
 	return false, errors.New("can't logic " + input)
 }
 
-func MergeError(err error, err2 error) error {
+func MergeError(err, err2 error) error {
 	if err != nil {
+		if err2 != nil {
+			return fmt.Errorf("%w; %w", err, err2)
+		}
 		return err
 	}
 	return err2
