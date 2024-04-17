@@ -7,6 +7,7 @@ import (
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsopt "github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
@@ -35,7 +36,10 @@ func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 	if c.Name == "" {
 		kc.RestConfig, err = utils.GetInClusterConfig()
 		if err != nil {
-			return
+			kc.RestConfig, err = utils.GetRestConfig(constants.GetCurrentUserKubeConfigPath())
+			if err != nil {
+				return
+			}
 		}
 		kc.BuildClients()
 		return

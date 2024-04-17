@@ -226,6 +226,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	kc, err := opskube.NewClusterConnection(c)
 	if err != nil {
 		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+		logger.Error.Println(err)
 		return err
 	}
 	nodes, err := opskube.GetNodes(ctx, logger, kc.Client, kubeOpt)
