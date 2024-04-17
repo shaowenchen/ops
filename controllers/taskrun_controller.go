@@ -29,7 +29,6 @@ import (
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsoption "github.com/shaowenchen/ops/pkg/option"
 	opstask "github.com/shaowenchen/ops/pkg/task"
-	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -235,32 +234,23 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		return err
 	}
 	r.commitStatus(logger, ctx, t, tr, opsv1.StatusRunning)
-	runTaskrunFailed := false
 	for _, node := range nodes {
-		err = opsutils.MergeError(err, opstask.RunTaskOnKube(logger, t, tr, kc, &node,
+		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
 				Variables: tr.GetSpec().Variables,
-			}, kubeOpt))
-		if err != nil {
+			}, kubeOpt)
+	}
+	for _, node := range tr.Status.TaskRunNodeStatus {
+		if node.RunStatus == opsv1.StatusFailed {
 			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
-			runTaskrunFailed = true
-		} else {
-			r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
+			return
 		}
 	}
-	if runTaskrunFailed {
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
-	} else {
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
-	}
+	r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
 	return
 }
 
 func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, status string) (err error) {
-	if err != nil {
-		logger.Error.Println(err, "failed to get last task")
-		return
-	}
 	if status != "" {
 		tr.Status.RunStatus = status
 		t.Status.RunStatus = status
