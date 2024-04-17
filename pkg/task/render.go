@@ -71,12 +71,6 @@ func RenderStepVariables(step *opsv1.Step, vars map[string]string) *opsv1.Step {
 			step.Content = strings.ReplaceAll(step.Content, fmt.Sprintf(`${%s}`, key), value)
 			step.LocalFile = strings.ReplaceAll(step.LocalFile, fmt.Sprintf(`${%s}`, key), value)
 			step.RemoteFile = strings.ReplaceAll(step.RemoteFile, fmt.Sprintf(`${%s}`, key), value)
-			step.Kubernetes.Action = strings.ReplaceAll(step.Kubernetes.Action, fmt.Sprintf(`${%s}`, key), value)
-			step.Kubernetes.Kind = strings.ReplaceAll(step.Kubernetes.Kind, fmt.Sprintf(`${%s}`, key), value)
-			step.Kubernetes.Namespace = strings.ReplaceAll(step.Kubernetes.Namespace, fmt.Sprintf(`${%s}`, key), value)
-			step.Kubernetes.Name = strings.ReplaceAll(step.Kubernetes.Name, fmt.Sprintf(`${%s}`, key), value)
-			step.Alert.Url = strings.ReplaceAll(step.Alert.Url, fmt.Sprintf(`${%s}`, key), value)
-			step.Alert.If = strings.ReplaceAll(step.Alert.If, fmt.Sprintf(`${%s}`, key), value)
 		}
 	}
 	f()

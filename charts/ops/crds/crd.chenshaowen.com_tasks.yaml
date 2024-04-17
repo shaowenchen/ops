@@ -69,30 +69,12 @@ spec:
               steps:
                 items:
                   properties:
-                    alert:
-                      properties:
-                        if:
-                          type: string
-                        url:
-                          type: string
-                      type: object
                     allowfailure:
                       type: string
                     content:
                       type: string
                     direction:
                       type: string
-                    kubernetes:
-                      properties:
-                        action:
-                          type: string
-                        kind:
-                          type: string
-                        name:
-                          type: string
-                        namespace:
-                          type: string
-                      type: object
                     localfile:
                       type: string
                     name:

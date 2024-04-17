@@ -47,27 +47,13 @@ const TaskTypeRefHost = "host"
 const TaskTypeRefCluster = "cluster"
 
 type Step struct {
-	When         string     `json:"when,omitempty" yaml:"when,omitempty"`
-	Name         string     `json:"name,omitempty" yaml:"name,omitempty"`
-	Content      string     `json:"content,omitempty" yaml:"content,omitempty"`
-	LocalFile    string     `json:"localfile,omitempty" yaml:"localfile,omitempty"`
-	RemoteFile   string     `json:"remotefile,omitempty" yaml:"remotefile,omitempty"`
-	Direction    string     `json:"direction,omitempty" yaml:"direction,omitempty"`
-	AllowFailure string     `json:"allowfailure,omitempty" yaml:"allowfailure,omitempty"`
-	Kubernetes   Kubernetes `json:"kubernetes,omitempty" yaml:"kubernetes,omitempty"`
-	Alert        Alert      `json:"alert,omitempty" yaml:"alert,omitempty"`
-}
-
-type Kubernetes struct {
-	Action    string `json:"action,omitempty" yaml:"action,omitempty"`
-	Kind      string `json:"kind,omitempty" yaml:"kind,omitempty"`
-	Name      string `json:"name,omitempty" yaml:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
-}
-
-type Alert struct {
-	Url string `json:"url,omitempty" yaml:"url,omitempty"`
-	If  string `json:"if,omitempty" yaml:"if,omitempty"`
+	When         string `json:"when,omitempty" yaml:"when,omitempty"`
+	Name         string `json:"name,omitempty" yaml:"name,omitempty"`
+	Content      string `json:"content,omitempty" yaml:"content,omitempty"`
+	LocalFile    string `json:"localfile,omitempty" yaml:"localfile,omitempty"`
+	RemoteFile   string `json:"remotefile,omitempty" yaml:"remotefile,omitempty"`
+	Direction    string `json:"direction,omitempty" yaml:"direction,omitempty"`
+	AllowFailure string `json:"allowfailure,omitempty" yaml:"allowfailure,omitempty"`
 }
 
 // TaskStatus defines the observed state of Task

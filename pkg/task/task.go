@@ -10,7 +10,6 @@ import (
 	"github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/prom"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -114,9 +113,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 }
 
 func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (status string, output string, err error) {
-	if len(step.Alert.Url) > 0 {
-		return runStepAlertOnHost
-	} else if len(step.Content) > 0 {
+	if len(step.Content) > 0 {
 		return runStepShellOnHost
 	}
 	return runStepCopyOnHost
@@ -133,30 +130,11 @@ func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, o
 }
 
 func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task, c *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (string, string, error) {
-	if len(step.Kubernetes.Action) > 0 {
-		return runStepKubernetesOnKube
-	} else if len(step.Content) > 0 {
+	if len(step.Content) > 0 {
 		return runStepShellOnKube
 	} else {
 		return runStepCopyOnKube
 	}
-}
-
-func runStepAlertOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status string, output string, err error) {
-	return prom.AlertPromQuery(step.Alert.Url, step.Alert.If)
-}
-
-func runStepKubernetesOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
-	option := option.KubernetesOption{
-		Kind:   step.Kubernetes.Kind,
-		Action: step.Kubernetes.Action,
-	}
-	option.Metadata.Name = step.Kubernetes.Name
-	option.Metadata.Namespace = step.Kubernetes.Namespace
-	err = kc.SetRequestLimit(
-		logger,
-		option)
-	return
 }
 
 func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {

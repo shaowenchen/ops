@@ -13,7 +13,6 @@ import (
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -227,34 +226,4 @@ func (kc *KubeConnection) File(logger *opslog.Logger, option opsopt.FileOption) 
 	}
 	return
 
-}
-
-func (kc *KubeConnection) SetRequestLimit(logger *opslog.Logger, option opsopt.KubernetesOption) (err error) {
-	namespacedName := types.NamespacedName{
-		Namespace: option.Metadata.Namespace,
-		Name:      option.Metadata.Name,
-	}
-	if option.Kind == "Deployment" {
-		err = SetDeploymentRecommandResource(kc.Client, namespacedName)
-		if err != nil {
-			logger.Error.Println(err)
-		}
-		return err
-	}
-	if option.Kind == "StatefulSet" {
-		err = SetStatefulSetRecommandResource(kc.Client, namespacedName)
-		if err != nil {
-			logger.Error.Println(err)
-		}
-		return err
-	}
-	if option.Kind == "DaemonSet" {
-		err = SetDaemonSetRecommandResource(kc.Client, namespacedName)
-		if err != nil {
-			logger.Error.Println(err)
-		}
-		return err
-	}
-	logger.Info.Println("Unrecognized type: " + option.Kind)
-	return
 }
