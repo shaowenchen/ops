@@ -94,6 +94,10 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if t.Spec.RuntimeImage == "" {
 		t.Spec.RuntimeImage = constants.DefaultRuntimeImage
 	}
+	// validate typeRef
+	if t.Spec.TypeRef == "" && t.Spec.NodeName == constants.AnyMaster {
+		t.Spec.TypeRef = opsv1.TaskTypeRefCluster
+	}
 	// had run once, skip
 	if t.Status.RunStatus != opsv1.StatusEmpty && t.GetSpec().Crontab == "" {
 		return ctrl.Result{}, nil
