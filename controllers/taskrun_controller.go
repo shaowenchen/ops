@@ -175,6 +175,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	} else if tr.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
 		c := &opsv1.Cluster{}
 		kubeOpt := opsoption.KubeOption{
+			Debug:        os.Getenv("DEBUG") == "true",
 			NodeName:     tr.GetSpec().NodeName,
 			All:          tr.GetSpec().All,
 			RuntimeImage: tr.GetSpec().RuntimeImage,

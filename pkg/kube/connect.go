@@ -183,7 +183,7 @@ func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, 
 	if err != nil {
 		return
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), false, kc.Client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), kubeOpt.Debug, kc.Client, pod)
 	return
 }
 
