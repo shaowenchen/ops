@@ -52,6 +52,11 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option
 }
 
 func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
+	defer func() {
+		if !debug {
+			client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
+		}
+	}()
 	for range time.Tick(time.Second * 1) {
 		select {
 		default:
@@ -64,14 +69,10 @@ func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kube
 				return
 			}
 			if utils.IsSucceededPod(pod) {
-				if !debug {
-					client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
-				}
 				return
 			}
 			if utils.IsFailedPod(pod) {
-				err = errors.New("pod failed")
-				if len(logs) == 0 {
+				if len(logs) == 0 && err != nil {
 					logs = err.Error()
 				}
 				return
