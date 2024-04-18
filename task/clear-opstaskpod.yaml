@@ -4,7 +4,9 @@ metadata:
   name: clear-opstaskpod
   namespace: ops-system
 spec:
-  nodename: anymaster
+  crontab: "56 23 * * *"
+  typeRef: cluster
+  nodeName: anymaster
   desc: use task `clear-opstaskpod` to clear ops task pod in specified namespace within a Kubernetes cluster.
   variables:
     namespace: ops-system
