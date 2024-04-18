@@ -26,12 +26,14 @@ func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shell
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := RunShellOnNode(client, &node, namespacedName, kubeOpt.RuntimeImage, shellOpt.Content, kubeOpt.InCluster)
+	pod, err := RunShellOnNode(client, &node, namespacedName, kubeOpt.RuntimeImage, shellOpt.Content)
 	if err != nil {
 		logger.Error.Println(err)
 	}
 	stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
-	logger.Info.Println(stdout)
+	if err != nil && len(stdout) == 0 {
+		stdout = err.Error()
+	}
 	return
 }
 

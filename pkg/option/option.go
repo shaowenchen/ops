@@ -21,7 +21,6 @@ type KubeOption struct {
 	NodeName     string
 	RuntimeImage string
 	All          bool
-	InCluster    bool
 }
 
 type S3FileOption struct {

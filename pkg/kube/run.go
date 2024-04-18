@@ -13,7 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string, incluster bool) (pod *corev1.Pod, err error) {
+func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string) (pod *corev1.Pod, err error) {
 	if image == "" {
 		image = constants.DefaultRuntimeImage
 	}
@@ -33,10 +33,6 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 	// is incluster or not
 	hostFlag := true
 	cmdArg := []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"}
-	if incluster {
-		hostFlag = false
-		cmdArg = []string{"-c", "echo " + shellBase64 + " | base64 -d | bash"}
-	}
 	pod, err = client.CoreV1().Pods(namespacedName.Namespace).Create(
 		context.TODO(),
 		&corev1.Pod{

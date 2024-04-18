@@ -64,8 +64,6 @@ spec:
                 type: string
               desc:
                 type: string
-              incluster:
-                type: boolean
               name:
                 type: string
               nameRef:

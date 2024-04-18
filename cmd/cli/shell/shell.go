@@ -80,7 +80,6 @@ func init() {
 	ShellCmd.MarkFlagRequired("content")
 
 	ShellCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
-	ShellCmd.Flags().BoolVarP(&kubeOpt.InCluster, "incluster", "", false, "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.OpsNamespace, "opsnamespace", "", constants.DefaultOpsNamespace, "ops work namespace")
 	ShellCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
