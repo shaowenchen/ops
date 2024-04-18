@@ -122,34 +122,16 @@ rules:
   - update
   - patch
   - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
 - apiGroups: 
   - ""
   resources:
+  - events
   - nodes
+  - pods
+  - pods/status
+  - pods/log
+  - secrets
+  - namespaces
   verbs:
   - get
   - list
