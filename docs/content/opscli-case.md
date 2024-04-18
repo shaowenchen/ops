@@ -93,3 +93,9 @@ kubectl apply -f ~/.ops/task/alert-gpu-drop.yaml
 ```bash
 kubectl apply -f ~/.ops/task/alert-gpu-zombie.yaml
 ```
+
+- 自动清理 Ops 运行 Task 创建的临时 Pod 对象
+
+```bash
+kubectl apply -f ~/.ops/task/clear-opstaskpod.yaml
+```
