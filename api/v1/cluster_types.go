@@ -48,8 +48,7 @@ type ClusterStatus struct {
 const StatusSuccessed = "successed"
 const StatusFailed = "failed"
 const StatusRunning = "running"
-const StatusInit = "init"
-const StatusFiring = "firing"
+const StatusAborted = "aborted"
 const StatusEmpty = ""
 
 //+kubebuilder:object:root=true

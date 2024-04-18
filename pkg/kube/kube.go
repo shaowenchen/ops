@@ -61,10 +61,14 @@ func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kube
 			if err != nil {
 				return
 			}
-			if utils.IsStopedPod(pod) {
+			if utils.IsSucceededPod(pod) {
 				if !debug {
 					client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
 				}
+				return
+			}
+			if utils.IsFailedPod(pod) {
+				err = errors.New("pod failed")
 				return
 			}
 		}

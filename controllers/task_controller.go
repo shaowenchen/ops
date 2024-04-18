@@ -21,11 +21,9 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -46,7 +44,6 @@ type TaskReconciler struct {
 	crontabMap        map[string]cron.EntryID
 	crontabRunningMap map[string]*sync.Mutex
 	cron              *cron.Cron
-	updateStatusMap   map[string]*sync.Mutex
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=tasks,verbs=get;list;watch;create;update;patch;delete
@@ -82,10 +79,6 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		r.cron.Start()
 	}
 
-	if r.updateStatusMap == nil {
-		r.updateStatusMap = make(map[string]*sync.Mutex)
-	}
-
 	t := &opsv1.Task{}
 	err = r.Client.Get(ctx, req.NamespacedName, t)
 
@@ -102,7 +95,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		t.Spec.RuntimeImage = constants.DefaultRuntimeImage
 	}
 	// had run once, skip
-	if t.Status.RunStatus != "" && t.GetSpec().Crontab == "" {
+	if t.Status.RunStatus != opsv1.StatusEmpty && t.GetSpec().Crontab == "" {
 		return ctrl.Result{}, nil
 	}
 
@@ -159,8 +152,7 @@ func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Contex
 		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
 	}
 	r.crontabRunningMap[t.GetUniqueKey()] = &sync.Mutex{}
-	r.updateStatusMap[t.GetUniqueKey()] = &sync.Mutex{}
-	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusInit)
+	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusRunning)
 	if t.GetSpec().Crontab != "" {
 		r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, func() {
 			// create taskrun
@@ -204,13 +196,10 @@ func (r *TaskReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.Con
 }
 
 func (r *TaskReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, overrideStatus *opsv1.TaskStatus, status string) (err error) {
-	lock := r.updateStatusMap[t.GetUniqueKey()]
-	lock.Lock()
 	lastT := &opsv1.Task{}
 	err = r.Client.Get(ctx, types.NamespacedName{Name: t.Name, Namespace: t.Namespace}, lastT)
 	if err != nil {
 		logger.Error.Println(err, "failed to get last task")
-		lock.Unlock()
 		return
 	}
 	if overrideStatus != nil {
@@ -219,13 +208,9 @@ func (r *TaskReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 	if status != "" {
 		lastT.Status.RunStatus = status
 	}
-	if lastT.Status.RunStatus == opsv1.StatusRunning {
-		lastT.Status.StartTime = &metav1.Time{Time: time.Now()}
-	}
 	err = r.Client.Status().Update(ctx, lastT)
 	if err != nil {
 		logger.Error.Println(err, "update task status error")
 	}
-	lock.Unlock()
 	return
 }

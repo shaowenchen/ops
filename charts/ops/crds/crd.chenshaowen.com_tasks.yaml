@@ -19,11 +19,23 @@ spec:
     - jsonPath: .spec.crontab
       name: Crontab
       type: string
-    - jsonPath: .status.startTime
-      name: StartTime
-      type: date
+    - jsonPath: .spec.typeRef
+      name: TypeRef
+      type: string
+    - jsonPath: .spec.nameRef
+      name: NameRef
+      type: string
+    - jsonPath: .spec.nodeName
+      name: NodeName
+      type: string
+    - jsonPath: .spec.all
+      name: All
+      type: boolean
+    - jsonPath: .spec.selector
+      name: Selector
+      type: string
     - jsonPath: .status.runStatus
-      name: RunStatus
+      name: Status
       type: string
     name: v1
     schema:
@@ -101,9 +113,6 @@ spec:
                 description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
                   of cluster Important: Run "make" to regenerate code after modifying
                   this file'
-                type: string
-              startTime:
-                format: date-time
                 type: string
             type: object
         type: object

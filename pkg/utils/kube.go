@@ -122,9 +122,17 @@ func IsNodeReady(node *corev1.Node) bool {
 	return false
 }
 
-func IsStopedPod(pod *corev1.Pod) bool {
+func IsSucceededPod(pod *corev1.Pod) bool {
 	status := pod.Status.Phase
-	if status == corev1.PodFailed || status == corev1.PodSucceeded {
+	if status == corev1.PodSucceeded {
+		return true
+	}
+	return false
+}
+
+func IsFailedPod(pod *corev1.Pod) bool {
+	status := pod.Status.Phase
+	if status == corev1.PodFailed {
 		return true
 	}
 	return false

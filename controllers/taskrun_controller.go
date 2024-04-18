@@ -22,6 +22,8 @@ import (
 	"sort"
 	"time"
 
+	"os"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opshost "github.com/shaowenchen/ops/pkg/host"
@@ -33,7 +35,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -78,7 +79,11 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		tr.Spec.RuntimeImage = opsconstants.DefaultRuntimeImage
 	}
 	// had run once, skip
-	if tr.Status.RunStatus != "" && tr.Status.RunStatus != opsv1.StatusInit {
+	if tr.Status.RunStatus != opsv1.StatusEmpty {
+		// abort running taskrun if restart or modified
+		if tr.Status.RunStatus == opsv1.StatusRunning {
+			r.commitStatus(logger, ctx, tr, opsv1.StatusAborted)
+		}
 		return ctrl.Result{}, nil
 	}
 	// get task
@@ -115,7 +120,7 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 	}
 	finishedTaskruns := []opsv1.TaskRun{}
 	for _, tr := range trs.Items {
-		if tr.Status.RunStatus != opsv1.StatusEmpty && tr.Status.RunStatus != opsv1.StatusRunning && tr.Status.RunStatus != opsv1.StatusInit {
+		if tr.Status.RunStatus != opsv1.StatusEmpty && tr.Status.RunStatus != opsv1.StatusRunning {
 			finishedTaskruns = append(finishedTaskruns, tr)
 		}
 	}
@@ -137,13 +142,13 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 }
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
-	r.commitStatus(logger, ctx, t, tr, opsv1.StatusInit)
+	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	if tr.GetSpec().TypeRef == opsv1.TaskTypeRefHost || tr.GetSpec().TypeRef == "" {
 		h := &opsv1.Host{}
 		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, h)
 		if err != nil {
 			logger.Error.Println(err)
-			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 			return
 		}
 		// if hostname is empty, use localhost
@@ -165,14 +170,8 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		}
 		logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-		err = r.runTaskOnHost(cliLogger, ctx, t, tr, h, extraVariables)
+		r.runTaskOnHost(cliLogger, ctx, t, tr, h, extraVariables)
 		cliLogger.Flush()
-		if err != nil {
-			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
-			logger.Error.Println(err)
-			return
-		}
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
 	} else if tr.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
 		c := &opsv1.Cluster{}
 		kubeOpt := opsoption.KubeOption{
@@ -185,20 +184,14 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, c)
 			if err != nil {
 				logger.Error.Println(err)
-				r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+				r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 				return
 			}
 			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
 		}
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-		err = r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
+		r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
 		cliLogger.Flush()
-		if err != nil {
-			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
-			logger.Error.Println(err)
-			return
-		}
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
 	}
 	return
 }
@@ -206,17 +199,17 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host, variables map[string]string) (err error) {
 	hc, err := opshost.NewHostConnBase64(h)
 	if err != nil {
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 		return err
 	}
-	r.commitStatus(logger, ctx, t, tr, opsv1.StatusRunning)
+	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	err = opstask.RunTaskOnHost(ctx, logger, t, tr, hc, opsoption.TaskOption{
 		Variables: variables,
 	})
 	if err != nil {
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 	} else {
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
+		r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 	}
 	return
 }
@@ -224,50 +217,43 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, c *opsv1.Cluster, kubeOpt opsoption.KubeOption) (err error) {
 	kc, err := opskube.NewClusterConnection(c)
 	if err != nil {
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 		logger.Error.Println(err)
 		return err
 	}
 	nodes, err := opskube.GetNodes(ctx, logger, kc.Client, kubeOpt)
 	if err != nil || len(nodes) == 0 {
-		r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 		return err
 	}
-	r.commitStatus(logger, ctx, t, tr, opsv1.StatusRunning)
+	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	for _, node := range nodes {
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
 				Variables: tr.GetSpec().Variables,
 			}, kubeOpt)
 	}
+	// get taskrun status
 	for _, node := range tr.Status.TaskRunNodeStatus {
 		if node.RunStatus == opsv1.StatusFailed {
-			r.commitStatus(logger, ctx, t, tr, opsv1.StatusFailed)
+			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 			return
 		}
 	}
-	r.commitStatus(logger, ctx, t, tr, opsv1.StatusSuccessed)
+	r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 	return
 }
 
-func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, status string) (err error) {
+func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, tr *opsv1.TaskRun, status string) (err error) {
 	if status != "" {
 		tr.Status.RunStatus = status
-		t.Status.RunStatus = status
 	}
 	if tr.Status.RunStatus == opsv1.StatusRunning {
 		tr.Status.StartTime = &metav1.Time{Time: time.Now()}
 	}
-	if t.Status.RunStatus == opsv1.StatusRunning {
-		t.Status.StartTime = &metav1.Time{Time: time.Now()}
-	}
 	err = r.Client.Status().Update(ctx, tr)
 	if err != nil {
 		logger.Error.Println(err, "update taskrun status error")
-	}
-	err = r.Client.Status().Update(ctx, t)
-	if err != nil {
-		logger.Error.Println(err, "update task status error")
 	}
 	return
 }

@@ -56,26 +56,28 @@ type Step struct {
 	AllowFailure string `json:"allowfailure,omitempty" yaml:"allowfailure,omitempty"`
 }
 
-// TaskStatus defines the observed state of Task
-type TaskStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	RunStatus string       `json:"runStatus,omitempty" yaml:"runStatus,omitempty"`
-	StartTime *metav1.Time `json:"startTime,omitempty" yaml:"startTime,omitempty"`
-}
-
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
-// +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
-// +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
+// +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
+// +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
+// +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
+// +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
+// +kubebuilder:printcolumn:name="Selector",type=string,JSONPath=`.spec.selector`
+// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.runStatus`
 type Task struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
 	Spec   TaskSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
 	Status TaskStatus `json:"status,omitempty" yaml:"status,omitempty"`
+}
+
+// TaskStatus defines the observed state of Task
+type TaskStatus struct {
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+	RunStatus string `json:"runStatus,omitempty" yaml:"runStatus,omitempty"`
 }
 
 func (t *Task) GetUniqueKey() string {
