@@ -86,7 +86,7 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Cluster{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 5}).
+			MaxConcurrentReconciles: opsconstants.MaxConcurrentReconciles}).
 		Complete(r)
 }
 

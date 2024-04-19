@@ -23,6 +23,8 @@ const DefaultRuntimeImage = "docker.io/library/ubuntu:20.04"
 
 const SyncResourceStatusHeatSeconds = 60 * 5
 
+const MaxConcurrentReconciles = 1
+
 const (
 	ContainersReady string = "ContainersReady"
 	PodInitialized  string = "Initialized"

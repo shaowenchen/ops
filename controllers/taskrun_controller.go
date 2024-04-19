@@ -279,6 +279,6 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.TaskRun{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 5}).
+			MaxConcurrentReconciles: opsconstants.MaxConcurrentReconciles}).
 		Complete(r)
 }
