@@ -9,12 +9,12 @@ spec:
   typeRef: cluster
   nodeName: anymaster
   variables:
-    cluster: "default"
-    notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+    cluster: default
+    notifaction: https://xz.wps.cn/api/v1/webhook/send?key=
   steps:
     - name: get host status
-      content: kubectl -n ops-system get hosts | grep -q failed && echo "Failed hosts found:" && kubectl -n ops-system get hosts | grep failed && exit 1 || echo "OK" && exit 0
+      content: kubectl -n ops-system get hosts | grep -q failed && kubectl -n ops-system get hosts | grep failed || echo "OK"
     - name: notifaction
-      when: not endwith(${result}, OK)
+      when: not startwith(${result}, OK)
       content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "集群: ${cluster}\n结果：${result}"\n原因: hosts failed" } }'
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "原因: hosts failed\n集群: ${cluster}\n"} }'
