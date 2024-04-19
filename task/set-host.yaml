@@ -1,11 +1,13 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: set-kubernete-kernel
+  name: set-host
   namespace: ops-system
 spec:
-  desc: use task `set-kubernete-kernel` to set a better kernel parameters for Kubernetes in specified host
+  desc: use task `set-host` to set a better kernel parameters for kubernetes host
   steps:
+    - name: install required packages
+      content: apt-get install -y openssl socat conntrack ipset ebtables chrony ipvsadm
     - name: Free Mem
       content: echo 3 > /proc/sys/vm/drop_caches
     - name: Max PID
