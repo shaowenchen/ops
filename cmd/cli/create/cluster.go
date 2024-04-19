@@ -24,7 +24,7 @@ var clusterCmd = &cobra.Command{
 		logger := log.NewLogger().SetVerbose(cVerbose).SetStd().SetFile().Build()
 		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
-		err := CreateCluster(ctx, logger, cClusterOpt, cVerbose)
+		err := CreateCluster(ctx, logger, cClusterOpt, cInventory)
 		if err != nil {
 			fmt.Printf(err.Error())
 			return
