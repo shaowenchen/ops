@@ -28,13 +28,13 @@ import (
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
-
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
 // ClusterReconciler reconciles a Cluster object
@@ -85,6 +85,8 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Cluster{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 5}).
 		Complete(r)
 }
 

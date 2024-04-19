@@ -22,8 +22,6 @@ import (
 	"sort"
 	"time"
 
-	"os"
-
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opshost "github.com/shaowenchen/ops/pkg/host"
@@ -35,8 +33,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
 // TaskRunReconciler reconciles a TaskRun object
@@ -278,5 +278,7 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.TaskRun{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 5}).
 		Complete(r)
 }

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sync"
 
 	"github.com/google/go-cmp/cmp"
@@ -137,6 +138,8 @@ func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				},
 			},
 		).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 5}).
 		Complete(r)
 }
 
