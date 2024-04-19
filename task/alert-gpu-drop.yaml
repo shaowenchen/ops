@@ -11,6 +11,7 @@ spec:
     typeRef: host
     variables:
         desired_card_count: "8"
+        cluster: "default"
         notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
     steps:
         - name: alert-card-drop
@@ -22,6 +23,7 @@ spec:
               import json
               from datetime import datetime
 
+              cluster = '${cluster}'
               hostname = '${hostname}'
               notifaction = '${notifaction}'
               desired_card_count = int('${desired_card_count}')
@@ -83,5 +85,5 @@ spec:
                   error_message += build_error_message(str(e))
               finally:
                   if len(error_message) > 0:
-                      error_message = f'节点: {hostname} \n{error_message}异常判断: {reason}\n'
+                      error_message = f'集群: {cluster} \n节点: {hostname} \n{error_message}异常判断: {reason}\n'
                       send(error_message)

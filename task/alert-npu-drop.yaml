@@ -10,6 +10,7 @@ spec:
         alert-npu-drop: enabled
     typeRef: host
     variables:
+        cluster: "default"
         desired_card_count: "16"
         notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
     steps:
@@ -22,6 +23,7 @@ spec:
               import json
               from datetime import datetime
 
+              cluster = '${cluster}'
               hostname = '${hostname}'
               notifaction = '${notifaction}'
               desired_card_count = int('${desired_card_count}')
@@ -82,5 +84,5 @@ spec:
               finally:
                   if len(error_message) > 0:
                       print(error_message)
-                      error_message = f'节点: {hostname} \n{error_message}异常判断: {reason}\n'
+                      error_message = f'集群: {cluster} \n节点: {hostname} \n{error_message}异常判断: {reason}\n'
                       send(error_message)
