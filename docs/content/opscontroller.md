@@ -42,6 +42,12 @@ helm install myops ops/ops --version 1.0.0 --namespace ops-system --create-names
 kubectl get pods -n ops-system
 ```
 
+### 卸载
+
+```bash
+helm -n ops-system uninstall myops
+```
+
 ## 需要注意的是
 
 ops-controller-manager 默认只会处理 `ops-system` 命名空间下的 CRD 资源。
