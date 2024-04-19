@@ -17,4 +17,4 @@ spec:
     - name: notifaction
       when: not endwith(${result}, OK)
       content: |
-        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "cluster: ${cluster}\n${result}" } }'
+        curl -X POST ${notifaction} -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "集群: ${cluster}\n结果：${result}"\n原因: hosts failed" } }'
