@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	DefaultMaxTaskrunHistory = 2
+	DefaultMaxTaskrunHistory = 1
 	LabelCronTaskRunKey      = "taskruns/type"
 	LabelCronTaskRunValue    = "cron"
 	LabelTaskRefKey          = "taskruns/taskref"

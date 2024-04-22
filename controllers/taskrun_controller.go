@@ -164,6 +164,8 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 			return
 		}
+		r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
+		var orErr error
 		for _, h := range hs {
 			// fill variables
 			extraVariables := map[string]string{
@@ -179,10 +181,18 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			}
 			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
 			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-			r.runTaskOnHost(cliLogger, ctx, t, tr, &h, extraVariables)
+			err = r.runTaskOnHost(cliLogger, ctx, t, tr, &h, extraVariables)
+			if err != nil {
+				orErr = err
+			}
 			cliLogger.Flush()
 		}
-
+		if orErr != nil {
+			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+			return
+		} else {
+			r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
+		}
 	} else if tr.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
 		c := &opsv1.Cluster{
 			ObjectMeta: metav1.ObjectMeta{
@@ -215,19 +225,12 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host, variables map[string]string) (err error) {
 	hc, err := opshost.NewHostConnBase64(h)
 	if err != nil {
-		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 		return err
 	}
-	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	err = opstask.RunTaskOnHost(ctx, logger, t, tr, hc, opsoption.TaskOption{
 		Variables: variables,
 	})
-	if err != nil {
-		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
-	} else {
-		r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
-	}
-	return
+	return err
 }
 
 func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, c *opsv1.Cluster, kubeOpt opsoption.KubeOption) (err error) {
