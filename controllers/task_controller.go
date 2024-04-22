@@ -99,8 +99,8 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if t.Spec.TypeRef == "" && t.Spec.NodeName == constants.AnyMaster {
 		t.Spec.TypeRef = opsv1.TaskTypeRefCluster
 	}
-	// had run once, skip
-	if t.Status.RunStatus != opsv1.StatusEmpty && t.GetSpec().Crontab == "" {
+	// validate crontab
+	if t.GetSpec().Crontab == "" {
 		return ctrl.Result{}, nil
 	}
 
@@ -159,7 +159,6 @@ func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Contex
 		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
 	}
 	r.crontabRunningMap[t.GetUniqueKey()] = &sync.Mutex{}
-	r.commitStatus(logger, ctx, t, &t.Status, opsv1.StatusRunning)
 	if t.GetSpec().Crontab != "" {
 		r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, func() {
 			// create taskrun
@@ -198,26 +197,6 @@ func (r *TaskReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.Con
 	}
 	for _, h := range hostList.Items {
 		hosts = append(hosts, h)
-	}
-	return
-}
-
-func (r *TaskReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, overrideStatus *opsv1.TaskStatus, status string) (err error) {
-	lastT := &opsv1.Task{}
-	err = r.Client.Get(ctx, types.NamespacedName{Name: t.Name, Namespace: t.Namespace}, lastT)
-	if err != nil {
-		logger.Error.Println(err, "failed to get last task")
-		return
-	}
-	if overrideStatus != nil {
-		lastT.Status = *overrideStatus
-	}
-	if status != "" {
-		lastT.Status.RunStatus = status
-	}
-	err = r.Client.Status().Update(ctx, lastT)
-	if err != nil {
-		logger.Error.Println(err, "update task status error")
 	}
 	return
 }

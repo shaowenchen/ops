@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	DefaultMaxTaskrunHistory = 10
+	DefaultMaxTaskrunHistory = 3
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
