@@ -24,6 +24,7 @@ const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 const DefaultRuntimeImage = "docker.io/library/ubuntu:20.04"
 
 const SyncResourceStatusHeatSeconds = 60 * 5
+const SyncResourceRandomBiasSeconds = 60 * 2
 
 const MaxResourceConcurrentReconciles = 1
 const MaxTaskrunConcurrentReconciles = 5

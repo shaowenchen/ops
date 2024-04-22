@@ -100,7 +100,6 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if t.GetSpec().Crontab == "" {
 		return ctrl.Result{}, nil
 	}
-
 	// create task
 	r.createTaskrun(logger, ctx, t)
 	if err != nil {

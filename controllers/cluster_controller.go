@@ -22,8 +22,6 @@ import (
 	"os"
 	"time"
 
-	"sync"
-
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
@@ -32,9 +30,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"math/rand"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sync"
 )
 
 // ClusterReconciler reconciles a Cluster object
@@ -122,6 +122,7 @@ func (r *ClusterReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Con
 	// create ticker
 	logger.Info.Println(fmt.Sprintf("start ticker for cluster %s", c.GetUniqueKey()))
 	go func() {
+		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncResourceRandomBiasSeconds)) * time.Second)
 		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
 		defer ticker.Stop()
 		for {

@@ -29,6 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"math/rand"
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -123,6 +124,7 @@ func (r *HostReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Contex
 	// create ticker
 	logger.Info.Println(fmt.Sprintf("start ticker for host %s", h.GetUniqueKey()))
 	go func() {
+		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncResourceRandomBiasSeconds)) * time.Second)
 		ticker := time.NewTicker(time.Second * opsconstants.SyncResourceStatusHeatSeconds)
 		defer ticker.Stop()
 		for {
