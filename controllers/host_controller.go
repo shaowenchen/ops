@@ -87,7 +87,7 @@ func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Host{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: opsconstants.MaxConcurrentReconciles}).
+			MaxConcurrentReconciles: opsconstants.MaxResourceConcurrentReconciles}).
 		Complete(r)
 }
 

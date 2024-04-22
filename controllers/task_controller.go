@@ -136,7 +136,7 @@ func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			},
 		).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: opsconstants.MaxConcurrentReconciles}).
+			MaxConcurrentReconciles: opsconstants.MaxResourceConcurrentReconciles}).
 		Complete(r)
 }
 
