@@ -5,7 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: use task `auto-create-host` to auto create host
-    crontab: "58 * * * *"
+    crontab: "54 * * * *"
     typeRef: cluster
     nodeName: anymaster
     steps:
