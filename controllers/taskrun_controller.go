@@ -20,7 +20,10 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
+
+	"os"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -33,7 +36,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -73,10 +75,6 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	if err != nil {
 		return ctrl.Result{}, err
-	}
-	// validate task
-	if tr.Spec.RuntimeImage == "" {
-		tr.Spec.RuntimeImage = opsconstants.DefaultRuntimeImage
 	}
 	// had run once, skip
 	if tr.Status.RunStatus != opsv1.StatusEmpty {
@@ -143,45 +141,62 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
-	if tr.GetSpec().TypeRef == opsv1.TaskTypeRefHost || tr.GetSpec().TypeRef == "" {
-		h := &opsv1.Host{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, h)
-		if err != nil {
-			logger.Error.Println(err)
+	if tr.GetSpec().TypeRef == opsv1.TaskTypeRefHost {
+		hs := []opsv1.Host{}
+		if tr.Spec.Selector == nil {
+			h := opsv1.Host{}
+			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, &h)
+			if err != nil {
+				logger.Error.Println(err)
+				r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+				return
+			}
+			// if hostname is empty, use localhost
+			if len(t.GetSpec().NameRef) > 0 && err != nil {
+				logger.Error.Println(err)
+				return
+			}
+			hs = append(hs, h)
+		} else {
+			hs = r.getSelectorHosts(logger, ctx, tr)
+		}
+		if len(hs) == 0 {
 			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 			return
 		}
-		// if hostname is empty, use localhost
-		if len(t.GetSpec().NameRef) > 0 && err != nil {
-			logger.Error.Println(err)
-			return
-		}
-		// fill variables
-		extraVariables := map[string]string{
-			"hostname": h.GetHostname(),
-		}
-		// filled host
-		if h.Spec.SecretRef != "" {
-			err = filledHostFromSecret(h, r.Client, h.Spec.SecretRef)
-			if err != nil {
-				logger.Error.Println("fill host secretRef error", err)
-				return
+		for _, h := range hs {
+			// fill variables
+			extraVariables := map[string]string{
+				"hostname": h.GetHostname(),
 			}
+			// filled host
+			if h.Spec.SecretRef != "" {
+				err = filledHostFromSecret(&h, r.Client, h.Spec.SecretRef)
+				if err != nil {
+					logger.Error.Println("fill host secretRef error", err)
+					return
+				}
+			}
+			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
+			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
+			r.runTaskOnHost(cliLogger, ctx, t, tr, &h, extraVariables)
+			cliLogger.Flush()
 		}
-		logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
-		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-		r.runTaskOnHost(cliLogger, ctx, t, tr, h, extraVariables)
-		cliLogger.Flush()
+
 	} else if tr.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
-		c := &opsv1.Cluster{}
+		c := &opsv1.Cluster{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: tr.Spec.NameRef,
+			},
+		}
 		kubeOpt := opsoption.KubeOption{
-			Debug:        os.Getenv("DEBUG") == "true",
+			Debug:        strings.ToLower(os.Getenv("DEBUG")) == "true",
 			NodeName:     tr.GetSpec().NodeName,
 			All:          tr.GetSpec().All,
 			RuntimeImage: tr.GetSpec().RuntimeImage,
 			OpsNamespace: opsconstants.DefaultOpsNamespace,
 		}
-		if tr.Spec.NameRef != "" {
+		if tr.Spec.NameRef != opsconstants.CurrentRuntime {
 			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, c)
 			if err != nil {
 				logger.Error.Println(err)
@@ -264,6 +279,19 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	err = r.Client.Status().Update(ctx, latestTr)
 	if err != nil {
 		logger.Error.Println(err, "update taskrun status error")
+	}
+	return
+}
+
+func (r *TaskRunReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.Context, tr *opsv1.TaskRun) (hosts []opsv1.Host) {
+	hostList := &opsv1.HostList{}
+	err := r.Client.List(ctx, hostList, client.MatchingLabels(tr.Spec.Selector))
+	if err != nil {
+		logger.Error.Println(err, "failed to list hosts")
+		return
+	}
+	for _, h := range hostList.Items {
+		hosts = append(hosts, h)
 	}
 	return
 }

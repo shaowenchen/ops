@@ -20,11 +20,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sync"
 
 	"github.com/google/go-cmp/cmp"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -35,16 +36,16 @@ import (
 	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 )
 
 // TaskReconciler reconciles a Task object
 type TaskReconciler struct {
-	Client            client.Client
-	Scheme            *runtime.Scheme
-	crontabMap        map[string]cron.EntryID
-	crontabRunningMap map[string]*sync.Mutex
-	cron              *cron.Cron
+	Client     client.Client
+	Scheme     *runtime.Scheme
+	crontabMap map[string]cron.EntryID
+	cron       *cron.Cron
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=tasks,verbs=get;list;watch;create;update;patch;delete
@@ -70,10 +71,6 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 
 	if r.crontabMap == nil {
 		r.crontabMap = make(map[string]cron.EntryID)
-	}
-
-	if r.crontabRunningMap == nil {
-		r.crontabRunningMap = make(map[string]*sync.Mutex)
 	}
 	if r.cron == nil {
 		r.cron = cron.New()
@@ -139,7 +136,7 @@ func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			},
 		).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 5}).
+			MaxConcurrentReconciles: opsconstants.MaxConcurrentReconciles}).
 		Complete(r)
 }
 
@@ -158,45 +155,37 @@ func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Contex
 		logger.Info.Println(fmt.Sprintf("clear ticker for task %s", t.GetUniqueKey()))
 		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
 	}
-	r.crontabRunningMap[t.GetUniqueKey()] = &sync.Mutex{}
-	if t.GetSpec().Crontab != "" {
-		r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, func() {
-			// create taskrun
-			if t.Spec.Selector == nil {
-				tr := opsv1.NewTaskRun(t)
-				r.Client.Create(ctx, &tr)
-			} else {
-				// find slector hosts and create taskrun
-				if t.Spec.TypeRef == opsv1.TaskTypeRefHost {
-					hosts := r.getSelectorHosts(logger, ctx, t)
-					for _, h := range hosts {
-						tr := opsv1.NewTaskRun(t)
-						tr.Spec.NameRef = h.Name
-						r.Client.Create(ctx, &tr)
-					}
-				} else if t.Spec.TypeRef == opsv1.TaskTypeRefCluster {
-					// todo
-				}
-			}
-
+	if t.GetSpec().Crontab == "" {
+		return nil
+	}
+	r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, func() {
+		taskRunList := opsv1.TaskRunList{}
+		err := r.Client.List(ctx, &taskRunList, &client.ListOptions{
+			LabelSelector: labels.SelectorFromSet(map[string]string{
+				opsv1.LabelCronTaskRunKey: opsv1.LabelCronTaskRunValue,
+				opsv1.LabelTaskRefKey:     t.Name,
+			}),
 		})
-		logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
 		if err != nil {
-			return err
+			logger.Error.Println(err)
+			return
 		}
-	}
-	return
-}
-
-func (r *TaskReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (hosts []opsv1.Host) {
-	hostList := &opsv1.HostList{}
-	err := r.Client.List(ctx, hostList, client.MatchingLabels(t.Spec.Selector))
+		for _, tr := range taskRunList.Items {
+			if tr.Status.RunStatus == opsv1.StatusRunning || tr.Status.RunStatus == opsv1.StatusEmpty {
+				logger.Info.Println(fmt.Sprintf("skip running taskrun %s", tr.Name))
+				return
+			}
+		}
+		tr := opsv1.NewTaskRun(t)
+		tr.Labels = map[string]string{
+			opsv1.LabelCronTaskRunKey: opsv1.LabelCronTaskRunValue,
+			opsv1.LabelTaskRefKey:     t.Name,
+		}
+		r.Client.Create(ctx, &tr)
+	})
+	logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
 	if err != nil {
-		logger.Error.Println(err, "failed to list hosts")
-		return
+		return err
 	}
-	for _, h := range hostList.Items {
-		hosts = append(hosts, h)
-	}
-	return
+	return nil
 }

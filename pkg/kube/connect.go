@@ -32,7 +32,7 @@ func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 	kc = &KubeConnection{
 		Cluster: c,
 	}
-	if c.Name == "" {
+	if c.Name == constants.CurrentRuntime {
 		kc.RestConfig, err = utils.GetInClusterConfig()
 		if err != nil {
 			kc.RestConfig, err = utils.GetRestConfig(constants.GetCurrentUserKubeConfigPath())

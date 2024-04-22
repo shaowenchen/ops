@@ -19,11 +19,15 @@ package v1
 import (
 	"time"
 
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	DefaultMaxTaskrunHistory = 3
+	DefaultMaxTaskrunHistory = 5
+	LabelCronTaskRunKey      = "taskruns/type"
+	LabelCronTaskRunValue    = "cron"
+	LabelTaskRefKey          = "taskruns/taskref"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -36,6 +40,7 @@ type TaskRunSpec struct {
 	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	TypeRef      string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
+	Selector     map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
 	NameRef      string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
 	NodeName     string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
 	All          bool              `json:"all,omitempty" yaml:"all,omitempty"`
@@ -47,7 +52,7 @@ func (tr *TaskRun) GetSpec() *TaskRunSpec {
 }
 
 func NewTaskRun(t *Task) TaskRun {
-	return TaskRun{
+	tr := TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: t.Name + "-",
 			Namespace:    t.Namespace,
@@ -64,12 +69,27 @@ func NewTaskRun(t *Task) TaskRun {
 			TaskRef:      t.GetObjectMeta().GetName(),
 			Variables:    t.Spec.Variables,
 			TypeRef:      t.Spec.TypeRef,
+			Selector:     t.Spec.Selector,
 			NameRef:      t.Spec.NameRef,
 			NodeName:     t.Spec.NodeName,
 			All:          t.Spec.All,
 			RuntimeImage: t.Spec.RuntimeImage,
 		},
 	}
+	// validate task
+	if tr.Spec.RuntimeImage == "" {
+		tr.Spec.RuntimeImage = opsconstants.DefaultRuntimeImage
+	}
+	if tr.Spec.TypeRef == "" && tr.Spec.NameRef == opsconstants.AnyMaster {
+		tr.Spec.TypeRef = TaskTypeRefCluster
+	} else if tr.Spec.TypeRef == "" {
+		tr.Spec.TypeRef = TaskTypeRefHost
+	}
+	// fill nameRef
+	if tr.Spec.TypeRef == TaskTypeRefCluster && tr.Spec.NodeName != "" && tr.Spec.NameRef == "" {
+		tr.Spec.NameRef = opsconstants.CurrentRuntime
+	}
+	return tr
 }
 
 // TaskRunStatus defines the observed state of TaskRun
@@ -90,7 +110,6 @@ type TaskRunNodeStatus struct {
 
 type TaskRunStep struct {
 	StepName   string `json:"stepName,omitempty" yaml:"stepName,omitempty"`
-	StepCmd    string `json:"stepCmd,omitempty" yaml:"stepCmd,omitempty"`
 	StepOutput string `json:"stepOutput,omitempty" yaml:"stepOutput,omitempty"`
 	StepStatus string `json:"stepStatus,omitempty" yaml:"stepStatus,omitempty"`
 }
@@ -104,7 +123,6 @@ func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepO
 	}
 	tr.TaskRunNodeStatus[nodeName].TaskRunStep = append(tr.TaskRunNodeStatus[nodeName].TaskRunStep, &TaskRunStep{
 		StepName:   stepName,
-		StepCmd:    stepCmd,
 		StepOutput: stepOutput,
 		StepStatus: stepStatus,
 	})
@@ -115,11 +133,11 @@ func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepO
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// +kubebuilder:printcolumn:name="Task",type=string,JSONPath=`.spec.taskRef`
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
 // +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
 // +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
+// +kubebuilder:printcolumn:name="Selector",type=string,JSONPath=`.spec.selector`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
 // TaskRun is the Schema for the taskruns API

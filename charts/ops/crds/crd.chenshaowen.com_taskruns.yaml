@@ -16,9 +16,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.taskRef
-      name: Task
-      type: string
     - jsonPath: .spec.typeRef
       name: TypeRef
       type: string
@@ -31,6 +28,9 @@ spec:
     - jsonPath: .spec.all
       name: All
       type: boolean
+    - jsonPath: .spec.selector
+      name: Selector
+      type: string
     - jsonPath: .status.startTime
       name: StartTime
       type: date
@@ -65,6 +65,10 @@ spec:
                 type: string
               runtimeImage:
                 type: string
+              selector:
+                additionalProperties:
+                  type: string
+                type: object
               taskRef:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file'
@@ -97,8 +101,6 @@ spec:
                     taskRunStep:
                       items:
                         properties:
-                          stepCmd:
-                            type: string
                           stepName:
                             type: string
                           stepOutput:

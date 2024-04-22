@@ -8,6 +8,8 @@ const AllNamespaces = "all"
 const DefaultOpsNamespace = "ops-system"
 const DefaultNamespace = "default"
 
+const CurrentRuntime = "current"
+
 const LabelNodeRoleMaster = "node-role.kubernetes.io/master"
 const LabelNodeRoleControlPlane = "node-role.kubernetes.io/control-plane"
 
