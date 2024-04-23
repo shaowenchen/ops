@@ -6,6 +6,9 @@ metadata:
 spec:
   desc: use task `clear-disk` to clear disk
   steps:
+    - name: before clear
+      content: |
+        timeout 5 df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/
     - name: clear image
       content: nerdctl --namespace k8s.io image prune -f || docker image prune -a -f || true
     - name: clear container
@@ -19,3 +22,6 @@ spec:
     - name: clear jfs cache data
       content: |
         find /data/jfs/cache2/mem -maxdepth 1 -type d -mtime +30 -exec rm -rf {} + || true
+    - name: after clear
+      content: |
+        timeout 5 df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/
