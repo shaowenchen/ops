@@ -56,14 +56,6 @@ func NewTaskRun(t *Task) TaskRun {
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: t.Name + "-",
 			Namespace:    t.Namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: t.APIVersion,
-					Kind:       t.Kind,
-					Name:       t.Name,
-					UID:        t.UID,
-				},
-			},
 		},
 		Spec: TaskRunSpec{
 			TaskRef:      t.GetObjectMeta().GetName(),
@@ -75,6 +67,17 @@ func NewTaskRun(t *Task) TaskRun {
 			All:          t.Spec.All,
 			RuntimeImage: t.Spec.RuntimeImage,
 		},
+	}
+	// fill owner ref
+	if t.UID != "" {
+		tr.OwnerReferences = []metav1.OwnerReference{
+			{
+				APIVersion: "crd.chenshaowen.com/v1",
+				Kind:       "Task",
+				Name:       t.Name,
+				UID:        t.UID,
+			},
+		}
 	}
 	// validate task
 	if tr.Spec.RuntimeImage == "" {
