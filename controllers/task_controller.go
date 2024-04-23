@@ -19,9 +19,10 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
-
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -158,6 +159,7 @@ func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Contex
 		return nil
 	}
 	r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, func() {
+		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncTaskCronRandomBiasSeconds)) * time.Second)
 		taskRunList := opsv1.TaskRunList{}
 		err := r.Client.List(ctx, &taskRunList, &client.ListOptions{
 			LabelSelector: labels.SelectorFromSet(map[string]string{
