@@ -9,6 +9,7 @@ type ChatCompletionStreamChoiceDelta struct {
 	Content      string        `json:"content,omitempty"`
 	Role         string        `json:"role,omitempty"`
 	FunctionCall *FunctionCall `json:"function_call,omitempty"`
+	ToolCalls    []ToolCall    `json:"tool_calls,omitempty"`
 }
 
 type ChatCompletionStreamChoice struct {
@@ -18,13 +19,20 @@ type ChatCompletionStreamChoice struct {
 	ContentFilterResults ContentFilterResults            `json:"content_filter_results,omitempty"`
 }
 
+type PromptFilterResult struct {
+	Index                int                  `json:"index"`
+	ContentFilterResults ContentFilterResults `json:"content_filter_results,omitempty"`
+}
+
 type ChatCompletionStreamResponse struct {
-	ID                string                       `json:"id"`
-	Object            string                       `json:"object"`
-	Created           int64                        `json:"created"`
-	Model             string                       `json:"model"`
-	Choices           []ChatCompletionStreamChoice `json:"choices"`
-	PromptAnnotations []PromptAnnotation           `json:"prompt_annotations,omitempty"`
+	ID                  string                       `json:"id"`
+	Object              string                       `json:"object"`
+	Created             int64                        `json:"created"`
+	Model               string                       `json:"model"`
+	Choices             []ChatCompletionStreamChoice `json:"choices"`
+	SystemFingerprint   string                       `json:"system_fingerprint"`
+	PromptAnnotations   []PromptAnnotation           `json:"prompt_annotations,omitempty"`
+	PromptFilterResults []PromptFilterResult         `json:"prompt_filter_results,omitempty"`
 }
 
 // ChatCompletionStream

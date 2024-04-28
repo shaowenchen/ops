@@ -1,11 +1,15 @@
 package copilot
 
 import (
+	"context"
 	"fmt"
-	"strings"
-
 	openai "github.com/sashabaranov/go-openai"
+	"github.com/shaowenchen/ops/pkg/log"
+	"github.com/shaowenchen/ops/pkg/option"
+	"strings"
 )
+
+var GlobalCopilotOption *option.CopilotOption
 
 type ChatCodeResponse Langcode
 
@@ -67,6 +71,12 @@ func (rcl *RoleContentList) IsEndWithRunCodePair() bool {
 }
 
 func (rcl *RoleContentList) Merge(merge *RoleContentList) *RoleContentList {
+	if merge == nil {
+		return rcl
+	}
+	if rcl == nil {
+		return merge
+	}
 	*rcl = append(*rcl, *merge...)
 	return rcl
 }
@@ -95,4 +105,48 @@ func (rcl *RoleContentList) GetOpenaiChatCompletionMessagesWithSystem(system str
 		Content: system,
 	})
 	return
+}
+
+func GetClient(endpoint, key string) *openai.Client {
+	config := openai.DefaultConfig(key)
+	config.BaseURL = endpoint
+	if strings.Contains(endpoint, "azure.com") {
+		config = openai.DefaultAzureConfig(key, endpoint)
+	}
+	return openai.NewClientWithConfig(config)
+}
+
+func ChatCompletion(logger *log.Logger, client *openai.Client, model string, history *RoleContentList, input, system string, temperature float32) (output string, err error) {
+	logger.Debug.Printf("llm ask history: %v, llm ask input: %v\n ", history, input)
+	newHistory := RoleContentList{}
+	newHistory.Merge(history)
+	newHistory.AddUserContent(input).AddSystemContent(system)
+	output, _, err = chatCompletetion(logger, client, model, &newHistory, temperature, nil)
+	return
+}
+
+func ChatTools(logger *log.Logger, client *openai.Client, model string, history *RoleContentList, input, system string, temperature float32, tools []openai.Tool) (calls []openai.ToolCall, err error) {
+	logger.Debug.Printf("llm ask history: %v, llm ask input: %v\n ", history, input)
+	newHistory := RoleContentList{}
+	newHistory.Merge(history)
+	newHistory.AddUserContent(input).AddSystemContent(system)
+	_, calls, err = chatCompletetion(logger, client, model, &newHistory, temperature, tools)
+	return
+}
+
+func chatCompletetion(logger *log.Logger, client *openai.Client, model string, history *RoleContentList, temperature float32, tools []openai.Tool) (output string, calls []openai.ToolCall, err error) {
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model:       model,
+			Messages:    history.GetOpenaiChatCompletionMessages(),
+			Temperature: temperature,
+			Tools:       tools,
+		},
+	)
+	if err != nil {
+		logger.Error.Printf("llm chat error: %v\n", err)
+		return
+	}
+	return resp.Choices[0].Message.Content, resp.Choices[0].Message.ToolCalls, nil
 }

@@ -2,10 +2,12 @@ package copilot
 
 import (
 	"fmt"
-	"golang.org/x/term"
 	"os"
 	"strings"
 
+	"golang.org/x/term"
+
+	"github.com/shaowenchen/ops/pkg/agent"
 	"github.com/shaowenchen/ops/pkg/copilot"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
@@ -19,9 +21,8 @@ var verbose string
 const welcome = `Welcome to Opscli Copilot. Please type "exit" or "q" to quit.`
 const quit = "Goodbye!"
 const prompt = "Opscli> "
-const maxTryTimes = 5
 const defaultEndpoint = "https://api.openai.com/v1"
-const defaultModel = "gpt-3.5-turbo"
+const defaultModel = "gpt-3.5-turbo-16k"
 
 var CopilotCmd = &cobra.Command{
 	Use:   "copilot",
@@ -29,6 +30,7 @@ var CopilotCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.NewLogger().SetVerbose(verbose).SetFile().SetFlag().Build()
 		fillParameters(&copilotOpt)
+		copilot.GlobalCopilotOption = &copilotOpt
 		CreateCopilot(logger, copilotOpt)
 	},
 }
@@ -36,27 +38,28 @@ var CopilotCmd = &cobra.Command{
 func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 	fmt.Println(welcome)
 	defer fmt.Println(quit)
-	askHistory := copilot.RoleContentList{}
+	history := copilot.RoleContentList{}
 	stdFd := int(os.Stdin.Fd())
 	oldState, _ := term.MakeRaw(stdFd)
 	defer term.Restore(stdFd, oldState)
 
 	terminal := term.NewTerminal(os.Stdin, prompt)
-	confirmTerminal := term.NewTerminal(os.Stdin, "> ")
 	rawState, _ := term.GetState(stdFd)
+
+	pipelinerunsManager := agent.NewLLMPipelineRunsManager(copilotOpt.OpsServer, copilotOpt.OpsToken, "ops-system", 10, copilot.AllPipelines, copilot.AllTasks)
 	for {
-		ask, err := terminal.ReadLine()
+		input, err := terminal.ReadLine()
 		if err != nil {
-			PrintTerm(stdFd, oldState, rawState, err.Error())
+			printTerm(stdFd, oldState, rawState, err.Error())
 			break
 		}
-		ask = strings.TrimSpace(ask)
-		reply, err := ChatRecursion(logger, opt, maxTryTimes, &askHistory, ask, ReplyHasNotStarted, stdFd, oldState, rawState, terminal, confirmTerminal)
+		input = strings.TrimSpace(input)
+		pr, err := copilot.RunPipeline(logger, &history, pipelinerunsManager, input, 3, "copilot")
 		if err != nil {
-			PrintTerm(stdFd, oldState, rawState, err.Error())
+			printTerm(stdFd, oldState, rawState, err.Error())
 			continue
 		}
-		PrintTerm(stdFd, oldState, rawState, reply)
+		printTerm(stdFd, oldState, rawState, pr.Output)
 	}
 }
 
@@ -70,6 +73,18 @@ func fillParameters(opt *option.CopilotOption) {
 	if opt.Key == "" {
 		opt.Key = utils.GetMultiEnvDefault([]string{"OPENAI_API_KEY", "key"}, "")
 	}
+	if opt.OpsServer == "" {
+		opt.OpsServer = utils.GetMultiEnvDefault([]string{"OPS_SERVER", "opsserver"}, "")
+	}
+	if opt.OpsToken == "" {
+		opt.OpsToken = utils.GetMultiEnvDefault([]string{"OPS_TOKEN", "opstoken"}, "")
+	}
+}
+
+func printTerm(stdFd int, oldState, rawState *term.State, log string) {
+	term.Restore(stdFd, oldState)
+	fmt.Println(log)
+	term.Restore(stdFd, rawState)
 }
 
 func init() {
@@ -79,4 +94,6 @@ func init() {
 	CopilotCmd.Flags().StringVarP(&copilotOpt.Key, "key", "k", "", "e.g. sk-xxx")
 	CopilotCmd.Flags().IntVarP(&copilotOpt.History, "history", "", 5, "")
 	CopilotCmd.Flags().BoolVarP(&copilotOpt.Silence, "silence", "s", false, "")
+	CopilotCmd.Flags().StringVarP(&copilotOpt.OpsServer, "opsserver", "", "", "")
+	CopilotCmd.Flags().StringVarP(&copilotOpt.OpsToken, "opstoken", "", "", "")
 }

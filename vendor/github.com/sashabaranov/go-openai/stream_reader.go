@@ -27,6 +27,8 @@ type streamReader[T streamable] struct {
 	response       *http.Response
 	errAccumulator utils.ErrorAccumulator
 	unmarshaler    utils.Unmarshaler
+
+	httpHeader
 }
 
 func (stream *streamReader[T]) Recv() (response T, err error) {
@@ -106,6 +108,6 @@ func (stream *streamReader[T]) unmarshalError() (errResp *ErrorResponse) {
 	return
 }
 
-func (stream *streamReader[T]) Close() {
-	stream.response.Body.Close()
+func (stream *streamReader[T]) Close() error {
+	return stream.response.Body.Close()
 }
