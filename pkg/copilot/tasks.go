@@ -38,29 +38,31 @@ var taskListPipelines = agent.LLMTask{
 
 var taskAppSummary = agent.LLMTask{
 	Desc: "summary",
-	Name: "app-summary",
+	Name: "summary",
 	CallFunction: func(logger *log.Logger, prManager *agent.LLMPipelineRunsManager, pr *agent.LLMPipelineRun) (output string, err error) {
 		prompt := `
-# give brief summaries and suggestions based on the problem and the tasks performed for the problem.
+# Give brief summaries and suggestions based on the problem and the tasks performed for the problem.
 # Don't repeat the question in the answer.
-# do not repeat the result of the task in the answer.
-# do not list the implementation details of each step in your answer
+# Do not repeat the result of the task in the answer.
+# Do not list the implementation details of each step in your answer
+# Answer the question in the language of the question.
 `
-		input := "My Question：" + pr.Desc + ", and did the following\n"
-		output = "### run following tasks\n"
+		input := "Question：" + pr.Desc + "\n"
+		tasksOutput := "### Some additional information\n"
 		trLength := len(pr.TaskRuns)
 		for i, tr := range pr.TaskRuns {
 			input += tr.Output + "\n"
 			if i < trLength-1 {
-				output += "#### " + tr.TaskRef + "\n"
-				output += tr.Output + "\n"
+				tasksOutput += "#### " + tr.TaskRef + "\n"
+				tasksOutput += tr.Output + "\n"
 			}
 		}
+		logger.Debug.Println(tasksOutput)
 		client := GetClient(GlobalCopilotOption.Endpoint, GlobalCopilotOption.Key)
-		output, err = ChatCompletion(logger, client, GlobalCopilotOption.Model, nil, input, prompt, 0.3)
+		summaryOutput, err := ChatCompletion(logger, client, GlobalCopilotOption.Model, nil, input, prompt, 0)
 		if err == nil {
-			output += "### Summary\n" + output
+			return summaryOutput, nil
 		}
-		return output, err
+		return tasksOutput, err
 	},
 }

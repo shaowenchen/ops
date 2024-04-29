@@ -8,7 +8,10 @@ import (
 func GetDefaultToolCall() []openai.ToolCall {
 	return []openai.ToolCall{
 		{
-			Function: openai.FunctionCall{Name: pipelineListPipeline.Name},
+			Function: openai.FunctionCall{
+				Name:      agent.ClearUnavailableChar(pipelineListPipeline.Name),
+				Arguments: `{}`,
+			},
 		},
 	}
 }
@@ -33,7 +36,7 @@ var pipelineListCluster = agent.LLMPipeline{
 			Name: "list-clusters",
 		},
 		{
-			Name: "app-summary",
+			Name: "summary",
 		},
 	},
 }
@@ -48,7 +51,7 @@ var pipelineListTask = agent.LLMPipeline{
 			Name: "list-tasks",
 		},
 		{
-			Name: "app-summary",
+			Name: "summary",
 		},
 	},
 }
@@ -63,7 +66,7 @@ var pipelineListPipeline = agent.LLMPipeline{
 			Name: "list-pipelines",
 		},
 		{
-			Name: "app-summary",
+			Name: "summary",
 		},
 	},
 }
@@ -85,13 +88,10 @@ var pipelineRestartPod = agent.LLMPipeline{
 			Name: "check-pod-existed",
 		},
 		{
-			Name: "white-list-permission",
-		},
-		{
 			Name: "delete-pod",
 		},
 		{
-			Name: "app-summary",
+			Name: "summary",
 		},
 	},
 }
@@ -113,13 +113,10 @@ var pipelineRestartPodForce = agent.LLMPipeline{
 			Name: "check-pod-existed",
 		},
 		{
-			Name: "white-list-permission",
-		},
-		{
 			Name: "delete-pod-force",
 		},
 		{
-			Name: "app-summary",
+			Name: "summary",
 		},
 	},
 }
@@ -141,7 +138,7 @@ var pipelineGetClusterIP = agent.LLMPipeline{
 			Name: "inspect-clusterip",
 		},
 		{
-			Name: "app-summary",
+			Name: "summary",
 		},
 	},
 }
@@ -159,13 +156,10 @@ var pipelineClearDisk = agent.LLMPipeline{
 	},
 	LLMTasks: []agent.LLMTask{
 		{
-			Name: "white-list-permission",
-		},
-		{
 			Name: "clear-disk",
 		},
 		{
-			Name: "app-summary",
+			Name: "summary",
 		},
 	},
 }
