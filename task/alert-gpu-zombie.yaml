@@ -20,6 +20,7 @@ spec:
               import subprocess
               import requests
               import json
+              import time
               from datetime import datetime
 
               cluster = '${cluster}'
@@ -53,13 +54,19 @@ spec:
                   if not os.path.exists('/usr/bin/nvidia-smi'):
                       raise Exception(build_error_message('找不到 nvidia-smi 命令'))
                   # 2. 
-                  output = subprocess.check_output(['nvidia-smi' , '--query-compute-apps=process_name,used_memory', '--format=csv,noheader,nounits'], universal_newlines=True)
-                  lines = [line for line in output.split('\n')]
+                  preoutput = subprocess.check_output(['nvidia-smi' , '--query-compute-apps=process_name,used_memory', '--format=csv,noheader,nounits'], universal_newlines=True)
+                  prelines = [line for line in preoutput.split('\n')]
+                  
+                  # 3. wait 3s to recheck
+                  time.sleep(3)
+                  ouput = subprocess.check_output(['nvidia-smi' , '--query-compute-apps=process_name,used_memory', '--format=csv,noheader,nounits'], universal_newlines=True)
+                  lines = [line for line in ouput.split('\n')]
                   for index, line in enumerate(lines):
                       line = line.strip()
-                      if '[No data]' in line:
+                      if '[No data]' in line and line in prelines:
                           num = line.split(', ')[-1]
                           error_message += build_error_message('有僵尸进程占用显卡 ' + num + 'MB')
+                  
               except Exception as e:
                   error_message += build_error_message(str(e))
               finally:
