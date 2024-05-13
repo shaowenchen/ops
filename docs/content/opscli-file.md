@@ -88,10 +88,10 @@ unset sk
 - 上传本地文件 `./tmp.log` 到 API Server
 
 ```bash
-/usr/local/bin/opscli file --direction upload --api https://uploadapi.vinqi.info/api/v1/files --aeskey "" --localfile ./tmp.log
+/usr/local/bin/opscli file --direction upload --api https://uploadapi.vinqi.com/api/v1/files --aeskey "" --localfile ./tmp.log
 
 Please use the following command to download the file:
-opscli file --api https://uploadapi.vinqi.info/api/v1/files --aeskey xxxxxxxxxxx --direction download --remotefile https://download_url_link.com.aes
+opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey xxxxxxxxxxx --direction download --remotefile https://download_url_link.com.aes
 ```
 
 这里的 api 提供上传服务，aeskey 为空字符串时自动生成一个随机秘钥，如果不设置 aeskey 默认为 unset 将不会进行文件加密。
