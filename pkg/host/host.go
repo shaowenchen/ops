@@ -29,7 +29,11 @@ func Shell(ctx context.Context, logger *log.Logger, h *opsv1.Host, option option
 		return err
 	}
 	stdout, err := c.Shell(ctx, option.Sudo, option.Content)
-	logger.Info.Println(stdout)
+	if err != nil {
+		logger.Error.Println(err)
+	} else {
+		logger.Info.Println(stdout)
+	}
 	return
 }
 

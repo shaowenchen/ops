@@ -63,10 +63,7 @@ func KubeShell(ctx context.Context, logger *log.Logger, shellOpt option.ShellOpt
 
 func HostShell(ctx context.Context, logger *log.Logger, shellOpt option.ShellOption, hostOpt option.HostOption, inventory string) (err error) {
 	for _, h := range host.GetHosts(logger, option.ClusterOption{}, hostOpt, inventory) {
-		err = host.Shell(ctx, logger, h, shellOpt, hostOpt)
-		if err != nil {
-			logger.Error.Println(err)
-		}
+		host.Shell(ctx, logger, h, shellOpt, hostOpt)
 	}
 	return
 }
