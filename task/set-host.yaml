@@ -8,8 +8,6 @@ spec:
   steps:
     - name: install required packages
       content: apt-get install -y openssl socat conntrack ipset ebtables chrony ipvsadm
-    - name: Free Mem
-      content: echo 3 > /proc/sys/vm/drop_caches
     - name: Max PID
       content: echo "kernel.pid_max=65535 " >> /etc/sysctl.conf && sysctl -p
     - name: Max Thread
