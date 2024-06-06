@@ -13,3 +13,4 @@ spec:
           content: |
               kubectl get nodes -o wide > /tmp/ops-hosts
               /usr/local/bin/opscli create host -i /tmp/ops-hosts --secretref host-secret
+              kubectl label hosts -n ops-system --all managed-by=ops

@@ -1,0 +1,70 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: auto-cron-host
+    namespace: ops-system
+spec:
+    desc: use task `auto-cron-host` to auto create host
+    crontab: "50 * * * *"
+    selector:
+        managed-by: ops
+    typeRef: host
+    steps:
+        - name: add dragonfly docker for containerd
+          content: |
+              curl -s https://mirror.ghproxy.com/https://raw.githubusercontent.com/shaowenchen/hubimage/main/nydus/dfget-containerd.sh | bash -
+        - name: add dragonfly r
+          content: |
+              curl -s https://mirror.ghproxy.com/https://raw.githubusercontent.com/dragonflyoss/Dragonfly2/main/hack/gen-containerd-hosts.sh | bash -s ghcr.io
+        - name: config hosts
+          content: |
+              host="127.0.0.1 myhost"
+              if ! grep -q "myhost" /etc/hosts; then
+                  echo "myhost not found in /etc/hosts. Adding configuration..."
+                  echo $HUB_MIRROR | tee -a /etc/hosts > /dev/null
+                  if grep -q "myhost" /etc/hosts; then
+                      echo "host configuration added successfully."
+                  else
+                      echo "Failed to add host configuration. Please check permissions."
+                  fi
+              else
+                  echo "host is already configured in /etc/hosts."
+              fi
+        - name: add opscli
+          content: |
+              if ! command -v opscli &> /dev/null
+              then
+                  echo "opscli not found. Installing..."
+                  
+                  # Use curl to download and install opscli
+                  curl -sfL https://mirror.ghproxy.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
+                  
+                  # Check if installation was successful
+                  if command -v opscli &> /dev/null
+                  then
+                      echo "opscli installed successfully."
+                  else
+                      echo "opscli installation failed. Please check the installation script and network connection."
+                  fi
+              else
+                  echo "opscli is already installed."
+              fi
+        - name: add nerdcli
+          content: |
+              if ! command -v nerdcli &> /dev/null
+              then
+                  echo "nerdcli not found. Installing..."
+                  
+                  # Use curl to download and install nerdcli
+                  opscli task -f ~/.ops/task/install-nerdcli.yaml
+                  
+                  # Check if installation was successful
+                  if command -v nerdcli &> /dev/null
+                  then
+                      echo "nerdcli installed successfully."
+                  else
+                      echo "nerdcli installation failed. Please check the installation script and network connection."
+                  fi
+              else
+                  echo "nerdcli is already installed."
+              fi
