@@ -49,22 +49,22 @@ spec:
               else
                   echo "opscli is already installed."
               fi
-        - name: add nerdcli
+        - name: add nerdctl
           content: |
-              if ! command -v nerdcli &> /dev/null
+              if ! command -v nerdctl &> /dev/null
               then
-                  echo "nerdcli not found. Installing..."
+                  echo "nerdctl not found. Installing..."
                   
-                  # Use curl to download and install nerdcli
-                  opscli task -f ~/.ops/task/install-nerdcli.yaml
+                  # Use curl to download and install nerdctl
+                  opscli task -f ~/.ops/task/install-nerdctl.yaml
                   
                   # Check if installation was successful
-                  if command -v nerdcli &> /dev/null
+                  if command -v nerdctl &> /dev/null
                   then
-                      echo "nerdcli installed successfully."
+                      echo "nerdctl installed successfully."
                   else
-                      echo "nerdcli installation failed. Please check the installation script and network connection."
+                      echo "nerdctl installation failed. Please check the installation script and network connection."
                   fi
               else
-                  echo "nerdcli is already installed."
+                  echo "nerdctl is already installed."
               fi
