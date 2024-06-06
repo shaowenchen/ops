@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-    name: auto-cron-host
+    name: cron-host
     namespace: ops-system
 spec:
-    desc: use task `auto-cron-host` to auto create host
+    desc: use task `cron-host` to auto create host
     crontab: "50 * * * *"
     selector:
         managed-by: ops
