@@ -11,7 +11,13 @@ spec:
     clear: "false"
   steps:
     - name: Add Etc Hosts
-      content: echo "${ip} ${domain}" >> /etc/hosts
+      content: |
+        if ! grep -q "${domain}" /etc/hosts; then
+            echo "${ip} ${domain}" | sudo tee -a /etc/hosts > /dev/null
+            echo "Added ${domain} to /etc/hosts"
+        else
+            echo "${domain} is already present in /etc/hosts"
+        fi
       when: ${clear} == "false"
     - name: Remove Etc Hosts
       content: sed -i '/${domain}/d' /etc/hosts

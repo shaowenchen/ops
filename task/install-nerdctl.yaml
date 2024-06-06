@@ -7,9 +7,15 @@ spec:
   desc: use task `install-nerdctl` to install nerdctl tool in specified host
   variables:
     proxy: https://mirror.ghproxy.com/
-    version: 1.7.2
+    version: 1.7.6
     arch: amd64
   steps:
+    - name: Check nerdctl
+      content: |
+        if [ -x "$(command -v nerdctl)" ]; then
+          echo "nerdctl is already installed"
+          exit 1
+        fi
     - name: Download nerdctl
       content: wget ${proxy}https://github.com/containerd/nerdctl/releases/download/v${version}/nerdctl-${version}-linux-${arch}.tar.gz
     - name: Extract
