@@ -68,11 +68,11 @@ func ShellMemUsagePercent() string {
 }
 
 func ShellDiskTotal(timeout int) string {
-	return fmt.Sprintf(`timeout %d df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/ | head -n 1 | awk '{ print $2 }'`, timeout)
+	return fmt.Sprintf(`timeout %d df -H 2>/dev/null | grep "^/" | grep -v "/dev/loop" | grep -v "/boot" | awk '{ print $5 " " $2 " " $1 }' | grep " "/ | awk '{ print $2 }' | tr '\n' ' '`, timeout)
 }
 
 func ShellDiskUsagePercent(timeout int) string {
-	return fmt.Sprintf(`timeout %d df -H 2>/dev/null | grep "/$" | awk '{ print $5 " " $2 " " $1 }' | grep " "/| head -n 1| awk '{ print $1}'`, timeout)
+	return fmt.Sprintf(`timeout %d df -H 2>/dev/null | grep "^/" | grep -v "/dev/loop" | grep -v "/boot" | awk '{ print $5 " " $2 " " $1 }' | grep " "/ | awk '{ print $1}' | tr '\n' ' '`, timeout)
 }
 
 func ShellHostname() string {
