@@ -28,6 +28,9 @@ spec:
     - jsonPath: .status.diskTotal
       name: Disk
       type: string
+    - jsonPath: .status.diskUsagePercent
+      name: DiskUsage
+      type: string
     - jsonPath: .status.acceleratorVendor
       name: Vendor
       type: string

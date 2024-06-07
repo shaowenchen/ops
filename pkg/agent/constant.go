@@ -3,10 +3,10 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 	"time"
-	"io"
 )
 
 const LLMTaskPrefix = "task-"

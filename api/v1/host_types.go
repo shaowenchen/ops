@@ -68,6 +68,7 @@ type HostStatus struct {
 // +kubebuilder:printcolumn:name="CPU",type=string,JSONPath=`.status.cpuTotal`
 // +kubebuilder:printcolumn:name="Mem",type=string,JSONPath=`.status.memTotal`
 // +kubebuilder:printcolumn:name="Disk",type=string,JSONPath=`.status.diskTotal`
+// +kubebuilder:printcolumn:name="DiskUsage",type=string,JSONPath=`.status.diskUsagePercent`
 // +kubebuilder:printcolumn:name="Vendor",type=string,JSONPath=`.status.acceleratorVendor`
 // +kubebuilder:printcolumn:name="Model",type=string,JSONPath=`.status.acceleratorModel`
 // +kubebuilder:printcolumn:name="Count",type=string,JSONPath=`.status.acceleratorCount`

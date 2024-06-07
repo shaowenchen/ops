@@ -9,4 +9,3 @@ func GetToolsPrompt() string {
 #5 Think more, always you can find a suitable tools to help you.
 `
 }
-

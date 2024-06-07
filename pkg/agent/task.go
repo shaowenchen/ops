@@ -16,13 +16,13 @@ func NewLLMTask(t *opsv1.Task) LLMTask {
 }
 
 type LLMTask struct {
-	Desc         string                 `json:"desc"`
-	Namespace    string                 `json:"namespace"`
-	Name         string                 `json:"name"`
-	TypeRef      string                 `json:"typeRef"`
-	NameRef      string                 `json:"nameRef"`
-	NodeName     string                 `json:"nodeName"`
-	Variables    map[string]string      `json:"variables"`
+	Desc         string                                                                      `json:"desc"`
+	Namespace    string                                                                      `json:"namespace"`
+	Name         string                                                                      `json:"name"`
+	TypeRef      string                                                                      `json:"typeRef"`
+	NameRef      string                                                                      `json:"nameRef"`
+	NodeName     string                                                                      `json:"nodeName"`
+	Variables    map[string]string                                                           `json:"variables"`
 	CallFunction func(*log.Logger, *LLMPipelineRunsManager, *LLMPipelineRun) (string, error) `json:"-"`
 }
 
