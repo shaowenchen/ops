@@ -1,0 +1,25 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: test-perf3
+  namespace: ops-system
+spec:
+  desc: use task `test-perf3` to test iperf3 between two nodes, variables `srcip` and `dstip` are required
+  nodeName: anymaster
+  variables:
+    srcip: "127.0.0.1"
+    dstip: "127.0.0.1"
+  steps:
+    - name: install perf3 in dst node
+      content: |
+        ssh -o StrictHostKeyChecking=no ${dstip} 'apt-get install iperf3 -y'
+    - name: run iperf3 server in dst node 5 minutes daemon
+      content: |
+        ssh -o StrictHostKeyChecking=no ${dstip} 'nohup timeout 300 iperf3 -s > /dev/null 2>&1 &'
+      allowFailure: true
+    - name: install perf3 in src node
+      content: |
+        ssh -o StrictHostKeyChecking=no ${srcip} 'apt-get install iperf3 -y'
+    - name: run iperf3 client in src
+      content: |
+        ssh -o StrictHostKeyChecking=no ${srcip} 'iperf3 -c ${dstip}'
