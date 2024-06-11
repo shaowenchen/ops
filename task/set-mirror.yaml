@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: set-mirror
+  namespace: ops-system
+spec:
+  desc: use task `set-mirror` to set a faster mirror for os
+  steps:
+    - name: install required packages
+      content: |
+        PROXY="https://mirror.ghproxy.com/" &&
+        curl -sfL "$PROXY"https://raw.githubusercontent.com/shaowenchen/hubimage/main/mirror/ubuntu/get.sh | sh -
