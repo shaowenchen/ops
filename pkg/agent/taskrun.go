@@ -26,6 +26,7 @@ type LLMTaskRunManager struct {
 	endpoint           string
 	token              string
 	namespace          string
+	runtimeImage       string
 	tasks              []LLMTask
 	tickOnce           sync.Once
 	hostsManager       *LLMHostsManager
@@ -33,12 +34,13 @@ type LLMTaskRunManager struct {
 	pipelinerunManager *LLMPipelineRunsManager
 }
 
-func NewLLMTaskRunManager(endpoint, token, namespace string, pipelinerunManager *LLMPipelineRunsManager) *LLMTaskRunManager {
+func NewLLMTaskRunManager(endpoint, token, namespace, runtimeImage string, pipelinerunManager *LLMPipelineRunsManager) *LLMTaskRunManager {
 	return &LLMTaskRunManager{
-		endpoint:  endpoint,
-		token:     token,
-		namespace: namespace,
-		tasks:     make([]LLMTask, 0),
+		endpoint:     endpoint,
+		token:        token,
+		namespace:    namespace,
+		runtimeImage: runtimeImage,
+		tasks:        make([]LLMTask, 0),
 		hostsManager: NewLLMHostsManager(
 			endpoint,
 			token,
@@ -88,6 +90,7 @@ func (m *LLMTaskRunManager) Rebuild(t *LLMTask) (task LLMTask, err error) {
 		TypeRef:      taskTmp.TypeRef,
 		NameRef:      taskTmp.NameRef,
 		NodeName:     taskTmp.NodeName,
+		RuntimeImage: taskTmp.RuntimeImage,
 		Variables:    taskTmp.Variables,
 		CallFunction: taskTmp.CallFunction,
 	}

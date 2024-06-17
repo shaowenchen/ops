@@ -33,9 +33,9 @@ const (
 	LLMPipelineRunStatusFailed  LLMPipelineRunStatus = "failed"
 )
 
-func NewLLMPipelineRunsManager(enpoint, token, namespace string, syncTickerSeconds uint, allPipelines []LLMPipeline, allTasks []LLMTask) (prManager *LLMPipelineRunsManager) {
+func NewLLMPipelineRunsManager(enpoint, token, namespace, runtimeimage string, syncTickerSeconds uint, allPipelines []LLMPipeline, allTasks []LLMTask) (prManager *LLMPipelineRunsManager) {
 	prManager = &LLMPipelineRunsManager{}
-	prManager.taskrunsManager = NewLLMTaskRunManager(enpoint, token, namespace, prManager)
+	prManager.taskrunsManager = NewLLMTaskRunManager(enpoint, token, namespace, runtimeimage ,prManager)
 	prManager.GetHostManager().StartUpdateTimer(time.Duration(syncTickerSeconds), prManager.GetHostManager().Update)
 	prManager.GetClusterManager().StartUpdateTimer(time.Duration(syncTickerSeconds)*time.Second, prManager.GetClusterManager().Update)
 	prManager.GetTaskRunManager().StartUpdateTimer(time.Duration(syncTickerSeconds), prManager.GetTaskRunManager().Update)
@@ -48,6 +48,7 @@ type LLMPipelineRunsManager struct {
 	endpoint        string
 	token           string
 	namespace       string
+	runtimeImage    string
 	pipelines       []LLMPipeline
 	tickOnce        sync.Once
 	taskrunsManager *LLMTaskRunManager

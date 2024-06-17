@@ -53,6 +53,7 @@ type CopilotOption struct {
 	Silence   bool
 	OpsServer string
 	OpsToken  string
+	RuntimeImage string
 }
 
 type FileOption struct {

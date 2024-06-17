@@ -12,6 +12,7 @@ import (
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
+	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,7 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 	terminal := term.NewTerminal(os.Stdin, prompt)
 	rawState, _ := term.GetState(stdFd)
 
-	pipelinerunsManager := agent.NewLLMPipelineRunsManager(copilotOpt.OpsServer, copilotOpt.OpsToken, "ops-system", 10, copilot.AllPipelines, copilot.AllTasks)
+	pipelinerunsManager := agent.NewLLMPipelineRunsManager(copilotOpt.OpsServer, copilotOpt.OpsToken, "ops-system", copilotOpt.RuntimeImage, 10, copilot.AllPipelines, copilot.AllTasks)
 	for {
 		input, err := terminal.ReadLine()
 		if err != nil {
@@ -96,4 +97,5 @@ func init() {
 	CopilotCmd.Flags().BoolVarP(&copilotOpt.Silence, "silence", "s", false, "")
 	CopilotCmd.Flags().StringVarP(&copilotOpt.OpsServer, "opsserver", "", "", "")
 	CopilotCmd.Flags().StringVarP(&copilotOpt.OpsToken, "opstoken", "", "", "")
+	CopilotCmd.Flags().StringVarP(&copilotOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "e.g. ubuntu:22.04")
 }

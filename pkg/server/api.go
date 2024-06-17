@@ -318,13 +318,14 @@ func ListTaskRun(c *gin.Context) {
 
 func CreateTaskRun(c *gin.Context) {
 	type Params struct {
-		Namespace string            `uri:"namespace"`
-		TaskRef   string            `json:"taskRef"`
-		TypeRef   string            `json:"typeRef"`
-		NameRef   string            `json:"nameRef"`
-		NodeName  string            `json:"nodeName"`
-		All       bool              `json:"all"`
-		Variables map[string]string `json:"variables"`
+		Namespace    string            `uri:"namespace"`
+		TaskRef      string            `json:"taskRef"`
+		TypeRef      string            `json:"typeRef"`
+		NameRef      string            `json:"nameRef"`
+		NodeName     string            `json:"nodeName"`
+		All          bool              `json:"all"`
+		RuntimeImage string            `json:"runtimeImage"`
+		Variables    map[string]string `json:"variables"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -363,6 +364,9 @@ func CreateTaskRun(c *gin.Context) {
 	}
 	taskRun := opsv1.NewTaskRun(task)
 	taskRun.Spec.NameRef = req.NameRef
+	if len(req.RuntimeImage) > 0 {
+		taskRun.Spec.RuntimeImage = req.RuntimeImage
+	}
 	if req.All {
 		taskRun.Spec.All = req.All
 	}
