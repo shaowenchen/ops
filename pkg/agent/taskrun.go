@@ -12,14 +12,15 @@ import (
 )
 
 type LLMTaskRun struct {
-	Desc      string            `json:"desc"`
-	Namespace string            `json:"namespace"`
-	TaskRef   string            `json:"taskRef"`
-	TypeRef   string            `json:"typeRef"`
-	NameRef   string            `json:"nameRef"`
-	NodeName  string            `json:"nodeName"`
-	Variables map[string]string `json:"variables"`
-	Output    string            `json:"output"`
+	Desc         string            `json:"desc"`
+	Namespace    string            `json:"namespace"`
+	TaskRef      string            `json:"taskRef"`
+	TypeRef      string            `json:"typeRef"`
+	NameRef      string            `json:"nameRef"`
+	NodeName     string            `json:"nodeName"`
+	Variables    map[string]string `json:"variables"`
+	RuntimeImage string            `json:"runtimeImage"`
+	Output       string            `json:"output"`
 }
 
 type LLMTaskRunManager struct {
@@ -110,7 +111,11 @@ func (m *LLMTaskRunManager) Run(logger *log.Logger, pr *LLMPipelineRun, tr *LLMT
 		logger.Debug.Printf("call function for %s, output: %s \n", tr.TaskRef, tr.Output)
 		return
 	}
-	logger.Debug.Printf("create taskrun, taskRef: %v, typeRef: %v, nameRef: %v, nodeName: %v, variables: %v\n", tr.TaskRef, tr.TypeRef, tr.NameRef, tr.NodeName, tr.Variables)
+	// fill runtime image
+	if m.runtimeImage != "" {
+		tr.RuntimeImage = m.runtimeImage
+	}
+	logger.Debug.Printf("create taskrun, taskRef: %v, typeRef: %v, nameRef: %v, nodeName: %v, variables: %v, runtimeImage: %v\n", tr.TaskRef, tr.TypeRef, tr.NameRef, tr.NodeName, tr.Variables, m.runtimeImage)
 	taskrun, err := m.request(tr)
 	if err != nil {
 		logger.Debug.Printf("request err: %v\n", err)

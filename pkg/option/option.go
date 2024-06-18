@@ -46,13 +46,13 @@ type ShellOption struct {
 }
 
 type CopilotOption struct {
-	Endpoint  string
-	Model     string
-	Key       string
-	History   int
-	Silence   bool
-	OpsServer string
-	OpsToken  string
+	Endpoint     string
+	Model        string
+	Key          string
+	History      int
+	Silence      bool
+	OpsServer    string
+	OpsToken     string
 	RuntimeImage string
 }
 

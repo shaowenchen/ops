@@ -35,7 +35,7 @@ const (
 
 func NewLLMPipelineRunsManager(enpoint, token, namespace, runtimeimage string, syncTickerSeconds uint, allPipelines []LLMPipeline, allTasks []LLMTask) (prManager *LLMPipelineRunsManager) {
 	prManager = &LLMPipelineRunsManager{}
-	prManager.taskrunsManager = NewLLMTaskRunManager(enpoint, token, namespace, runtimeimage ,prManager)
+	prManager.taskrunsManager = NewLLMTaskRunManager(enpoint, token, namespace, runtimeimage, prManager)
 	prManager.GetHostManager().StartUpdateTimer(time.Duration(syncTickerSeconds), prManager.GetHostManager().Update)
 	prManager.GetClusterManager().StartUpdateTimer(time.Duration(syncTickerSeconds)*time.Second, prManager.GetClusterManager().Update)
 	prManager.GetTaskRunManager().StartUpdateTimer(time.Duration(syncTickerSeconds), prManager.GetTaskRunManager().Update)

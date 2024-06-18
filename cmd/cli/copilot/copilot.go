@@ -8,11 +8,11 @@ import (
 	"golang.org/x/term"
 
 	"github.com/shaowenchen/ops/pkg/agent"
+	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/copilot"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
-	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/spf13/cobra"
 )
 
