@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"os"
 	"sort"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/pkg/constants"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -366,6 +368,13 @@ func CreateTaskRun(c *gin.Context) {
 	taskRun.Spec.NameRef = req.NameRef
 	if len(req.RuntimeImage) > 0 {
 		taskRun.Spec.RuntimeImage = req.RuntimeImage
+	} else {
+		defaultRuntimeImage := os.Getenv("DEFAULT_RUNTIME_IMAGE")
+		if len(defaultRuntimeImage) > 0 {
+			taskRun.Spec.RuntimeImage = defaultRuntimeImage
+		} else {
+			taskRun.Spec.RuntimeImage = constants.DefaultRuntimeImage
+		}
 	}
 	if req.All {
 		taskRun.Spec.All = req.All
