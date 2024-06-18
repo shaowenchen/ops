@@ -90,8 +90,13 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		return ctrl.Result{}, err
 	}
 	// validate task
-	if t.Spec.RuntimeImage == "" {
-		t.Spec.RuntimeImage = constants.DefaultRuntimeImage
+	if t.Spec.RuntimeImage != "" {
+		defaultRuntimeImage := os.Getenv("DEFAULT_RUNTIME_IMAGE")
+		if defaultRuntimeImage != "" {
+			t.Spec.RuntimeImage = defaultRuntimeImage
+		} else {
+			t.Spec.RuntimeImage = constants.DefaultRuntimeImage
+		}
 	}
 	// validate typeRef
 	if t.Spec.TypeRef == "" && t.Spec.NodeName == constants.AnyMaster {
