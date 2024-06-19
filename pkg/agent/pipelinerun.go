@@ -179,7 +179,7 @@ func (m *LLMPipelineRunsManager) Run(logger *log.Logger, pipelinerun *LLMPipelin
 			logger.Error.Printf("run taskrun err: %v\n", err)
 			return
 		}
-		if tr.RunStatus == opsv1.StatusFailed {
+		if tr.RunStatus != opsv1.StatusSuccessed {
 			logger.Error.Printf("run taskrun err: %v\n", err)
 			return
 		}
