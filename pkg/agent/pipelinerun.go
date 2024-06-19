@@ -159,6 +159,7 @@ func (m *LLMPipelineRunsManager) Rebuild(pipelinerun *LLMPipelineRun) error {
 			NameRef:   nameRef,
 			NodeName:  nodeName,
 			Variables: variables,
+			Always:    task.Always,
 		})
 	}
 	return nil
@@ -178,19 +179,23 @@ func (m *LLMPipelineRunsManager) Run(logger *log.Logger, pipelinerun *LLMPipelin
 	if err != nil {
 		return err
 	}
+	onlyAlways := false
 	for _, tr := range pipelinerun.TaskRuns {
-		err = m.taskrunsManager.Run(logger, pipelinerun, tr)
-		logger.Debug.Printf("run taskrun: %s, output: %s\n", tr.TaskRef, tr.Output)
-		if err != nil {
-			logger.Error.Printf("run taskrun err: %v\n", err)
-			return
-		}
-		if tr.RunStatus != opsv1.StatusSuccessed {
-			logger.Error.Printf("run taskrun err: %v\n", err)
-			return
-		}
-		if pipelinerun.RunStatus != opsv1.StatusRunning {
-			break
+		if onlyAlways == false || onlyAlways == true && tr.Always == true {
+			err = m.taskrunsManager.Run(logger, pipelinerun, tr)
+			logger.Debug.Printf("run taskrun: %s, output: %s\n", tr.TaskRef, tr.Output)
+			if err != nil {
+				logger.Error.Printf("run taskrun err: %v\n", err)
+				onlyAlways = true
+				continue
+			}
+			if tr.RunStatus != opsv1.StatusSuccessed {
+				logger.Error.Printf("run taskrun err: %v\n", err)
+				continue
+			}
+			if pipelinerun.RunStatus != opsv1.StatusRunning {
+				break
+			}
 		}
 	}
 	if pipelinerun.Output == "" && len(pipelinerun.TaskRuns) > 0 {

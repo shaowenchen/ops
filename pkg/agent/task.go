@@ -24,6 +24,7 @@ type LLMTask struct {
 	NodeName     string                                                                      `json:"nodeName"`
 	Variables    map[string]string                                                           `json:"variables"`
 	RuntimeImage string                                                                      `json:"runtimeImage"`
+	Always       bool                                                                        `json:"always"`
 	CallFunction func(*log.Logger, *LLMPipelineRunsManager, *LLMPipelineRun) (string, error) `json:"-"`
 }
 

@@ -21,6 +21,7 @@ type LLMTaskRun struct {
 	Variables    map[string]string `json:"variables"`
 	RuntimeImage string            `json:"runtimeImage"`
 	Output       string            `json:"output"`
+	Always       bool              `json:"always"`
 	RunStatus    string            `json:"runStatus"`
 }
 
