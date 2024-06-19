@@ -30,7 +30,7 @@ func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shell
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	stdout, err := GetPodLog(logger, context.TODO(), false, client, pod)
+	stdout, err := GetPodLog(logger, context.TODO(), kubeOpt.Debug, client, pod)
 	if err != nil {
 		logger.Error.Println(err)
 	} else {
