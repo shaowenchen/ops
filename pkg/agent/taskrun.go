@@ -100,6 +100,16 @@ func (m *LLMTaskRunManager) Rebuild(t *LLMTask) (task LLMTask, err error) {
 }
 
 func (m *LLMTaskRunManager) Run(logger *log.Logger, pr *LLMPipelineRun, tr *LLMTaskRun) (err error) {
+	if logger == nil {
+		return errors.New("logger is nil")
+	}
+	if pr == nil {
+		return errors.New("pipelinerun is nil")
+	}
+	if tr == nil {
+		return errors.New("taskrun is nil")
+	}
+
 	task, err := m.GetLLMTask(tr.TaskRef)
 	if err != nil {
 		return err
