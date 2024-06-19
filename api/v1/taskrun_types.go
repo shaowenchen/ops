@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	"os"
 	"time"
 
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -80,8 +81,13 @@ func NewTaskRun(t *Task) TaskRun {
 		}
 	}
 	// validate task
-	if tr.Spec.RuntimeImage == "" {
-		tr.Spec.RuntimeImage = opsconstants.DefaultRuntimeImage
+	if t.Spec.RuntimeImage != "" {
+		defaultRuntimeImage := os.Getenv("DEFAULT_RUNTIME_IMAGE")
+		if defaultRuntimeImage != "" {
+			tr.Spec.RuntimeImage = defaultRuntimeImage
+		} else {
+			tr.Spec.RuntimeImage = opsconstants.DefaultRuntimeImage
+		}
 	}
 	if tr.Spec.TypeRef == "" && tr.Spec.NameRef == opsconstants.AnyMaster {
 		tr.Spec.TypeRef = TaskTypeRefCluster
