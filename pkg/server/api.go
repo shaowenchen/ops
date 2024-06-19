@@ -418,7 +418,7 @@ func CreateTaskRun(c *gin.Context) {
 				showError(c, err.Error())
 				return
 			}
-			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed {
+			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed || latest.Status.RunStatus == opsv1.StatusAborted {
 				showData(c, latest)
 				return
 			}
