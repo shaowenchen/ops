@@ -97,6 +97,9 @@ func (m *LLMTaskRunManager) Rebuild(t *LLMTask) (task LLMTask, err error) {
 		Variables:    taskTmp.Variables,
 		CallFunction: taskTmp.CallFunction,
 	}
+	if t.Always {
+		task.Always = true
+	}
 	return
 }
 

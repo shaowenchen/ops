@@ -81,7 +81,7 @@ func NewTaskRun(t *Task) TaskRun {
 		}
 	}
 	// validate task
-	if t.Spec.RuntimeImage != "" {
+	if t.Spec.RuntimeImage == "" {
 		defaultRuntimeImage := os.Getenv("DEFAULT_RUNTIME_IMAGE")
 		if defaultRuntimeImage != "" {
 			tr.Spec.RuntimeImage = defaultRuntimeImage
