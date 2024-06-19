@@ -135,6 +135,9 @@ func IsFailedPod(pod *corev1.Pod) bool {
 	if status == corev1.PodFailed {
 		return true
 	}
+	if pod.Status.ContainerStatuses != nil && len(pod.Status.ContainerStatuses) > 0 {
+		return pod.Status.ContainerStatuses[0].LastTerminationState.Terminated.ExitCode > 0
+	}
 	return false
 }
 

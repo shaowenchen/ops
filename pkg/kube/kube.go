@@ -77,6 +77,7 @@ func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kube
 				if len(logs) == 0 && err != nil {
 					logs = err.Error()
 				}
+				err = errors.New("status failed, logs: " + logs)
 				return
 			}
 		}

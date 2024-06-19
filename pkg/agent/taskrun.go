@@ -21,6 +21,7 @@ type LLMTaskRun struct {
 	Variables    map[string]string `json:"variables"`
 	RuntimeImage string            `json:"runtimeImage"`
 	Output       string            `json:"output"`
+	RunStatus    string            `json:"runStatus"`
 }
 
 type LLMTaskRunManager struct {
@@ -119,10 +120,11 @@ func (m *LLMTaskRunManager) Run(logger *log.Logger, pr *LLMPipelineRun, tr *LLMT
 	taskrun, err := m.request(tr)
 	if err != nil {
 		logger.Debug.Printf("request err: %v\n", err)
-		pr.Status = LLMPipelineRunStatusFailed
+		pr.RunStatus = opsv1.StatusFailed
 		return err
 	} else {
 		tr.Output = GetTaskRunMarkdown(taskrun, nil)
+		tr.RunStatus = taskrun.Status.RunStatus
 	}
 	return
 }

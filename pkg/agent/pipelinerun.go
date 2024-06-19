@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/log"
 	"strings"
 	"sync"
@@ -12,26 +13,18 @@ import (
 )
 
 type LLMPipelineRun struct {
-	Desc        string               `json:"desc"`
-	Creator     string               `json:"creator"`
-	Namespace   string               `json:"namespace"`
-	NameRef     string               `json:"nameRef"`
-	NodeName    string               `json:"nodeName"`
-	PipelineRef string               `json:"pipelineRef"`
-	TypeRef     string               `json:"typeRef"`
-	Variables   map[string]string    `json:"variables"`
-	TaskRuns    []*LLMTaskRun        `json:"taskRuns"`
-	Output      string               `json:"output"`
-	Status      LLMPipelineRunStatus `json:"status"`
+	Desc        string            `json:"desc"`
+	Creator     string            `json:"creator"`
+	Namespace   string            `json:"namespace"`
+	NameRef     string            `json:"nameRef"`
+	NodeName    string            `json:"nodeName"`
+	PipelineRef string            `json:"pipelineRef"`
+	TypeRef     string            `json:"typeRef"`
+	Variables   map[string]string `json:"variables"`
+	TaskRuns    []*LLMTaskRun     `json:"taskRuns"`
+	Output      string            `json:"output"`
+	RunStatus   string            `json:"runStatus"`
 }
-
-type LLMPipelineRunStatus string
-
-const (
-	LLMPipelineRunStatusRunning LLMPipelineRunStatus = "running"
-	LLMPipelineRunStatusSuccess LLMPipelineRunStatus = "success"
-	LLMPipelineRunStatusFailed  LLMPipelineRunStatus = "failed"
-)
 
 func NewLLMPipelineRunsManager(enpoint, token, namespace, runtimeimage string, syncTickerSeconds uint, allPipelines []LLMPipeline, allTasks []LLMTask) (prManager *LLMPipelineRunsManager) {
 	prManager = &LLMPipelineRunsManager{}
@@ -172,8 +165,8 @@ func (m *LLMPipelineRunsManager) Rebuild(pipelinerun *LLMPipelineRun) error {
 }
 
 func (m *LLMPipelineRunsManager) Run(logger *log.Logger, pipelinerun *LLMPipelineRun) (err error) {
-	if pipelinerun.Status != LLMPipelineRunStatusRunning {
-		pipelinerun.Status = LLMPipelineRunStatusRunning
+	if pipelinerun.RunStatus != opsv1.StatusRunning {
+		pipelinerun.RunStatus = opsv1.StatusRunning
 	}
 	err = m.Rebuild(pipelinerun)
 	if err != nil {
@@ -186,15 +179,19 @@ func (m *LLMPipelineRunsManager) Run(logger *log.Logger, pipelinerun *LLMPipelin
 			logger.Error.Printf("run taskrun err: %v\n", err)
 			return
 		}
-		if pipelinerun.Status != LLMPipelineRunStatusRunning {
+		if tr.RunStatus == opsv1.StatusFailed {
+			logger.Error.Printf("run taskrun err: %v\n", err)
+			return
+		}
+		if pipelinerun.RunStatus != opsv1.StatusRunning {
 			break
 		}
 	}
 	if pipelinerun.Output == "" && len(pipelinerun.TaskRuns) > 0 {
 		pipelinerun.Output = pipelinerun.TaskRuns[len(pipelinerun.TaskRuns)-1].Output
 	}
-	if pipelinerun.Status == LLMPipelineRunStatusRunning {
-		pipelinerun.Status = LLMPipelineRunStatusSuccess
+	if pipelinerun.RunStatus == opsv1.StatusRunning {
+		pipelinerun.RunStatus = opsv1.StatusSuccessed
 	}
 	return
 }
