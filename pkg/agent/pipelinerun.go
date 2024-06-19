@@ -165,6 +165,12 @@ func (m *LLMPipelineRunsManager) Rebuild(pipelinerun *LLMPipelineRun) error {
 }
 
 func (m *LLMPipelineRunsManager) Run(logger *log.Logger, pipelinerun *LLMPipelineRun) (err error) {
+	if logger == nil {
+		return errors.New("logger is nil")
+	}
+	if pipelinerun == nil {
+		return errors.New("pipelinerun is nil")
+	}
 	if pipelinerun.RunStatus != opsv1.StatusRunning {
 		pipelinerun.RunStatus = opsv1.StatusRunning
 	}
