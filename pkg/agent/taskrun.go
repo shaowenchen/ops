@@ -116,7 +116,7 @@ func (m *LLMTaskRunManager) Run(logger *log.Logger, pr *LLMPipelineRun, tr *LLMT
 	if m.runtimeImage != "" {
 		tr.RuntimeImage = m.runtimeImage
 	}
-	logger.Debug.Printf("create taskrun, taskRef: %v, typeRef: %v, nameRef: %v, nodeName: %v, variables: %v, runtimeImage: %v\n", tr.TaskRef, tr.TypeRef, tr.NameRef, tr.NodeName, tr.Variables, m.runtimeImage)
+	logger.Debug.Printf("create taskrun, taskRef: %v, typeRef: %v, nameRef: %v, nodeName: %v, variables: %v\n", tr.TaskRef, tr.TypeRef, tr.NameRef, tr.NodeName, tr.Variables)
 	taskrun, err := m.request(tr)
 	if err != nil {
 		logger.Debug.Printf("request err: %v\n", err)
