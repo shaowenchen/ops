@@ -146,6 +146,13 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 			Content: step.Content,
 		},
 		kubeOpt)
+	if len(output) == 0 {
+		if err != nil {
+			output = err.Error()
+		} else {
+			output = "no output"
+		}
+	}
 	return
 }
 

@@ -133,8 +133,10 @@ func (m *LLMTaskRunManager) Run(logger *log.Logger, pr *LLMPipelineRun, tr *LLMT
 	logger.Debug.Printf("create taskrun, taskRef: %v, typeRef: %v, nameRef: %v, nodeName: %v, variables: %v\n", tr.TaskRef, tr.TypeRef, tr.NameRef, tr.NodeName, tr.Variables)
 	taskrun, err := m.request(tr)
 	if err != nil {
-		logger.Debug.Printf("request err: %v\n", err.Error())
-		tr.Output = err.Error()
+		logger.Info.Printf("request err: %v\n", err.Error())
+		if tr.Output == "" {
+			tr.Output = err.Error()
+		}
 		tr.RunStatus = opsv1.StatusFailed
 		return err
 	} else {
