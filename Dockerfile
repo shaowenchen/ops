@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM hubimage/builder-golang:1.19 as builder
+FROM golang:1.19 as builder
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -15,7 +15,7 @@ COPY . .
 # by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
 RUN GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o ops-controller-manager main.go
 
-FROM hubimage/runtime-ubuntu:22.04
+FROM ubuntu:22.04
 RUN apt-get update && \
     apt-get install -y curl python3 python3-pip && \
     rm -rf /var/cache/apt/* && \
