@@ -190,6 +190,7 @@ func (m *LLMPipelineRunsManager) Run(logger *log.Logger, pipelinerun *LLMPipelin
 				onlyAlways = true
 			}
 		} else {
+			tr.Output = "skipped"
 			logger.Debug.Printf("skip taskrun: %s\n", tr.TaskRef)
 		}
 	}
