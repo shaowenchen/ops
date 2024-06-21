@@ -65,6 +65,9 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
+	if os.Getenv("DEBUG") == "true" {
+		logger.SetVerbose("debug").Build()
+	}
 	h := &opsv1.Host{}
 	err := r.Get(ctx, req.NamespacedName, h)
 

@@ -67,6 +67,9 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
+	if os.Getenv("DEBUG") == "true" {
+		logger.SetVerbose("debug").Build()
+	}
 	tr := &opsv1.TaskRun{}
 	err := r.Client.Get(ctx, req.NamespacedName, tr)
 

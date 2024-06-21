@@ -64,6 +64,9 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
+	if os.Getenv("DEBUG") == "true" {
+		logger.SetVerbose("debug").Build()
+	}
 	c := &opsv1.Cluster{}
 	err = r.Get(ctx, req.NamespacedName, c)
 

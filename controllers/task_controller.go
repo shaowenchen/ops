@@ -69,7 +69,9 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
-
+	if os.Getenv("DEBUG") == "true" {
+		logger.SetVerbose("debug").Build()
+	}
 	if r.crontabMap == nil {
 		r.crontabMap = make(map[string]cron.EntryID)
 	}
