@@ -13,16 +13,17 @@ func GetIntentionPrompt(tools []openai.Tool) string {
 		return ""
 	}
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("| tool | description | parameters |\n"))
-	b.WriteString("|-|-|-|\n")
+	b.WriteString(fmt.Sprintf("| tool | description |\n"))
+	b.WriteString("|-|-|\n")
 	for _, tool := range tools {
-		parametersBytes, _ := json.Marshal(tool.Function.Parameters)
-		b.WriteString(fmt.Sprintf("| %s | %s | %s |\n", tool.Function.Name, tool.Function.Description, string(parametersBytes)))
 		b.WriteString(fmt.Sprintf("| %s | %s |\n", tool.Function.Name, tool.Function.Description))
 	}
-	return `# do not give answer directly, just choose one tool to solve the problem
-# use the following tools to solve\diagnose the problem
-` + b.String()
+	return `Please select the most appropriate option based on the following list:
+Options:
+` + b.String() + `
+Example: 
+Input: ` + tools[0].Function.Description + `
+Output: ` + tools[0].Function.Name
 }
 
 func GetParametersPrompt(tool openai.Tool) string {
