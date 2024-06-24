@@ -5,15 +5,12 @@ import (
 	"github.com/shaowenchen/ops/pkg/agent"
 )
 
-func GetDefaultToolCall() []openai.ToolCall {
-	return []openai.ToolCall{
-		{
-			Function: openai.FunctionCall{
-				Name:      agent.ClearUnavailableChar(pipelineListPipeline.Name),
-				Arguments: `{}`,
-			},
-		},
+func GetDefaultToolCall() (call openai.ToolCall) {
+	call.Function = openai.FunctionCall{
+		Name:      agent.ClearUnavailableChar(pipelineHelp.Name),
+		Arguments: `{}`,
 	}
+	return call
 }
 
 var AllPipelines = []agent.LLMPipeline{
@@ -24,6 +21,7 @@ var AllPipelines = []agent.LLMPipeline{
 	pipelineRestartPodForce,
 	pipelineGetClusterIP,
 	pipelineClearDisk,
+	pipelineHelp,
 }
 
 var pipelineListCluster = agent.LLMPipeline{
@@ -160,6 +158,18 @@ var pipelineClearDisk = agent.LLMPipeline{
 		},
 		{
 			Name: "summary",
+		},
+	},
+}
+
+var pipelineHelp = agent.LLMPipeline{
+	Desc:      "Help - help",
+	Namespace: "ops-system",
+	Name:      "help",
+	NodeName:  "",
+	LLMTasks: []agent.LLMTask{
+		{
+			Name: "help",
 		},
 	},
 }

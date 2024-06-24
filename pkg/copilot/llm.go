@@ -89,6 +89,9 @@ func (rcl *RoleContentList) WithHistory(maxHistory int) *RoleContentList {
 }
 
 func (rcl *RoleContentList) GetOpenaiChatCompletionMessages() (messageList []openai.ChatCompletionMessage) {
+	if rcl == nil {
+		return
+	}
 	for _, roleContent := range *rcl {
 		messageList = append(messageList, openai.ChatCompletionMessage{
 			Role:    roleContent.Role,
@@ -116,37 +119,98 @@ func GetClient(endpoint, key string) *openai.Client {
 	return openai.NewClientWithConfig(config)
 }
 
-func ChatCompletion(logger *log.Logger, client *openai.Client, model string, history *RoleContentList, input, system string, temperature float32) (output string, err error) {
-	logger.Debug.Printf("llm ask history: %v, llm ask input: %v\n ", history, input)
-	newHistory := RoleContentList{}
-	newHistory.Merge(history)
-	newHistory.AddUserContent(input).AddSystemContent(system)
-	output, _, err = chatCompletetion(logger, client, model, &newHistory, temperature, nil)
-	return
-}
-
-func ChatTools(logger *log.Logger, client *openai.Client, model string, history *RoleContentList, input, system string, temperature float32, tools []openai.Tool) (calls []openai.ToolCall, err error) {
-	logger.Debug.Printf("llm ask history: %v, llm ask input: %v\n ", history, input)
-	newHistory := RoleContentList{}
-	newHistory.Merge(history)
-	newHistory.AddUserContent(input).AddSystemContent(system)
-	_, calls, err = chatCompletetion(logger, client, model, &newHistory, temperature, tools)
-	return
-}
-
-func chatCompletetion(logger *log.Logger, client *openai.Client, model string, history *RoleContentList, temperature float32, tools []openai.Tool) (output string, calls []openai.ToolCall, err error) {
-	resp, err := client.CreateChatCompletion(
-		context.Background(),
-		openai.ChatCompletionRequest{
-			Model:       model,
-			Messages:    history.GetOpenaiChatCompletionMessages(),
-			Temperature: temperature,
-			Tools:       tools,
-		},
-	)
-	if err != nil {
-		logger.Error.Printf("llm chat error: %v\n", err)
+func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, input, system string, temperature float32) (chat func(string, string, *RoleContentList) (string, error), err error) {
+	client := GetClient(endpoint, key)
+	if client == nil {
+		err = fmt.Errorf("build openai client failed")
 		return
 	}
-	return resp.Choices[0].Message.Content, resp.Choices[0].Message.ToolCalls, nil
+	chat = func(input, system string, history *RoleContentList) (string, error) {
+		resp, err := client.CreateChatCompletion(
+			context.Background(),
+			openai.ChatCompletionRequest{
+				Model:       model,
+				Messages:    history.GetOpenaiChatCompletionMessages(),
+				Temperature: temperature,
+			},
+		)
+		if err != nil {
+			return "", err
+		}
+		return resp.Choices[0].Message.Content, nil
+	}
+	return
+}
+
+func ChatTools(logger *log.Logger, input string, buildIntentionSystem func([]openai.Tool) string, buildParametersSystem func(openai.Tool) string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tools []openai.Tool) (call *openai.ToolCall, err error) {
+	intentionSystem := buildIntentionSystem(tools)
+	// 1/2, try to get intention
+	output, tool, err := chatIntention(logger, input, intentionSystem, chat, history, tools)
+	logger.Debug.Printf("llm intention output: %s, tool: %v, call: %v\n ", output, tool, call)
+	if err != nil {
+		return
+	}
+	if tool.Function == nil || tool.Function.Name == "" {
+		logger.Info.Printf("llm intent function not found: %v\n", err)
+		return
+	}
+	// 2/2, try to get parameters
+	parametersSystem := buildParametersSystem(tool)
+	output, call, err = chatParameters(logger, input, parametersSystem, chat, history, tool)
+	logger.Debug.Printf("llm chatParameters output: %v, call: %v\n ", output, call)
+	return
+}
+
+func chatIntention(logger *log.Logger, input string, system string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tools []openai.Tool) (output string, tool openai.Tool, err error) {
+	output, err = chat(input, system, history)
+	if err != nil {
+		logger.Error.Printf("llm chatIntention error: %v\n", err)
+		return
+	}
+	// not openai
+	for _, t := range tools {
+		if strings.Contains(output, t.Function.Name) {
+			tool = t
+			return
+		}
+	}
+	return
+}
+
+func chatParameters(logger *log.Logger, input, system string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tool openai.Tool) (output string, call *openai.ToolCall, err error) {
+	output, err = chat(input, system, history)
+	if err != nil {
+		logger.Error.Printf("llm chatParameters error: %v\n", err)
+		return
+	}
+	// clean string
+	start := -1
+	end := -1
+
+	for i, char := range output {
+		if char == '{' {
+			start = i
+			break
+		}
+	}
+	for i := len(output) - 1; i >= 0; i-- {
+		if output[i] == '}' {
+			end = i
+			break
+		}
+	}
+	if start != -1 && end != -1 && start < end {
+		output = output[start : end+1]
+	} else {
+		output = "{}"
+	}
+
+	call = &openai.ToolCall{
+		Function: openai.FunctionCall{
+			Name:      tool.Function.Name,
+			Arguments: output,
+		},
+	}
+	logger.Debug.Printf("llm chatParameters name: %s, arguments: %s\n", call.Function.Name, call.Function.Arguments)
+	return
 }

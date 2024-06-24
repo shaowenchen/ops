@@ -48,6 +48,12 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 	rawState, _ := term.GetState(stdFd)
 
 	pipelinerunsManager := agent.NewLLMPipelineRunsManager(copilotOpt.OpsServer, copilotOpt.OpsToken, "ops-system", copilotOpt.RuntimeImage, 10, copilot.AllPipelines, copilot.AllTasks)
+	// build chat
+	chat, err := copilot.BuildOpenAIChat(copilotOpt.Endpoint, copilotOpt.Key, copilotOpt.Model, &history, "", "copilot", 0.1)
+	if err != nil {
+		logger.Error.Printf("build chat error: %v\n", err)
+		return
+	}
 	for {
 		input, err := terminal.ReadLine()
 		if err != nil {
@@ -55,7 +61,7 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 			break
 		}
 		input = strings.TrimSpace(input)
-		pr, err := copilot.RunPipeline(logger, &history, pipelinerunsManager, input, 3, "copilot")
+		pr, err := copilot.RunPipeline(logger, chat, &history, pipelinerunsManager, input, "copilot")
 		if err != nil {
 			printTerm(stdFd, oldState, rawState, err.Error())
 			continue

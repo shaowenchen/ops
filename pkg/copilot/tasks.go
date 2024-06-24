@@ -1,6 +1,7 @@
 package copilot
 
 import (
+	"fmt"
 	"github.com/shaowenchen/ops/pkg/agent"
 	"github.com/shaowenchen/ops/pkg/log"
 )
@@ -10,6 +11,7 @@ var AllTasks = []agent.LLMTask{
 	taskListTasks,
 	taskListPipelines,
 	taskAppSummary,
+	taskHelp,
 }
 
 var taskListClusters = agent.LLMTask{
@@ -58,11 +60,26 @@ var taskAppSummary = agent.LLMTask{
 			}
 		}
 		logger.Debug.Println(tasksOutput)
-		client := GetClient(GlobalCopilotOption.Endpoint, GlobalCopilotOption.Key)
-		summaryOutput, err := ChatCompletion(logger, client, GlobalCopilotOption.Model, nil, input, prompt, 0)
+		chat, err := BuildOpenAIChat(GlobalCopilotOption.Endpoint, GlobalCopilotOption.Key, GlobalCopilotOption.Model, nil, input, prompt, 0)
+		if err != nil {
+			return "", err
+		}
+		summaryOutput, err := chat(tasksOutput, prompt, nil)
 		if err == nil {
 			return summaryOutput, nil
 		}
 		return tasksOutput, err
+	},
+}
+
+var taskHelp = agent.LLMTask{
+	Desc: "Help",
+	Name: "help",
+	CallFunction: func(logger *log.Logger, prManager *agent.LLMPipelineRunsManager, pr *agent.LLMPipelineRun) (output string, err error) {
+		output = `## Help: `
+		for _, p := range AllPipelines {
+			output += fmt.Sprintf("\n- %s \n", p.Desc)
+		}
+		return
 	},
 }
