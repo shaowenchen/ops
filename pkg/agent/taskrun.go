@@ -123,7 +123,6 @@ func (m *LLMTaskRunManager) Run(logger *log.Logger, pr *LLMPipelineRun, tr *LLMT
 		if tr.Output == "" {
 			tr.Output = "no output or not found"
 		}
-		logger.Debug.Printf("call function for %s, output: %s \n", tr.TaskRef, tr.Output)
 		return
 	}
 	// fill runtime image
