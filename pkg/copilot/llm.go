@@ -151,7 +151,7 @@ func ChatTools(logger *log.Logger, input string, buildIntentionSystem func([]ope
 	// 1/2, try to get intention
 IntentMaxAgain:
 	output, tool, err := chatIntention(logger, input, intentionSystem, chat, history, tools)
-	logger.Debug.Printf("llm intention output: %s, tool: %v, call: %v\n ", output, tool, call)
+	logger.Debug.Printf("llm intention output: %s\n ", output)
 	if err != nil {
 		time.Sleep(1 * time.Second)
 		if intentMaxTry > 0 {
@@ -173,7 +173,7 @@ IntentMaxAgain:
 	parametersSystem := buildParametersSystem(tool)
 parametersMaxTryAgain:
 	output, call, err = chatParameters(logger, input, parametersSystem, chat, history, tool)
-	logger.Debug.Printf("llm chatParameters output: %v, call: %v\n ", output, call)
+	logger.Debug.Printf("llm chatParameters output: %v\n ", output)
 	if err != nil {
 		time.Sleep(1 * time.Second)
 		if parametersMaxTry > 0 {

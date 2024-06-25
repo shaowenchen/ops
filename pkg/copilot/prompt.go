@@ -21,7 +21,7 @@ func GetIntentionPrompt(tools []openai.Tool) string {
 	return `Please select the most appropriate option based on the following list:
 Options:
 ` + b.String() + `
-Example: 
+Example:
 Input: ` + tools[0].Function.Description + `
 Output: ` + tools[0].Function.Name
 }
@@ -55,6 +55,7 @@ Please follow these guidelines:
 5. If no parameters are found in the text, return an empty JSON object.
 6. Do not add any explanations or additional text, only output the JSON object.
 7. Do not add any extra parameters excluding the fields in Output Example.
+8. Do not return a list of JSON objects, just return first JSON object.
 
 Example:
 Input: "Please list pod names in cluster 1 on node 1"
