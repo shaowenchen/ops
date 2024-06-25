@@ -11,4 +11,4 @@ spec:
   steps:
     - name: Check node existed
       content: |
-        found="false"; if [ -z "$node" ]; then echo "node is empty"; else if kubectl get node ${node} &>/dev/null; then echo "Node ${node} is existed"; found="true"; else echo "Node ${node} is not existed"; fi; fi
+        found="false"; if [ -z "$node" ]; then echo "node is existed"; else if kubectl get node ${node} &>/dev/null; then echo "Node ${node} is existed"; found="true"; else echo "Node ${node} is not existed"; fi; fi
