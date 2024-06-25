@@ -27,9 +27,18 @@ Output: ` + tools[0].Function.Name
 }
 
 func GetParametersPrompt(tool openai.Tool) string {
-	parametersBytes, _ := json.Marshal(tool.Function.Parameters)
 	if tool.Function.Parameters == nil {
 		return ""
+	}
+	var b strings.Builder
+	for k, v := range tool.Function.Parameters.(jsonschema.Definition).Properties {
+		b.WriteString(fmt.Sprintf("parameter: %s\n", k))
+		b.WriteString(fmt.Sprintf("parameter type: string\n"))
+		b.WriteString(fmt.Sprintf("description: %s\n", v.Description))
+		if len(v.Enum) > 0 {
+			b.WriteString(fmt.Sprintf("choice: %v\n", v.Enum))
+		}
+		b.WriteString("---\n")
 	}
 	outputScheme := map[string]string{}
 	for k, _ := range tool.Function.Parameters.(jsonschema.Definition).Properties {
@@ -41,11 +50,11 @@ func GetParametersPrompt(tool openai.Tool) string {
 Please follow these guidelines:
 
 1. Carefully analyze the provided text and identify possible parameters and their values.
-2. Parameters may include, but are not limited to: dates, times, locations, names, quantities, amounts, etc.
-3. Organize the extracted parameters into JSON format, using meaningful key names.
-4. If the value of a parameter is uncertain, use null as its value.
+3. Organize the extracted parameters into JSON format.
+4. If the value of a parameter is uncertain, use "" as its value.
 5. If no parameters are found in the text, return an empty JSON object.
 6. Do not add any explanations or additional text, only output the JSON object.
+7. Do not add any extra parameters excluding the fields in Output Example.
 
 Example:
 Input: "Please list pod names in cluster 1 on node 1"
@@ -56,5 +65,7 @@ Output:
   "typeRef": "cluster",
 }
 
-Now, please analyze the following text and extract parameters: ` + string(parametersBytes) + `# Output Example: ` + string(outputScoutputSchemeBytes)
+Now, please analyze the following text and extract parameters:
+` + b.String() + `
+# Output Example: ` + string(outputScoutputSchemeBytes)
 }

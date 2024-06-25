@@ -3,10 +3,12 @@ package copilot
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
-	"strings"
 )
 
 var GlobalCopilotOption *option.CopilotOption
@@ -143,21 +145,43 @@ func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, inpu
 }
 
 func ChatTools(logger *log.Logger, input string, buildIntentionSystem func([]openai.Tool) string, buildParametersSystem func(openai.Tool) string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tools []openai.Tool) (call *openai.ToolCall, err error) {
+	intentMaxTry := 3
+	parametersMaxTry := 3
 	intentionSystem := buildIntentionSystem(tools)
 	// 1/2, try to get intention
+IntentMaxAgain:
 	output, tool, err := chatIntention(logger, input, intentionSystem, chat, history, tools)
 	logger.Debug.Printf("llm intention output: %s, tool: %v, call: %v\n ", output, tool, call)
 	if err != nil {
+		time.Sleep(1 * time.Second)
+		if intentMaxTry > 0 {
+			intentMaxTry--
+			goto IntentMaxAgain
+		}
 		return
 	}
 	if tool.Function == nil || tool.Function.Name == "" {
 		logger.Info.Printf("llm intent function not found: %v\n", err)
+		time.Sleep(1 * time.Second)
+		if intentMaxTry > 0 {
+			intentMaxTry--
+			goto IntentMaxAgain
+		}
 		return
 	}
 	// 2/2, try to get parameters
 	parametersSystem := buildParametersSystem(tool)
+parametersMaxTryAgain:
 	output, call, err = chatParameters(logger, input, parametersSystem, chat, history, tool)
 	logger.Debug.Printf("llm chatParameters output: %v, call: %v\n ", output, call)
+	if err != nil {
+		time.Sleep(1 * time.Second)
+		if parametersMaxTry > 0 {
+			parametersMaxTry--
+			goto parametersMaxTryAgain
+		}
+		return
+	}
 	return
 }
 
@@ -211,6 +235,5 @@ func chatParameters(logger *log.Logger, input, system string, chat func(string, 
 			Arguments: output,
 		},
 	}
-	logger.Debug.Printf("llm chatParameters name: %s, arguments: %s\n", call.Function.Name, call.Function.Arguments)
 	return
 }
