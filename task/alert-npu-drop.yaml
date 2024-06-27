@@ -81,7 +81,7 @@ spec:
                       raise Exception(error_message)
               except Exception as e:
                   if len(error_message) == 0:
-                      error_message += str(e)
+                      error_message = str(e)
               finally:
                   if len(error_message) > 0:
                       print(error_message)

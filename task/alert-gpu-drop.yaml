@@ -82,7 +82,8 @@ spec:
                       error_message += build_error_message('gpu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
                       raise Exception(error_message)
               except Exception as e:
-                  error_message += build_error_message(str(e))
+                  if len(error_message) == 0:
+                      error_message = str(e)
               finally:
                   if len(error_message) > 0:
                       error_message = f'集群: {cluster} \n节点: {hostname} \n{error_message}异常判断: {reason}\n'
