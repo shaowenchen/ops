@@ -26,7 +26,6 @@ spec:
 
               error_message = ''
               reason = '设备注册异常'
-              
 
               def send(message):
                   payload = {
@@ -67,7 +66,7 @@ spec:
                           for key, value in device_list.items():
                               if value and is_json(value) and len(json.loads(value)) > 0 and "Fault" in key:
                                   device = cm_name.split("deviceinfo-")[-1]
-                                  error_message += f"设备: {device}, Status: {value}\n"
+                                  error_message += f"Device: {device}, Status: {value}\n"
               try:
                   config_maps = get_config_maps()
                   if config_maps:
@@ -78,5 +77,5 @@ spec:
               finally:
                   if len(error_message) > 0:
                       print(error_message)
-                      error_message = f'集群: {cluster} \n \n{error_message}异常判断: {reason}\n'
+                      error_message = f'集群: {cluster} \n{error_message}异常判断: {reason}\n'
                       send(error_message)

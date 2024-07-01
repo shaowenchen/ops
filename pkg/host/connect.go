@@ -306,7 +306,8 @@ func (c *HostConnection) execPython(ctx context.Context, sudo bool, cmd string) 
 }
 
 func (c *HostConnection) execScript(ctx context.Context, sudo bool, cmd string) (stdout string, err error) {
-	if strings.HasPrefix(strings.TrimSpace(cmd), "#!/usr/bin/python") {
+	lines := strings.Split(cmd, "\n")
+	if len(lines) > 1 && strings.Contains(lines[0], "python") {
 		return c.execPython(ctx, sudo, cmd)
 	}
 	return c.execSh(ctx, sudo, cmd)
