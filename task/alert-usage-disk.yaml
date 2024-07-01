@@ -28,7 +28,6 @@ spec:
               error_message = ''
               reason = '磁盘使用率超过阈值'
               usage_threshold = ${usage}
-              
 
               def send(message):
                   payload = {
@@ -53,8 +52,8 @@ spec:
               def check_disk_usage(hosts):
                   global error_message
                   for item in hosts.get("items", []):
-                      hostname = item.get("metadata", {}).get("hostname")
                       status = item.get("status", {})
+                      hostname = status.get("hostname")
                       disk_usage_percent = status.get("diskUsagePercent")
                       if disk_usage_percent:
                           usage_percentages = [int(disk.strip('%')) for disk in disk_usage_percent.split() if "%" in disk]

@@ -53,8 +53,8 @@ spec:
               def check_mem_usage(hosts):
                   global error_message
                   for item in hosts.get("items", []):
-                      hostname = item.get("metadata", {}).get("hostname")
                       status = item.get("status", {})
+                      hostname = status.get("hostname")
                       mem_usage_percent = status.get("memUsagePercent")
                       mem_usage_percent = mem_usage_percent.strip('%').split('.')[0]
                       usage_percentage = int(mem_usage_percent)
