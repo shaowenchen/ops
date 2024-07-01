@@ -1,0 +1,82 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alert-npu-cm
+    namespace: ops-system
+spec:
+    desc: use task `alert-npu-cm` to check npu cm in specified host
+    crontab: "*/10 * * * *"
+    nodeName: "anymaster"
+    typeRef: cluster
+    variables:
+        cluster: "default"
+        notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+    steps:
+        - name: alert-npu-cm
+          content: |
+              #!/usr/bin/python
+              import os
+              import subprocess
+              import requests
+              import json
+              from datetime import datetime
+
+              cluster = '${cluster}'
+              notifaction = '${notifaction}'
+
+              error_message = ''
+              reason = '设备注册异常'
+              
+
+              def send(message):
+                  payload = {
+                      'msgtype': 'text',
+                      'text': {
+                          'content': message
+                      }
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              def get_config_maps(namespace="kube-system"):
+                  cmd = ["kubectl", "-n", namespace, "get", "cm", "-o", "json"]
+                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                  if result.returncode != 0:
+                      print(f"Error fetching config maps: {result.stderr}")
+                      return None
+                  return json.loads(result.stdout)
+
+              def is_json(myjson):
+                  try:
+                      json.loads(myjson)
+                  except ValueError:
+                    return False
+                  return True
+
+              def check_device_status(config_maps):
+                  global error_message 
+                  for item in config_maps.get("items", []):
+                      cm_name = item.get("metadata", {}).get("name")
+                      device_info_cfg = item.get("data", {}).get("DeviceInfoCfg")
+                      if device_info_cfg:
+                          device_info = json.loads(device_info_cfg)
+                          device_list = device_info.get("DeviceInfo", {}).get("DeviceList", {})
+                          for key, value in device_list.items():
+                              if value and is_json(value) and len(json.loads(value)) > 0 and "Fault" in key:
+                                  device = cm_name.split("deviceinfo-")[-1]
+                                  error_message += f"设备: {device}, Status: {value}\n"
+              try:
+                  config_maps = get_config_maps()
+                  if config_maps:
+                      check_device_status(config_maps)
+              except Exception as e:
+                  if len(error_message) == 0:
+                      error_message = str(e)
+              finally:
+                  if len(error_message) > 0:
+                      print(error_message)
+                      error_message = f'集群: {cluster} \n \n{error_message}异常判断: {reason}\n'
+                      send(error_message)
