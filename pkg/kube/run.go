@@ -3,7 +3,6 @@ package kube
 import (
 	"context"
 	"fmt"
-
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -11,11 +10,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"strings"
 )
 
 func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string) (pod *corev1.Pod, err error) {
 	if image == "" {
 		image = constants.DefaultRuntimeImage
+	}
+	// choose interpreter
+	usePython := false
+	lines := strings.Split(shell, "\n")
+	if len(lines) > 1 && strings.Contains(lines[0], "python") {
+		usePython = true
 	}
 	shellBase64 := utils.EncodingStringToBase64(shell)
 	priviBool := true
@@ -33,6 +39,9 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 	// is incluster or not
 	hostFlag := true
 	cmdArg := []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"}
+	if usePython {
+		cmdArg[1] = cmdArg[1] + " -- python3 /dev/stdin"
+	}
 	pod, err = client.CoreV1().Pods(namespacedName.Namespace).Create(
 		context.TODO(),
 		&corev1.Pod{
