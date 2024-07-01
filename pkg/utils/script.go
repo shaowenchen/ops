@@ -64,7 +64,7 @@ func ShellMemTotal() string {
 }
 
 func ShellMemUsagePercent() string {
-	return `free -m | awk 'NR==2{printf "%.2f%\n", $3*100/$2 }'`
+	return `free -m | awk 'NR==2{printf "%.2f%%\n", $3*100/$2 }'`
 }
 
 func ShellDiskTotal(timeout int) string {
