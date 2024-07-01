@@ -10,7 +10,7 @@ spec:
     typeRef: cluster
     variables:
         cluster: "default"
-        usage: "20"
+        usage: "80"
         notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
     steps:
         - name: alert-usage-mem
@@ -56,10 +56,10 @@ spec:
                       hostname = item.get("metadata", {}).get("hostname")
                       status = item.get("status", {})
                       mem_usage_percent = status.get("memUsagePercent")
-                      if mem_usage_percent:
-                          usage_percentages = [int(mem.strip('%')) for mem in mem_usage_percent.split() if "%" in mem]
-                          if any(usage > usage_threshold for usage in usage_percentages):
-                              error_message += f"Hostname: {hostname}, Usage: {mem_usage_percent}\n"
+                      mem_usage_percent = mem_usage_percent.strip('%').split('.')[0]
+                      usage_percentage = int(mem_usage_percent)
+                      if usage_percentage > usage_threshold:
+                          error_message += f"Hostname: {hostname}, Usage: {mem_usage_percent}\n"
               try:
                   hosts = get_hosts()
                   if hosts:
