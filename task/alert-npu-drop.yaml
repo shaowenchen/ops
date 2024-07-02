@@ -46,8 +46,25 @@ spec:
 
               def build_error_message(message, card_id=''):
                   if card_id == '':
-                      return f'异常信息: {message}\n'
+                      return f': {message}\n'
                   return f'异常位置: {card_id}\n异常信息: {message}\n'
+            
+              def get_schedulable_nodes():
+                  cmd = ["kubectl", "get", "nodes", "-o", "json"]
+                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                  if result.returncode != 0:
+                      print(f"Error fetching nodes: {result.stderr}")
+                      return []
+                  nodes = json.loads(result.stdout)
+                  schedulable_nodes = []
+                  for item in nodes.get("items", []):
+                      if item.get("spec", {}).get("unschedulable", False) == False:
+                          schedulable_nodes.append(item["metadata"]["name"])
+                  return schedulable_nodes
+               
+              if hostname not in get_schedulable_nodes():
+                  print(f'{hostname} is not schedulable')
+                  exit(0)
 
               try:
                   # 1. check npu-smi exists /usr/local/bin/npu-smi
@@ -85,5 +102,5 @@ spec:
               finally:
                   if len(error_message) > 0:
                       print(error_message)
-                      error_message = f'集群: {cluster} \n节点: {hostname} \n{error_message}异常判断: {reason}\n'
+                      error_message = f'cluster: {cluster} \n nodename: {hostname} \n{error_message}reason: {reason}\n'
                       send(error_message)
