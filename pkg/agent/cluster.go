@@ -34,10 +34,10 @@ func NewLLMClustersManager(endpoint, token, namespace string) *LLMClustersManage
 
 func (m *LLMClustersManager) GetMarkdown() string {
 	var b strings.Builder
-	b.WriteString("| namespace | name | desc | \n")
-	b.WriteString("|-|-|-|\n")
+	b.WriteString("| name | desc | \n")
+	b.WriteString("|-|-|\n")
 	for _, item := range m.clusters {
-		b.WriteString(fmt.Sprintf("| %s | %s | %s |\n", item.Namespace, item.Name, item.Desc))
+		b.WriteString(fmt.Sprintf("| %s | %s |\n", item.Name, item.Desc))
 	}
 	return b.String()
 }

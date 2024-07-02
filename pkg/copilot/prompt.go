@@ -18,12 +18,8 @@ func GetIntentionPrompt(tools []openai.Tool) string {
 	for _, tool := range tools {
 		b.WriteString(fmt.Sprintf("| %s | %s |\n", tool.Function.Name, tool.Function.Description))
 	}
-	return `Please select the most appropriate option based on the following list:
-Options:
-` + b.String() + `
-Example:
-Input: ` + tools[0].Function.Description + `
-Output: ` + tools[0].Function.Name
+	return `Please select the most appropriate tool to complete the task and output the tool name. The tools Options are:
+` + b.String()
 }
 
 func GetParametersPrompt(tool openai.Tool) string {
@@ -36,10 +32,11 @@ func GetParametersPrompt(tool openai.Tool) string {
 		funcDesc.WriteString("It requires the following parameters:\n")
 	}
 	for k, v := range tool.Function.Parameters.(jsonschema.Definition).Properties {
-		parmDesc := fmt.Sprintf("%s (string, required): %s\n", k, v.Description)
+		parmDesc := fmt.Sprintf("- %s (string, required):\n %s\n", k, v.Description)
 		if len(v.Enum) > 0 {
-			parmDesc += ", Valid values: " + strings.Join(v.Enum, ", ")
+			parmDesc += "Available values: " + strings.Join(v.Enum, ", ")
 		}
+		parmDesc += "\n"
 		funcDesc.WriteString(parmDesc)
 	}
 	outputScheme := map[string]string{}

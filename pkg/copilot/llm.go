@@ -145,7 +145,7 @@ func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, inpu
 }
 
 func ChatTools(logger *log.Logger, input string, buildIntentionSystem func([]openai.Tool) string, buildParametersSystem func(openai.Tool) string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tools []openai.Tool) (call *openai.ToolCall, err error) {
-	intentMaxTry := 3
+	intentMaxTry := 5
 	parametersMaxTry := 3
 	intentionSystem := buildIntentionSystem(tools)
 	// 1/2, try to get intention
@@ -162,7 +162,7 @@ IntentMaxAgain:
 	}
 	if tool.Function == nil || tool.Function.Name == "" {
 		logger.Info.Printf("llm intent function not found: %v\n", err)
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 		if intentMaxTry > 0 {
 			intentMaxTry--
 			goto IntentMaxAgain
@@ -175,7 +175,7 @@ parametersMaxTryAgain:
 	output, call, err = chatParameters(logger, input, parametersSystem, chat, history, tool)
 	logger.Debug.Printf("llm chatParameters output: %v\n ", output)
 	if err != nil {
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 		if parametersMaxTry > 0 {
 			parametersMaxTry--
 			goto parametersMaxTryAgain
@@ -191,9 +191,25 @@ func chatIntention(logger *log.Logger, input string, system string, chat func(st
 		logger.Error.Printf("llm chatIntention error: %v\n", err)
 		return
 	}
-	// not openai
+	avaliables := make([]string, 0)
 	for _, t := range tools {
 		if strings.Contains(output, t.Function.Name) {
+			avaliables = append(avaliables, t.Function.Name)
+		}
+	}
+	if len(avaliables) == 0 {
+		return
+	}
+	// return max length
+	funcName := avaliables[0]
+	for _, name := range avaliables {
+		if len(name) > len(funcName) {
+			funcName = name
+		}
+	}
+	tool = tools[0]
+	for _, t := range tools {
+		if t.Function.Name == funcName {
 			tool = t
 			return
 		}
