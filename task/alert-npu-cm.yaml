@@ -54,9 +54,23 @@ spec:
                   except ValueError:
                     return False
                   return True
+              
+              def get_schedulable_nodes():
+                  cmd = ["kubectl", "get", "nodes", "-o", "json"]
+                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                  if result.returncode != 0:
+                      print(f"Error fetching nodes: {result.stderr}")
+                      return []
+                  nodes = json.loads(result.stdout)
+                  schedulable_nodes = []
+                  for item in nodes.get("items", []):
+                      if item.get("spec", {}).get("unschedulable", False) == False:
+                          schedulable_nodes.append(item["metadata"]["name"])
+                  return schedulable_nodes
 
               def check_device_status(config_maps):
-                  global error_message 
+                  global error_message
+                  schedulable_nodes = get_schedulable_nodes()
                   for item in config_maps.get("items", []):
                       cm_name = item.get("metadata", {}).get("name")
                       device_info_cfg = item.get("data", {}).get("DeviceInfoCfg")
@@ -66,7 +80,8 @@ spec:
                           for key, value in device_list.items():
                               if value and is_json(value) and len(json.loads(value)) > 0 and "Fault" in key:
                                   device = cm_name.split("deviceinfo-")[-1]
-                                  error_message += f"Device: {device}, Status: {value}\n"
+                                  if device in schedulable_nodes:
+                                      error_message += f"Nodename: {device}, Status: {value}\n"
               try:
                   config_maps = get_config_maps()
                   if config_maps:

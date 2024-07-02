@@ -10,7 +10,7 @@ spec:
     typeRef: cluster
     variables:
         cluster: "default"
-        usage: "80"
+        usage: "85"
         notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
     steps:
         - name: alert-usage-disk
@@ -41,6 +41,7 @@ spec:
                   }
                   response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
                   print(response.text)
+                
               def get_hosts(namespace="ops-system"):
                   cmd = ["kubectl", "-n", namespace, "get", "hosts", "-o", "json"]
                   try:
@@ -49,8 +50,23 @@ spec:
                   except subprocess.CalledProcessError as e:
                       print(f"Error fetching hosts: {e.stderr}")
                       return None
+
+              def get_schedulable_nodes():
+                  cmd = ["kubectl", "get", "nodes", "-o", "json"]
+                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                  if result.returncode != 0:
+                      print(f"Error fetching nodes: {result.stderr}")
+                      return []
+                  nodes = json.loads(result.stdout)
+                  schedulable_nodes = []
+                  for item in nodes.get("items", []):
+                      if item.get("spec", {}).get("unschedulable", False) == False:
+                          schedulable_nodes.append(item["metadata"]["name"])
+                  return schedulable_nodes
+
               def check_disk_usage(hosts):
                   global error_message
+                  schedulable_nodes = get_schedulable_nodes()
                   for item in hosts.get("items", []):
                       status = item.get("status", {})
                       hostname = status.get("hostname")
@@ -58,7 +74,8 @@ spec:
                       if disk_usage_percent:
                           usage_percentages = [int(disk.strip('%')) for disk in disk_usage_percent.split() if "%" in disk]
                           if any(usage > usage_threshold for usage in usage_percentages):
-                              error_message += f"Hostname: {hostname}, Usage: {disk_usage_percent}\n"
+                              if hostname in schedulable_nodes:
+                                  error_message += f"Nodename: {hostname}, Usage: {disk_usage_percent}\n"
               try:
                   hosts = get_hosts()
                   if hosts:
