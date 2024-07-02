@@ -54,18 +54,20 @@ spec:
                   if not os.path.exists('/usr/bin/nvidia-smi'):
                       raise Exception(build_error_message('找不到 nvidia-smi 命令'))
                   # 2. 
-                  preoutput = subprocess.check_output(['nvidia-smi' , '--query-compute-apps=process_name,used_memory', '--format=csv,noheader,nounits'], universal_newlines=True)
-                  prelines = [line for line in preoutput.split('\n')]
+                  output = subprocess.check_output(['nvidia-smi' , '--query-compute-apps=process_name,pid,used_memory', '--format=csv,noheader,nounits'], universal_newlines=True)
+                  lines = [line for line in output.split('\n')]
                   
-                  # 3. wait 3s to recheck
-                  time.sleep(3)
-                  ouput = subprocess.check_output(['nvidia-smi' , '--query-compute-apps=process_name,used_memory', '--format=csv,noheader,nounits'], universal_newlines=True)
-                  lines = [line for line in ouput.split('\n')]
+                  # 3. check zombie
+                  alertLines = []
                   for index, line in enumerate(lines):
                       line = line.strip()
-                      if '[No data]' in line and line in prelines:
+                      if '[No data]' in line and line not in alertLines:
+                          alertLines.append(line)
+                  if len(alertLines) > 0:
+                      for line in alertLines:
+                          pid = line.split(', ')[1]
                           num = line.split(', ')[-1]
-                          error_message += build_error_message('有僵尸进程占用显卡 ' + num + 'MB')
+                          error_message += build_error_message('有僵尸进程 ' + pid + ' 占用显卡 ' + num + 'MB')
                   
               except Exception as e:
                   if len(error_message) == 0:
