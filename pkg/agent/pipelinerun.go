@@ -242,6 +242,12 @@ func (m *LLMPipelineRunsManager) BuildTool(p LLMPipeline) openai.Tool {
 	}
 
 	for _, v := range p.Variables {
+		if _, ok := parmerters.Properties[v.Key]; ok {
+			scheme := parmerters.Properties[v.Key]
+			scheme.Description = p.Desc
+			parmerters.Properties[v.Key] = scheme
+			continue
+		}
 		parmerters.Properties[v.Key] = jsonschema.Definition{
 			Type:        jsonschema.DataType(v.Value.Type),
 			Description: v.Desc,

@@ -16,8 +16,9 @@ func GetIntentionPrompt(tools []openai.Tool) string {
 	for _, tool := range tools {
 		b.WriteString(fmt.Sprintf("- %s(%s)\n", tool.Function.Name, tool.Function.Description))
 	}
-	return fmt.Sprintf(`Please select the most appropriate option to finish the task. 
-Must be one of the following options:\n%s`, b.String())
+	return `Please select the most appropriate option to finish the task. 
+Must be one of the following options: ` +
+		b.String()
 }
 
 func GetParametersPrompt(tool openai.Tool) string {
@@ -58,6 +59,6 @@ two。. Please make sure that the parameters you extract strictly follow the def
 2. Output the extracted parameters in JSON format.
 
 Function definition:` + funcDesc.String() + `
-The parsing result of all necessary parameters is (in JSON format):` +
+The parsing of all necessary parameters is (in JSON format):` +
 		string(outputSchemeBytes)
 }
