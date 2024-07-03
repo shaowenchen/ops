@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/shaowenchen/ops/pkg/constants"
@@ -135,8 +136,13 @@ func IsFailedPod(pod *corev1.Pod) bool {
 	if status == corev1.PodFailed {
 		return true
 	}
-	if pod.Status.ContainerStatuses != nil && len(pod.Status.ContainerStatuses) > 0 && pod.Status.ContainerStatuses[0].LastTerminationState.Terminated != nil {
-		return pod.Status.ContainerStatuses[0].LastTerminationState.Terminated.ExitCode > 0
+	if pod.Status.ContainerStatuses != nil && len(pod.Status.ContainerStatuses) > 0 {
+		if pod.Status.ContainerStatuses[0].LastTerminationState.Terminated != nil {
+			return pod.Status.ContainerStatuses[0].LastTerminationState.Terminated.ExitCode > 0
+		}
+		if pod.Status.ContainerStatuses[0].State.Waiting != nil && strings.Contains(pod.Status.ContainerStatuses[0].State.Waiting.Reason, "BackOff") {
+			return true
+		}
 	}
 	return false
 }

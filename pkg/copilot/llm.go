@@ -146,7 +146,7 @@ func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, inpu
 
 func ChatTools(logger *log.Logger, input string, buildIntentionSystem func([]openai.Tool) string, buildParametersSystem func(openai.Tool) string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tools []openai.Tool) (call *openai.ToolCall, err error) {
 	intentMaxTry := 5
-	parametersMaxTry := 3
+	parametersMaxTry := 5
 	intentionSystem := buildIntentionSystem(tools)
 	// 1/2, try to get intention
 IntentMaxAgain:
