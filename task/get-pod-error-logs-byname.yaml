@@ -11,4 +11,4 @@ spec:
     topk: "50"
   steps:
     - name: get pod topk error logs
-      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl logs --tail=${topk} -n | grep -iE 'err|warn'
+      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl logs --tail=${topk} -n | grep -iE 'err|warn' | exit 0

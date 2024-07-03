@@ -34,10 +34,18 @@ func NewLLMClustersManager(endpoint, token, namespace string) *LLMClustersManage
 
 func (m *LLMClustersManager) GetMarkdown() string {
 	var b strings.Builder
-	b.WriteString("| name | desc | \n")
-	b.WriteString("|-|-|\n")
+	b.WriteString("| namespace | name | desc | \n")
+	b.WriteString("|-|-|-|\n")
 	for _, item := range m.clusters {
-		b.WriteString(fmt.Sprintf("| %s | %s |\n", item.Name, item.Desc))
+		b.WriteString(fmt.Sprintf("| %s | %s | %s |\n", item.Namespace, item.Name, item.Desc))
+	}
+	return b.String()
+}
+
+func (m *LLMClustersManager) GetText() string {
+	var b strings.Builder
+	for _, item := range m.clusters {
+		b.WriteString(fmt.Sprintf("name: %s desc: %s,", item.Name, item.Desc))
 	}
 	return b.String()
 }
@@ -95,14 +103,4 @@ func (m *LLMClustersManager) StartUpdateTimer(interval time.Duration, updateFunc
 		}
 	}()
 	m.clusters, _ = updateFunc()
-}
-
-func (m *LLMClustersManager) BuildtMarkdown() string {
-	var b strings.Builder
-	b.WriteString("| namespace | name | desc | \n")
-	b.WriteString("|-|-|-|\n")
-	for _, item := range m.clusters {
-		b.WriteString(fmt.Sprintf("| %s | %s | %s |\n", item.Namespace, item.Name, item.Desc))
-	}
-	return b.String()
 }

@@ -11,4 +11,4 @@ spec:
     topk: "20"
   steps:
     - name: get pod topk logs by svc name
-      content: kubectl get svc --all-namespaces | grep ${svc} | awk '{print $1}' | xargs -L1 kubectl logs -l app=${svc} --tail=${topk} -n
+      content: kubectl get svc --all-namespaces | grep ${svc} | awk '{print $1}' | xargs -L1 kubectl logs -l app=${svc} --tail=${topk} -n | exit 0

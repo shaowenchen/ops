@@ -225,20 +225,20 @@ func (m *LLMPipelineRunsManager) BuildTool(p LLMPipeline) openai.Tool {
 		Properties: map[string]jsonschema.Definition{
 			"typeRef": {
 				Type:        "string",
-				Description: "the credential type you provide",
+				Description: "just set it to cluster",
 				Enum:        []string{"cluster"},
 			},
 			"nameRef": {
 				Type:        "string",
-				Description: m.GetClusterManager().BuildtMarkdown(),
+				Description: m.GetClusterManager().GetText(),
 				Enum:        m.GetClusterManager().GetList(),
 			},
 			"nodeName": {
 				Type:        "string",
-				Description: "if typeRef is cluster, nodeName means the name of a specific host in the cluster",
+				Description: "if typeRef is cluster, nodeName is a host name. if not found, use anymaster",
 			},
 		},
-		Required: []string{"typeRef", "nameRef"},
+		Required: []string{"typeRef", "nameRef", "nodeName"},
 	}
 
 	for _, v := range p.Variables {

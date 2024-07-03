@@ -2,13 +2,14 @@ package copilot
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"strings"
-	"time"
-
 	openai "github.com/sashabaranov/go-openai"
+	"github.com/sashabaranov/go-openai/jsonschema"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
+	"strings"
+	"time"
 )
 
 var GlobalCopilotOption *option.CopilotOption
@@ -223,6 +224,7 @@ func chatParameters(logger *log.Logger, input, system string, chat func(string, 
 		logger.Error.Printf("llm chatParameters error: %v\n", err)
 		return
 	}
+	logger.Debug.Printf("llm chatParameters output: %s\n ", output)
 	// clean string
 	start := -1
 	end := -1
@@ -243,6 +245,20 @@ func chatParameters(logger *log.Logger, input, system string, chat func(string, 
 		output = output[start : end+1]
 	} else {
 		output = "{}"
+	}
+	// validate json
+	outputMap := make(map[string]interface{})
+	err = json.Unmarshal([]byte(output), &outputMap)
+	if err != nil {
+		logger.Error.Printf("json marshal error: %v\n", err)
+		return
+	}
+
+	for k, _ := range tool.Function.Parameters.(jsonschema.Definition).Properties {
+		if _, ok := outputMap[k]; !ok {
+			err = fmt.Errorf("parameter %s not found", k)
+			return
+		}
 	}
 
 	call = &openai.ToolCall{
