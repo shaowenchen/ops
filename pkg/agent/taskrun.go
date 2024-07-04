@@ -123,6 +123,11 @@ func (m *LLMTaskRunManager) Run(logger *log.Logger, pr *LLMPipelineRun, tr *LLMT
 		if tr.Output == "" {
 			tr.Output = "no output or not found"
 		}
+		if err != nil {
+			tr.RunStatus = opsv1.StatusFailed
+		} else {
+			tr.RunStatus = opsv1.StatusSuccessed
+		}
 		return
 	}
 	// fill runtime image

@@ -194,7 +194,7 @@ func chatIntention(logger *log.Logger, input string, system string, chat func(st
 	}
 	avaliables := make([]string, 0)
 	for _, t := range tools {
-		if strings.Contains(output, t.Function.Name) {
+		if strings.Contains(output, t.Function.Name) || strings.Contains(output, t.Function.Description) {
 			avaliables = append(avaliables, t.Function.Name)
 		}
 	}

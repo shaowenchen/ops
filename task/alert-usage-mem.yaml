@@ -5,7 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: use task `alert-usage-mem` to check npu cm in specified host
-    crontab: "*/10 * * * *"
+    crontab: "*/30 * * * *"
     nodeName: "anymaster"
     typeRef: cluster
     variables:
@@ -28,7 +28,6 @@ spec:
               error_message = ''
               reason = '内存使用率超过阈值'
               usage_threshold = ${usage}
-              
 
               def send(message):
                   payload = {
@@ -68,7 +67,7 @@ spec:
                   for item in hosts.get("items", []):
                       status = item.get("status", {})
                       hostname = status.get("hostname")
-                      mem_usage_percent = status.get("memUsagePercent")
+                      mem_usage_percent = status.get("memUsagePercent", "0.00%")
                       usage_percentage = mem_usage_percent.split("%")[0].split(".")[0]
                       usage_percentage = int(usage_percentage)
                       if usage_percentage > usage_threshold:

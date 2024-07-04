@@ -16,9 +16,10 @@ func GetIntentionPrompt(tools []openai.Tool) string {
 	for _, tool := range tools {
 		b.WriteString(fmt.Sprintf("- %s(%s)\n", tool.Function.Name, tool.Function.Description))
 	}
-	return `Please select the most appropriate option to finish the task. 
+	return `Please select the most appropriate option to classify the intention of the user. 
+Don't ask any more questions, just select the option.
 Must be one of the following options: ` +
-		b.String()
+b.String()
 }
 
 func GetParametersPrompt(tool openai.Tool) string {
