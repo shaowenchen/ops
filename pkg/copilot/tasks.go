@@ -42,34 +42,23 @@ var taskAppSummary = agent.LLMTask{
 	Desc: "summary",
 	Name: "summary",
 	CallFunction: func(logger *log.Logger, prManager *agent.LLMPipelineRunsManager, pr *agent.LLMPipelineRun) (output string, err error) {
-		prompt := `
-# Give brief summaries and suggestions based on the problem and the tasks performed for the problem.
-# Don't repeat the question in the answer.
-# Do not repeat the result of the task in the answer.
-# Do not list the implementation details of each step in your answer
-# Answer the question in the language of the question.
-`
-		input := "Question：" + pr.Desc + "\n"
-		tasksOutput := "### Some additional information\n"
+		output = "### Summary\n"
 		trLength := len(pr.TaskRuns)
-		for i, tr := range pr.TaskRuns {
-			input += tr.Output + "\n"
-			if i < trLength-1 {
-				tasksOutput += "#### " + tr.TaskRef + "\n"
-				tasksOutput += tr.Output + "\n"
-			}
+		for i := 0; i < trLength-1; i++ {
+			t := pr.TaskRuns[i]
+			t.Output = ShortOutput(t.Output)
+			output += "#### " + t.TaskRef + "\n"
+			output += t.Output + "\n"
 		}
-		logger.Debug.Println(tasksOutput)
-		chat, err := BuildOpenAIChat(GlobalCopilotOption.Endpoint, GlobalCopilotOption.Key, GlobalCopilotOption.Model, nil, input, prompt, 0)
-		if err != nil {
-			return "", err
-		}
-		summaryOutput, err := chat(tasksOutput, prompt, nil)
-		if err == nil {
-			return summaryOutput, nil
-		}
-		return tasksOutput, err
+		return
 	},
+}
+
+func ShortOutput(output string) string {
+	if len(output) > 1000 {
+		return output[:500] + "..." + output[len(output)-500:]
+	}
+	return output
 }
 
 var taskHelp = agent.LLMTask{

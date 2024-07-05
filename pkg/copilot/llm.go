@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	openai "github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/shaowenchen/ops/pkg/agent"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
-	"strings"
-	"time"
 )
 
 var GlobalCopilotOption *option.CopilotOption
@@ -129,6 +129,11 @@ func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, inpu
 		return
 	}
 	chat = func(input, system string, history *RoleContentList) (string, error) {
+		if history == nil {
+			history = &RoleContentList{}
+		}
+		history = history.AddSystemContent(system)
+		history = history.AddUserContent(input)
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{
@@ -145,127 +150,98 @@ func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, inpu
 	return
 }
 
-func ChatTools(logger *log.Logger, input string, buildIntentionSystem func([]openai.Tool) string, buildParametersSystem func(openai.Tool) string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tools []openai.Tool) (call *openai.ToolCall, err error) {
-	intentMaxTry := 3
-	parametersMaxTry := 3
-	intentionSystem := buildIntentionSystem(tools)
-	// 1/2, try to get intention
-IntentMaxAgain:
-	output, tool, err := chatIntention(logger, input, intentionSystem, chat, history, tools)
-	logger.Debug.Printf("llm intention output: %s\n ", output)
-	if err != nil {
-		time.Sleep(1 * time.Second)
-		if intentMaxTry > 0 {
-			intentMaxTry--
-			goto IntentMaxAgain
-		}
-		return
-	}
-	if tool.Function == nil || tool.Function.Name == "" {
-		logger.Info.Printf("llm intent function not found: %v\n", err)
-		time.Sleep(3 * time.Second)
-		if intentMaxTry > 0 {
-			intentMaxTry--
-			goto IntentMaxAgain
-		}
-		return
-	}
-	// 2/2, try to get parameters
-	parametersSystem := buildParametersSystem(tool)
-parametersMaxTryAgain:
-	output, call, err = chatParameters(logger, input, parametersSystem, chat, history, tool)
-	logger.Debug.Printf("llm chatParameters output: %v\n ", output)
-	if err != nil {
-		time.Sleep(3 * time.Second)
-		if parametersMaxTry > 0 {
-			parametersMaxTry--
-			goto parametersMaxTryAgain
-		}
-		return
-	}
-	return
-}
-
-func chatIntention(logger *log.Logger, input string, system string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tools []openai.Tool) (output string, tool openai.Tool, err error) {
+func ChatIntention(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func([]agent.LLMPipeline) string, pipelines []agent.LLMPipeline, history *RoleContentList, input string, maxTryTimes int) (output string, pipeline agent.LLMPipeline, pr *agent.LLMPipelineRun, err error) {
+Again:
+	system := buildSystem(pipelines)
 	output, err = chat(input, system, history)
 	if err != nil {
 		logger.Error.Printf("llm chatIntention error: %v\n", err)
+		if maxTryTimes > 0 {
+			maxTryTimes--
+			goto Again
+		}
 		return
 	}
+	logger.Debug.Printf("llm chatIntention output: %s\n", output)
+	// check pipelines
 	avaliables := make([]string, 0)
-	for _, t := range tools {
-		if strings.Contains(output, t.Function.Name) || strings.Contains(output, t.Function.Description) {
-			avaliables = append(avaliables, t.Function.Name)
+	for _, p := range pipelines {
+		if strings.Contains(output, p.Name) || strings.Contains(output, p.Desc) {
+			avaliables = append(avaliables, p.Name)
 		}
 	}
 	if len(avaliables) == 0 {
+		if maxTryTimes > 0 {
+			maxTryTimes--
+			logger.Debug.Printf("try again chatIntention, maxTryTimes: %d\n", maxTryTimes)
+			goto Again
+		}
 		return
 	}
-	// return max length
-	funcName := avaliables[0]
+	// return max length match
+	available := avaliables[0]
 	for _, name := range avaliables {
-		if len(name) > len(funcName) {
-			funcName = name
+		if len(name) > len(available) {
+			available = name
 		}
 	}
-	tool = tools[0]
-	for _, t := range tools {
-		if t.Function.Name == funcName {
-			tool = t
+	for _, p := range pipelines {
+		if p.Name == available {
+			pipeline = p
+			pr = agent.NewLLMPipelineRun(p)
 			return
 		}
+	}
+	if maxTryTimes > 0 {
+		maxTryTimes--
+		goto Again
 	}
 	return
 }
 
-func chatParameters(logger *log.Logger, input, system string, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, tool openai.Tool) (output string, call *openai.ToolCall, err error) {
+func ChatParameters(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func(agent.LLMPipeline) string, pipelines []agent.LLMPipeline, history *RoleContentList, pipeline agent.LLMPipeline, pr *agent.LLMPipelineRun, input string, maxTryTimes int) (output string, err error) {
+Again:
+	system := buildSystem(pipeline)
 	output, err = chat(input, system, history)
 	if err != nil {
 		logger.Error.Printf("llm chatParameters error: %v\n", err)
 		return
 	}
-	logger.Debug.Printf("llm chatParameters output: %s\n ", output)
 	// clean string
 	start := -1
 	end := -1
-
-	for i, char := range output {
-		if char == '{' {
+	for i := 0; i < len(output); i++ {
+		char := output[i]
+		if char == '{' && start == -1 && end == -1 {
 			start = i
-			break
-		}
-	}
-	for i := len(output) - 1; i >= 0; i-- {
-		if output[i] == '}' {
+		} else if char == '}' && start != -1 && end == -1 {
 			end = i
+		} else if start != -1 && end != -1 {
 			break
 		}
 	}
 	if start != -1 && end != -1 && start < end {
 		output = output[start : end+1]
-	} else {
-		output = "{}"
 	}
+	logger.Debug.Printf("llm chatParameters cleaed output: %s\n ", output)
 	// validate json
-	outputMap := make(map[string]interface{})
+	outputMap := make(map[string]string)
 	err = json.Unmarshal([]byte(output), &outputMap)
 	if err != nil {
 		logger.Error.Printf("json marshal error: %v\n", err)
+		if maxTryTimes > 0 {
+			maxTryTimes--
+			logger.Debug.Printf("try again chatParameters, maxTryTimes: %d\n", maxTryTimes)
+			goto Again
+		}
 		return
 	}
 
-	for k, _ := range tool.Function.Parameters.(jsonschema.Definition).Properties {
-		if _, ok := outputMap[k]; !ok {
-			err = fmt.Errorf("parameter %s not found", k)
-			return
+	for i, _ := range pipeline.Variables {
+		if _, ok := outputMap[pipeline.Variables[i].Key]; !ok {
+			pipeline.Variables[i].Value.Str = outputMap[pipeline.Variables[i].Key]
 		}
 	}
-
-	call = &openai.ToolCall{
-		Function: openai.FunctionCall{
-			Name:      tool.Function.Name,
-			Arguments: output,
-		},
-	}
+	// validate variables
 	return
 }

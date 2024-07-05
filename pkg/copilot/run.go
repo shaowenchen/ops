@@ -1,48 +1,26 @@
 package copilot
 
 import (
-	"encoding/json"
-
 	"github.com/shaowenchen/ops/pkg/agent"
 	"github.com/shaowenchen/ops/pkg/log"
 )
 
 func RunPipeline(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, pipelinerunsManager *agent.LLMPipelineRunsManager, input string, creator string) (pipelinerun *agent.LLMPipelineRun, err error) {
+	pipelines := pipelinerunsManager.GetLLMPipelines()
+	logger.Debug.Println("available pipelines num: ", len(pipelines))
+	// chat intention
 	history.WithHistory(0)
-	tools := pipelinerunsManager.BuildTools()
-	logger.Debug.Printf("> tools length: %v\n", len(tools))
-	call, err := ChatTools(logger, input, GetIntentionPrompt, GetParametersPrompt, chat, history, tools)
+	_, pipeline, pipelinerun, err := ChatIntention(logger, chat, GetIntentionPrompt, pipelines, history, input, 3)
 	if err != nil {
-		return nil, err
+		return
 	}
-	logger.Debug.Printf("> call: %v\n", call)
-	if call == nil {
-		defaultCall := GetDefaultToolCall()
-		call = &defaultCall
-	}
-	f := call.Function.Name
-	a := call.Function.Arguments
-	vars := make(map[string]string)
-	err = json.Unmarshal([]byte(a), &vars)
+	// chat parameters
+	history.WithHistory(0)
+	_, err = ChatParameters(logger, chat, GetParametersPrompt, pipelines, history, pipeline, pipelinerun, input, 3)
 	if err != nil {
-		return nil, err
+		return
 	}
-	typeRef := vars["typeRef"]
-	if typeRef == "" {
-		typeRef = "cluster"
-	}
-	nameRef := vars["nameRef"]
-	nodeName := vars["nodeName"]
-	pipelinerun = &agent.LLMPipelineRun{
-		Creator:     creator,
-		Desc:        input,
-		Namespace:   "ops-system",
-		PipelineRef: f,
-		TypeRef:     typeRef,
-		NameRef:     nameRef,
-		NodeName:    nodeName,
-		Variables:   vars,
-	}
+	// run pipelinerun
 	logger.Debug.Printf("> run pipeline %s on %s %s , variables: %v\n", pipelinerun.PipelineRef, pipelinerun.TypeRef, pipelinerun.NameRef, pipelinerun.Variables)
 	err = pipelinerunsManager.Run(logger, pipelinerun)
 	return

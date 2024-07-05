@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -13,12 +12,10 @@ const LLMTaskPrefix = "task-"
 const LLMPipelinePrefix = "pipeline-"
 const OpsDefaultNamespace = "ops-system"
 
-func ClearUnavailableChar(input string) string {
-	for _, c := range []string{"-", "_", " "} {
-		input = strings.ReplaceAll(input, c, "")
-	}
-	return input
-}
+const VarTypeRefKey = "typeRef"
+const VarTypeRefValue = "cluster"
+const VarNameRefKey = "nameRef"
+const VarNodeNameKey = "nodeName"
 
 func GetTaskListClusters() LLMTask {
 	return LLMTask{

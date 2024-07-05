@@ -3,8 +3,6 @@ package agent
 import (
 	"errors"
 	"fmt"
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/log"
 	"strings"
@@ -24,6 +22,20 @@ type LLMPipelineRun struct {
 	TaskRuns    []*LLMTaskRun     `json:"taskRuns"`
 	Output      string            `json:"output"`
 	RunStatus   string            `json:"runStatus"`
+}
+
+func NewLLMPipelineRun(pipeline LLMPipeline) *LLMPipelineRun {
+	vars := make(map[string]string)
+	for _, v := range pipeline.Variables {
+		vars[v.Key] = v.DefaultValue.String()
+	}
+	return &LLMPipelineRun{
+		Namespace:   pipeline.Namespace,
+		NameRef:     pipeline.NameRef,
+		NodeName:    pipeline.NodeName,
+		PipelineRef: pipeline.Name,
+		Variables:   vars,
+	}
 }
 
 func NewLLMPipelineRunsManager(enpoint, token, namespace, runtimeimage string, syncTickerSeconds uint, allPipelines []LLMPipeline, allTasks []LLMTask) (prManager *LLMPipelineRunsManager) {
@@ -59,13 +71,9 @@ func (m *LLMPipelineRunsManager) GetTaskRunManager() *LLMTaskRunManager {
 	return m.taskrunsManager
 }
 
-func (m *LLMPipelineRunsManager) GetPipelineTools() []openai.Tool {
-	return m.BuildTools()
-}
-
 func (m *LLMPipelineRunsManager) GetPipelineByClearUnavailableChar(name string) (LLMPipeline, error) {
 	for _, pipeline := range m.pipelines {
-		if ClearUnavailableChar(pipeline.Name) == name {
+		if pipeline.Name == name {
 			return pipeline, nil
 		}
 	}
@@ -210,61 +218,6 @@ func (p *LLMPipelineRunsManager) GetLLMTasks() []LLMTask {
 
 func (m *LLMPipelineRunsManager) GetLLMPipelines() []LLMPipeline {
 	return m.pipelines
-}
-
-func (m *LLMPipelineRunsManager) BuildTools() (tools []openai.Tool) {
-	for _, pipeline := range m.pipelines {
-		tools = append(tools, m.BuildTool(pipeline))
-	}
-	return
-}
-
-func (m *LLMPipelineRunsManager) BuildTool(p LLMPipeline) openai.Tool {
-	parmerters := jsonschema.Definition{
-		Type: "object",
-		Properties: map[string]jsonschema.Definition{
-			"typeRef": {
-				Type:        "string",
-				Description: "just set it to cluster",
-				Enum:        []string{"cluster"},
-			},
-			"nameRef": {
-				Type:        "string",
-				Description: m.GetClusterManager().GetText(),
-				Enum:        m.GetClusterManager().GetList(),
-			},
-			"nodeName": {
-				Type:        "string",
-				Description: "if typeRef is cluster, nodeName is a host name. if not found, use anymaster",
-			},
-		},
-		Required: []string{"typeRef", "nameRef", "nodeName"},
-	}
-
-	for _, v := range p.Variables {
-		if _, ok := parmerters.Properties[v.Key]; ok {
-			scheme := parmerters.Properties[v.Key]
-			scheme.Description = p.Desc
-			parmerters.Properties[v.Key] = scheme
-			continue
-		}
-		parmerters.Properties[v.Key] = jsonschema.Definition{
-			Type:        jsonschema.DataType(v.Value.Type),
-			Description: v.Desc,
-		}
-		if v.Required {
-			parmerters.Required = append(parmerters.Required, v.Key)
-		}
-	}
-	tool := openai.Tool{
-		Type: "function",
-		Function: &openai.FunctionDefinition{
-			Name:        ClearUnavailableChar(p.Name),
-			Description: p.Desc,
-			Parameters:  parmerters,
-		},
-	}
-	return tool
 }
 
 func (m *LLMPipelineRunsManager) Update() (ps []LLMPipeline, err error) {

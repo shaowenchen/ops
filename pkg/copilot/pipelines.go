@@ -1,17 +1,8 @@
 package copilot
 
 import (
-	openai "github.com/sashabaranov/go-openai"
 	"github.com/shaowenchen/ops/pkg/agent"
 )
-
-func GetDefaultToolCall() (call openai.ToolCall) {
-	call.Function = openai.FunctionCall{
-		Name:      agent.ClearUnavailableChar(pipelineHelp.Name),
-		Arguments: `{}`,
-	}
-	return call
-}
 
 var AllPipelines = []agent.LLMPipeline{
 	pipelineListCluster,
@@ -35,6 +26,7 @@ var pipelineListCluster = agent.LLMPipeline{
 		},
 		{
 			Name: "summary",
+			Always: true,
 		},
 	},
 }
@@ -50,6 +42,7 @@ var pipelineListTask = agent.LLMPipeline{
 		},
 		{
 			Name: "summary",
+			Always: true,
 		},
 	},
 }
@@ -65,6 +58,7 @@ var pipelineListPipeline = agent.LLMPipeline{
 		},
 		{
 			Name: "summary",
+			Always: true,
 		},
 	},
 }
@@ -90,6 +84,7 @@ var pipelineRestartPod = agent.LLMPipeline{
 		},
 		{
 			Name: "summary",
+			Always: true,
 		},
 	},
 }
@@ -115,6 +110,7 @@ var pipelineRestartPodForce = agent.LLMPipeline{
 		},
 		{
 			Name: "summary",
+			Always: true,
 		},
 	},
 }
@@ -137,6 +133,7 @@ var pipelineGetClusterIP = agent.LLMPipeline{
 		},
 		{
 			Name: "summary",
+			Always: true,
 		},
 	},
 }
@@ -158,6 +155,7 @@ var pipelineClearDisk = agent.LLMPipeline{
 		},
 		{
 			Name: "summary",
+			Always: true,
 		},
 	},
 }
