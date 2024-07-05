@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -170,7 +169,7 @@ func GetFileArray(filePath string) (fileArray []string, err error) {
 		return
 	}
 	if info.IsDir() {
-		files, err := ioutil.ReadDir(filePath)
+		files, err := os.ReadDir(filePath)
 		if err != nil {
 			return nil, err
 		}

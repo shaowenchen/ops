@@ -36,8 +36,8 @@ func (p LLMPipeline) GetFullVariables() []VariablePair {
 	})
 
 	vars = append(vars, VariablePair{
-		Key:          "nameRef",
-		Required:     true,
+		Key:      "nameRef",
+		Required: true,
 	})
 
 	vars = append(vars, VariablePair{

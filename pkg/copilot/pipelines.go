@@ -25,7 +25,7 @@ var pipelineListCluster = agent.LLMPipeline{
 			Name: "list-clusters",
 		},
 		{
-			Name: "summary",
+			Name:   "summary",
 			Always: true,
 		},
 	},
@@ -41,7 +41,7 @@ var pipelineListTask = agent.LLMPipeline{
 			Name: "list-tasks",
 		},
 		{
-			Name: "summary",
+			Name:   "summary",
 			Always: true,
 		},
 	},
@@ -57,7 +57,7 @@ var pipelineListPipeline = agent.LLMPipeline{
 			Name: "list-pipelines",
 		},
 		{
-			Name: "summary",
+			Name:   "summary",
 			Always: true,
 		},
 	},
@@ -83,7 +83,7 @@ var pipelineRestartPod = agent.LLMPipeline{
 			Name: "delete-pod",
 		},
 		{
-			Name: "summary",
+			Name:   "summary",
 			Always: true,
 		},
 	},
@@ -109,7 +109,7 @@ var pipelineRestartPodForce = agent.LLMPipeline{
 			Name: "delete-pod-force",
 		},
 		{
-			Name: "summary",
+			Name:   "summary",
 			Always: true,
 		},
 	},
@@ -132,7 +132,7 @@ var pipelineGetClusterIP = agent.LLMPipeline{
 			Name: "inspect-clusterip",
 		},
 		{
-			Name: "summary",
+			Name:   "summary",
 			Always: true,
 		},
 	},
@@ -154,7 +154,7 @@ var pipelineClearDisk = agent.LLMPipeline{
 			Name: "clear-disk",
 		},
 		{
-			Name: "summary",
+			Name:   "summary",
 			Always: true,
 		},
 	},

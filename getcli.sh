@@ -69,11 +69,11 @@ if [ ! -d "${OPSDIR}" ]; then
   mkdir "${OPSDIR}"
 fi
 
-if [ -d "${OPSDIR}task" ]; then
-  mv ${OPSDIR}task ${OPSDIR}.task_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+if [ -d "${OPSDIR}tasks" ]; then
+  mv ${OPSDIR}tasks ${OPSDIR}.task_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
-mv "$OPSTEMPDIR/task" ${OPSDIR}
+mv "$OPSTEMPDIR/tasks" ${OPSDIR}
 
 if [ `id -u` -eq 0 ]; then
   mv -f "$OPSTEMPDIR/opscli" /usr/local/bin/

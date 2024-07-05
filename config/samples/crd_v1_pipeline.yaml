@@ -1,0 +1,23 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  labels:
+    app.kubernetes.io/name: pipeline
+    app.kubernetes.io/instance: pipeline-sample
+    app.kubernetes.io/part-of: ops
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ops
+  name: pipeline-sample
+spec:
+  # TODO(user): Add fields here
+  desc: "sample pipeline"
+  variables:
+    a:
+      value: "1"
+    b:
+      default: "2"
+  tasks:
+    - name: task1-name
+      variables:
+        a: "1"
+      taskRef: task1

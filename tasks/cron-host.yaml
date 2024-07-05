@@ -19,7 +19,7 @@ spec:
               /usr/local/bin/gen-containerd-hosts.sh registry.aliyuncs.com
         - name: config hosts
           content: |
-              opscli task -f ~/.ops/task/add-etc-hosts.yaml --ip x.x.x.x --domain x.com
+              opscli task -f ~/.ops/tasks/add-etc-hosts.yaml --ip x.x.x.x --domain x.com
         - name: add opscli
           content: |
               if [ ! -f /usr/local/bin/opscli ]; then
@@ -27,4 +27,4 @@ spec:
               fi
         - name: add nerdctl
           content: |
-              opscli task -f ~/.ops/task/install-nerdctl.yaml
+              opscli task -f ~/.ops/tasks/install-nerdctl.yaml

@@ -19,7 +19,7 @@ opscli shell --content "apt-get install fio -y" --nodename node1
 - 在节点上测试磁盘 IO 性能
 
 ```bash
-opscli task -f ~/.ops/task/get-diskio-byfio.yaml --size 1g --filename=/tmp/testfile --nodename node1
+opscli task -f ~/.ops/tasks/get-diskio-byfio.yaml --size 1g --filename=/tmp/testfile --nodename node1
 ```
 
 其中 size 为测试文件大小，filename 为测试文件路径，nodename 为测试节点名称。
@@ -63,7 +63,7 @@ lat (usec): min=35, max=664838, avg=385.12, stdev=5335.64 -> 4k 写延时为 385
 - 在全部 master 节点上安装 Opscli
 
 ```bash
-opscli task -f ~/.ops/task/install-opscli.yaml -i master-ips.txt
+opscli task -f ~/.ops/tasks/install-opscli.yaml -i master-ips.txt
 ```
 
 - 在能 ssh 全部节点的机器上，创建访问主机的 ssh 密钥
@@ -75,27 +75,27 @@ kubectl -n ops-system create secret generic host-secret --from-file=privatekey=/
 - 自动发现集群主机
 
 ```bash
-kubectl apply -f ~/.ops/task/auto-create-host.yaml
+kubectl apply -f ~/.ops/tasks/auto-create-host.yaml
 ```
 
 - 自动给 host 对象打上标签
 
 ```bash
-kubectl apply -f ~/.ops/task/alert-label-gpu.yaml
+kubectl apply -f ~/.ops/tasks/alert-label-gpu.yaml
 ```
 
 - 配置巡检任务
 
 ```bash
-kubectl apply -f ~/.ops/task/alert-gpu-drop.yaml
+kubectl apply -f ~/.ops/tasks/alert-gpu-drop.yaml
 ```
 
 ```bash
-kubectl apply -f ~/.ops/task/alert-gpu-zombie.yaml
+kubectl apply -f ~/.ops/tasks/alert-gpu-zombie.yaml
 ```
 
 - 自动清理 Ops 运行 Task 创建的临时 Pod 对象
 
 ```bash
-kubectl apply -f ~/.ops/task/clear-opstaskpod.yaml
+kubectl apply -f ~/.ops/tasks/clear-opstaskpod.yaml
 ```

@@ -60,6 +60,32 @@ rules:
 - apiGroups:
   - crd.chenshaowen.com
   resources:
+  - pipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - pipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - pipelines/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
   - taskruns
   verbs:
   - create

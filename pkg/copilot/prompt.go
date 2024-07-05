@@ -30,9 +30,9 @@ func GetParametersPrompt(pipeline agent.LLMPipeline) string {
 		desc.WriteString("It requires the following parameters:\n")
 	}
 	for k, v := range pipeline.Variables {
-		parmDesc := fmt.Sprintf("- %s(%s)\n", k, v.Desc)
+		parmDesc := fmt.Sprintf("- %d(%s)\n", k, v.Desc)
 		if len(v.Enum) > 0 {
-			parmDesc = fmt.Sprintf("- %s(%s available options: %s)\n", k, v.Desc, strings.Join(v.Enum, ", "))
+			parmDesc = fmt.Sprintf("- %d(%s available options: %s)\n", k, v.Desc, strings.Join(v.Enum, ", "))
 		}
 		desc.WriteString(parmDesc)
 	}

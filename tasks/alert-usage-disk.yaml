@@ -10,7 +10,7 @@ spec:
     typeRef: cluster
     variables:
         cluster: "default"
-        usage: "85"
+        usage: "80"
         notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
     steps:
         - name: alert-usage-disk

@@ -6,5 +6,5 @@ RUN make cli
 FROM hubimage/runtime-ubuntu:22.04
 WORKDIR /
 COPY --from=builder /workspace/bin/opscli /bin/opscli
-COPY --from=builder /workspace/task /root/.ops/task
+COPY --from=builder /workspace/task /root/.ops/tasks
 ENTRYPOINT ["/bin/opscli"]

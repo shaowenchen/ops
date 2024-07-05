@@ -44,7 +44,7 @@ node1 为节点名称。
 远程到主机 `1.1.1.1` ，更新 `/etc/hosts` 文件。
 
 ```bash
-/usr/local/bin/opscli task -f ~/.ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i 1.1.1.1 --port 2222 --username root
+/usr/local/bin/opscli task -f ~/.ops/tasks/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i 1.1.1.1 --port 2222 --username root
 ```
 
 如果需要清理加上 `--clear` 参数即可。
@@ -52,13 +52,13 @@ node1 为节点名称。
 - 集群全部节点
 
 ```bash
-/usr/local/bin/opscli task -f ~/.ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --all
+/usr/local/bin/opscli task -f ~/.ops/tasks/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --all
 ```
 
 - 集群指定节点
 
 ```bash
-/usr/local/bin/opscli task -f ~/.ops/task/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --nodename node1
+/usr/local/bin/opscli task -f ~/.ops/tasks/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --nodename node1
 ```
 
 ### 应用安装
@@ -66,7 +66,7 @@ node1 为节点名称。
 - 安装 Istio
 
 ```bash
-/usr/local/bin/opscli task -f ~/.ops/task/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf
+/usr/local/bin/opscli task -f ~/.ops/tasks/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf
 ```
 
 --version 默认值为 1.13.7，--kubeconfig 默认值为 /etc/kubernetes/admin.conf。
@@ -74,5 +74,5 @@ node1 为节点名称。
 - 卸载 Istio
 
 ```bash
-/usr/local/bin/opscli task -f ~/.ops/task/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf --action delete
+/usr/local/bin/opscli task -f ~/.ops/tasks/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf --action delete
 ```
