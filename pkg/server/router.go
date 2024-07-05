@@ -27,6 +27,14 @@ func SetupRouter(r *gin.Engine) {
 		v1Taskruns.POST("", CreateTaskRun)
 		v1Taskruns.GET("/:taskrun", GetTaskRun)
 	}
+	v1Pipelines := r.Group("/api/v1/namespaces/:namespace/pipelines").Use(AuthMiddleware())
+	{
+		v1Pipelines.GET("", ListPipeline)
+		v1Pipelines.POST("", CreatePipeline)
+		v1Pipelines.GET("/:pipeline", GetPipeline)
+		v1Pipelines.PUT("/:pipeline", PutPipeline)
+		v1Pipelines.DELETE("/:pipeline", DeletePipeline)
+	}
 }
 
 func SetHealthzRouter(r *gin.Engine) {

@@ -130,6 +130,34 @@ func GetTask(c *gin.Context) {
 	return
 }
 
+func GetPipeline(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Pipeline  string `uri:"pipeline"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	pipeline := &opsv1.Pipeline{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Pipeline,
+	}, pipeline)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, pipeline)
+}
+
 func CreateTask(c *gin.Context) {
 	dataBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -154,6 +182,30 @@ func CreateTask(c *gin.Context) {
 	showSuccess(c)
 }
 
+func CreatePipeline(c *gin.Context) {
+	dataBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+	}
+	pipeline := &opsv1.Pipeline{}
+	err = json.Unmarshal(dataBytes, pipeline)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Create(context.TODO(), pipeline)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
 func PutTask(c *gin.Context) {
 	dataBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -171,6 +223,30 @@ func PutTask(c *gin.Context) {
 		return
 	}
 	err = client.Update(context.TODO(), task)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
+func PutPipeline(c *gin.Context) {
+	dataBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+	}
+	pipeline := &opsv1.Pipeline{}
+	err = json.Unmarshal(dataBytes, pipeline)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Update(context.TODO(), pipeline)
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -204,6 +280,40 @@ func DeleteTask(c *gin.Context) {
 		return
 	}
 	err = client.Delete(context.TODO(), task)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+	return
+}
+
+func DeletePipeline(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Pipeline  string `uri:"pipeline"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	pipeline := &opsv1.Pipeline{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Pipeline,
+	}, pipeline)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Delete(context.TODO(), pipeline)
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -247,6 +357,43 @@ func ListTask(c *gin.Context) {
 		return
 	}
 	showData(c, paginator[opsv1.Task](taskList.Items, req.PageSize, req.Page))
+}
+
+func ListPipeline(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
+	}
+	var req = Params{
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	pipelineList := &opsv1.PipelineList{}
+	if req.Namespace == "all" {
+		err = client.List(context.TODO(), pipelineList)
+	} else {
+		err = client.List(context.TODO(), pipelineList, runtimeClient.InNamespace(req.Namespace))
+	}
+	if err != nil {
+		return
+	}
+	showData(c, paginator[opsv1.Pipeline](pipelineList.Items, req.PageSize, req.Page))
 }
 
 func GetTaskRun(c *gin.Context) {
