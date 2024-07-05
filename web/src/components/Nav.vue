@@ -20,6 +20,9 @@
             <li class="nav-item">
                 <router-link to="/taskruns" class="nav-link">TaskRuns</router-link>
             </li>
+            <li class="nav-item">
+                <router-link to="/pipelines" class="nav-link">Pipelines</router-link>
+            </li>
         </ul>
     </nav>
 </template>
