@@ -111,7 +111,7 @@ func NewPipelineRun(p *Pipeline) PipelineRun {
 		pr.OwnerReferences = []metav1.OwnerReference{
 			{
 				APIVersion: "crd.chenshaowen.com/v1",
-				Kind:       "Task",
+				Kind:       "Pipeline",
 				Name:       p.Name,
 				UID:        p.UID,
 			},
