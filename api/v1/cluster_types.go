@@ -49,6 +49,7 @@ const StatusSuccessed = "successed"
 const StatusFailed = "failed"
 const StatusRunning = "running"
 const StatusAborted = "aborted"
+const StatusDataInValid = "dataInValid"
 const StatusEmpty = ""
 
 //+kubebuilder:object:root=true

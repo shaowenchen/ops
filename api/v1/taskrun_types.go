@@ -90,12 +90,12 @@ func NewTaskRun(t *Task) TaskRun {
 		}
 	}
 	if tr.Spec.TypeRef == "" && tr.Spec.NameRef == opsconstants.AnyMaster {
-		tr.Spec.TypeRef = TaskTypeRefCluster
+		tr.Spec.TypeRef = TypeRefCluster
 	} else if tr.Spec.TypeRef == "" {
-		tr.Spec.TypeRef = TaskTypeRefHost
+		tr.Spec.TypeRef = TypeRefHost
 	}
 	// fill nameRef
-	if tr.Spec.TypeRef == TaskTypeRefCluster && tr.Spec.NodeName != "" && tr.Spec.NameRef == "" {
+	if tr.Spec.TypeRef == TypeRefCluster && tr.Spec.NodeName != "" && tr.Spec.NameRef == "" {
 		tr.Spec.NameRef = opsconstants.CurrentRuntime
 	}
 	return tr

@@ -144,7 +144,7 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
-	if tr.GetSpec().TypeRef == opsv1.TaskTypeRefHost {
+	if tr.GetSpec().TypeRef == opsv1.TypeRefHost {
 		hs := []opsv1.Host{}
 		if tr.Spec.Selector == nil {
 			h := opsv1.Host{}
@@ -196,7 +196,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		} else {
 			r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 		}
-	} else if tr.GetSpec().TypeRef == opsv1.TaskTypeRefCluster {
+	} else if tr.GetSpec().TypeRef == opsv1.TypeRefCluster {
 		c := &opsv1.Cluster{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: tr.Spec.NameRef,

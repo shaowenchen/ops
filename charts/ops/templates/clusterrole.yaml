@@ -137,6 +137,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - pipelineruns
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - pipelineruns/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - pipelineruns/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - coordination.k8s.io
   resources:
   - leases

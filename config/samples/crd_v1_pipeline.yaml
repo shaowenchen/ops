@@ -8,16 +8,13 @@ metadata:
     app.kuberentes.io/managed-by: kustomize
     app.kubernetes.io/created-by: ops
   name: pipeline-sample
+  namespace: ops-system
 spec:
   # TODO(user): Add fields here
   desc: "sample pipeline"
   variables:
-    a:
-      value: "1"
-    b:
-      default: "2"
+    namespace:
+      value: "ops-system"
   tasks:
-    - name: task1-name
-      variables:
-        a: "1"
-      taskRef: task1
+    - name: test
+      taskRef: list-pods

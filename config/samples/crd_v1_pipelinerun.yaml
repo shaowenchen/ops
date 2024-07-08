@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: PipelineRun
+metadata:
+  labels:
+    app.kubernetes.io/name: pipelinerun
+    app.kubernetes.io/instance: pipelinerun-sample
+    app.kubernetes.io/part-of: ops
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ops
+  name: pipelinerun-sample
+  namespace: ops-system
+spec:
+  typeRef: cluster
+  nameRef: dev
+  pipelineRef: pipeline-sample
+  variables:
+    namespace: kube-system

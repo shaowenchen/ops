@@ -93,7 +93,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	}
 	// validate typeRef
 	if t.Spec.TypeRef == "" && t.Spec.NodeName == constants.AnyMaster {
-		t.Spec.TypeRef = opsv1.TaskTypeRefCluster
+		t.Spec.TypeRef = opsv1.TypeRefCluster
 	}
 	// validate crontab
 	if t.GetSpec().Crontab == "" {

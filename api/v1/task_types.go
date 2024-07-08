@@ -42,8 +42,8 @@ type TaskSpec struct {
 	TaskRunHistoryLimit int               `json:"taskRunHistoryLimit,omitempty" yaml:"taskRunHistoryLimit,omitempty"`
 }
 
-const TaskTypeRefHost = "host"
-const TaskTypeRefCluster = "cluster"
+const TypeRefHost = "host"
+const TypeRefCluster = "cluster"
 
 type Step struct {
 	When         string `json:"when,omitempty" yaml:"when,omitempty"`
