@@ -65,8 +65,8 @@ func (pr *PipelineRunStatus) AddPipelineRunTaskStatus(taskName string, taskRef s
 }
 
 type PipelineRunTaskStatus struct {
-	TaskName      string        `json:"name,omitempty" yaml:"name,omitempty"`
-	TaskRef       string        `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
+	TaskName      string         `json:"name,omitempty" yaml:"name,omitempty"`
+	TaskRef       string         `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 	TaskRunStatus *TaskRunStatus `json:"taskRunStatus,omitempty" yaml:"taskRunStatus,omitempty"`
 }
 
@@ -81,6 +81,43 @@ type PipelineRun struct {
 
 	Spec   PipelineRunSpec   `json:"spec,omitempty"`
 	Status PipelineRunStatus `json:"status,omitempty"`
+}
+
+func NewPipelineRun(p *Pipeline) PipelineRun {
+	if p == nil {
+		return PipelineRun{}
+	}
+	pr := PipelineRun{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: p.Name + "-",
+			Namespace:    p.Namespace,
+		},
+		Spec: PipelineRunSpec{
+			PipelineRef: p.Name,
+		},
+	}
+	if p.Spec.Variables != nil {
+		for k, v := range p.Spec.Variables {
+			if v.Value == "" {
+				pr.Spec.Variables[k] = v.Value
+			} else {
+				pr.Spec.Variables[k] = v.Default
+			}
+		}
+	}
+	// fill owner ref
+	if p.UID != "" {
+		pr.OwnerReferences = []metav1.OwnerReference{
+			{
+				APIVersion: "crd.chenshaowen.com/v1",
+				Kind:       "Task",
+				Name:       p.Name,
+				UID:        p.UID,
+			},
+		}
+	}
+	// validate
+	return pr
 }
 
 //+kubebuilder:object:root=true

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import { Home, Hosts, Clusters, Tasks, TaskRuns, Pipelines, Login} from "@/views";
+import { Home, Hosts, Clusters, Tasks, TaskRuns, Pipelines, PipelineRuns, Login} from "@/views";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -12,6 +12,7 @@ export const router = createRouter({
     { path: "/tasks", component: Tasks, name: "tasks" },
     { path: "/taskruns", component: TaskRuns, name: "taskruns" },
     { path: "/pipelines", component: Pipelines, name: "pipelines" },
+    { path: "/pipelineruns", component: PipelineRuns, name: "pipelineruns" },
     { path: "/login", component: Login, name: "login" },
   ],
 });

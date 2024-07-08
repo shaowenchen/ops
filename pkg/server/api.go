@@ -424,6 +424,34 @@ func GetTaskRun(c *gin.Context) {
 	showData(c, taskRun)
 }
 
+func GetPipelineRun(c *gin.Context) {
+	type Params struct {
+		Namespace   string `uri:"namespace"`
+		Pipelinerun string `uri:"pipelinerun"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	pipelineRun := &opsv1.PipelineRun{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Pipelinerun,
+	}, pipelineRun)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, pipelineRun)
+}
+
 func ListTaskRun(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -463,6 +491,43 @@ func ListTaskRun(c *gin.Context) {
 	})
 	// item.status.startTime
 	showData(c, paginator[opsv1.TaskRun](taskRunList.Items, req.PageSize, req.Page))
+}
+
+func ListPipelineRun(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
+	}
+	var req = Params{
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	pipelineRunList := &opsv1.PipelineRunList{}
+	if req.Namespace == "all" {
+		err = client.List(context.TODO(), pipelineRunList)
+	} else {
+		err = client.List(context.TODO(), pipelineRunList, runtimeClient.InNamespace(req.Namespace))
+	}
+	if err != nil {
+		return
+	}
+	showData(c, paginator[opsv1.PipelineRun](pipelineRunList.Items, req.PageSize, req.Page))
 }
 
 func CreateTaskRun(c *gin.Context) {
@@ -560,6 +625,80 @@ func CreateTaskRun(c *gin.Context) {
 			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 				Namespace: taskRun.Namespace,
 				Name:      taskRun.Name,
+			}, latest)
+			if err != nil {
+				showError(c, err.Error())
+				return
+			}
+			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed || latest.Status.RunStatus == opsv1.StatusAborted {
+				showData(c, latest)
+				return
+			}
+
+		case <-ctx.Done():
+			showError(c, "timeout")
+			return
+		}
+	}
+}
+
+func CreatePipelineRun(c *gin.Context) {
+	type Params struct {
+		Namespace    string            `uri:"namespace"`
+		PipelineRef  string            `json:"pipelineRef"`
+		TypeRef      string            `json:"typeRef"`
+		NameRef      string            `json:"nameRef"`
+		NodeName     string            `json:"nodeName"`
+		All          bool              `json:"all"`
+		RuntimeImage string            `json:"runtimeImage"`
+		Variables    map[string]string `json:"variables"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindJSON(&req)
+	if err != nil {
+		showError(c, "get body error "+err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// merge pipeline variables
+	pipeline := &opsv1.Pipeline{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.PipelineRef,
+	}, pipeline)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// create pipelinerun
+	pipelinerun := opsv1.NewPipelineRun(pipeline)
+	// patch
+	err = client.Create(context.TODO(), &pipelinerun)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// wait
+	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
+	defer cancel()
+	ticker := time.NewTicker(3 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			latest := &opsv1.PipelineRun{}
+			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+				Namespace: pipelinerun.Namespace,
+				Name:      pipelinerun.Name,
 			}, latest)
 			if err != nil {
 				showError(c, err.Error())

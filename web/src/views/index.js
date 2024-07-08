@@ -4,4 +4,5 @@ export { default as Clusters } from './Clusters.vue';
 export { default as Tasks } from './Tasks.vue';
 export { default as TaskRuns } from './TaskRuns.vue';
 export { default as Pipelines } from './Pipelines.vue';
+export { default as PipelineRuns } from './PipelineRuns.vue';
 export { default as Login } from './Login.vue';
