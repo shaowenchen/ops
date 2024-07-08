@@ -644,14 +644,12 @@ func CreateTaskRun(c *gin.Context) {
 
 func CreatePipelineRun(c *gin.Context) {
 	type Params struct {
-		Namespace    string            `uri:"namespace"`
-		PipelineRef  string            `json:"pipelineRef"`
-		TypeRef      string            `json:"typeRef"`
-		NameRef      string            `json:"nameRef"`
-		NodeName     string            `json:"nodeName"`
-		All          bool              `json:"all"`
-		RuntimeImage string            `json:"runtimeImage"`
-		Variables    map[string]string `json:"variables"`
+		Namespace   string            `uri:"namespace"`
+		PipelineRef string            `json:"pipelineRef"`
+		TypeRef     string            `json:"typeRef"`
+		NameRef     string            `json:"nameRef"`
+		NodeName    string            `json:"nodeName"`
+		Variables   map[string]string `json:"variables"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -681,7 +679,21 @@ func CreatePipelineRun(c *gin.Context) {
 	}
 	// create pipelinerun
 	pipelinerun := opsv1.NewPipelineRun(pipeline)
+
 	// patch
+	if req.NameRef != "" {
+		pipelinerun.Spec.NameRef = req.NameRef
+	}
+	if req.TypeRef != "" {
+		pipelinerun.Spec.TypeRef = req.TypeRef
+	}
+	if req.NodeName != "" {
+		pipelinerun.Spec.NodeName = req.NodeName
+	}
+	if req.Variables != nil {
+		pipelinerun.Spec.Variables = req.Variables
+	}
+
 	err = client.Create(context.TODO(), &pipelinerun)
 	if err != nil {
 		showError(c, err.Error())

@@ -94,11 +94,12 @@ func NewPipelineRun(p *Pipeline) PipelineRun {
 		},
 		Spec: PipelineRunSpec{
 			PipelineRef: p.Name,
+			Variables:   make(map[string]string),
 		},
 	}
 	if p.Spec.Variables != nil {
 		for k, v := range p.Spec.Variables {
-			if v.Value == "" {
+			if v.Value != "" {
 				pr.Spec.Variables[k] = v.Value
 			} else {
 				pr.Spec.Variables[k] = v.Default
