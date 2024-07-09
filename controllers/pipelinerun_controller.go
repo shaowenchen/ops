@@ -156,6 +156,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		}
 		// run task and commit status
 		for {
+			time.Sleep(time.Second * 3)
 			trRunning := &opsv1.TaskRun{}
 			if err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Name}, trRunning); err != nil {
 				logger.Error.Println(err)
@@ -163,7 +164,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			}
 			r.commitStatus(logger, ctx, pr, opsv1.StatusRunning, tRef.Name, trRunning.Spec.TaskRef, &trRunning.Status)
 			if trRunning.Status.RunStatus == opsv1.StatusRunning || trRunning.Status.RunStatus == opsv1.StatusEmpty {
-				time.Sleep(time.Second * 3)
+				continue
 			} else if trRunning.Status.RunStatus == opsv1.StatusSuccessed {
 				break
 			} else {
