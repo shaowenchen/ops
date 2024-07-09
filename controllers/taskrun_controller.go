@@ -79,6 +79,18 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// fix variables
+	if tr.Spec.Variables != nil {
+		if _, ok := tr.Spec.Variables["typeRef"]; !ok {
+			tr.Spec.TypeRef = tr.Spec.Variables["typeRef"]
+		}
+		if _, ok := tr.Spec.Variables["nameRef"]; !ok {
+			tr.Spec.NameRef = tr.Spec.Variables["nameRef"]
+		}
+		if _, ok := tr.Spec.Variables["nodeName"]; !ok {
+			tr.Spec.NodeName = tr.Spec.Variables["nodeName"]
+		}
+	}
 	// had run once, skip
 	if tr.Status.RunStatus != opsv1.StatusEmpty {
 		// abort running taskrun if restart or modified
