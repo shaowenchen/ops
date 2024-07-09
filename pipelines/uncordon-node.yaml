@@ -1,0 +1,24 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: uncordon-node
+  namespace: ops-system
+spec:
+  desc: 恢复集群节点
+  variables:
+    nodeName:
+      value: "anymaster"
+      required: true
+    typeRef:
+      value: "cluster"
+      required: true
+    nameRef:
+      required: true
+    node:
+      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
+      required: true
+  tasks:
+    - name: 检查节点是否存在
+      taskRef: check-node-existed
+    - name: 恢复节点
+      taskRef: uncordon-node

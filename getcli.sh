@@ -70,10 +70,16 @@ if [ ! -d "${OPSDIR}" ]; then
 fi
 
 if [ -d "${OPSDIR}tasks" ]; then
-  mv ${OPSDIR}tasks ${OPSDIR}.task_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+  mv ${OPSDIR}tasks ${OPSDIR}.tasks_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
 mv "$OPSTEMPDIR/tasks" ${OPSDIR}
+
+if [ -d "${OPSDIR}pipelines" ]; then
+  mv ${OPSDIR}pipelines ${OPSDIR}.pipelines_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+fi
+
+mv "$OPSTEMPDIR/pipelines" ${OPSDIR}
 
 if [ `id -u` -eq 0 ]; then
   mv -f "$OPSTEMPDIR/opscli" /usr/local/bin/

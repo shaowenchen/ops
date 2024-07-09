@@ -22,6 +22,7 @@ dist: bin
 archives:
 - name_template: "opscli-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
   files:
-    - task/*
+    - tasks/*
+    - pipelines/*
 changelog:
   skip: true
