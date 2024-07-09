@@ -8,7 +8,20 @@ spec:
   nodeName: anymaster
   variables:
     svc: ""
+    namespace: ""
   steps:
     - name: Check svc existed
       content: |
-        found="false"; if [ -z "$svc" ]; then echo "svc is empty"; else for ns in $(kubectl get namespaces --no-headers | awk '{print $1}'); do if kubectl get svc ${svc} -n $ns &>/dev/null; then echo "Pod ${svc} existed in $ns"; found="true"; fi; done; if [ "$found" = "false" ]; then echo "Pod ${svc} not found"; fi; fi
+        if [ -z "${svc}" ]; then
+          echo "svc is not set"
+          exit 1
+        fi
+        if [ -z "${namespace}" ]; then
+          echo "namespace is not set"
+          exit 1
+        fi
+        if kubectl get svc ${svc} -n ${namespace} 2>&1 | grep -q "NotFound"; then
+          echo "svc ${svc} not existed"
+          exit 1 
+        fi
+        echo "svc ${svc} existed"
