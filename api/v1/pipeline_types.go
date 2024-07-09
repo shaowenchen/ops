@@ -36,7 +36,7 @@ type Variables struct {
 	Default  string   `json:"default,omitempty" yaml:"default,omitempty"`
 	Value    string   `json:"value,omitempty" yaml:"value,omitempty"`
 	Desc     string   `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Regx     string   `json:"regx,omitempty" yaml:"regx,omitempty"`
+	Regex    string   `json:"regex,omitempty" yaml:"regex,omitempty"`
 	Required bool     `json:"required,omitempty" yaml:"required,omitempty"`
 	Enum     []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 	Examples []string `json:"examples,omitempty" yaml:"examples,omitempty"`
@@ -47,7 +47,7 @@ func (v Variables) MarshalYAML() (interface{}, error) {
 		Default  string   `json:"default,omitempty" yaml:"default,omitempty"`
 		Value    string   `json:"value,omitempty" yaml:"value,omitempty"`
 		Desc     string   `json:"desc,omitempty" yaml:"desc,omitempty"`
-		Regx     string   `json:"regx,omitempty" yaml:"regx,omitempty"`
+		Regex    string   `json:"regx,omitempty" yaml:"regx,omitempty"`
 		Required bool     `json:"required,omitempty" yaml:"required,omitempty"`
 		Enum     []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 		Examples []string `json:"examples,omitempty" yaml:"examples,omitempty"`
@@ -55,7 +55,7 @@ func (v Variables) MarshalYAML() (interface{}, error) {
 		Default:  v.Default,
 		Value:    v.Value,
 		Desc:     v.Desc,
-		Regx:     v.Regx,
+		Regex:    v.Regex,
 		Required: v.Required,
 		Enum:     v.Enum,
 		Examples: v.Examples,
@@ -74,7 +74,7 @@ func (v *Variables) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		Default  string   `json:"default,omitempty" yaml:"default,omitempty"`
 		Value    string   `json:"value,omitempty" yaml:"value,omitempty"`
 		Desc     string   `json:"desc,omitempty" yaml:"desc,omitempty"`
-		Regx     string   `json:"regx,omitempty" yaml:"regx,omitempty"`
+		Regex    string   `json:"regex,omitempty" yaml:"regex,omitempty"`
 		Required bool     `json:"required,omitempty" yaml:"required,omitempty"`
 		Enum     []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 		Examples []string `json:"examples,omitempty" yaml:"examples,omitempty"`
@@ -87,7 +87,7 @@ func (v *Variables) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		Default:  asStruct.Default,
 		Value:    asStruct.Value,
 		Desc:     asStruct.Desc,
-		Regx:     asStruct.Regx,
+		Regex:    asStruct.Regex,
 		Required: asStruct.Required,
 		Enum:     asStruct.Enum,
 		Examples: asStruct.Examples,

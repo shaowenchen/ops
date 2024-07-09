@@ -73,7 +73,7 @@ spec:
                       items:
                         type: string
                       type: array
-                    regx:
+                    regex:
                       type: string
                     required:
                       type: boolean
