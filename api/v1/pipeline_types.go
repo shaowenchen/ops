@@ -42,59 +42,6 @@ type Variables struct {
 	Examples []string `json:"examples,omitempty" yaml:"examples,omitempty"`
 }
 
-func (v Variables) MarshalYAML() (interface{}, error) {
-	return struct {
-		Default  string   `json:"default,omitempty" yaml:"default,omitempty"`
-		Value    string   `json:"value,omitempty" yaml:"value,omitempty"`
-		Desc     string   `json:"desc,omitempty" yaml:"desc,omitempty"`
-		Regex    string   `json:"regx,omitempty" yaml:"regx,omitempty"`
-		Required bool     `json:"required,omitempty" yaml:"required,omitempty"`
-		Enum     []string `json:"enum,omitempty" yaml:"enum,omitempty"`
-		Examples []string `json:"examples,omitempty" yaml:"examples,omitempty"`
-	}{
-		Default:  v.Default,
-		Value:    v.Value,
-		Desc:     v.Desc,
-		Regex:    v.Regex,
-		Required: v.Required,
-		Enum:     v.Enum,
-		Examples: v.Examples,
-	}, nil
-}
-
-// UnmarshalYAML customizes the YAML unmarshaling for Variables
-func (v *Variables) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var asString string
-	if err := unmarshal(&asString); err == nil {
-		*v = Variables{Value: asString}
-		return nil
-	}
-
-	var asStruct struct {
-		Default  string   `json:"default,omitempty" yaml:"default,omitempty"`
-		Value    string   `json:"value,omitempty" yaml:"value,omitempty"`
-		Desc     string   `json:"desc,omitempty" yaml:"desc,omitempty"`
-		Regex    string   `json:"regex,omitempty" yaml:"regex,omitempty"`
-		Required bool     `json:"required,omitempty" yaml:"required,omitempty"`
-		Enum     []string `json:"enum,omitempty" yaml:"enum,omitempty"`
-		Examples []string `json:"examples,omitempty" yaml:"examples,omitempty"`
-	}
-	if err := unmarshal(&asStruct); err != nil {
-		return err
-	}
-
-	*v = Variables{
-		Default:  asStruct.Default,
-		Value:    asStruct.Value,
-		Desc:     asStruct.Desc,
-		Regex:    asStruct.Regex,
-		Required: asStruct.Required,
-		Enum:     asStruct.Enum,
-		Examples: asStruct.Examples,
-	}
-	return nil
-}
-
 type TaskRef struct {
 	Name         string            `json:"name"`
 	TaskRef      string            `json:"taskRef,omitempty"`
