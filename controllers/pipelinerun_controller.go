@@ -162,7 +162,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 				break
 			}
 			r.commitStatus(logger, ctx, pr, opsv1.StatusRunning, tRef.Name, trRunning.Spec.TaskRef, &trRunning.Status)
-			if trRunning.Status.RunStatus == opsv1.StatusRunning || trRunning.Status.RunStatus == opsv1.StatusEmpty {
+			if trRunning.Status.RunStatus == opsv1.StatusRunning || trRunning.Status.RunStatus == opsv1.StatusEmpty || trRunning.Status.RunStatus == opsv1.StatusSuccessed {
 				time.Sleep(time.Second * 3)
 			} else {
 				runAlways = true
