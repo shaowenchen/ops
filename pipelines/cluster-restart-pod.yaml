@@ -1,0 +1,25 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: cluster-restart-pod
+  namespace: ops-system
+spec:
+  desc: 重启、删除集群中的某一个 Pod
+  variables:
+    typeRef:
+      value: "cluster"
+      required: true
+    nameRef:
+      required: true
+    nodeName:
+      value: "anymaster"
+      required: true
+    podname:
+      desc: "For example, `pod: doc-translate-ec-long-v1-64cf8d5478-5zsvk or name: doc-translate-ec-long-v1-64cf8d5478-5zsvk`, where doc-translate-ec-long-v1-64cf8d5478-5zsvk is podname"
+      value: ""
+      required: true
+  tasks:
+    - name: 检查 Pod 是否存在
+      taskRef: check-pod-existed
+    - name: 删除 Pod
+      taskRef: delete-pod

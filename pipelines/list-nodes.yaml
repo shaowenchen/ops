@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: list-nodes
+  namespace: ops-system
+spec:
+  desc: 查看、列出某个集群的所有节点
+  variables:
+    typeRef:
+      value: "cluster"
+      required: true
+    nameRef:
+      required: true
+  tasks:
+    - name: 列出集群的节点
+      taskRef: list-nodes
+

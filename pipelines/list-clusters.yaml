@@ -4,7 +4,7 @@ metadata:
   name: list-clusters
   namespace: ops-system
 spec:
-  desc: 列出所有集群
+  desc: 列出、查看所有的集群
   variables:
     typeRef:
       value: "cluster"

@@ -4,7 +4,7 @@ metadata:
   name: list-pipelines
   namespace: ops-system
 spec:
-  desc: 列出所有流水线
+  desc: 查看、列出所有的流水线
   variables:
     typeRef:
       value: "cluster"

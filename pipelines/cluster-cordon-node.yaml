@@ -1,0 +1,24 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: cluster-cordon-node
+  namespace: ops-system
+spec:
+  desc: 禁用集群中的某个节点
+  variables:
+    nodeName:
+      value: "anymaster"
+      required: true
+    typeRef:
+      value: "cluster"
+      required: true
+    nameRef:
+      required: true
+    node:
+      required: true
+      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
+  tasks:
+    - name: 检查节点是否存在
+      taskRef: check-node-existed
+    - name: 禁用节点
+      taskRef: cordon-node
