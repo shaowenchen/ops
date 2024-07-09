@@ -24,6 +24,7 @@ import (
 
 	crdv1 "github.com/shaowenchen/ops/api/v1"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -104,6 +105,10 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			r.commitStatus(logger, ctx, pr, opsv1.StatusFailed, tRef.Name, tRef.TaskRef, nil)
 			continue
 		}
+		runtimeImage := opsconstants.DefaultRuntimeImage
+		if len(os.Getenv("DEFAULT_RUNTIME_IMAGE")) > 0 {
+			runtimeImage = os.Getenv("DEFAULT_RUNTIME_IMAGE")
+		}
 		tr := &opsv1.TaskRun{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace:    pr.Namespace,
@@ -118,12 +123,29 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 				},
 			},
 			Spec: opsv1.TaskRunSpec{
-				TaskRef:   tRef.TaskRef,
-				TypeRef:   mergeValue(t.Spec.TypeRef, pr.Spec.TypeRef),
-				NameRef:   mergeValue(t.Spec.NameRef, pr.Spec.NameRef),
-				NodeName:  mergeValue(t.Spec.NodeName, pr.Spec.NodeName),
-				Variables: mergeMapValue(t.Spec.Variables, pr.Spec.Variables),
+				TaskRef:      tRef.TaskRef,
+				TypeRef:      mergeValue(t.Spec.TypeRef, pr.Spec.TypeRef),
+				NameRef:      mergeValue(t.Spec.NameRef, pr.Spec.NameRef),
+				NodeName:     mergeValue(t.Spec.NodeName, pr.Spec.NodeName),
+				Variables:    mergeMapValue(t.Spec.Variables, pr.Spec.Variables),
+				RuntimeImage: runtimeImage,
 			},
+		}
+		// merge variable to spec
+		if tr.Spec.Variables != nil {
+			if _, ok := tr.Spec.Variables["typeRef"]; ok {
+				tr.Spec.TypeRef = tr.Spec.Variables["typeRef"]
+			}
+			if _, ok := tr.Spec.Variables["nameRef"]; ok {
+				tr.Spec.NameRef = tr.Spec.Variables["nameRef"]
+			}
+			if _, ok := tr.Spec.Variables["nodeName"]; ok {
+				tr.Spec.NodeName = tr.Spec.Variables["nodeName"]
+			}
+		}
+		// pin some variable
+		if t.Spec.NodeName == "anymaster" {
+			tr.Spec.NodeName = "anymaster"
 		}
 		err = r.Client.Create(ctx, tr)
 		if err != nil {
