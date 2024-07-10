@@ -285,19 +285,28 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	if tr.Status.RunStatus == opsv1.StatusRunning {
 		tr.Status.StartTime = &metav1.Time{Time: time.Now()}
 	}
-	// get taskrun latest version
-	latestTr := &opsv1.TaskRun{}
-	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.GetName()}, latestTr)
-	if err != nil {
-		logger.Error.Println(err)
-		return
+
+	for retries := 0; retries < CommitStatusMaxRetries; retries++ {
+		latestTr := &opsv1.TaskRun{}
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.GetName()}, latestTr)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
+
+		latestTr.Status = tr.Status
+		err = r.Client.Status().Update(ctx, latestTr)
+		if err == nil {
+			return
+		}
+		if !apierrors.IsConflict(err) {
+			logger.Error.Println(err, "update taskrun status error")
+			return
+		}
+		logger.Info.Println("conflict detected, retrying...", err)
+		time.Sleep(1 * time.Second)
 	}
-	// update taskrun status
-	latestTr.Status = tr.Status
-	err = r.Client.Status().Update(ctx, latestTr)
-	if err != nil {
-		logger.Error.Println(err, "update taskrun status error")
-	}
+	logger.Error.Println("update taskrun status failed after retries", err)
 	return
 }
 

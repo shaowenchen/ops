@@ -34,6 +34,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const CommitStatusMaxRetries = 5
+
 // PipelineRunReconciler reconciles a PipelineRun object
 type PipelineRunReconciler struct {
 	client.Client
@@ -212,24 +214,31 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, pr *opsv1.PipelineRun, prstatus string, taskName, taskRef string, trStatus *opsv1.TaskRunStatus) (err error) {
-	// get taskrun latest version
 	latestPr := &opsv1.PipelineRun{}
-	err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.GetNamespace(), Name: pr.GetName()}, latestPr)
-	if err != nil {
-		logger.Error.Println(err)
-		return
+	for retries := 0; retries < CommitStatusMaxRetries; retries++ {
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.GetNamespace(), Name: pr.GetName()}, latestPr)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
+		if latestPr.Status.StartTime == nil {
+			latestPr.Status.StartTime = &metav1.Time{Time: time.Now()}
+		}
+		latestPr.Status.RunStatus = prstatus
+		if trStatus != nil {
+			latestPr.Status.AddPipelineRunTaskStatus(taskName, taskRef, trStatus)
+		}
+		err = r.Client.Status().Update(ctx, latestPr)
+		if err == nil {
+			return
+		}
+		if !apierrors.IsConflict(err) {
+			logger.Error.Println(err, "update pipelinerun taskrun status error")
+			return
+		}
+		logger.Info.Println("conflict detected, retrying...", err)
+		time.Sleep(1 * time.Second)
 	}
-	if latestPr.Status.StartTime == nil {
-		latestPr.Status.StartTime = &metav1.Time{Time: time.Now()}
-	}
-	latestPr.Status.RunStatus = prstatus
-	// update taskrun task status
-	if trStatus != nil {
-		latestPr.Status.AddPipelineRunTaskStatus(taskName, taskRef, trStatus)
-	}
-	err = r.Client.Status().Update(ctx, latestPr)
-	if err != nil {
-		logger.Error.Println(err, "update taskrun status error")
-	}
+	logger.Error.Println("update pipelinerun taskrun status failed after retries", err)
 	return
 }
