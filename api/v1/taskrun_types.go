@@ -25,10 +25,10 @@ import (
 )
 
 const (
-	DefaultMaxTaskrunHistory = 1
-	LabelCronTaskRunKey      = "taskruns/type"
-	LabelCronTaskRunValue    = "cron"
-	LabelTaskRefKey          = "taskruns/taskref"
+	DefaultMaxRunHistory  = 1
+	LabelCronTaskRunKey   = "taskruns/type"
+	LabelCronTaskRunValue = "cron"
+	LabelTaskRefKey       = "taskruns/taskref"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!

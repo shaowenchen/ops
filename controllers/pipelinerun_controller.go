@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -87,12 +88,50 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		r.commitStatus(logger, ctx, pr, opsv1.StatusFailed, "", "", nil)
 		return ctrl.Result{}, err
 	}
-	// Todo: clear history
-
+	// clear history
+	go func() {
+		r.clearHistory(logger, ctx, p, pr)
+	}()
 	// run
 	err = r.run(logger, ctx, p, pr)
-
 	return ctrl.Result{}, err
+}
+
+func (r *PipelineRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Context, p *opsv1.Pipeline, pr *opsv1.PipelineRun) {
+	prs := &opsv1.PipelineRunList{}
+	maxHistory := p.Spec.RunHistoryLimit
+	if maxHistory == 0 {
+		maxHistory = opsv1.DefaultMaxRunHistory
+	}
+	err := r.Client.List(ctx,
+		prs,
+		client.InNamespace(p.Namespace),
+		client.MatchingFields{".spec.pipelineRef": p.Name})
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	}
+	finished := []opsv1.PipelineRun{}
+	for _, pr := range prs.Items {
+		if pr.Status.RunStatus != opsv1.StatusEmpty && pr.Status.RunStatus != opsv1.StatusRunning {
+			finished = append(finished, pr)
+		}
+	}
+
+	sort.Slice(finished, func(i, j int) bool {
+		return finished[i].Status.StartTime.Before(finished[j].Status.StartTime)
+	})
+
+	if len(finished) > int(maxHistory) {
+		finished = finished[:len(finished)-int(maxHistory)]
+		for _, tr := range finished {
+			err := r.Client.Delete(ctx, &tr)
+			if err != nil {
+				logger.Error.Println(err)
+			}
+		}
+	}
+	return
 }
 
 func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, p *opsv1.Pipeline, pr *opsv1.PipelineRun) (err error) {
@@ -211,6 +250,12 @@ func mergeMapValue(value1 map[string]string, value2 map[string]string) map[strin
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.PipelineRun{}, ".spec.pipelineRef", func(rawObj client.Object) []string {
+		pr := rawObj.(*opsv1.PipelineRun)
+		return []string{pr.Spec.PipelineRef}
+	}); err != nil {
+		return err
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&crdv1.PipelineRun{}).
 		WithEventFilter(

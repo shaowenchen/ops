@@ -67,6 +67,8 @@ spec:
                 type: string
               nodeName:
                 type: string
+              runHistoryLimit:
+                type: integer
               runtimeImage:
                 type: string
               selector:
@@ -92,8 +94,6 @@ spec:
                       type: string
                   type: object
                 type: array
-              taskRunHistoryLimit:
-                type: integer
               typeRef:
                 type: string
               variables:

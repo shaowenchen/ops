@@ -27,9 +27,10 @@ import (
 type PipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Desc      string               `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Variables map[string]Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Tasks     []TaskRef            `json:"tasks" yaml:"tasks"`
+	Desc            string               `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Variables       map[string]Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Tasks           []TaskRef            `json:"tasks" yaml:"tasks"`
+	RunHistoryLimit int                  `json:"runHistoryLimit,omitempty" yaml:"runHistoryLimit,omitempty"`
 }
 
 type Variables struct {
