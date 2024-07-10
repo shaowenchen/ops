@@ -142,6 +142,7 @@ func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepO
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
+// +kubebuilder:printcolumn:name="TaskRef",type=string,JSONPath=`.spec.taskRef`
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
 // +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`

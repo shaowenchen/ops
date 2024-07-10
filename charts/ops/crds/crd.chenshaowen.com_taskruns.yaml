@@ -16,6 +16,9 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.taskRef
+      name: TaskRef
+      type: string
     - jsonPath: .spec.typeRef
       name: TypeRef
       type: string

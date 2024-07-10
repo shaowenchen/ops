@@ -16,6 +16,9 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.pipelineRef
+      name: PipelineRef
+      type: string
     - jsonPath: .status.runStatus
       name: Status
       type: string

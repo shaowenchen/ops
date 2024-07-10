@@ -73,6 +73,7 @@ type PipelineRunTaskStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
+// +kubebuilder:printcolumn:name="PipelineRef",type=string,JSONPath=`.spec.pipelineRef`
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.runStatus`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 type PipelineRun struct {
