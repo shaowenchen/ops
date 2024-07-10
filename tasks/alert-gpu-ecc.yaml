@@ -1,0 +1,71 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alert-gpu-ecc
+    namespace: ops-system
+spec:
+    desc: use task `alert-gpu-ecc` to check gpu drop in specified host
+    crontab: "*/10 * * * *"
+    selector:
+        alert-gpu-ecc: enabled
+    typeRef: host
+    variables:
+        max: "1"
+        cluster: "default"
+        notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+    steps:
+        - name: alert-card-ecc
+          content: |
+            #!/usr/bin/python
+            import os
+            import subprocess
+            import requests
+            import json
+            from datetime import datetime
+
+            cluster = '${cluster}'
+            hostname = '$(hostname)'
+            notifaction = '${notifaction}'
+            maxecc = int('${max}')
+
+            reason = 'ECC异常'
+
+            def send(message):
+                payload = {
+                    'msgtype': 'text',
+                    'text': {
+                        'content': message
+                    }
+                }
+                headers = {
+                    'Content-Type': 'application/json'
+                }
+                response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                print(response.text)
+
+            def build_error_message(message, card_id=''):
+                if card_id == '':
+                    return f'异常信息: {message}\n'
+                return f'异常位置: {card_id}\n异常信息: {message}\n'
+
+            try:
+                # 1. check nvidia-smi exists /usr/bin/nvidia-sm
+                if not os.path.exists('/usr/bin/nvidia-smi'):
+                    raise Exception(build_error_message('找不到 nvidia-smi 命令'))
+                # 2. check ecc from nvidia-smi
+                output = subprocess.check_output(['nvidia-smi'], universal_newlines=True)
+                error_message = ''
+                lines = [line for line in output.split('\n') if "NVIDIA" in line and "Driver" not in line]
+                for index, line in enumerate(lines):
+                    location = line.split(" ")[3]
+                    ecc_count = int(line.split(" ")[-2])
+                    if ecc_count > maxecc:
+                        error_message += build_error_message(line, location)
+            except Exception as e:
+                if len(error_message) == 0:
+                    error_message = str(e)
+            finally:
+                if len(error_message) > 0:
+                    error_message = f'集群: {cluster} \n节点: {hostname} \n{error_message}异常判断: {reason}\n'
+                    send(error_message)
+
