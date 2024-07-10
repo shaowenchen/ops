@@ -236,8 +236,9 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 		r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
 		cliLogger.Flush()
+	} else {
+		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 	}
-	r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 	return
 }
 

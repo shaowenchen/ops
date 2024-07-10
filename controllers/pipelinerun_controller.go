@@ -146,7 +146,9 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		if err != nil {
 			logger.Error.Println(err)
 			runAlways = true
-			r.commitStatus(logger, ctx, pr, opsv1.StatusFailed, tRef.Name, tRef.TaskRef, nil)
+			r.commitStatus(logger, ctx, pr, opsv1.StatusDataInValid, tRef.Name, tRef.TaskRef, &opsv1.TaskRunStatus{
+				RunStatus: opsv1.StatusDataInValid,
+			})
 			continue
 		}
 		runtimeImage := opsconstants.DefaultRuntimeImage
@@ -219,8 +221,11 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 	}
 	finallyStatus := opsv1.StatusSuccessed
 	for _, status := range pr.Status.PipelineRunStatus {
-		if status.TaskRunStatus.RunStatus != opsv1.StatusSuccessed {
+		if status.TaskRunStatus.RunStatus == opsv1.StatusFailed {
 			finallyStatus = opsv1.StatusFailed
+			break
+		} else if status.TaskRunStatus.RunStatus == opsv1.StatusDataInValid {
+			finallyStatus = opsv1.StatusDataInValid
 			break
 		}
 	}
