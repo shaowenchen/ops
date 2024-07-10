@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `check-pod-existed` to check whether the pod existed and get pod namespace, variables must to set `pod`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     podname: ""
   steps:

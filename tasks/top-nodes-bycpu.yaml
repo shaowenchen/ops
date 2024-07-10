@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `top-nodes-bycpu` to list topK usage cpu of nodes in cluster, variables avaliable to set `topk`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     topk: "5"
   steps:

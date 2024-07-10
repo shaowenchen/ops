@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `inspect-node` to get node details in cluster, variables must to set `node`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     node: ""
   steps:

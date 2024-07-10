@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `get-pod-logs-bysvc` to get pod logs in cluster, variables must to set `svc`、`namespace`, avaliable to set `topk`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     namespace: ""
     svc: ""

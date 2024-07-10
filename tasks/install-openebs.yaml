@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `install-openebs` to install openebs for Kubernetes
   nodeName: anymaster
+  typeRef: cluster
   variables:
     action: apply
     kubeconfig: "/etc/kubernetes/admin.conf"

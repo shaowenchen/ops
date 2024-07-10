@@ -6,8 +6,9 @@ metadata:
 spec:
   desc: use task `top-pods-bycpu` to list topK usage cpu of pods in cluster, variables must to set `namespace`, avaliable to set `topk`
   nodeName: anymaster
+  typeRef: cluster
   variables:
-    namespace: default
+    namespace: ""
     topk: "10"
   steps:
     - name: list topK usage cpu of pods in specified namespace

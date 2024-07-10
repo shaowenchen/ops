@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `get-node-status` to get node status, variables must to set `node`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     node: ""
   steps:

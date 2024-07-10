@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `check-node-existed` to check whether the node existed, variables must to set `node`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     node: ""
   steps:

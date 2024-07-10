@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `test-perf3` to test iperf3 between two nodes, variables `srcip` and `dstip` are required
   nodeName: anymaster
+  typeRef: cluster
   variables:
     srcip: "127.0.0.1"
     dstip: "127.0.0.1"

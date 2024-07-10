@@ -4,11 +4,13 @@ metadata:
   name: delete-pod
   namespace: ops-system
 spec:
-  desc: use task `delete-pod` to restart or delete pod in cluster, variables must to set `podname`.
+  desc: use task `delete-pod` to restart or delete pod in cluster, variables must to set `podname`、`namespace`
   nodeName: anymaster
+  typeRef: cluster
   variables:
+    namespace: ""
     podname: ""
   steps:
     - name: delete pod
       content: |
-        kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl delete pod -n
+        kubectl delete pod -n ${namespace} ${podname}

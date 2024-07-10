@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `list-reqlimit` to list request and limit in cluster, variables must to set `namespace`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     namespace: ""
   steps:

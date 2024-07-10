@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `top-node-pods-bymem` to list topK usage memory of pods in node, variables must to set `node`, avaliable to set `topk`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     node: ""
     topk: "5"

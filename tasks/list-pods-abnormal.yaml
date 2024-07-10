@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `list-pods-abnormal` to list **abnormal pods*** in cluster, variables must to set `namespace`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     namespace: ""
   steps:

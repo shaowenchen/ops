@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `get-pod-error-logs-bysvc` to get pod error logs in cluster, variables must to set `svc`、`namespace`, avaliable to set `topk`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     svc: ""
     namespace: ""

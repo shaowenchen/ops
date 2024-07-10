@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `install-prometheus` to install prometheus in Kubernetes
   nodeName: anymaster
+  typeRef: cluster
   variables:
     namespace: monitor
     action: install

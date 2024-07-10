@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `list-pods-bysvc` to list **pods** in cluster, variables must to set `namespace` and `svc`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     namespace: ""
     svc: ""

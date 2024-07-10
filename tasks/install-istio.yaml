@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `install-istio` to install istio in Kubernetes
   nodeName: anymaster
+  typeRef: cluster
   variables:
     version: "1.13.7"
     kubeconfig: "/etc/kubernetes/admin.conf"

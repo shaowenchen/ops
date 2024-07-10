@@ -4,11 +4,13 @@ metadata:
   name: delete-pod-force
   namespace: ops-system
 spec:
-  desc: use task `delete-pod-force` to restart or delete pod in cluster, variables must to set `podname`.
+  desc: use task `delete-pod-force` to restart or delete pod in cluster, variables must to set `podname`、`namespace`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     podname: ""
+    namespace: ""
   steps:
     - name: delete pod
       content: |
-        kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n
+        kubectl delete pod --grace-period=0 --force -n ${namespace} ${podname}

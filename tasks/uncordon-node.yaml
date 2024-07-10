@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `uncordon-node` to uncordon node in cluster, variables must to set `node`. You can't use task `uncordon-node` unless I specifically state that.
   nodeName: anymaster
+  typeRef: cluster
   variables:
     node: ""
   steps:

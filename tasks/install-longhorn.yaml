@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `install-longhorn` to install longhorn in Kubernetes
   nodeName: anymaster
+  typeRef: cluster
   variables:
     action: apply
     version: 1.4.0

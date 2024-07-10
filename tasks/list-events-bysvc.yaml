@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `list-events-bysvc` to get pod events in cluster, variables must to set `svc`、`namespace`, avaliable to set `topk`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     topk: "50"
     svc: ""

@@ -6,6 +6,7 @@ metadata:
 spec:
   desc: use task `list-svcs` to list **svc** in cluster, variables must to set `namespace`
   nodeName: anymaster
+  typeRef: cluster
   variables:
     namespace: ops-system
   steps:

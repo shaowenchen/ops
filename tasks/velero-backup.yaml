@@ -5,6 +5,8 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `velero-backup` to backup Kubernetes Using Velero
+  nodeName: anymaster
+  typeRef: cluster
   variables:
     cluster_name: test
     version: "4"
