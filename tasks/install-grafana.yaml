@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `install-grafana` to install grafana for Kubernetes
-  nodename: anymaster
+  nodeName: anymaster
   variables:
     namespace: monitor
     action: install

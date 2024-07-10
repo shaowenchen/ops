@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: use task `add-sshkey` to add ssh key to specified host
   variables:
-    keycontent:
+    keycontent: ""
     keypath: ~/.ssh/authorized_keys
   steps:
     - name: Add Key to ${keypath}

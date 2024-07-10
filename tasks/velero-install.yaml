@@ -10,9 +10,9 @@ spec:
     download_url: https://mirror.ghproxy.com/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
     region: ap-southeast-3
     endpoint: https://obs.ap-southeast-3.myhuaweicloud.com
-    bucket:
-    ak:
-    sk:
+    bucket: ""
+    ak: ""
+    sk: ""
   steps:
     - name: Download Velero Client
       content: wget ${download_url}

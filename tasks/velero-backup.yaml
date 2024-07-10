@@ -7,7 +7,7 @@ spec:
   desc: use task `velero-backup` to backup Kubernetes Using Velero
   variables:
     cluster_name: test
-    version: 4
+    version: "4"
     velero_version: v1.9.2
   steps:
     - name: Backup all

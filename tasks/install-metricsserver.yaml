@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `install-metricsserver` to install metrics server for Kubernetes
-  nodename: anymaster
+  nodeName: anymaster
   variables:
     proxy: https://mirror.ghproxy.com/
     action: apply

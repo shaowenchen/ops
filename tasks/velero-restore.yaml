@@ -8,7 +8,7 @@ spec:
   variables:
     velero_version: v1.9.2
     cluster_name: test
-    version: 2
+    version: "2"
   steps:
     - name: Restore all
       content: ./velero-${velero_version}-linux-amd64/velero restore create  ${cluster_name}-${version}-restore --from-backup  ${cluster_name}-${version}

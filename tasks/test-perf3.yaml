@@ -16,7 +16,7 @@ spec:
     - name: run iperf3 server in dst node 5 minutes daemon
       content: |
         ssh -o StrictHostKeyChecking=no ${dstip} 'nohup timeout 300 iperf3 -s > /dev/null 2>&1 &'
-      allowFailure: true
+      allowfailure: "true"
     - name: install perf3 in src node
       content: |
         ssh -o StrictHostKeyChecking=no ${srcip} 'apt-get install iperf3 -y'

@@ -5,14 +5,14 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `install-prometheus` to install prometheus in Kubernetes
-  nodename: anymaster
+  nodeName: anymaster
   variables:
     namespace: monitor
     action: install
   steps:
     - name: create namespace
       content: kubectl create ns ${namespace}
-      allowfailure: true
+      allowfailure: "true"
     - name: add helm repo
       content: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     - name: update helm repo

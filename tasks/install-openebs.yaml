@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `install-openebs` to install openebs for Kubernetes
-  nodename: anymaster
+  nodeName: anymaster
   variables:
     action: apply
     kubeconfig: "/etc/kubernetes/admin.conf"
@@ -13,6 +13,6 @@ spec:
     - name: ${action} openebs
       content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://openebs.github.io/charts/openebs-operator.yaml
     - name: set default class
-      content: |+
+      content: |
         kubectl --kubeconfig ${kubeconfig} patch storageclass openebs-hostpath -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
       when: ${action}==apply

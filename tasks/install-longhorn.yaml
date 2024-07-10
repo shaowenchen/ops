@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `install-longhorn` to install longhorn in Kubernetes
-  nodename: anymaster
+  nodeName: anymaster
   variables:
     action: apply
     version: 1.4.0
