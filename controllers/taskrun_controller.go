@@ -25,6 +25,7 @@ import (
 
 	"os"
 
+	"github.com/google/go-cmp/cmp"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opshost "github.com/shaowenchen/ops/pkg/host"
@@ -39,6 +40,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // TaskRunReconciler reconciles a TaskRun object
@@ -79,6 +82,14 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// had run once, skip
+	if tr.Status.RunStatus != opsv1.StatusEmpty {
+		// abort running taskrun if restart or modified
+		if tr.Status.RunStatus == opsv1.StatusRunning {
+			r.commitStatus(logger, ctx, tr, opsv1.StatusAborted)
+		}
+		return ctrl.Result{}, nil
+	}
 	// fix variables
 	if tr.Spec.Variables != nil {
 		if _, ok := tr.Spec.Variables["typeRef"]; !ok {
@@ -90,14 +101,6 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		if _, ok := tr.Spec.Variables["nodeName"]; !ok {
 			tr.Spec.NodeName = tr.Spec.Variables["nodeName"]
 		}
-	}
-	// had run once, skip
-	if tr.Status.RunStatus != opsv1.StatusEmpty {
-		// abort running taskrun if restart or modified
-		if tr.Status.RunStatus == opsv1.StatusRunning {
-			r.commitStatus(logger, ctx, tr, opsv1.StatusAborted)
-		}
-		return ctrl.Result{}, nil
 	}
 	// get task
 	t := &opsv1.Task{}
@@ -156,7 +159,7 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
-	if tr.GetSpec().TypeRef == opsv1.TypeRefHost {
+	if tr.GetSpec().TypeRef == opsv1.TypeRefHost || tr.GetSpec().TypeRef == "" {
 		hs := []opsv1.Host{}
 		if tr.Spec.Selector == nil {
 			h := opsv1.Host{}
@@ -234,6 +237,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
 		cliLogger.Flush()
 	}
+	r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 	return
 }
 
@@ -293,7 +297,6 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 			logger.Error.Println(err)
 			return
 		}
-
 		latestTr.Status = tr.Status
 		err = r.Client.Status().Update(ctx, latestTr)
 		if err == nil {
@@ -333,6 +336,27 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.TaskRun{}).
+		WithEventFilter(
+			predicate.Funcs{
+				// drop reconcile for status updates
+				UpdateFunc: func(e event.UpdateEvent) bool {
+					if _, ok := e.ObjectOld.(*opsv1.TaskRun); !ok {
+						return true
+					}
+
+					oldObject := e.ObjectOld.(*opsv1.TaskRun).DeepCopy()
+					newObject := e.ObjectNew.(*opsv1.TaskRun).DeepCopy()
+
+					oldObjectCmp := &opsv1.TaskRun{}
+					newObjectCmp := &opsv1.TaskRun{}
+
+					oldObjectCmp.Spec = oldObject.Spec
+					newObjectCmp.Spec = newObject.Spec
+
+					return !cmp.Equal(oldObjectCmp, newObjectCmp)
+				},
+			},
+		).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: opsconstants.MaxTaskrunConcurrentReconciles}).
 		Complete(r)

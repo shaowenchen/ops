@@ -22,6 +22,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	crdv1 "github.com/shaowenchen/ops/api/v1"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -32,6 +33,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 const CommitStatusMaxRetries = 5
@@ -74,7 +77,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 	// had run once, skip
-	if !(pr.Status.RunStatus == opsv1.StatusEmpty || pr.Status.RunStatus == opsv1.StatusRunning) {
+	if !(pr.Status.RunStatus == opsv1.StatusEmpty) {
 		return ctrl.Result{}, nil
 	}
 	// get pipeline
@@ -210,6 +213,27 @@ func mergeMapValue(value1 map[string]string, value2 map[string]string) map[strin
 func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&crdv1.PipelineRun{}).
+		WithEventFilter(
+			predicate.Funcs{
+				// drop reconcile for status updates
+				UpdateFunc: func(e event.UpdateEvent) bool {
+					if _, ok := e.ObjectOld.(*opsv1.PipelineRun); !ok {
+						return true
+					}
+
+					oldObject := e.ObjectOld.(*opsv1.PipelineRun).DeepCopy()
+					newObject := e.ObjectNew.(*opsv1.PipelineRun).DeepCopy()
+
+					oldObjectCmp := &opsv1.PipelineRun{}
+					newObjectCmp := &opsv1.PipelineRun{}
+
+					oldObjectCmp.Spec = oldObject.Spec
+					newObjectCmp.Spec = newObject.Spec
+
+					return !cmp.Equal(oldObjectCmp, newObjectCmp)
+				},
+			},
+		).
 		Complete(r)
 }
 

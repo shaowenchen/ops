@@ -5,7 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: use task `alert-gpu-ecc` to check gpu drop in specified host
-    crontab: "*/10 * * * *"
+    crontab: "* */2 * * *"
     selector:
         alert-gpu-ecc: enabled
     typeRef: host
@@ -24,7 +24,7 @@ spec:
             from datetime import datetime
 
             cluster = '${cluster}'
-            hostname = '$(hostname)'
+            hostname = '${hostname}'
             notifaction = '${notifaction}'
             maxecc = int('${max}')
 
@@ -58,7 +58,10 @@ spec:
                 lines = [line for line in output.split('\n') if "NVIDIA" in line and "Driver" not in line]
                 for index, line in enumerate(lines):
                     location = line.split(" ")[3]
-                    ecc_count = int(line.split(" ")[-2])
+                    ecc_count = line.split(" ")[-2]
+                    if not ecc_count.isdigit():
+                        continue
+                    ecc_count = int(ecc_count)
                     if ecc_count > maxecc:
                         error_message += build_error_message(line, location)
             except Exception as e:
