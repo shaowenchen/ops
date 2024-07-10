@@ -7,7 +7,7 @@ spec:
   desc: use task `list-podsimage` to list pod image in cluster, variables must to set `namespace`
   nodeName: anymaster
   variables:
-    namespace: ops-system
+    namespace: ""
   steps:
     - name: list pods image
       when: ${namespace} != "all"

@@ -4,11 +4,12 @@ metadata:
   name: list-error-events-bypod
   namespace: ops-system
 spec:
-  desc: use task `list-error-events-bypod` to get pod events in cluster, variables must to set `pod`, avaliable to set `topk`
+  desc: use task `list-error-events-bypod` to get pod events in cluster, variables must to set `pod`、`namespace`, avaliable to set `topk`
   nodeName: anymaster
   variables:
+    namespace: ""
     topk: "10"
     podname: ""
   steps:
     - name: list pod events
-      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1}' | xargs -L1 kubectl get events -n | grep ${podname} | grep -i 'warn\|err' | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}
+      content: kubectl get events -n ${namespace} | grep ${podname} | grep -i 'warn\|err' | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}

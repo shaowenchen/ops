@@ -4,11 +4,12 @@ metadata:
   name: get-pod-logs-bysvc
   namespace: ops-system
 spec:
-  desc: use task `get-pod-logs-bysvc` to get pod logs in cluster, variables must to set `svc`, avaliable to set `topk`
+  desc: use task `get-pod-logs-bysvc` to get pod logs in cluster, variables must to set `svc`、`namespace`, avaliable to set `topk`
   nodeName: anymaster
   variables:
+    namespace: ""
     svc: ""
     topk: "20"
   steps:
     - name: get pod topk logs by svc name
-      content: kubectl get svc --all-namespaces | grep ${svc} | awk '{print $1}' | xargs -L1 kubectl logs -l app=${svc} --tail=${topk} -n | exit 0
+      content: kubectl logs -l app=${svc} --tail=${topk} -n ${namespace} | exit 0

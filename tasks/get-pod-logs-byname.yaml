@@ -4,11 +4,12 @@ metadata:
   name: get-pod-logs-byname
   namespace: ops-system
 spec:
-  desc: use task `get-pod-logs-byname` to get pod logs in cluster, variables must to set `podname`, avaliable to set `topk`
+  desc: use task `get-pod-logs-byname` to get pod logs in cluster, variables must to set `podname`、`namespace`, avaliable to set `topk`
   nodeName: anymaster
   variables:
+    namespace: ""
     podname: ""
     topk: "20"
   steps:
     - name: get pod topk logs
-      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl logs --tail=${topk} -n | exit 0
+      content: kubectl logs --tail=${topk} -n ${namespace} ${podname} | exit 0

@@ -7,7 +7,7 @@ spec:
   desc: use task `list-pods-abnormal` to list **abnormal pods*** in cluster, variables must to set `namespace`
   nodeName: anymaster
   variables:
-    namespace: default
+    namespace: ""
   steps:
     - name: list abnormal pods
       content: kubectl get pod -n ${namespace} | grep -vE 'Running|Completed|Succeeded' |  awk '{print $1, $2, $5}'

@@ -4,11 +4,12 @@ metadata:
   name: get-pod-error-logs-byname
   namespace: ops-system
 spec:
-  desc: use task `get-pod-error-logs-byname` to get pod error logs in cluster, variables must to set `podname`, avaliable to set `topk`
+  desc: use task `get-pod-error-logs-byname` to get pod error logs in cluster, variables must to set `podname`、`namespace`, avaliable to set `topk`
   nodeName: anymaster
   variables:
+    namespace: ""
     podname: ""
     topk: "50"
   steps:
     - name: get pod topk error logs
-      content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl logs --tail=${topk} -n | grep -iE 'err|warn' | exit 0
+      content: kubectl logs --tail=${topk} -n ${namespace} ${podname} | grep -iE 'err|warn' | exit 0

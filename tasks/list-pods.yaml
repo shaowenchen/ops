@@ -7,7 +7,7 @@ spec:
   desc: use task `list-pods` to list **pods** in cluster, variables must to set `namespace`
   nodeName: anymaster
   variables:
-    namespace: default
+    namespace: ""
   steps:
     - name: list pods
       content: kubectl get pod -n ${namespace} |  awk '{print $1, $2, $5}'
