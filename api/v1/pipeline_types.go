@@ -44,11 +44,11 @@ type Variables struct {
 }
 
 type TaskRef struct {
-	Name         string            `json:"name"`
-	TaskRef      string            `json:"taskRef,omitempty"`
-	Variables    map[string]string `json:"variables,omitempty"`
-	AllowFailure bool              `json:"allowFailure,omitempty"`
-	RunAlways    bool              `json:"runAlways,omitempty"`
+	Name         string            `json:"name" yaml:"name"`
+	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
+	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	AllowFailure bool              `json:"allowFailure,omitempty" yaml:"allowFailure,omitempty"`
+	RunAlways    bool              `json:"runAlways,omitempty" yaml:"runAlways,omitempty"`
 }
 
 // PipelineStatus defines the observed state of Pipeline
@@ -62,20 +62,20 @@ type PipelineStatus struct {
 
 // Pipeline is the Schema for the pipelines API
 type Pipeline struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
-	Spec   PipelineSpec   `json:"spec,omitempty"`
-	Status PipelineStatus `json:"status,omitempty"`
+	Spec   PipelineSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Status PipelineStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
 // PipelineList contains a list of Pipeline
 type PipelineList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Pipeline `json:"items"`
+	metav1.TypeMeta `json:",inline" yaml:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Items           []Pipeline `json:"items" yaml:"items"`
 }
 
 func init() {

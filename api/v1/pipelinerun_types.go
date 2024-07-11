@@ -30,7 +30,7 @@ type PipelineRunSpec struct {
 	TypeRef     string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
 	NameRef     string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
 	NodeName    string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
-	PipelineRef string            `json:"pipelineRef"`
+	PipelineRef string            `json:"pipelineRef,omitempty" yaml:"pipelineRef,omitempty"`
 	Variables   map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 }
 
@@ -77,11 +77,11 @@ type PipelineRunTaskStatus struct {
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.runStatus`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 type PipelineRun struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
-	Spec   PipelineRunSpec   `json:"spec,omitempty"`
-	Status PipelineRunStatus `json:"status,omitempty"`
+	Spec   PipelineRunSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Status PipelineRunStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 func NewPipelineRun(p *Pipeline) PipelineRun {
@@ -126,9 +126,9 @@ func NewPipelineRun(p *Pipeline) PipelineRun {
 
 // PipelineRunList contains a list of PipelineRun
 type PipelineRunList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []PipelineRun `json:"items"`
+	metav1.TypeMeta `json:",inline" yaml:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Items           []PipelineRun `json:"items" yaml:"items"`
 }
 
 func init() {
