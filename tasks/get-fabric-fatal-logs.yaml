@@ -6,7 +6,8 @@ metadata:
 spec:
   desc: use task `get-fabric-fatal-logs` to get fabric fatal logs , avaliable to set `topk`
   variables:
-    topk: "10"
+    topk: 
+      default: "10"
   steps:
     - name: get fabric fatal logs
       content: journalctl -u nvidia-fabricmanager.service |grep fatal | head -n ${topk}

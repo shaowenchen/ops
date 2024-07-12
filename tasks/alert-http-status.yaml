@@ -5,15 +5,19 @@ metadata:
   namespace: ops-system
 spec:
   desc: use task `alert-http-status` to check specified url http status, if not expected, send notification
-  # crontab: "1/* * * * *"
   variables:
-    url: https://www.chenshaowen.com/
-    expect: "200"
-    message: "${url} http status is not ${expect}"
+    url:
+      default: https://www.chenshaowen.com/
+    expect: 
+      default: "200"
+    message: 
+      default: "${url} http status is not ${expect}"
+    notifaction:
+      default: https://xz.wps.cn/api/v1/webhook/send?key=
   steps:
     - name: get status
       content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}
     - name: notifaction
       when: ${result} != ${expect}
       content: |
-        curl -X POST  'https://xz.wps.cn/api/v1/webhook/send?key='  -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${message}" } }'
+        curl -X POST  ${notifaction}  -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${message}" } }'

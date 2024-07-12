@@ -8,10 +8,14 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    proxy: https://mirror.ghproxy.com/
-    action: apply
-    version: 0.5.0
-    kubeconfig: "/etc/kubernetes/admin.conf"
+    proxy: 
+      default: https://mirror.ghproxy.com/
+    action: 
+      default: apply
+    version: 
+      default: 0.5.0
+    kubeconfig: 
+      default: "/etc/kubernetes/admin.conf"
   steps:
     - name: ${action} MetricsServer
       content: kubectl --kubeconfig ${kubeconfig} ${action} -f ${proxy}https://raw.githubusercontent.com/shaowenchen/hubimage/master/observation/v${version}-metrics-server.yaml

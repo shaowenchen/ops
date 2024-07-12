@@ -6,7 +6,8 @@ metadata:
 spec:
   desc: use task `check-gpu-drop` to check whether the gpu card has been dropped in specified host
   variables:
-    desired_gpu_count: "8"
+    desired_gpu_count: 
+      default: "8"
   steps:
     - name: Check nvidia-smi
       content: nvidia-smi

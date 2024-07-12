@@ -7,7 +7,8 @@ spec:
   desc: use task `cordon-node` to cordon node in cluster, variables must to set `node`. You can't use task `cordon-node` unless I specifically state that.
   nodeName: anymaster
   variables:
-    node: ""
+    node:
+      display: node name
   steps:
     - name: cordon node
       content: kubectl cordon ${node}

@@ -67,6 +67,8 @@ spec:
                       type: string
                     desc:
                       type: string
+                    display:
+                      type: string
                     enum:
                       items:
                         type: string

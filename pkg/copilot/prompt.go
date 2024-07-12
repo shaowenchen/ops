@@ -3,17 +3,18 @@ package copilot
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/shaowenchen/ops/pkg/agent"
 	"strings"
+
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 )
 
-func GetIntentionPrompt(pipelines []agent.LLMPipeline) string {
+func GetIntentionPrompt(pipelines []opsv1.Pipeline) string {
 	if len(pipelines) == 0 {
 		return ""
 	}
 	var b strings.Builder
 	for _, pipeline := range pipelines {
-		b.WriteString(fmt.Sprintf("- %s(%s)\n", pipeline.Name, pipeline.Desc))
+		b.WriteString(fmt.Sprintf("- %s(%s)\n", pipeline.Name, pipeline.Spec.Desc))
 	}
 	return `Please select the most appropriate option to classify the intention of the user. 
 Don't ask any more questions, just select the option.
@@ -22,28 +23,32 @@ Must be one of the following options:
 ` + b.String()
 }
 
-func GetParametersPrompt(pipeline agent.LLMPipeline) string {
+func GetParametersPrompt(pipeline opsv1.Pipeline, clusters []opsv1.Cluster) string {
 	// add vars
 	var desc strings.Builder
-	desc.WriteString(fmt.Sprintf("The %s pipeline is used to %s.\n", pipeline.Name, pipeline.Desc))
-	if len(pipeline.Variables) >= 0 {
-		desc.WriteString("It requires the following parameters:\n")
+	desc.WriteString(fmt.Sprintf("The %s pipeline is used to %s.\n", pipeline.Name, pipeline.Spec.Desc))
+	if len(pipeline.Spec.Variables) >= 0 {
+		desc.WriteString("It requires the following parameters(if enum provided, choose one of them):\n")
 	}
-	for k, v := range pipeline.Variables {
-		parmDesc := fmt.Sprintf("- %d(%s)\n", k, v.Desc)
-		if len(v.Enum) > 0 {
-			parmDesc = fmt.Sprintf("- %d(%s available options: %s)\n", k, v.Desc, strings.Join(v.Enum, ", "))
+	clusterEnum := []string{}
+	for _, cluster := range clusters {
+		clusterEnum = append(clusterEnum, cluster.Name)
+	}
+	for k, _ := range pipeline.Spec.Variables {
+		vt := pipeline.Spec.Variables[k]
+		if k == "nameRef" {
+			vt.Enum = clusterEnum
 		}
+		vStr, _ := json.Marshal(vt)
+		parmDesc := fmt.Sprintf("\t- %s \t %s\n", k, string(vStr))
 		desc.WriteString(parmDesc)
 	}
 	outputScheme := map[string]string{}
-	for _, k := range pipeline.GetFullVariables() {
-		if k.Key == "typeRef" {
-			outputScheme[k.Key] = "cluster"
-		} else if k.Key == "nodeName" {
-			outputScheme[k.Key] = "try extract from the input, if not found, use anymaster"
+	for key, value := range pipeline.Spec.Variables {
+		if value.Value != "" {
+			outputScheme[key] = value.Value
 		} else {
-			outputScheme[k.Key] = "need to extract from the input"
+			outputScheme[key] = ""
 		}
 	}
 	outputSchemeBytes, _ := json.Marshal(outputScheme)

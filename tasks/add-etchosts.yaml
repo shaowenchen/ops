@@ -6,9 +6,12 @@ metadata:
 spec:
   desc: use task `add-etchosts` to add hosts to /etc/hosts for specified host
   variables:
-    ip: ""
-    domain: ""
-    clear: "false"
+    ip:
+      display: ip
+    domain:
+      display: domain
+    clear:
+      default: "false"
   steps:
     - name: Add Etc Hosts
       content: |

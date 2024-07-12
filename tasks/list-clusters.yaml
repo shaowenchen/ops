@@ -6,7 +6,8 @@ metadata:
 spec:
   desc: use task `list-clusters` to list all **clusters** in cluster, variables must to set `namespace`
   variables:
-    namespace: ops-system
+    namespace:
+      display: namespace
   nodeName: anymaster
   typeRef: cluster
   steps:

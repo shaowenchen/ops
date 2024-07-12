@@ -8,7 +8,8 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    topk: "5"
+    topk: 
+      default: "5"
   steps:
     - name: list topK usage memory of nodes
       content: kubectl top node --sort-by=memory | head -$((${topk}+1))

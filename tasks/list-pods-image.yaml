@@ -8,7 +8,8 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ""
+    namespace:
+      default: default
   steps:
     - name: list pods image
       when: ${namespace} != "all"

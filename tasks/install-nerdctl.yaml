@@ -6,9 +6,12 @@ metadata:
 spec:
   desc: use task `install-nerdctl` to install nerdctl tool in specified host
   variables:
-    proxy: https://mirror.ghproxy.com/
-    version: 1.7.6
-    arch: amd64
+    proxy: 
+      default: https://mirror.ghproxy.com/
+    version: 
+      default: 1.7.6
+    arch: 
+      default: amd64
   steps:
     - name: Check nerdctl
       content: |

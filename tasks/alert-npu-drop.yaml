@@ -10,9 +10,12 @@ spec:
         alert-npu-drop: enabled
     typeRef: host
     variables:
-        cluster: "default"
-        desired_card_count: "16"
-        notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+        cluster: 
+            default: default
+        desired_card_count: 
+            default: "16"
+        notifaction: 
+            default: "https://xz.wps.cn/api/v1/webhook/send?key="
     steps:
         - name: alert-npu-drop
           content: |

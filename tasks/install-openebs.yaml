@@ -8,8 +8,10 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    action: apply
-    kubeconfig: "/etc/kubernetes/admin.conf"
+    action: 
+      default: apply
+    kubeconfig: 
+      default: "/etc/kubernetes/admin.conf"
   steps:
     - name: ${action} openebs
       content: kubectl --kubeconfig ${kubeconfig} ${action} -f https://openebs.github.io/charts/openebs-operator.yaml

@@ -8,12 +8,18 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    name: ""
-    resource_type: deploy
-    namespace: ops-system
-    min: "1"
-    max: "5"
-    cpu_percent: "80"
+    name:
+      display: name
+    namespace:
+      display: namespace
+    resource_type:
+      default: deploy
+    min:
+      default: "1"
+    max:
+      default: "5"
+    cpu_percent:
+      default: "80"
   steps:
     - name: add hpa for
       content: kubectl autoscale ${resource_type} ${name} --min=${min} --max=${max} --cpu-percent=${cpu_percent}

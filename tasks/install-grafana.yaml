@@ -8,9 +8,12 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: monitor
-    action: install
-    kubeconfig: "/etc/kubernetes/admin.conf"
+    namespace: 
+      default: monitor
+    action: 
+      default: install
+    kubeconfig: 
+      default: "/etc/kubernetes/admin.conf"
   steps:
     - name: add helm repo
       content: helm --kubeconfig ${kubeconfig} repo add grafana https://grafana.github.io/helm-charts

@@ -6,11 +6,16 @@ metadata:
 spec:
   desc: use task `install-nydus` to install nydus kit in specified host
   variables:
-    proxy: https://mirror.ghproxy.com/
-    version: 2.2.4
-    rpcversion: 0.13.4
-    arch: amd64
-    os: linux
+    proxy: 
+      default: https://mirror.ghproxy.com/
+    version: 
+      default: 2.2.4
+    rpcversion: 
+      default: 0.13.4
+    arch: 
+      default: amd64
+    os: 
+      default: linux
   steps:
     - name: Download nydus
       content: wget ${proxy}https://github.com/dragonflyoss/nydus/releases/download/v${version}/nydus-static-v${version}-${os}-${arch}.tgz

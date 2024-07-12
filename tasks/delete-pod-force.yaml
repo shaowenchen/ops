@@ -8,8 +8,10 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    podname: ""
-    namespace: ""
+    podname:
+      display: pod name
+    namespace:
+      display: namespace
   steps:
     - name: delete pod
       content: |

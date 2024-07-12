@@ -8,8 +8,10 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ""
-    topk: "20"
+    namespace:
+      default: "default"
+    topk: 
+      default: "20"
   steps:
     - name: list topK usage memory of pods
       content: |

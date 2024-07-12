@@ -8,7 +8,8 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ops-system
+    namespace:
+      default: default
   steps:
     - name: get svc info
       content: kubectl get svc -A -o=custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,IP:.spec.clusterIP,PORT:.spec.ports[*].targetPort' 

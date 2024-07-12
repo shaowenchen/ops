@@ -1,3 +1,19 @@
 {
-    "go.inferGopath": false
+    "go.inferGopath": false,
+    "yaml.schemas": {
+        "https://json.schemastore.org/yamllint.json": [
+            "file:///Volumes/Data/github/ops/tasks/list-events-bypod.yaml",
+            "file:///Volumes/Data/github/ops/tasks/uncordon-node.yaml",
+            "file:///Volumes/Data/github/ops/tasks/velero-install.yaml",
+            "file:///Volumes/Data/github/ops/tasks/velero-restore.yaml",
+            "file:///Volumes/Data/github/ops/tasks/add-etchosts.yaml",
+            "file:///Volumes/Data/github/ops/tasks/top-pods-bycpu-node.yaml",
+            "file:///Volumes/Data/github/ops/tasks/list-tasks.yaml",
+            "file:///Volumes/Data/github/ops/tasks/list-reqlimit.yaml",
+            "file:///Volumes/Data/github/ops/tasks/list-pods.yaml",
+            "file:///Volumes/Data/github/ops/tasks/alert-label-gpu.yaml",
+            "file:///Volumes/Data/github/ops/tasks/clear-kubernetes.yaml",
+            "file:///Volumes/Data/github/ops/tasks/add-secret-imagepull.yaml"
+        ]
+    }
 }

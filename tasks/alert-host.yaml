@@ -9,8 +9,10 @@ spec:
   typeRef: cluster
   nodeName: anymaster
   variables:
-    cluster: default
-    notifaction: https://xz.wps.cn/api/v1/webhook/send?key=
+    cluster: 
+      default: default
+    notifaction: 
+      default: https://xz.wps.cn/api/v1/webhook/send?key=
   steps:
     - name: get host status
       content: kubectl -n ops-system get hosts | grep -q failed && kubectl -n ops-system get hosts | grep failed || echo "OK"

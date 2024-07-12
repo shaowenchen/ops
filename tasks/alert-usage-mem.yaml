@@ -9,9 +9,12 @@ spec:
     nodeName: "anymaster"
     typeRef: cluster
     variables:
-        cluster: "default"
-        usage: "85"
-        notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+        cluster:
+            default: default
+        usage:
+            default: "85"
+        notifaction:
+            default: "https://xz.wps.cn/api/v1/webhook/send?key="
     steps:
         - name: alert-usage-mem
           content: |

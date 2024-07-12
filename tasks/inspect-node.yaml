@@ -8,7 +8,8 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    node: ""
+    node:
+      value: ""
   steps:
     - name: get node details
       content: kubectl describe node ${node}

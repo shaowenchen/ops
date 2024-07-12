@@ -8,7 +8,8 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    podname: ""
+    podname:
+      display: pod name
   steps:
     - name: Check pod existed
       content: |

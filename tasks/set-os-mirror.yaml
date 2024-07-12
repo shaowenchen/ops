@@ -6,7 +6,8 @@ metadata:
 spec:
   desc: use task `set-os-mirror` to set os mirror friendly to China for specified host
   variables:
-    proxy: https://mirror.ghproxy.com/
+    proxy: 
+      default: https://mirror.ghproxy.com/
   steps:
     - name: Set mirror
       content: curl -sfL ${proxy}https://raw.githubusercontent.com/shaowenchen/hubimage/main/mirror/get.sh | sh -

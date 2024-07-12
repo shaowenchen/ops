@@ -7,7 +7,6 @@ import (
 
 	"golang.org/x/term"
 
-	"github.com/shaowenchen/ops/pkg/agent"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/copilot"
 	"github.com/shaowenchen/ops/pkg/log"
@@ -47,7 +46,12 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 	terminal := term.NewTerminal(os.Stdin, prompt)
 	rawState, _ := term.GetState(stdFd)
 
-	pipelinerunsManager := agent.NewLLMPipelineRunsManager(copilotOpt.OpsServer, copilotOpt.OpsToken, "ops-system", copilotOpt.RuntimeImage, 10, copilot.AllPipelines, copilot.AllTasks)
+	pipelinerunsManager, err := copilot.NewPipelineRunsManager(copilotOpt.OpsServer, copilotOpt.OpsToken, "ops-system")
+	if err != nil {
+		logger.Error.Printf("create pipelineruns manager error: %v\n", err)
+		return
+	}
+
 	// build chat
 	chat, err := copilot.BuildOpenAIChat(copilotOpt.Endpoint, copilotOpt.Key, copilotOpt.Model, &history, "", "copilot", 0.1)
 	if err != nil {
@@ -61,12 +65,23 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 			break
 		}
 		input = strings.TrimSpace(input)
-		pr, err := copilot.RunPipeline(logger, chat, &history, pipelinerunsManager, input, "copilot")
+		pr, exitCode, err := copilot.RunPipeline(logger, chat, &history, pipelinerunsManager, input, "copilot")
+		output := ""
+		if exitCode == copilot.ExitCodeIntentionEmpty {
+			output = "I can not understand your input:" + input + ", please help me to solve it, use following intention:\n " + pipelinerunsManager.GetForIntent()
+		} else if exitCode == copilot.ExitCodeParametersNotFound {
+			output = "I can not get the parameters, please help me to solve it:\n " + pipelinerunsManager.GetForVariables(pr)
+		} else {
+			output = fmt.Sprintf("%s", pipelinerunsManager.PrintMarkdownPipelineRuns(pr))
+		}
+		if output == "" {
+			output = "It's bug, please contact chenshaowen to fix it"
+		}
 		if err != nil {
 			printTerm(stdFd, oldState, rawState, err.Error())
 			continue
 		}
-		printTerm(stdFd, oldState, rawState, pr.Output)
+		printTerm(stdFd, oldState, rawState, output)
 	}
 }
 

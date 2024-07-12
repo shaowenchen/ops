@@ -8,9 +8,12 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    cluster_name: test
-    version: "4"
-    velero_version: v1.9.2
+    cluster_name: 
+      default: default
+    version: 
+      default: "4"
+    velero_version: 
+      default: v1.9.2
   steps:
     - name: Backup all
       content: ./velero-${velero_version}-linux-amd64/velero backup create ${cluster_name}-${version}

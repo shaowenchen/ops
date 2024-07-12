@@ -28,18 +28,18 @@ import (
 type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Crontab         string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
-	Variables       map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Steps           []Step            `json:"steps,omitempty" yaml:"steps,omitempty"`
-	Name            string            `json:"name,omitempty" yaml:"name,omitempty"`
-	Desc            string            `json:"desc,omitempty" yaml:"desc,omitempty"`
-	TypeRef         string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
-	Selector        map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
-	NameRef         string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
-	NodeName        string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
-	All             bool              `json:"all,omitempty" yaml:"all,omitempty"`
-	RuntimeImage    string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
-	RunHistoryLimit int               `json:"runHistoryLimit,omitempty" yaml:"runHistoryLimit,omitempty"`
+	Crontab         string               `json:"crontab,omitempty" yaml:"crontab,omitempty"`
+	Variables       map[string]Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Steps           []Step               `json:"steps,omitempty" yaml:"steps,omitempty"`
+	Name            string               `json:"name,omitempty" yaml:"name,omitempty"`
+	Desc            string               `json:"desc,omitempty" yaml:"desc,omitempty"`
+	TypeRef         string               `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
+	Selector        map[string]string    `json:"selector,omitempty" yaml:"selector,omitempty"`
+	NameRef         string               `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
+	NodeName        string               `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	All             bool                 `json:"all,omitempty" yaml:"all,omitempty"`
+	RuntimeImage    string               `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
+	RunHistoryLimit int                  `json:"runHistoryLimit,omitempty" yaml:"runHistoryLimit,omitempty"`
 }
 
 const TypeRefHost = "host"
@@ -68,6 +68,18 @@ type Task struct {
 	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
 	Spec TaskSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
+}
+
+func (t *Task) GetVariables() map[string]string {
+	var result = make(map[string]string)
+	for k, v := range t.Spec.Variables {
+		if v.Value != "" {
+			result[k] = v.Value
+		} else {
+			result[k] = v.Default
+		}
+	}
+	return result
 }
 
 func (t *Task) GetUniqueKey() string {

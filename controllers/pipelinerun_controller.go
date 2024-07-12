@@ -173,7 +173,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 				TypeRef:      mergeValue(t.Spec.TypeRef, pr.Spec.TypeRef),
 				NameRef:      mergeValue(t.Spec.NameRef, pr.Spec.NameRef),
 				NodeName:     mergeValue(t.Spec.NodeName, pr.Spec.NodeName),
-				Variables:    mergeMapValue(t.Spec.Variables, pr.Spec.Variables),
+				Variables:    mergeMapValue(t.GetVariables(), pr.Spec.Variables),
 				RuntimeImage: runtimeImage,
 			},
 		}

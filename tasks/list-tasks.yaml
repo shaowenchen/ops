@@ -6,7 +6,8 @@ metadata:
 spec:
   desc: use task `list-task` to list all **tasks** in cluster, variables must to set `namespace`
   variables:
-    namespace: ops-system
+    namespace: 
+      default: ops-system
   nodeName: anymaster
   typeRef: cluster
   steps:

@@ -4,9 +4,10 @@ metadata:
   name: list-pipelines
   namespace: ops-system
 spec:
-  desc: use task `list-pipelines` to list all **pipelines** in cluster, variables must to set `namespace`
+  desc: list all **pipelines** in cluster
   variables:
-    namespace: ops-system
+    namespace:
+      desc: namespace
   nodeName: anymaster
   typeRef: cluster
   steps:

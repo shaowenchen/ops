@@ -8,7 +8,8 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    node: ""
+    node:
+      desc: node name
   steps:
     - name: uncordon node
       content: kubectl uncordon ${node}

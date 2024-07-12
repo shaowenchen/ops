@@ -16,7 +16,7 @@ import (
 func GetRealVariables(t *opsv1.Task, taskOpt option.TaskOption) (map[string]string, error) {
 	globalVariables := make(map[string]string)
 	// cli > env > yaml
-	utils.MergeMap(globalVariables, t.Spec.Variables)
+	utils.MergeMap(globalVariables, t.GetVariables())
 	utils.MergeMap(globalVariables, utils.GetAllOsEnv())
 	utils.MergeMap(globalVariables, taskOpt.Variables)
 
@@ -49,7 +49,7 @@ func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 			return nil, err1
 		}
 		task := opsv1.Task{}
-		task.Spec.Variables = make(map[string]string, 0)
+		task.Spec.Variables = make(map[string]opsv1.Variables)
 		err = yaml.Unmarshal(yfile, &task)
 		if err != nil {
 			return

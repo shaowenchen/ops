@@ -9,7 +9,8 @@ spec:
   nodeName: anymaster
   desc: use task `clear-opstaskpod` to clear ops task pod in specified namespace within a Kubernetes cluster.
   variables:
-    namespace: ops-system
+    namespace:
+      display: namespace
   steps:
     - name: clear ops task pod
       content: kubectl -n ${namespace} delete  pod -l ops=task

@@ -8,13 +8,20 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    velero_version: v1.9.2
-    download_url: https://mirror.ghproxy.com/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
-    region: ap-southeast-3
-    endpoint: https://obs.ap-southeast-3.myhuaweicloud.com
-    bucket: ""
-    ak: ""
-    sk: ""
+    velero_version: 
+      default: v1.9.2
+    download_url: 
+      default: https://mirror.ghproxy.com/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
+    region: 
+      default: ap-southeast-3
+    endpoint: 
+      default: https://obs.ap-southeast-3.myhuaweicloud.com
+    bucket:
+      desc: bucket name
+    ak:
+      desc: access key
+    sk:
+      desc: secret key
   steps:
     - name: Download Velero Client
       content: wget ${download_url}

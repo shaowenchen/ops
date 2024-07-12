@@ -35,6 +35,7 @@ type PipelineSpec struct {
 
 type Variables struct {
 	Default  string   `json:"default,omitempty" yaml:"default,omitempty"`
+	Display  string   `json:"display,omitempty" yaml:"display,omitempty"`
 	Value    string   `json:"value,omitempty" yaml:"value,omitempty"`
 	Desc     string   `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Regex    string   `json:"regex,omitempty" yaml:"regex,omitempty"`
@@ -67,6 +68,14 @@ type Pipeline struct {
 
 	Spec   PipelineSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
 	Status PipelineStatus `json:"status,omitempty" yaml:"status,omitempty"`
+}
+
+func (p *Pipeline) GetVariables() map[string]string {
+	var result = make(map[string]string)
+	for k, v := range p.Spec.Variables {
+		result[k] = v.Value
+	}
+	return result
 }
 
 //+kubebuilder:object:root=true

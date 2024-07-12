@@ -52,6 +52,10 @@ func (tr *TaskRun) GetSpec() *TaskRunSpec {
 	return &tr.Spec
 }
 
+func (tr *TaskRun) GetVariables() map[string]string {
+	return tr.Spec.Variables
+}
+
 func NewTaskRun(t *Task) TaskRun {
 	tr := TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
@@ -60,7 +64,7 @@ func NewTaskRun(t *Task) TaskRun {
 		},
 		Spec: TaskRunSpec{
 			TaskRef:      t.GetObjectMeta().GetName(),
-			Variables:    t.Spec.Variables,
+			Variables:    t.GetVariables(),
 			TypeRef:      t.Spec.TypeRef,
 			Selector:     t.Spec.Selector,
 			NameRef:      t.Spec.NameRef,

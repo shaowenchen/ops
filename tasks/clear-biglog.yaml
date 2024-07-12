@@ -6,11 +6,16 @@ metadata:
 spec:
   desc: use task `clear-biglog` to clear runc log in specified path for specified host
   variables:
-    size: 100M
-    clear: "false"
-    usage: "50"
-    logpath: /var/log
-    logname: "*log*"
+    size: 
+      default: 100M
+    clear: 
+      default: "false"
+    usage: 
+      default: "50"
+    logpath: 
+      default: /var/log
+    logname: 
+      default: "*log*"
   steps:
     - name: find ${logname} under ${logpath} with size > ${size}
       content: find ${logpath} -type f -name "${logname}" -size +${size} -exec du -h {} \; 2>/dev/null || true

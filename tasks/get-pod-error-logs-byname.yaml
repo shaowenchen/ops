@@ -8,9 +8,12 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ""
-    podname: ""
-    topk: "50"
+    namespace:
+      display: namespace
+    podname:
+      display: podname
+    topk:
+      default: "50"
   steps:
     - name: get pod topk error logs
       content: kubectl logs --tail=${topk} -n ${namespace} ${podname} | grep -iE 'err|warn' | exit 0

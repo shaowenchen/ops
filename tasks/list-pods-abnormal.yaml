@@ -4,11 +4,12 @@ metadata:
   name: list-pods-abnormal
   namespace: ops-system
 spec:
-  desc: use task `list-pods-abnormal` to list **abnormal pods*** in cluster, variables must to set `namespace`
+  desc: list **abnormal pods*** in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ""
+    namespace:
+      desc: name
   steps:
     - name: list abnormal pods
       content: kubectl get pod -n ${namespace} | grep -vE 'Running|Completed|Succeeded' |  awk '{print $1, $2, $5}'

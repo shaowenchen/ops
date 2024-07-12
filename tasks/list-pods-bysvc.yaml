@@ -8,8 +8,10 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ""
-    svc: ""
+    namespace:
+      desc: namespace
+    svc:
+      desc: svc name
   steps:
     - name: list pods by svc
       content: |

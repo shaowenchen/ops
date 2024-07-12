@@ -8,8 +8,10 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ""
-    podname: ""
+    namespace:
+      display: namespace
+    podname:
+      display: pod name
   steps:
     - name: get pod details info
       content: kubectl get pod --all-namespaces | grep ${podname} | awk '{print $1, $2}' | xargs -L1 kubectl describe pod -n

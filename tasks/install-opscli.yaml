@@ -6,7 +6,8 @@ metadata:
 spec:
   desc: use task `install-opscli` to install opscli tool in specified host
   variables:
-    proxy: https://mirror.ghproxy.com/
+    proxy: 
+      default: https://mirror.ghproxy.com/
   steps:
     - name: Install Opscli
       content: curl -sfL ${proxy}https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -

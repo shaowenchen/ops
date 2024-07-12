@@ -8,8 +8,13 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: monitor
-    action: install
+    namespace: 
+      default: monitor
+    action: 
+      default: install
+      enum:
+        - install
+        - uninstall
   steps:
     - name: create namespace
       content: kubectl create ns ${namespace}

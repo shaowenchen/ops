@@ -6,7 +6,8 @@ metadata:
 spec:
   desc: use task `list-process-byio` to list process by io in node, avaliable to set `topk`
   variables:
-    topk: "10"
+    topk: 
+      default: "10"
   steps:
     - name: list process by io
       content: iotop -b | head -$((${topk}+1))

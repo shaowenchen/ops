@@ -8,7 +8,8 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ""
+    namespace:
+      default: "default"
   steps:
     - name: list cpu request limit
       content: kubectl get pod -n ${namespace} -o custom-columns='NAMESPACE:.metadata.namespace,POD-NAME:.metadata.name,CPU-REQ:.spec.containers[*].resources.requests.cpu,CPU-LIMIT:.spec.containers[*].resources.limits.cpu'

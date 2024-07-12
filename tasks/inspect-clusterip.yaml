@@ -7,7 +7,8 @@ spec:
   desc: use task `inspect-clusterip` to get clusterip details in cluster, variables must to set `clusterip`
   nodeName: anymaster
   variables:
-    clusterip: ""
+    clusterip:
+      display: cluster ip
   steps:
     - name: search clusterip
       content: |

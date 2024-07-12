@@ -10,8 +10,10 @@ spec:
         alert-gpu-zombie: enabled
     typeRef: host
     variables:
-        cluster: "default"
-        notifaction: "https://xz.wps.cn/api/v1/webhook/send?key="
+        cluster:
+            default: default
+        notifaction:
+            default: https://xz.wps.cn/api/v1/webhook/send?key=
     steps:
         - name: alert-gpu-zombie
           content: |

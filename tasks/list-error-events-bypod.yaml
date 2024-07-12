@@ -8,9 +8,12 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    namespace: ""
-    topk: "10"
-    podname: ""
+    namespace:
+      display: namespace
+    podname:
+      display: pod name
+    topk:
+      default: "10"
   steps:
     - name: list pod events
       content: kubectl get events -n ${namespace} | grep ${podname} | grep -i 'warn\|err' | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}

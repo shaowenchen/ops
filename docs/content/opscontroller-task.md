@@ -24,9 +24,12 @@ spec:
   desc: alert
   crontab: "*/1 * * * *"
   variables:
-    url: http://1.1.1.1:5000/
-    expect: "200"
-    message: ${url} http status is not ${expect}
+    url: 
+      default: http://1.1.1.1:5000/
+    expect: 
+      default: "200"
+    message: 
+      default: ${url} http status is not ${expect}
   steps:
     - name: get status
       content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}

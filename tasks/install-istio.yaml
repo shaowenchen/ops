@@ -8,9 +8,12 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    version: "1.13.7"
-    kubeconfig: "/etc/kubernetes/admin.conf"
-    action: apply
+    version: 
+      default: "1.13.7"
+    kubeconfig: 
+      default: "/etc/kubernetes/admin.conf"
+    action: 
+      default: apply
   steps:
     - name: Download Istio
       content: curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${version} TARGET_ARCH=x86_64 sh -

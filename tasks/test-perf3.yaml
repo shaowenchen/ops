@@ -8,8 +8,10 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    srcip: "127.0.0.1"
-    dstip: "127.0.0.1"
+    srcip:
+      default: "127.0.0.1"
+    dstip:
+      default: "127.0.0.1"
   steps:
     - name: install perf3 in dst node
       content: |

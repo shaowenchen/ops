@@ -708,9 +708,9 @@ func (in *TaskSpec) DeepCopyInto(out *TaskSpec) {
 	*out = *in
 	if in.Variables != nil {
 		in, out := &in.Variables, &out.Variables
-		*out = make(map[string]string, len(*in))
+		*out = make(map[string]Variables, len(*in))
 		for key, val := range *in {
-			(*out)[key] = val
+			(*out)[key] = *val.DeepCopy()
 		}
 	}
 	if in.Steps != nil {

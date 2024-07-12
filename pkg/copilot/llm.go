@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
-	"github.com/shaowenchen/ops/pkg/agent"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
 )
@@ -150,7 +150,7 @@ func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, inpu
 	return
 }
 
-func ChatIntention(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func([]agent.LLMPipeline) string, pipelines []agent.LLMPipeline, history *RoleContentList, input string, maxTryTimes int) (output string, pipeline agent.LLMPipeline, pr *agent.LLMPipelineRun, err error) {
+func ChatIntention(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func([]opsv1.Pipeline) string, pipelines []opsv1.Pipeline, history *RoleContentList, input string, maxTryTimes int) (output string, pipeline opsv1.Pipeline, pr *opsv1.PipelineRun, err error) {
 Again:
 	system := buildSystem(pipelines)
 	output, err = chat(input, system, history)
@@ -166,7 +166,7 @@ Again:
 	// check pipelines
 	avaliables := make([]string, 0)
 	for _, p := range pipelines {
-		if strings.Contains(output, p.Name) || strings.Contains(output, p.Desc) {
+		if strings.Contains(output, p.Name) || strings.Contains(output, p.Spec.Desc) {
 			avaliables = append(avaliables, p.Name)
 		}
 	}
@@ -188,7 +188,8 @@ Again:
 	for _, p := range pipelines {
 		if p.Name == available {
 			pipeline = p
-			pr = agent.NewLLMPipelineRun(p)
+			prT := opsv1.NewPipelineRun(&p)
+			pr = &prT
 			return
 		}
 	}
@@ -199,9 +200,9 @@ Again:
 	return
 }
 
-func ChatParameters(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func(agent.LLMPipeline) string, pipelines []agent.LLMPipeline, history *RoleContentList, pipeline agent.LLMPipeline, pr *agent.LLMPipelineRun, input string, maxTryTimes int) (output string, err error) {
+func ChatParameters(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func(opsv1.Pipeline, []opsv1.Cluster) string, pipelines []opsv1.Pipeline, clusters []opsv1.Cluster, history *RoleContentList, pipeline opsv1.Pipeline, pr *opsv1.PipelineRun, input string, maxTryTimes int) (output string, err error) {
 Again:
-	system := buildSystem(pipeline)
+	system := buildSystem(pipeline, clusters)
 	output, err = chat(input, system, history)
 	if err != nil {
 		logger.Error.Printf("llm chatParameters error: %v\n", err)
@@ -225,23 +226,33 @@ Again:
 	}
 	logger.Debug.Printf("llm chatParameters cleaed output: %s\n ", output)
 	// validate json
-	outputMap := make(map[string]string)
-	err = json.Unmarshal([]byte(output), &outputMap)
-	if err != nil {
+	outputVars := make(map[string]string)
+	err1 := json.Unmarshal([]byte(output), &outputVars)
+	if err1 != nil {
 		logger.Error.Printf("json marshal error: %v\n", err)
 		if maxTryTimes > 0 {
 			maxTryTimes--
 			logger.Debug.Printf("try again chatParameters, maxTryTimes: %d\n", maxTryTimes)
 			goto Again
 		}
-		return
 	}
 
-	for i, _ := range pipeline.Variables {
-		if _, ok := outputMap[pipeline.Variables[i].Key]; !ok {
-			pipeline.Variables[i].Value.Str = outputMap[pipeline.Variables[i].Key]
+	for k, v := range pipeline.Spec.Variables {
+		if v.Value != "" {
+			pr.Spec.Variables[k] = v.Value
+		} else if _, ok := outputVars[k]; ok {
+			outV := outputVars[k]
+			pr.Spec.Variables[k] = ""
+			// if in enum keep it
+			for _, enum := range v.Enum {
+				if outV == enum {
+					pr.Spec.Variables[k] = outV
+					break
+				}
+			}
+		} else {
+			pr.Spec.Variables[k] = ""
 		}
 	}
-	// validate variables
 	return
 }

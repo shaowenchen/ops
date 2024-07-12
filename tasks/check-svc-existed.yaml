@@ -8,8 +8,10 @@ spec:
   nodeName: anymaster
   typeRef: cluster
   variables:
-    svc: ""
-    namespace: ""
+    svc:
+      display: svc
+    namespace:
+      display: namespace
   steps:
     - name: Check svc existed
       content: |
