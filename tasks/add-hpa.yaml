@@ -10,8 +10,10 @@ spec:
   variables:
     name:
       display: name
+      required: true
     namespace:
       display: namespace
+      required: true
     resource_type:
       default: deploy
     min:

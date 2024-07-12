@@ -1,21 +1,21 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-    name: alert-npu-drop
-    namespace: ops-system
+  name: alert-npu-drop
+  namespace: ops-system
 spec:
     desc: check npu drop in specified host
     crontab: "*/10 * * * *"
     selector:
-        alert-npu-drop: enabled
+      alert-npu-drop: enabled
     typeRef: host
     variables:
-        cluster: 
-            default: default
-        desired_card_count: 
-            default: "16"
-        notifaction: 
-            default: "https://xz.wps.cn/api/v1/webhook/send?key="
+      cluster: 
+        default: default
+      desired_card_count: 
+        default: "16"
+      notifaction: 
+        required: true
     steps:
         - name: alert-npu-drop
           content: |

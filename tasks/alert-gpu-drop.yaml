@@ -15,7 +15,7 @@ spec:
         cluster:
             default: default
         notifaction:
-            default: https://xz.wps.cn/api/v1/webhook/send?key=
+            required: true
     steps:
         - name: alert-card-drop
           content: |

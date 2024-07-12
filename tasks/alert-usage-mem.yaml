@@ -14,7 +14,7 @@ spec:
         usage:
             default: "85"
         notifaction:
-            default: "https://xz.wps.cn/api/v1/webhook/send?key="
+            required: true
     steps:
         - name: alert-usage-mem
           content: |

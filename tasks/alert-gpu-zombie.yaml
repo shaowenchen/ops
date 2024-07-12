@@ -7,13 +7,13 @@ spec:
     desc: check gpu
     crontab: "50 * * * *"
     selector:
-        alert-gpu-zombie: enabled
+      alert-gpu-zombie: enabled
     typeRef: host
     variables:
-        cluster:
-            default: default
-        notifaction:
-            default: https://xz.wps.cn/api/v1/webhook/send?key=
+      cluster:
+        default: default
+      notifaction:
+        required: true
     steps:
         - name: alert-gpu-zombie
           content: |

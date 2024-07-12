@@ -9,12 +9,12 @@ spec:
     nodeName: "anymaster"
     typeRef: cluster
     variables:
-        cluster:
-            default: default
-        usage:
-            default: "80"
-        notifaction:
-            default: https://xz.wps.cn/api/v1/webhook/send?key=
+      cluster:
+        default: default
+      usage:
+        default: "80"
+      notifaction:
+        required: true
     steps:
         - name: alert-usage-disk
           content: |

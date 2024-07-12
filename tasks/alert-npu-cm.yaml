@@ -9,10 +9,10 @@ spec:
     nodeName: "anymaster"
     typeRef: cluster
     variables:
-        cluster: 
-            default: default
-        notifaction: 
-            default: https://xz.wps.cn/api/v1/webhook/send?key=
+      cluster: 
+        default: default
+      notifaction: 
+        required: true
     steps:
         - name: alert-npu-cm
           content: |

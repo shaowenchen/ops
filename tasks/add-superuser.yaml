@@ -7,8 +7,10 @@ spec:
   desc: add a super user to specified host
   variables:
     name:
+      required: true
       display: name
     passwd:
+      required: true
       display: password
   steps:
     - name: add user

@@ -7,10 +7,13 @@ spec:
   desc: add hosts to /etc/hosts for specified host
   variables:
     ip:
+      required: true
       display: ip
     domain:
+      required: true
       display: domain
     clear:
+      required: true
       default: "false"
   steps:
     - name: Add Etc Hosts

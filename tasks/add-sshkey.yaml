@@ -8,6 +8,7 @@ spec:
   variables:
     keycontent:
       display: SSH Key
+      required: true
     keypath:
       display: SSH Key Path
       default: ~/.ssh/authorized_keys
