@@ -9,6 +9,7 @@ spec:
   variables:
     clusterip:
       display: cluster ip
+      required: true
   steps:
     - name: search clusterip
       content: |

@@ -9,6 +9,7 @@ spec:
   typeRef: cluster
   variables:
     podname:
+      required: true
       display: pod name
   steps:
     - name: Check pod existed

@@ -10,6 +10,7 @@ spec:
   variables:
     node:
       display: node name
+      required: true
   steps:
     - name: get node status
       content: kubectl get nodes ${node} -o wide

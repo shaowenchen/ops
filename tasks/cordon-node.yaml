@@ -9,6 +9,7 @@ spec:
   variables:
     node:
       display: node name
+      required: true
   steps:
     - name: cordon node
       content: kubectl cordon ${node}

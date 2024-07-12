@@ -10,8 +10,10 @@ spec:
   variables:
     namespace:
       display: namespace
+      required: true
     podname:
       display: pod name
+      required: true
     topk: 
       default: "20"
   steps:

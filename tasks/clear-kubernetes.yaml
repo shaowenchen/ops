@@ -10,6 +10,7 @@ spec:
   variables:
     namespace:
       display: namespace
+      required: true
   steps:
     - name: clear Evicted pod
       content: kubectl get pods ${namespace} -o wide | grep Evicted | awk '{print $1,$2}' | xargs -L1 kubectl delete pod --grace-period=0 --force -n

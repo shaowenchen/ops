@@ -10,8 +10,10 @@ spec:
   variables:
     namespace:
       display: namespace
+      required: true
     svc:
       display: svc
+      required: true
     topk: 
       default: "20"
   steps:
