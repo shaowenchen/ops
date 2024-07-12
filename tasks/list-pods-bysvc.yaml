@@ -10,8 +10,10 @@ spec:
   variables:
     namespace:
       desc: namespace
+      required: true
     svc:
       desc: svc name
+      required: true
   steps:
     - name: list pods by svc
       content: |

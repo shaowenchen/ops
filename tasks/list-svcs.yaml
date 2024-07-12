@@ -9,7 +9,7 @@ spec:
   typeRef: cluster
   variables:
     namespace:
-      default: default
+      required: true
   steps:
     - name: get svc info
       content: kubectl get svc -A -o=custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,IP:.spec.clusterIP,PORT:.spec.ports[*].targetPort' 

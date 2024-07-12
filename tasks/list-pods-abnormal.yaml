@@ -9,7 +9,8 @@ spec:
   typeRef: cluster
   variables:
     namespace:
-      desc: name
+      desc: namespace
+      required: true
   steps:
     - name: list abnormal pods
       content: kubectl get pod -n ${namespace} | grep -vE 'Running|Completed|Succeeded' |  awk '{print $1, $2, $5}'

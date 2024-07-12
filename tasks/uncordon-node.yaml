@@ -10,7 +10,6 @@ spec:
   variables:
     node:
       desc: node name
-      required: true
   steps:
     - name: uncordon node
       content: kubectl uncordon ${node}

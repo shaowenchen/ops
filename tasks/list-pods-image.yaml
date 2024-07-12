@@ -9,7 +9,7 @@ spec:
   typeRef: cluster
   variables:
     namespace:
-      default: default
+      required: true
   steps:
     - name: list pods image
       when: ${namespace} != "all"

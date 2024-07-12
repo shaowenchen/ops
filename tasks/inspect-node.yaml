@@ -9,7 +9,7 @@ spec:
   typeRef: cluster
   variables:
     node:
-      value: ""
+      required: true
   steps:
     - name: get node details
       content: kubectl describe node ${node}

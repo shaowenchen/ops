@@ -9,7 +9,7 @@ spec:
   typeRef: cluster
   variables:
     namespace:
-      default: default
+      required: true
   steps:
     - name: list pods
       content: kubectl get pod -n ${namespace} |  awk '{print $1, $2, $5}'

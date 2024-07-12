@@ -7,7 +7,7 @@ spec:
   desc: list all tasks in cluster
   variables:
     namespace: 
-      default: ops-system
+      required: true
   nodeName: anymaster
   typeRef: cluster
   steps:
