@@ -4,7 +4,7 @@ metadata:
   name: alert-http-status
   namespace: ops-system
 spec:
-  desc: use task `alert-http-status` to check specified url http status, if not expected, send notification
+  desc: check specified url http status, if not expected, send notification
   variables:
     url:
       default: https://www.chenshaowen.com/

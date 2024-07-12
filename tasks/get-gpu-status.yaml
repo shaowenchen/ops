@@ -4,7 +4,7 @@ metadata:
   name: get-gpu-status
   namespace: ops-system
 spec:
-  desc: use task `get-gpu-status` to get gpu status using nvidia-smi in specified host
+  desc: get gpu status using nvidia-smi in specified host
   steps:
     - name: Check nvidia-smi
       content: command -v nvidia-smi

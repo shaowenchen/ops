@@ -4,7 +4,7 @@ metadata:
     name: cron-host
     namespace: ops-system
 spec:
-    desc: use task `cron-host` to auto create host
+    desc: cron to create host 
     crontab: "50 * * * *"
     selector:
         managed-by: ops

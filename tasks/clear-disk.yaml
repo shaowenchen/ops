@@ -4,7 +4,7 @@ metadata:
   name: clear-disk
   namespace: ops-system
 spec:
-  desc: use task `clear-disk` to clear disk
+  desc: clear disk
   steps:
     - name: before clear
       content: |

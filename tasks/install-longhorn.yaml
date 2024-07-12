@@ -4,7 +4,7 @@ metadata:
   name: install-longhorn
   namespace: ops-system
 spec:
-  desc: use task `install-longhorn` to install longhorn in Kubernetes
+  desc: install longhorn in Kubernetes
   nodeName: anymaster
   typeRef: cluster
   variables:

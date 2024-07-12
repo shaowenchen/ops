@@ -4,7 +4,7 @@ metadata:
   name: delete-pod
   namespace: ops-system
 spec:
-  desc: use task `delete-pod` to restart or delete pod in cluster, variables must to set `podname`、`namespace`
+  desc: restart or delete pod in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

@@ -4,7 +4,7 @@ metadata:
   name: get-os-status
   namespace: ops-system
 spec:
-  desc: use task `get-os-status` to get status information of OS in specified host
+  desc: get status information of OS in specified host
   steps:
     - name: Kernel Version
       content: uname -r

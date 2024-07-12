@@ -4,7 +4,7 @@ metadata:
   name: inspect-node
   namespace: ops-system
 spec:
-  desc: use task `inspect-node` to get node details in cluster, variables must to set `node`
+  desc: get node details in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

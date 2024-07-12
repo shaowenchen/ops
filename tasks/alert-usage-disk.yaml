@@ -4,7 +4,7 @@ metadata:
     name: alert-usage-disk
     namespace: ops-system
 spec:
-    desc: use task `alert-usage-disk` to check npu cm in specified host
+    desc: check npu cm in specified host
     crontab: "*/30 * * * *"
     nodeName: "anymaster"
     typeRef: cluster

@@ -4,7 +4,7 @@ metadata:
   name: install-opscli
   namespace: ops-system
 spec:
-  desc: use task `install-opscli` to install opscli tool in specified host
+  desc: install opscli tool in specified host
   variables:
     proxy: 
       default: https://mirror.ghproxy.com/

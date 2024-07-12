@@ -4,7 +4,7 @@ metadata:
   name: inspect-pod
   namespace: ops-system
 spec:
-  desc: use task `inspect-pod` to get pod details in cluster, variables must to set `pod`、`namespace`
+  desc: get pod details in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

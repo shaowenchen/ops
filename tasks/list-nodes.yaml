@@ -4,7 +4,7 @@ metadata:
   name: list-nodes
   namespace: ops-system
 spec:
-  desc: use task `list-nodes` to list all **nodes** in cluster
+  desc: list all nodes in cluster
   nodeName: anymaster
   typeRef: cluster
   steps:

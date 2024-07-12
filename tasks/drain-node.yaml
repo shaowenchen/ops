@@ -4,7 +4,7 @@ metadata:
   name: drain-node
   namespace: ops-system
 spec:
-  desc: use task `drain-node` to drain node in cluster, variables must to set `node` 
+  desc: drain node in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

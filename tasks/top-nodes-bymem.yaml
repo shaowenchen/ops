@@ -4,7 +4,7 @@ metadata:
   name: top-nodes-bymem
   namespace: ops-system
 spec:
-  desc: use task `top-nodes-bymem` to list topK usage memory of nodes in cluster, variables avaliable to set `topk`
+  desc: list topK usage memory of nodes in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

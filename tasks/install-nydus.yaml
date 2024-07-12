@@ -4,7 +4,7 @@ metadata:
   name: install-nydus
   namespace: ops-system
 spec:
-  desc: use task `install-nydus` to install nydus kit in specified host
+  desc: install nydus kit in specified host
   variables:
     proxy: 
       default: https://mirror.ghproxy.com/

@@ -4,7 +4,7 @@ metadata:
   name: get-pod-logs-byname
   namespace: ops-system
 spec:
-  desc: use task `get-pod-logs-byname` to get pod logs in cluster, variables must to set `podname`、`namespace`, avaliable to set `topk`
+  desc: get pod logs in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

@@ -4,7 +4,7 @@ metadata:
   name: get-fabric-fatal-logs
   namespace: ops-system
 spec:
-  desc: use task `get-fabric-fatal-logs` to get fabric fatal logs , avaliable to set `topk`
+  desc: get fabric fatal logs
   variables:
     topk: 
       default: "10"

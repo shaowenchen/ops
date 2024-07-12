@@ -4,7 +4,7 @@ metadata:
   name: test-perf3
   namespace: ops-system
 spec:
-  desc: use task `test-perf3` to test iperf3 between two nodes, variables `srcip` and `dstip` are required
+  desc: test iperf3 between two nodes
   nodeName: anymaster
   typeRef: cluster
   variables:

@@ -4,7 +4,7 @@ metadata:
   name: install-metricsserver
   namespace: ops-system
 spec:
-  desc: use task `install-metricsserver` to install metrics server for Kubernetes
+  desc: install metrics server for Kubernetes
   nodeName: anymaster
   typeRef: cluster
   variables:

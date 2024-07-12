@@ -4,7 +4,7 @@ metadata:
   name: list-pipelines
   namespace: ops-system
 spec:
-  desc: list all **pipelines** in cluster
+  desc: list all pipelines in cluster
   variables:
     namespace:
       desc: namespace

@@ -4,7 +4,7 @@ metadata:
   name: velero-status
   namespace: ops-system
 spec:
-  desc: use task `velero-status` to status Velero
+  desc: status Velero
   nodeName: anymaster
   typeRef: cluster
   variables:

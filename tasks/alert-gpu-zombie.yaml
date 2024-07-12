@@ -4,7 +4,7 @@ metadata:
     name: alert-gpu-zombie
     namespace: ops-system
 spec:
-    desc: use task `alert-gpu-zombie` to check gpu
+    desc: check gpu
     crontab: "50 * * * *"
     selector:
         alert-gpu-zombie: enabled

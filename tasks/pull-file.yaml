@@ -4,9 +4,9 @@ metadata:
   name: pull-file
   namespace: ops-system
 spec:
-  desc: use task `pull-file` to pull from remote file example
+  desc: pull from remote file    
   steps:
-    - name: Pull /etc/hosts File
+    - name: Pull File
       remotefile: "/etc/hosts"
       localfile: "./hosts"
       direction: download

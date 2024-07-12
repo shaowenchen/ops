@@ -4,7 +4,7 @@ metadata:
   name: install-openebs
   namespace: ops-system
 spec:
-  desc: use task `install-openebs` to install openebs for Kubernetes
+  desc: install openebs for Kubernetes
   nodeName: anymaster
   typeRef: cluster
   variables:

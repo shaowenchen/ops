@@ -4,7 +4,7 @@ metadata:
   name: list-pods-image
   namespace: ops-system
 spec:
-  desc: use task `list-podsimage` to list pod image in cluster, variables must to set `namespace`
+  desc: list pod image in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

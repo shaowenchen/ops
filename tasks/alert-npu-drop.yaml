@@ -4,7 +4,7 @@ metadata:
     name: alert-npu-drop
     namespace: ops-system
 spec:
-    desc: use task `alert-npu-drop` to check npu drop in specified host
+    desc: check npu drop in specified host
     crontab: "*/10 * * * *"
     selector:
         alert-npu-drop: enabled

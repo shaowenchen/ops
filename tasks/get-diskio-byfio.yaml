@@ -4,7 +4,7 @@ metadata:
   name: get-diskio-byfio
   namespace: ops-system
 spec:
-  desc: use task `get-diskio-byfio` to run fio to test disk and get a report in specified path for specified host
+  desc: run fio to test disk and get a report in specified path for specified host
   variables:
     filename: 
       default: "/tmp/testfile"

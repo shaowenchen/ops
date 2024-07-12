@@ -4,7 +4,7 @@ metadata:
   name: list-tasks
   namespace: ops-system
 spec:
-  desc: use task `list-task` to list all **tasks** in cluster, variables must to set `namespace`
+  desc: list all tasks in cluster
   variables:
     namespace: 
       default: ops-system

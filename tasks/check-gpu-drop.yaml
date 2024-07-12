@@ -4,7 +4,7 @@ metadata:
   name: check-gpu-drop
   namespace: ops-system
 spec:
-  desc: use task `check-gpu-drop` to check whether the gpu card has been dropped in specified host
+  desc: check the gpu card dropped in specified host
   variables:
     desired_gpu_count: 
       default: "8"

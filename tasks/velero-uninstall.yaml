@@ -4,7 +4,7 @@ metadata:
   name: velero-uninstall
   namespace: ops-system
 spec:
-  desc: use task `velero-uninstall` to uninstall Velero
+  desc: uninstall Velero
   nodeName: anymaster
   typeRef: cluster
   steps:

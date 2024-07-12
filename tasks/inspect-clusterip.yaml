@@ -4,7 +4,7 @@ metadata:
   name: inspect-clusterip
   namespace: ops-system
 spec:
-  desc: use task `inspect-clusterip` to get clusterip details in cluster, variables must to set `clusterip`
+  desc: get clusterip details in cluster
   nodeName: anymaster
   variables:
     clusterip:

@@ -4,7 +4,7 @@ metadata:
   name: check-pod-existed
   namespace: ops-system
 spec:
-  desc: use task `check-pod-existed` to check whether the pod existed and get pod namespace, variables must to set `pod`
+  desc: check the pod existed and get pod namespace
   nodeName: anymaster
   typeRef: cluster
   variables:

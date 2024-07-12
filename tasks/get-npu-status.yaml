@@ -4,7 +4,7 @@ metadata:
   name: get-npu-status
   namespace: ops-system
 spec:
-  desc: use task `get-npu-status` to get npu status using npu-smi in specified host
+  desc: get npu status using npu-smi in specified host
   steps:
     - name: Check npu-smi
       content: command -v npu-smi

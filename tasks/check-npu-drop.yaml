@@ -4,7 +4,7 @@ metadata:
   name: check-npu-drop
   namespace: ops-system
 spec:
-  desc: use task `check-npu-drop` to check whether the npu card has been dropped in specified host
+  desc: check the npu card dropped in specified host
   variables:
     desired_npu_count: 
       default: "16"

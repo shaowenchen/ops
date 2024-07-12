@@ -4,7 +4,7 @@ metadata:
   name: install-descheduler
   namespace: ops-system
 spec:
-  desc: use task `install-descheduler` to install descheduler in Kubernetes 
+  desc: install descheduler in Kubernetes 
   nodeName: anymaster
   typeRef: cluster
   variables:

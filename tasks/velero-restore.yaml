@@ -4,7 +4,7 @@ metadata:
   name: velero-restore
   namespace: ops-system
 spec:
-  desc: use task `velero-restore` to restore Kubernetes Using Velero
+  desc: restore Kubernetes Using Velero
   nodeName: anymaster
   typeRef: cluster
   variables:

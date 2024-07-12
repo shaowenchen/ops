@@ -4,7 +4,7 @@ metadata:
   name: list-pods
   namespace: ops-system
 spec:
-  desc: use task `list-pods` to list **pods** in cluster, variables must to set `namespace`
+  desc: list pods in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

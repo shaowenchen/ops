@@ -4,7 +4,7 @@ metadata:
   name: top-pods-bycpu-node
   namespace: ops-system
 spec:
-  desc: use task `top-node-pods-bycpu` to list topK usage cpu of pods in node, variables must to set `node`, avaliable to set `topk`
+  desc: list topK usage cpu of pods in node
   nodeName: anymaster
   typeRef: cluster
   variables:

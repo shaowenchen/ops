@@ -4,7 +4,7 @@ metadata:
   name: get-pod-error-logs-byname
   namespace: ops-system
 spec:
-  desc: use task `get-pod-error-logs-byname` to get pod error logs in cluster, variables must to set `podname`、`namespace`, avaliable to set `topk`
+  desc: get pod error logs in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

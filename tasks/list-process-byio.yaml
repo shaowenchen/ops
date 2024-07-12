@@ -4,7 +4,7 @@ metadata:
   name: list-process-byio
   namespace: ops-system
 spec:
-  desc: use task `list-process-byio` to list process by io in node, avaliable to set `topk`
+  desc: list process by io in node
   variables:
     topk: 
       default: "10"

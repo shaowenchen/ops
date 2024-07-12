@@ -4,7 +4,7 @@ metadata:
   name: set-host
   namespace: ops-system
 spec:
-  desc: use task `set-host` to set a better kernel parameters for kubernetes host
+  desc: set a better kernel parameters for kubernetes host
   steps:
     - name: install required packages
       content: apt-get install -y openssl socat conntrack ipset ebtables chrony ipvsadm

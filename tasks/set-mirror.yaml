@@ -4,7 +4,7 @@ metadata:
   name: set-mirror
   namespace: ops-system
 spec:
-  desc: use task `set-mirror` to set a faster mirror for os
+  desc: set a faster mirror for os
   steps:
     - name: install required packages
       content: |

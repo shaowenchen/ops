@@ -4,7 +4,7 @@ metadata:
     name: alert-gpu-ecc
     namespace: ops-system
 spec:
-    desc: use task `alert-gpu-ecc` to check gpu drop in specified host
+    desc: check gpu drop in specified host
     crontab: "13 */2 * * *"
     selector:
         alert-gpu-ecc: enabled

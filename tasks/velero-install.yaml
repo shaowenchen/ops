@@ -4,7 +4,7 @@ metadata:
   name: velero-install
   namespace: ops-system
 spec:
-  desc: use task `velero-install` to install Velero Client && Server
+  desc: install Velero Client && Server
   nodeName: anymaster
   typeRef: cluster
   variables:

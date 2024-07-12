@@ -4,7 +4,7 @@ metadata:
     name: alert-label-npu
     namespace: ops-system
 spec:
-    desc: use task `alert-label-npu` to label host alert for gpu
+    desc: label host alert for gpu
     crontab: "2 * * * *"
     typeRef: cluster
     nodeName: anymaster

@@ -4,7 +4,7 @@ metadata:
   name: add-localbinpath
   namespace: ops-system
 spec:
-  desc: use task `add-localbinpath` to add /usr/local/bin to PATH for specified host
+  desc: add /usr/local/bin to PATH for specified host
   steps:
     - name: Set /usr/local/bin to PATH
       content: echo "export PATH=$PATH:/usr/local/bin" >> /etc/profile

@@ -4,7 +4,7 @@ metadata:
   name: install-nerdctl
   namespace: ops-system
 spec:
-  desc: use task `install-nerdctl` to install nerdctl tool in specified host
+  desc: install nerdctl tool in specified host
   variables:
     proxy: 
       default: https://mirror.ghproxy.com/

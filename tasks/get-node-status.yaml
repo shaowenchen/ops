@@ -4,7 +4,7 @@ metadata:
   name: get-node-status
   namespace: ops-system
 spec:
-  desc: use task `get-node-status` to get node status, variables must to set `node`
+  desc: get node status
   nodeName: anymaster
   typeRef: cluster
   variables:
