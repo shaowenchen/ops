@@ -129,9 +129,6 @@ func GetTaskAbsoluteFilePath(proxy, path string) string {
 		path = filepath.Join(dirname, path[2:])
 		return path
 	}
-	if !strings.HasSuffix(path, ".yaml") {
-		path = path + ".yaml"
-	}
 	// try current task
 	currentDirname, _ := os.Getwd()
 	currentTaskPath := filepath.Join(currentDirname, path)

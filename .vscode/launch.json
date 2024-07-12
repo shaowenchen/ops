@@ -11,9 +11,9 @@
       "mode": "debug",
       "cwd": "${workspaceFolder}",
       "program": "cmd/cli/main.go",
-      // "args": ["task", "-f", "get-osstatus.yaml", "-i", "", "--incluster"],
+      "args": ["task", "-f", ".2.yaml.test"],
       // "args": ["create", "task", "-i", "get-osstatus.yaml"],
-      "args": ["create", "cluster", "--name", "dev", "-i", "~/.kube/config"],
+      // "args": ["create", "cluster", "--name", "dev", "-i", "~/.kube/config"],
       "env": {}
     },
     {
