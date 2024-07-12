@@ -92,13 +92,13 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	// fix variables
 	if tr.Spec.Variables != nil {
-		if _, ok := tr.Spec.Variables["typeRef"]; !ok {
+		if _, ok := tr.Spec.Variables["typeRef"]; ok {
 			tr.Spec.TypeRef = tr.Spec.Variables["typeRef"]
 		}
-		if _, ok := tr.Spec.Variables["nameRef"]; !ok {
+		if _, ok := tr.Spec.Variables["nameRef"]; ok {
 			tr.Spec.NameRef = tr.Spec.Variables["nameRef"]
 		}
-		if _, ok := tr.Spec.Variables["nodeName"]; !ok {
+		if _, ok := tr.Spec.Variables["nodeName"]; ok {
 			tr.Spec.NodeName = tr.Spec.Variables["nodeName"]
 		}
 	}
@@ -106,6 +106,7 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	t := &opsv1.Task{}
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Spec.TaskRef}, t)
 	if err != nil {
+		r.commitStatus(logger, ctx, tr, opsv1.StatusDataInValid)
 		return ctrl.Result{}, err
 	}
 	// clear history
@@ -159,7 +160,7 @@ func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Cont
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
-	if tr.GetSpec().TypeRef == opsv1.TypeRefHost || tr.GetSpec().TypeRef == "" {
+	if tr.IsHostTypeRef() {
 		hs := []opsv1.Host{}
 		if tr.Spec.Selector == nil {
 			h := opsv1.Host{}
@@ -211,7 +212,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		} else {
 			r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 		}
-	} else if tr.GetSpec().TypeRef == opsv1.TypeRefCluster {
+	} else if tr.IsClusterTypeRef() {
 		c := &opsv1.Cluster{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: tr.Spec.NameRef,

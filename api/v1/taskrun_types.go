@@ -52,6 +52,14 @@ func (tr *TaskRun) GetSpec() *TaskRunSpec {
 	return &tr.Spec
 }
 
+func (tr *TaskRun) IsHostTypeRef() bool {
+	return tr.Spec.TypeRef == TypeRefHost
+}
+
+func (tr *TaskRun) IsClusterTypeRef() bool {
+	return tr.Spec.TypeRef == TypeRefCluster
+}
+
 func (tr *TaskRun) GetVariables() map[string]string {
 	return tr.Spec.Variables
 }
@@ -77,8 +85,8 @@ func NewTaskRun(t *Task) TaskRun {
 	if t.UID != "" {
 		tr.OwnerReferences = []metav1.OwnerReference{
 			{
-				APIVersion: "crd.chenshaowen.com/v1",
-				Kind:       "Task",
+				APIVersion: APIVersion,
+				Kind:       TaskKind,
 				Name:       t.Name,
 				UID:        t.UID,
 			},

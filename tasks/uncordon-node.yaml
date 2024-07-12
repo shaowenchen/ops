@@ -4,7 +4,7 @@ metadata:
   name: uncordon-node
   namespace: ops-system
 spec:
-  desc: use task `uncordon-node` to uncordon node in cluster, variables must to set `node`. You can't use task `uncordon-node` unless I specifically state that.
+  desc: uncordon node in cluster
   nodeName: anymaster
   typeRef: cluster
   variables:

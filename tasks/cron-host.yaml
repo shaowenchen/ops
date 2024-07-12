@@ -12,7 +12,9 @@ spec:
     steps:
         - name: add dragonfly docker for containerd
           content: |
-              curl -s https://mirror.ghproxy.com/https://raw.githubusercontent.com/shaowenchen/hubimage/main/nydus/dfget-containerd.sh | bash -
+              if [ ! -f /usr/local/bin/gen-containerd-hosts.sh ]; then
+                curl -s https://mirror.ghproxy.com/https://raw.githubusercontent.com/shaowenchen/hubimage/main/nydus/dfget-containerd.sh | bash -
+              fi
         - name: add dragonfly others domain
           content: |
               /usr/local/bin/gen-containerd-hosts.sh ghcr.io && \

@@ -1,3 +1,6 @@
 {
-    "go.inferGopath": false
+    "go.inferGopath": false,
+    "yaml.schemas": {
+        "https://json.schemastore.org/yamllint.json": "*.yaml"
+    }
 }

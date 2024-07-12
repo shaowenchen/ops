@@ -5,7 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: use task `alert-usage-mem` to check npu cm in specified host
-    crontab: "*/30 * * * *"
+    crontab: "* * * * *"
     nodeName: "anymaster"
     typeRef: cluster
     variables:
