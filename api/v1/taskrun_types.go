@@ -41,20 +41,30 @@ type TaskRunSpec struct {
 	RuntimeImage string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
 }
 
-func (tr *TaskRun) GetSpec() *TaskRunSpec {
-	return &tr.Spec
+func (obj *TaskRun) GetSpec() *TaskRunSpec {
+	return &obj.Spec
 }
 
-func (tr *TaskRun) IsHostTypeRef() bool {
-	return tr.Spec.TypeRef == TypeRefHost
+func (obj *TaskRun) IsHostTypeRef() bool {
+	return obj.Spec.TypeRef == TypeRefHost
 }
 
-func (tr *TaskRun) IsClusterTypeRef() bool {
-	return tr.Spec.TypeRef == TypeRefCluster
+func (obj *TaskRun) IsClusterTypeRef() bool {
+	return obj.Spec.TypeRef == TypeRefCluster
 }
 
-func (tr *TaskRun) GetVariables() map[string]string {
-	return tr.Spec.Variables
+func (obj *TaskRun) FilledByVariables() {
+	if obj.Spec.Variables != nil {
+		if _, ok := obj.Spec.Variables["typeRef"]; ok {
+			obj.Spec.TypeRef = obj.Spec.Variables["typeRef"]
+		}
+		if _, ok := obj.Spec.Variables["nameRef"]; ok {
+			obj.Spec.NameRef = obj.Spec.Variables["nameRef"]
+		}
+		if _, ok := obj.Spec.Variables["nodeName"]; ok {
+			obj.Spec.NodeName = obj.Spec.Variables["nodeName"]
+		}
+	}
 }
 
 func NewTaskRun(t *Task) TaskRun {

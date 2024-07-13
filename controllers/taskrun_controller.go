@@ -91,17 +91,7 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, nil
 	}
 	// fix variables
-	if tr.Spec.Variables != nil {
-		if _, ok := tr.Spec.Variables["typeRef"]; ok {
-			tr.Spec.TypeRef = tr.Spec.Variables["typeRef"]
-		}
-		if _, ok := tr.Spec.Variables["nameRef"]; ok {
-			tr.Spec.NameRef = tr.Spec.Variables["nameRef"]
-		}
-		if _, ok := tr.Spec.Variables["nodeName"]; ok {
-			tr.Spec.NodeName = tr.Spec.Variables["nodeName"]
-		}
-	}
+	tr.FilledByVariables()
 	// get task
 	t := &opsv1.Task{}
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Spec.TaskRef}, t)

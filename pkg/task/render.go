@@ -55,7 +55,6 @@ func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 		}
 		tasks = append(tasks, task)
 	}
-
 	return
 }
 

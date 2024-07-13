@@ -12,7 +12,7 @@ spec:
       default: monitor
     action: 
       default: install
-      enum:
+      enums:
         - install
         - uninstall
   steps:

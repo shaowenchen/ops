@@ -30,14 +30,14 @@ func GetParametersPrompt(pipeline opsv1.Pipeline, clusters []opsv1.Cluster) stri
 	if len(pipeline.Spec.Variables) >= 0 {
 		desc.WriteString("It requires the following parameters(if enum provided, choose one of them):\n")
 	}
-	clusterEnum := []string{}
+	clusterEnums := []string{}
 	for _, cluster := range clusters {
-		clusterEnum = append(clusterEnum, cluster.Name)
+		clusterEnums = append(clusterEnums, cluster.Name)
 	}
 	for k, _ := range pipeline.Spec.Variables {
 		vt := pipeline.Spec.Variables[k]
 		if k == "nameRef" {
-			vt.Enum = clusterEnum
+			vt.Enums = clusterEnums
 		}
 		vStr, _ := json.Marshal(vt)
 		parmDesc := fmt.Sprintf("\t- %s \t %s\n", k, string(vStr))

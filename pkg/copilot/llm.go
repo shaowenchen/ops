@@ -244,7 +244,7 @@ Again:
 			outV := outputVars[k]
 			pr.Spec.Variables[k] = ""
 			// if in enum keep it
-			for _, enum := range v.Enum {
+			for _, enum := range v.Enums {
 				if outV == enum {
 					pr.Spec.Variables[k] = outV
 					break
