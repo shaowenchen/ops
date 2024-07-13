@@ -25,7 +25,7 @@ const DefaultRuntimeImage = "docker.io/library/ubuntu:20.04"
 
 const SyncResourceStatusHeatSeconds = 60 * 5
 const SyncResourceRandomBiasSeconds = 60 * 2
-const SyncTaskCronRandomBiasSeconds = 30
+const SyncCronRandomBiasSeconds = 30
 
 const MaxResourceConcurrentReconciles = 1
 const MaxTaskrunConcurrentReconciles = 5

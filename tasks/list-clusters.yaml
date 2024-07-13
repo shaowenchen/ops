@@ -8,6 +8,7 @@ spec:
   variables:
     namespace:
       display: namespace
+      required: true
   nodeName: anymaster
   typeRef: cluster
   steps:

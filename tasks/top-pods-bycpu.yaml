@@ -9,7 +9,7 @@ spec:
   typeRef: cluster
   variables:
     namespace:
-      default: default
+      required: true
     topk: 
       default: "10"
   steps:

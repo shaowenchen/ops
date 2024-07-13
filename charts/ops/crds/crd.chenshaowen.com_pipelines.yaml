@@ -15,7 +15,11 @@ spec:
     singular: pipeline
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.crontab
+      name: Crontab
+      type: string
+    name: v1
     schema:
       openAPIV3Schema:
         description: Pipeline is the Schema for the pipelines API
@@ -35,9 +39,11 @@ spec:
           spec:
             description: PipelineSpec defines the desired state of Pipeline
             properties:
-              desc:
+              crontab:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              desc:
                 type: string
               runHistoryLimit:
                 type: integer

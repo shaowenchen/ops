@@ -1,16 +1,16 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-    name: auto-create-host
-    namespace: ops-system
+  name: auto-create-host
+  namespace: ops-system
 spec:
-    desc: auto create host
-    crontab: "54 * * * *"
-    typeRef: cluster
-    nodeName: anymaster
-    steps:
-        - name: create host
-          content: |
-              kubectl get nodes -o wide > /tmp/ops-hosts
-              /usr/local/bin/opscli create host -i /tmp/ops-hosts --secretref host-secret
-              kubectl label hosts -n ops-system --all managed-by=ops
+  desc: auto create host
+  crontab: "54 * * * *"
+  typeRef: cluster
+  nodeName: anymaster
+  steps:
+    - name: create host
+      content: |
+        kubectl get nodes -o wide > /tmp/ops-hosts
+        /usr/local/bin/opscli create host -i /tmp/ops-hosts --secretref host-secret
+        kubectl label hosts -n ops-system --all managed-by=ops

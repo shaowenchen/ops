@@ -9,9 +9,11 @@ spec:
   typeRef: cluster
   variables:
     srcip:
-      default: "127.0.0.1"
+      desc: ip address of source
+      required: true
     dstip:
-      default: "127.0.0.1"
+      desc: ip address of destination
+      required: true
   steps:
     - name: install perf3 in dst node
       content: |

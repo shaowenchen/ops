@@ -70,9 +70,9 @@ type Task struct {
 	Spec TaskSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
 }
 
-func (t *Task) GetVariables() map[string]string {
+func (obj *Task) GetVariables() map[string]string {
 	var result = make(map[string]string)
-	for k, v := range t.Spec.Variables {
+	for k, v := range obj.Spec.Variables {
 		if v.Value != "" {
 			result[k] = v.Value
 		} else {
@@ -82,15 +82,15 @@ func (t *Task) GetVariables() map[string]string {
 	return result
 }
 
-func (t *Task) GetUniqueKey() string {
+func (obj *Task) GetUniqueKey() string {
 	return types.NamespacedName{
-		Namespace: t.Namespace,
-		Name:      t.Name,
+		Namespace: obj.Namespace,
+		Name:      obj.Name,
 	}.String()
 }
 
-func (t *Task) GetSpec() *TaskSpec {
-	return &t.Spec
+func (obj *Task) GetCrontab() string {
+	return obj.Spec.Crontab
 }
 
 //+kubebuilder:object:root=true

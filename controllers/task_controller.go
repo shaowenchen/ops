@@ -96,7 +96,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		t.Spec.TypeRef = opsv1.TypeRefCluster
 	}
 	// validate crontab
-	if t.GetSpec().Crontab == "" {
+	if t.GetCrontab() == "" {
 		return ctrl.Result{}, nil
 	}
 	// create task
@@ -147,22 +147,22 @@ func (r *TaskReconciler) deleteTask(ctx context.Context, namespacedName types.Na
 	return nil
 }
 
-func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (err error) {
-	_, ok := r.crontabMap[t.GetUniqueKey()]
+func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Context, obj *opsv1.Task) (err error) {
+	_, ok := r.crontabMap[obj.GetUniqueKey()]
 	if ok {
-		logger.Info.Println(fmt.Sprintf("clear ticker for task %s", t.GetUniqueKey()))
-		r.cron.Remove(r.crontabMap[t.GetUniqueKey()])
+		logger.Info.Println(fmt.Sprintf("clear ticker for task %s", obj.GetUniqueKey()))
+		r.cron.Remove(r.crontabMap[obj.GetUniqueKey()])
 	}
-	if t.GetSpec().Crontab == "" {
+	if obj.GetCrontab() == "" {
 		return nil
 	}
-	r.crontabMap[t.GetUniqueKey()], err = r.cron.AddFunc(t.GetSpec().Crontab, func() {
-		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncTaskCronRandomBiasSeconds)) * time.Second)
+	r.crontabMap[obj.GetUniqueKey()], err = r.cron.AddFunc(obj.GetCrontab(), func() {
+		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
 		taskRunList := opsv1.TaskRunList{}
 		err := r.Client.List(ctx, &taskRunList, &client.ListOptions{
 			LabelSelector: labels.SelectorFromSet(map[string]string{
-				opsv1.LabelCronTaskRunKey: opsv1.LabelCronTaskRunValue,
-				opsv1.LabelTaskRefKey:     t.Name,
+				opsv1.LabelCronKey: opsv1.LabelCronTaskValue,
+				opsv1.LabelTaskRefKey:     obj.Name,
 			}),
 		})
 		if err != nil {
@@ -175,14 +175,14 @@ func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Contex
 				return
 			}
 		}
-		tr := opsv1.NewTaskRun(t)
-		tr.Labels = map[string]string{
-			opsv1.LabelCronTaskRunKey: opsv1.LabelCronTaskRunValue,
-			opsv1.LabelTaskRefKey:     t.Name,
+		objRun := opsv1.NewTaskRun(obj)
+		objRun.Labels = map[string]string{
+			opsv1.LabelCronKey: opsv1.LabelCronTaskValue,
+			opsv1.LabelTaskRefKey:     obj.Name,
 		}
-		r.Client.Create(ctx, &tr)
+		r.Client.Create(ctx, &objRun)
 	})
-	logger.Info.Println(fmt.Sprintf("start ticker for task %s", t.GetUniqueKey()))
+	logger.Info.Println(fmt.Sprintf("start ticker for task %s", obj.GetUniqueKey()))
 	if err != nil {
 		return err
 	}

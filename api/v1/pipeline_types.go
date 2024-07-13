@@ -18,6 +18,7 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -27,21 +28,11 @@ import (
 type PipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Crontab         string               `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Desc            string               `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Variables       map[string]Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Tasks           []TaskRef            `json:"tasks" yaml:"tasks"`
 	RunHistoryLimit int                  `json:"runHistoryLimit,omitempty" yaml:"runHistoryLimit,omitempty"`
-}
-
-type Variables struct {
-	Default  string   `json:"default,omitempty" yaml:"default,omitempty"`
-	Display  string   `json:"display,omitempty" yaml:"display,omitempty"`
-	Value    string   `json:"value,omitempty" yaml:"value,omitempty"`
-	Desc     string   `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Regex    string   `json:"regex,omitempty" yaml:"regex,omitempty"`
-	Required bool     `json:"required,omitempty" yaml:"required,omitempty"`
-	Enum     []string `json:"enum,omitempty" yaml:"enum,omitempty"`
-	Examples []string `json:"examples,omitempty" yaml:"examples,omitempty"`
 }
 
 type TaskRef struct {
@@ -58,9 +49,9 @@ type PipelineStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // Pipeline is the Schema for the pipelines API
 type Pipeline struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`
@@ -70,12 +61,23 @@ type Pipeline struct {
 	Status PipelineStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
-func (p *Pipeline) GetVariables() map[string]string {
+func (obj *Pipeline) GetUniqueKey() string {
+	return types.NamespacedName{
+		Namespace: obj.Namespace,
+		Name:      obj.Name,
+	}.String()
+}
+
+func (obj *Pipeline) GetVariables() map[string]string {
 	var result = make(map[string]string)
-	for k, v := range p.Spec.Variables {
+	for k, v := range obj.Spec.Variables {
 		result[k] = v.Value
 	}
 	return result
+}
+
+func (obj *Pipeline) GetCrontab() string {
+	return obj.Spec.Crontab
 }
 
 //+kubebuilder:object:root=true

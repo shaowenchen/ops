@@ -123,7 +123,7 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) {
 	trs := &opsv1.TaskRunList{}
-	maxHistory := t.GetSpec().RunHistoryLimit
+	maxHistory := t.Spec.RunHistoryLimit
 	if maxHistory == 0 {
 		maxHistory = opsv1.DefaultMaxRunHistory
 	}
@@ -171,7 +171,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 				return
 			}
 			// if hostname is empty, use localhost
-			if len(t.GetSpec().NameRef) > 0 && err != nil {
+			if len(t.Spec.NameRef) > 0 && err != nil {
 				logger.Error.Println(err)
 				return
 			}

@@ -10,6 +10,7 @@ spec:
   variables:
     node:
       desc: node name
+      required: true
     topk: 
       default: "5"
   steps:

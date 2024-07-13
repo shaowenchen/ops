@@ -10,6 +10,7 @@ spec:
   variables:
     node:
       display: node
+      required: true
   steps:
     - name: Check node existed
       content: |
