@@ -32,7 +32,7 @@ type PipelineSpec struct {
 	Desc            string               `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Variables       Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Tasks           []TaskRef            `json:"tasks" yaml:"tasks"`
-	RunHistoryLimit int                  `json:"runHistoryLimit,omitempty" yaml:"runHistoryLimit,omitempty"`
+	TTlSecondsAfterFinished int `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
 }
 
 type TaskRef struct {
@@ -70,6 +70,13 @@ func (obj *Pipeline) GetUniqueKey() string {
 
 func (obj *Pipeline) GetCrontab() string {
 	return obj.Spec.Crontab
+}
+
+func (obj *Pipeline) GetTTLSecondsAfterFinished() int {
+	if obj.Spec.TTlSecondsAfterFinished > 0 {
+		return obj.Spec.TTlSecondsAfterFinished
+	}
+	return DefaultTTLSecondsAfterFinished
 }
 
 //+kubebuilder:object:root=true

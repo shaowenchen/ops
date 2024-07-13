@@ -39,7 +39,7 @@ type TaskSpec struct {
 	NodeName        string               `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
 	All             bool                 `json:"all,omitempty" yaml:"all,omitempty"`
 	RuntimeImage    string               `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
-	RunHistoryLimit int                  `json:"runHistoryLimit,omitempty" yaml:"runHistoryLimit,omitempty"`
+	TTlSecondsAfterFinished int `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
 }
 
 const TypeRefHost = "host"
@@ -70,18 +70,6 @@ type Task struct {
 	Spec TaskSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
 }
 
-func (obj *Task) GetVariables() map[string]string {
-	var result = make(map[string]string)
-	for k, v := range obj.Spec.Variables {
-		if v.Value != "" {
-			result[k] = v.Value
-		} else {
-			result[k] = v.Default
-		}
-	}
-	return result
-}
-
 func (obj *Task) GetUniqueKey() string {
 	return types.NamespacedName{
 		Namespace: obj.Namespace,
@@ -91,6 +79,13 @@ func (obj *Task) GetUniqueKey() string {
 
 func (obj *Task) GetCrontab() string {
 	return obj.Spec.Crontab
+}
+
+func (obj *Task) GetTTLSecondsAfterFinished() int {
+	if obj.Spec.TTlSecondsAfterFinished > 0 {
+		return obj.Spec.TTlSecondsAfterFinished
+	}
+	return DefaultTTLSecondsAfterFinished
 }
 
 //+kubebuilder:object:root=true

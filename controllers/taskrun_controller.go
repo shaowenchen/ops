@@ -26,6 +26,7 @@ import (
 	"os"
 
 	"github.com/google/go-cmp/cmp"
+	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opshost "github.com/shaowenchen/ops/pkg/host"
@@ -47,7 +48,8 @@ import (
 // TaskRunReconciler reconciles a TaskRun object
 type TaskRunReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme    *runtime.Scheme
+	clearCron *cron.Cron
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
@@ -64,7 +66,9 @@ type TaskRunReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	// default to reconcile all namespace, if ACTIVE_NAMESPACE is set, only reconcile ACTIVE_NAMESPACE
+	// start clear cron
+	r.RegisterClearCron()
+	// only reconcile active namespace
 	actionNs := os.Getenv("ACTIVE_NAMESPACE")
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
@@ -99,10 +103,6 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		r.commitStatus(logger, ctx, tr, opsv1.StatusDataInValid)
 		return ctrl.Result{}, err
 	}
-	// clear history
-	go func() {
-		r.clearHistory(logger, ctx, t, tr)
-	}()
 	// run taskrun
 	err = r.run(logger, ctx, t, tr)
 	if err != nil {
@@ -111,41 +111,28 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{}, nil
 }
 
-func (r *TaskRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) {
-	trs := &opsv1.TaskRunList{}
-	maxHistory := t.Spec.RunHistoryLimit
-	if maxHistory == 0 {
-		maxHistory = opsv1.DefaultMaxRunHistory
-	}
-	err := r.Client.List(ctx,
-		trs,
-		client.InNamespace(t.GetNamespace()),
-		client.MatchingFields{".spec.taskRef": t.Name})
-	if err != nil {
-		logger.Error.Println(err)
+func (r *TaskRunReconciler) RegisterClearCron() {
+	if r.clearCron != nil {
 		return
 	}
-	finished := []opsv1.TaskRun{}
-	for _, tr := range trs.Items {
-		if tr.Status.RunStatus != opsv1.StatusEmpty && tr.Status.RunStatus != opsv1.StatusRunning {
-			finished = append(finished, tr)
+	r.clearCron = cron.New()
+	r.clearCron.AddFunc(opsv1.ClearCronTab, func() {
+		objs := &opsv1.TaskRunList{}
+		err := r.Client.List(context.Background(), objs)
+		if err != nil {
+			return
 		}
-	}
-
-	sort.Slice(finished, func(i, j int) bool {
-		return finished[i].Status.StartTime.Before(finished[j].Status.StartTime)
-	})
-
-	if len(finished) > int(maxHistory) {
-		finished = finished[:len(finished)-int(maxHistory)]
-		for _, tr := range finished {
-			err := r.Client.Delete(ctx, &tr)
-			if err != nil {
-				logger.Error.Println(err)
+		for _, obj := range objs.Items {
+			if obj.Status.RunStatus == opsv1.StatusRunning || obj.Status.RunStatus == opsv1.StatusEmpty {
+				continue
 			}
+			if obj.GetObjectMeta().GetCreationTimestamp().Add(opsv1.DefaultTTLSecondsAfterFinished * time.Second).After(time.Now()) {
+				continue
+			}
+			r.Client.Delete(context.Background(), &obj)
 		}
-	}
-	return
+	})
+	r.clearCron.Start()
 }
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {

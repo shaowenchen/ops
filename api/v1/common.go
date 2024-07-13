@@ -14,12 +14,13 @@ const (
 )
 
 const (
-	LabelCronKey           = "ops/cron"
-	LabelCronTaskValue     = "task"
-	LabelCronPipelineValue = "pipeline"
-	LabelTaskRefKey        = "ops/taskref"
-	LabelPipelineRefKey    = "ops/pipelineref"
-	DefaultMaxRunHistory   = 1
+	LabelCronKey                   = "ops/cron"
+	LabelCronTaskValue             = "task"
+	LabelCronPipelineValue         = "pipeline"
+	LabelTaskRefKey                = "ops/taskref"
+	LabelPipelineRefKey            = "ops/pipelineref"
+	DefaultTTLSecondsAfterFinished = 60 * 60
+	ClearCronTab                   = "*/30 * * * *"
 )
 
 type Variable struct {

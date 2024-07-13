@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	cron "github.com/robfig/cron/v3"
 	crdv1 "github.com/shaowenchen/ops/api/v1"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -43,7 +44,8 @@ const CommitStatusMaxRetries = 5
 // PipelineRunReconciler reconciles a PipelineRun object
 type PipelineRunReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme    *runtime.Scheme
+	clearCron *cron.Cron
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=pipelineruns,verbs=get;list;watch;create;update;patch;delete
@@ -60,6 +62,9 @@ type PipelineRunReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	// start clear cron
+	r.RegisterClearCron()
+	// only reconcile active namespace
 	actionNs := os.Getenv("ACTIVE_NAMESPACE")
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
@@ -97,41 +102,28 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return ctrl.Result{}, err
 }
 
-func (r *PipelineRunReconciler) clearHistory(logger *opslog.Logger, ctx context.Context, p *opsv1.Pipeline, pr *opsv1.PipelineRun) {
-	prs := &opsv1.PipelineRunList{}
-	maxHistory := p.Spec.RunHistoryLimit
-	if maxHistory == 0 {
-		maxHistory = opsv1.DefaultMaxRunHistory
-	}
-	err := r.Client.List(ctx,
-		prs,
-		client.InNamespace(p.Namespace),
-		client.MatchingFields{".spec.pipelineRef": p.Name})
-	if err != nil {
-		logger.Error.Println(err)
+func (r *PipelineRunReconciler) RegisterClearCron() {
+	if r.clearCron != nil {
 		return
 	}
-	finished := []opsv1.PipelineRun{}
-	for _, pr := range prs.Items {
-		if pr.Status.RunStatus != opsv1.StatusEmpty && pr.Status.RunStatus != opsv1.StatusRunning {
-			finished = append(finished, pr)
+	r.clearCron = cron.New()
+	r.clearCron.AddFunc(opsv1.ClearCronTab, func() {
+		objs := &opsv1.PipelineRunList{}
+		err := r.Client.List(context.Background(), objs)
+		if err != nil {
+			return
 		}
-	}
-
-	sort.Slice(finished, func(i, j int) bool {
-		return finished[i].Status.StartTime.Before(finished[j].Status.StartTime)
-	})
-
-	if len(finished) > int(maxHistory) {
-		finished = finished[:len(finished)-int(maxHistory)]
-		for _, tr := range finished {
-			err := r.Client.Delete(ctx, &tr)
-			if err != nil {
-				logger.Error.Println(err)
+		for _, obj := range objs.Items {
+			if obj.Status.RunStatus == opsv1.StatusRunning || obj.Status.RunStatus == opsv1.StatusEmpty {
+				continue
 			}
+			if obj.GetObjectMeta().GetCreationTimestamp().Add(opsv1.DefaultTTLSecondsAfterFinished * time.Second).After(time.Now()) {
+				continue
+			}
+			r.Client.Delete(context.Background(), &obj)
 		}
-	}
-	return
+	})
+	r.clearCron.Start()
 }
 
 func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, p *opsv1.Pipeline, pr *opsv1.PipelineRun) (err error) {
