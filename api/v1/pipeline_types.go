@@ -68,14 +68,6 @@ func (obj *Pipeline) GetUniqueKey() string {
 	}.String()
 }
 
-func (obj *Pipeline) GetVariables() map[string]string {
-	var result = make(map[string]string)
-	for k, v := range obj.Spec.Variables {
-		result[k] = v.Value
-	}
-	return result
-}
-
 func (obj *Pipeline) GetCrontab() string {
 	return obj.Spec.Crontab
 }

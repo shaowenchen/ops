@@ -1,5 +1,9 @@
 package v1
 
+import (
+	"regexp"
+)
+
 const APIVersion = "crd.chenshaowen.com/v1"
 
 const (
@@ -29,8 +33,131 @@ type Variable struct {
 	Examples []string `json:"examples,omitempty" yaml:"examples,omitempty"`
 }
 
-type Variables map[string]Variables
+func (v Variable) GetValue() string {
+	if v.Value != "" {
+		return v.Value
+	}
+	return v.Default
+}
 
-func (objs *Variables) AddLowPriorityVariables(others *Variables) *Variables {
+func (v Variable) MergeLowPriorityVariable(others Variable) Variable {
+	if v.Default == "" {
+		v.Default = others.Default
+	}
+	if v.Display == "" {
+		v.Display = others.Display
+	}
+	if v.Value == "" {
+		v.Value = others.Value
+	}
+	if v.Desc == "" {
+		v.Desc = others.Desc
+	}
+	if v.Required == false {
+		v.Required = others.Required
+	}
+	if v.Regex == "" {
+		v.Regex = others.Regex
+	}
+	if len(v.Enums) == 0 {
+		v.Enums = others.Enums
+	}
+	if len(v.Examples) == 0 {
+		v.Examples = others.Examples
+	}
+	return v
+}
+
+func (v Variable) MergeHighPriorityVariable(others Variable) Variable {
+	if others.Default != "" {
+		v.Default = others.Default
+	}
+	if others.Display != "" {
+		v.Display = others.Display
+	}
+	if others.Value != "" {
+		v.Value = others.Value
+	}
+	if others.Desc != "" {
+		v.Desc = others.Desc
+	}
+	if others.Required != false {
+		v.Required = others.Required
+	}
+	if others.Regex != "" {
+		v.Regex = others.Regex
+	}
+	if len(others.Enums) > 0 {
+		v.Enums = others.Enums
+	}
+	if len(others.Examples) > 0 {
+		v.Examples = others.Examples
+	}
+	return v
+}
+
+func (v *Variable) Validate() bool {
+	//validate required
+	if v.Required && v.Value == "" {
+		return false
+	}
+	//validate enum
+	if len(v.Enums) > 0 {
+		found := false
+		for _, e := range v.Enums {
+			if v.Value == e {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	//validate regex
+	if v.Regex != "" {
+		re, err := regexp.Compile(v.Regex)
+		if err != nil {
+			return false
+		}
+		if !re.MatchString(v.Value) {
+			return false
+		}
+	}
+	return true
+}
+
+type Variables map[string]Variable
+
+func (objs Variables) MergeLowPriorityVariables(others Variables) Variables {
+	for k, v := range objs {
+		if _, ok := others[k]; !ok {
+			continue
+		}
+		// merge others
+		objs[k] = v.MergeLowPriorityVariable(others[k])
+	}
 	return objs
+}
+
+func (objs Variables) MergeHighPriorityVariables(others Variables) Variables {
+	for k, v := range objs {
+		if _, ok := others[k]; !ok {
+			continue
+		}
+		// merge others
+		objs[k] = v.MergeHighPriorityVariable(others[k])
+	}
+	return objs
+}
+
+func (objs Variables) GetVariables() (result map[string]string) {
+	for k, v := range objs {
+		if v.Value != "" {
+			result[k] = v.Value
+		} else {
+			result[k] = v.Default
+		}
+	}
+	return
 }

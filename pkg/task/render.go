@@ -49,7 +49,6 @@ func ReadTaskYaml(filePath string) (tasks []opsv1.Task, err error) {
 			return nil, err1
 		}
 		task := opsv1.Task{}
-		task.Spec.Variables = make(map[string]opsv1.Variables)
 		err = yaml.Unmarshal(yfile, &task)
 		if err != nil {
 			return
