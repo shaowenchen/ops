@@ -30,8 +30,8 @@ type PipelineRunSpec struct {
 	TypeRef     string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
 	NameRef     string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
 	NodeName    string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
-	PipelineRef string            `json:"pipelineRef,omitempty" yaml:"pipelineRef,omitempty"`
 	Variables   map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	PipelineRef string            `json:"pipelineRef,omitempty" yaml:"pipelineRef,omitempty"`
 }
 
 // PipelineRunStatus defines the observed state of PipelineRun

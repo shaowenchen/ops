@@ -31,14 +31,14 @@ import (
 type TaskRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
-	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	TypeRef      string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
-	Selector     map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
 	NameRef      string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
 	NodeName     string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	Selector     map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
 	All          bool              `json:"all,omitempty" yaml:"all,omitempty"`
 	RuntimeImage string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
+	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 }
 
 func (obj *TaskRun) GetSpec() *TaskRunSpec {
