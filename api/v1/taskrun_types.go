@@ -75,7 +75,7 @@ func NewTaskRun(t *Task) TaskRun {
 		},
 		Spec: TaskRunSpec{
 			TaskRef:      t.GetObjectMeta().GetName(),
-			Variables:    t.GetVariables(),
+			Variables:    t.Spec.Variables.GetVariables(),
 			TypeRef:      t.Spec.TypeRef,
 			Selector:     t.Spec.Selector,
 			NameRef:      t.Spec.NameRef,

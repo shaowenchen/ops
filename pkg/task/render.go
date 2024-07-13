@@ -16,7 +16,7 @@ import (
 func GetRealVariables(t *opsv1.Task, taskOpt option.TaskOption) (map[string]string, error) {
 	globalVariables := make(map[string]string)
 	// cli > env > yaml
-	utils.MergeMap(globalVariables, t.GetVariables())
+	utils.MergeMap(globalVariables, t.Spec.Variables.GetVariables())
 	utils.MergeMap(globalVariables, utils.GetAllOsEnv())
 	utils.MergeMap(globalVariables, taskOpt.Variables)
 

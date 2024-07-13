@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"sort"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -93,10 +92,6 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		r.commitStatus(logger, ctx, pr, opsv1.StatusFailed, "", "", nil)
 		return ctrl.Result{}, err
 	}
-	// clear history
-	go func() {
-		r.clearHistory(logger, ctx, p, pr)
-	}()
 	// run
 	err = r.run(logger, ctx, p, pr)
 	return ctrl.Result{}, err
@@ -153,8 +148,8 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 				GenerateName: fmt.Sprintf("%s-%s-", pr.Name, t.Name),
 				OwnerReferences: []metav1.OwnerReference{
 					{
-						APIVersion: "crd.chenshaowen.com/v1",
-						Kind:       "PipelineRun",
+						APIVersion: opsv1.APIVersion,
+						Kind:       opsv1.PipelineRunKind,
 						Name:       pr.Name,
 						UID:        pr.UID,
 					},
@@ -165,7 +160,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 				TypeRef:      mergeValue(t.Spec.TypeRef, pr.Spec.TypeRef),
 				NameRef:      mergeValue(t.Spec.NameRef, pr.Spec.NameRef),
 				NodeName:     mergeValue(t.Spec.NodeName, pr.Spec.NodeName),
-				Variables:    mergeMapValue(t.GetVariables(), pr.Spec.Variables),
+				Variables:    mergeMapValue(t.Spec.Variables.GetVariables(), pr.Spec.Variables),
 				RuntimeImage: runtimeImage,
 			},
 		}
