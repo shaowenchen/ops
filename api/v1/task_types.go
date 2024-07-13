@@ -29,7 +29,7 @@ type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	Crontab         string               `json:"crontab,omitempty" yaml:"crontab,omitempty"`
-	Variables       map[string]Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Variables       Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Steps           []Step               `json:"steps,omitempty" yaml:"steps,omitempty"`
 	Name            string               `json:"name,omitempty" yaml:"name,omitempty"`
 	Desc            string               `json:"desc,omitempty" yaml:"desc,omitempty"`

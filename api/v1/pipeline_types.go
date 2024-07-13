@@ -30,7 +30,7 @@ type PipelineSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 	Crontab         string               `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Desc            string               `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Variables       map[string]Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Variables       Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Tasks           []TaskRef            `json:"tasks" yaml:"tasks"`
 	RunHistoryLimit int                  `json:"runHistoryLimit,omitempty" yaml:"runHistoryLimit,omitempty"`
 }

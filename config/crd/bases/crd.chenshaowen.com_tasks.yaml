@@ -97,29 +97,7 @@ spec:
               typeRef:
                 type: string
               variables:
-                additionalProperties:
-                  properties:
-                    default:
-                      type: string
-                    desc:
-                      type: string
-                    display:
-                      type: string
-                    enum:
-                      items:
-                        type: string
-                      type: array
-                    examples:
-                      items:
-                        type: string
-                      type: array
-                    regex:
-                      type: string
-                    required:
-                      type: boolean
-                    value:
-                      type: string
-                  type: object
+                additionalProperties: {}
                 type: object
             type: object
         type: object
