@@ -50,6 +50,8 @@ spec:
               def build_error_message(message, card_id=''):
                   if card_id == '':
                       return f'异常信息: {message}\n'
+                  if message == '':
+                      return ''
                   return f'异常位置: {card_id}\n异常信息: {message}\n'
 
               try:
@@ -57,7 +59,11 @@ spec:
                   if not os.path.exists('/usr/bin/nvidia-smi'):
                       raise Exception(build_error_message('找不到 nvidia-smi 命令'))
                   # 2. check count from nvidia-smi
-                  output = subprocess.check_output(['nvidia-smi' , '-L'], universal_newlines=True)
+                  output = ''
+                  try:
+                      output = subprocess.check_output(['nvidia-smi' , '-L'], universal_newlines=True)
+                  except:
+                      pass
                   card_count = 0
                   error_message = ''
                   lines = [line for line in output.split('\n') if line.startswith('GPU')]
