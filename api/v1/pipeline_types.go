@@ -28,7 +28,6 @@ import (
 type PipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Crontab                 string    `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Desc                    string    `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Variables               Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Tasks                   []TaskRef `json:"tasks" yaml:"tasks"`
@@ -51,7 +50,7 @@ type PipelineStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
+// +kubebuilder:printcolumn:name="Desc",type=string,JSONPath=`.spec.desc`
 // Pipeline is the Schema for the pipelines API
 type Pipeline struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`
@@ -66,10 +65,6 @@ func (obj *Pipeline) GetUniqueKey() string {
 		Namespace: obj.Namespace,
 		Name:      obj.Name,
 	}.String()
-}
-
-func (obj *Pipeline) GetCrontab() string {
-	return obj.Spec.Crontab
 }
 
 func (obj *Pipeline) GetTTLSecondsAfterFinished() int {

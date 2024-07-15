@@ -5,7 +5,6 @@ metadata:
     namespace: ops-system
 spec:
     desc: check npu cm in specified host
-    crontab: "*/30 * * * *"
     nodeName: "anymaster"
     typeRef: cluster
     variables:

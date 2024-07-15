@@ -5,7 +5,6 @@ metadata:
     namespace: ops-system
 spec:
     desc: check gpu
-    crontab: "50 * * * *"
     selector:
       alert-gpu-zombie: enabled
     typeRef: host

@@ -19,10 +19,10 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"os"
 	"strings"
 	"time"
-
-	"os"
 
 	"github.com/google/go-cmp/cmp"
 	cron "github.com/robfig/cron/v3"
@@ -47,8 +47,10 @@ import (
 // TaskRunReconciler reconciles a TaskRun object
 type TaskRunReconciler struct {
 	client.Client
-	Scheme    *runtime.Scheme
-	clearCron *cron.Cron
+	Scheme     *runtime.Scheme
+	crontabMap map[string]cron.EntryID
+	cron       *cron.Cron
+	clearCron  *cron.Cron
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
@@ -66,7 +68,7 @@ type TaskRunReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// start clear cron
-	r.RegisterClearCron()
+	r.registerClearCron()
 	// only reconcile active namespace
 	actionNs := os.Getenv("ACTIVE_NAMESPACE")
 	if actionNs != "" && actionNs != req.Namespace {
@@ -76,25 +78,24 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if os.Getenv("DEBUG") == "true" {
 		logger.SetVerbose("debug").Build()
 	}
+	if r.crontabMap == nil {
+		r.crontabMap = make(map[string]cron.EntryID)
+	}
+	if r.cron == nil {
+		r.cron = cron.New()
+		r.cron.Start()
+	}
+
+	// get taskrun
 	tr := &opsv1.TaskRun{}
 	err := r.Client.Get(ctx, req.NamespacedName, tr)
-
 	if apierrors.IsNotFound(err) {
+		r.deleteCronTab(logger, ctx, req.NamespacedName)
 		return ctrl.Result{}, nil
 	}
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	// had run once, skip
-	if tr.Status.RunStatus != opsv1.StatusEmpty {
-		// abort running taskrun if restart or modified
-		if tr.Status.RunStatus == opsv1.StatusRunning {
-			r.commitStatus(logger, ctx, tr, opsv1.StatusAborted)
-		}
-		return ctrl.Result{}, nil
-	}
-	// fix variables
-	tr.FilledByVariables()
 	// get task
 	t := &opsv1.Task{}
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Spec.TaskRef}, t)
@@ -102,7 +103,17 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		r.commitStatus(logger, ctx, tr, opsv1.StatusDataInValid)
 		return ctrl.Result{}, err
 	}
-	// run taskrun
+	// add crontab
+	r.addCronTab(logger, ctx, tr)
+	// check run status
+	if tr.Status.RunStatus != opsv1.StatusEmpty {
+		// abort running taskrun if restart or modified
+		if tr.Status.RunStatus == opsv1.StatusRunning {
+			r.commitStatus(logger, ctx, tr, opsv1.StatusAborted)
+		}
+		return ctrl.Result{}, nil
+	}
+
 	err = r.run(logger, ctx, t, tr)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -110,7 +121,54 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{}, nil
 }
 
-func (r *TaskRunReconciler) RegisterClearCron() {
+func (r *TaskRunReconciler) deleteCronTab(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {
+	_, ok := r.crontabMap[namespacedName.String()]
+	if ok {
+		r.cron.Remove(r.crontabMap[namespacedName.String()])
+		delete(r.crontabMap, namespacedName.String())
+		logger.Info.Println(fmt.Sprintf("clear ticker for taskrun %s", namespacedName.String()))
+	}
+	return nil
+}
+
+func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Context, objRun *opsv1.TaskRun) {
+	if objRun.Spec.Crontab == "" {
+		return
+	}
+	_, ok := r.crontabMap[objRun.GetUniqueKey()]
+	if ok {
+		logger.Info.Println(fmt.Sprintf("clear ticker for task %s", objRun.GetUniqueKey()))
+		r.cron.Remove(r.crontabMap[objRun.GetUniqueKey()])
+	}
+	r.cron.AddFunc(objRun.Spec.Crontab, func() {
+		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
+		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.Name))
+		// clear taskrun status
+		objRun.Status = opsv1.TaskRunStatus{}
+		err := r.Client.Status().Update(ctx, objRun)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
+		if objRun.Status.RunStatus == opsv1.StatusEmpty || objRun.Status.RunStatus == opsv1.StatusRunning {
+			return
+		}
+		obj := &opsv1.Task{}
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.TaskRef}, obj)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
+		r.run(logger, ctx, obj, objRun)
+	})
+}
+
+func (r *TaskRunReconciler) registerClearCron() {
 	if r.clearCron != nil {
 		return
 	}
@@ -122,6 +180,9 @@ func (r *TaskRunReconciler) RegisterClearCron() {
 			return
 		}
 		for _, obj := range objs.Items {
+			if obj.Spec.Crontab != "" {
+				continue
+			}
 			if obj.Status.RunStatus == opsv1.StatusRunning || obj.Status.RunStatus == opsv1.StatusEmpty {
 				continue
 			}
@@ -135,8 +196,9 @@ func (r *TaskRunReconciler) RegisterClearCron() {
 }
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
+	tr.FilledByVariables()
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
-	if tr.IsHostTypeRef() {
+	if t.IsHostTypeRef() {
 		hs := []opsv1.Host{}
 		if t.Spec.Selector == nil {
 			h := opsv1.Host{}
@@ -188,7 +250,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		} else {
 			r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 		}
-	} else if tr.IsClusterTypeRef() {
+	} else if t.IsClusterTypeRef() {
 		c := &opsv1.Cluster{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: tr.Spec.NameRef,
@@ -222,7 +284,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
 		cliLogger.Flush()
 	} else {
-		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+		r.commitStatus(logger, ctx, tr, opsv1.StatusDataInValid)
 	}
 	return
 }

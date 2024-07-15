@@ -18,23 +18,16 @@ package controllers
 
 import (
 	"context"
-	"fmt"
-	"math/rand"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -43,10 +36,8 @@ import (
 
 // TaskReconciler reconciles a Task object
 type TaskReconciler struct {
-	Client     client.Client
-	Scheme     *runtime.Scheme
-	crontabMap map[string]cron.EntryID
-	cron       *cron.Cron
+	Client client.Client
+	Scheme *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=tasks,verbs=get;list;watch;create;update;patch;delete
@@ -72,21 +63,9 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if os.Getenv("DEBUG") == "true" {
 		logger.SetVerbose("debug").Build()
 	}
-	if r.crontabMap == nil {
-		r.crontabMap = make(map[string]cron.EntryID)
-	}
-	if r.cron == nil {
-		r.cron = cron.New()
-		r.cron.Start()
-	}
 
 	t := &opsv1.Task{}
 	err = r.Client.Get(ctx, req.NamespacedName, t)
-
-	//if delete, stop ticker
-	if apierrors.IsNotFound(err) {
-		return ctrl.Result{}, r.deleteTask(ctx, req.NamespacedName)
-	}
 
 	if err != nil {
 		return ctrl.Result{}, err
@@ -95,12 +74,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if t.Spec.TypeRef == "" && t.Spec.NodeName == constants.AnyMaster {
 		t.Spec.TypeRef = opsv1.TypeRefCluster
 	}
-	// validate crontab
-	if t.GetCrontab() == "" {
-		return ctrl.Result{}, nil
-	}
-	// create task
-	r.createTaskrun(logger, ctx, t)
+	//TODO: Validate spec
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -136,55 +110,4 @@ func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: opsconstants.MaxResourceConcurrentReconciles}).
 		Complete(r)
-}
-
-func (r *TaskReconciler) deleteTask(ctx context.Context, namespacedName types.NamespacedName) error {
-	_, ok := r.crontabMap[namespacedName.String()]
-	if ok {
-		r.cron.Remove(r.crontabMap[namespacedName.String()])
-		delete(r.crontabMap, namespacedName.String())
-	}
-	return nil
-}
-
-func (r *TaskReconciler) createTaskrun(logger *opslog.Logger, ctx context.Context, obj *opsv1.Task) (err error) {
-	_, ok := r.crontabMap[obj.GetUniqueKey()]
-	if ok {
-		logger.Info.Println(fmt.Sprintf("clear ticker for task %s", obj.GetUniqueKey()))
-		r.cron.Remove(r.crontabMap[obj.GetUniqueKey()])
-	}
-	if obj.GetCrontab() == "" {
-		return nil
-	}
-	r.crontabMap[obj.GetUniqueKey()], err = r.cron.AddFunc(obj.GetCrontab(), func() {
-		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
-		taskRunList := opsv1.TaskRunList{}
-		err := r.Client.List(ctx, &taskRunList, &client.ListOptions{
-			LabelSelector: labels.SelectorFromSet(map[string]string{
-				opsv1.LabelCronKey: opsv1.LabelCronTaskValue,
-				opsv1.LabelTaskRefKey:     obj.Name,
-			}),
-		})
-		if err != nil {
-			logger.Error.Println(err)
-			return
-		}
-		for _, tr := range taskRunList.Items {
-			if tr.Status.RunStatus == opsv1.StatusRunning || tr.Status.RunStatus == opsv1.StatusEmpty {
-				logger.Info.Println(fmt.Sprintf("skip running taskrun %s", tr.Name))
-				return
-			}
-		}
-		objRun := opsv1.NewTaskRun(obj)
-		objRun.Labels = map[string]string{
-			opsv1.LabelCronKey: opsv1.LabelCronTaskValue,
-			opsv1.LabelTaskRefKey:     obj.Name,
-		}
-		r.Client.Create(ctx, &objRun)
-	})
-	logger.Info.Println(fmt.Sprintf("start ticker for task %s", obj.GetUniqueKey()))
-	if err != nil {
-		return err
-	}
-	return nil
 }

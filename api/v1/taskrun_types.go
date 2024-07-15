@@ -17,10 +17,12 @@ limitations under the License.
 package v1
 
 import (
-	"time"
 	"fmt"
+	"time"
+
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -33,16 +35,9 @@ type TaskRunSpec struct {
 	TypeRef   string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
 	NameRef   string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
 	NodeName  string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	Crontab   string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	TaskRef   string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
-}
-
-func (obj *TaskRun) IsHostTypeRef() bool {
-	return obj.Spec.TypeRef == TypeRefHost
-}
-
-func (obj *TaskRun) IsClusterTypeRef() bool {
-	return obj.Spec.TypeRef == TypeRefCluster
 }
 
 func (obj *TaskRun) FilledByVariables() {
@@ -57,6 +52,19 @@ func (obj *TaskRun) FilledByVariables() {
 			obj.Spec.NodeName = obj.Spec.Variables["nodeName"]
 		}
 	}
+	if obj.Spec.NodeName == opsconstants.AnyMaster {
+		obj.Spec.TypeRef = TypeRefCluster
+		if obj.Spec.NameRef == "" {
+			obj.Spec.NameRef = opsconstants.CurrentRuntime
+		}
+	}
+}
+
+func (obj *TaskRun) GetUniqueKey() string {
+	return types.NamespacedName{
+		Namespace: obj.Namespace,
+		Name:      obj.Name,
+	}.String()
 }
 
 func NewTaskRun(t *Task) TaskRun {
@@ -119,20 +127,20 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 		},
 	}
 	// merge typeRef/nameRef/nodeName
-	if tr.Spec.TypeRef == ""{
+	if tr.Spec.TypeRef == "" {
 		tr.Spec.TypeRef = pr.Spec.TypeRef
 	}
-	if tr.Spec.NameRef == ""{
+	if tr.Spec.NameRef == "" {
 		tr.Spec.NameRef = pr.Spec.NameRef
 	}
-	if tr.Spec.NodeName == ""{
+	if tr.Spec.NodeName == "" {
 		tr.Spec.NodeName = pr.Spec.NodeName
 	}
 	// merge variables
 	if pr.Spec.Variables != nil {
 		for k, value := range pr.Spec.Variables {
 			if _, ok := tr.Spec.Variables[k]; !ok {
-				tr.Spec.Variables[k] = value	
+				tr.Spec.Variables[k] = value
 			}
 		}
 	}
@@ -178,13 +186,13 @@ func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepO
 	tr.TaskRunNodeStatus[nodeName].RunStatus = stepStatus
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="TaskRef",type=string,JSONPath=`.spec.taskRef`
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
 // +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
+// +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
 // TaskRun is the Schema for the taskruns API

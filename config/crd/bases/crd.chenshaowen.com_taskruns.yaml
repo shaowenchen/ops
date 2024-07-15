@@ -28,6 +28,9 @@ spec:
     - jsonPath: .spec.nodeName
       name: NodeName
       type: string
+    - jsonPath: .spec.crontab
+      name: Crontab
+      type: string
     - jsonPath: .status.startTime
       name: StartTime
       type: date
@@ -54,6 +57,8 @@ spec:
           spec:
             description: TaskRunSpec defines the desired state of TaskRun
             properties:
+              crontab:
+                type: string
               nameRef:
                 type: string
               nodeName:

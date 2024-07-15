@@ -5,7 +5,6 @@ metadata:
     namespace: ops-system
 spec:
     desc: check gpu drop in specified host
-    crontab: "13 */2 * * *"
     selector:
         alert-gpu-ecc: enabled
     typeRef: host

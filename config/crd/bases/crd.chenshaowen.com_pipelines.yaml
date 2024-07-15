@@ -16,8 +16,8 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.crontab
-      name: Crontab
+    - jsonPath: .spec.desc
+      name: Desc
       type: string
     name: v1
     schema:
@@ -39,11 +39,9 @@ spec:
           spec:
             description: PipelineSpec defines the desired state of Pipeline
             properties:
-              crontab:
+              desc:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file'
-                type: string
-              desc:
                 type: string
               tasks:
                 items:

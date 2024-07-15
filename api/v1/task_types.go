@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -31,7 +32,6 @@ type TaskSpec struct {
 	TypeRef                 string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
 	NameRef                 string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
 	NodeName                string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
-	Crontab                 string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Variables               Variables         `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Steps                   []Step            `json:"steps,omitempty" yaml:"steps,omitempty"`
 	Name                    string            `json:"name,omitempty" yaml:"name,omitempty"`
@@ -57,7 +57,6 @@ type Step struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
 // +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
@@ -70,6 +69,13 @@ type Task struct {
 	Spec TaskSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
 }
 
+func (obj *Task) GetTTLSecondsAfterFinished() int {
+	if obj.Spec.TTlSecondsAfterFinished > 0 {
+		return obj.Spec.TTlSecondsAfterFinished
+	}
+	return DefaultTTLSecondsAfterFinished
+}
+
 func (obj *Task) GetUniqueKey() string {
 	return types.NamespacedName{
 		Namespace: obj.Namespace,
@@ -77,15 +83,12 @@ func (obj *Task) GetUniqueKey() string {
 	}.String()
 }
 
-func (obj *Task) GetCrontab() string {
-	return obj.Spec.Crontab
+func (obj *Task) IsHostTypeRef() bool {
+	return obj.Spec.TypeRef == TypeRefHost
 }
 
-func (obj *Task) GetTTLSecondsAfterFinished() int {
-	if obj.Spec.TTlSecondsAfterFinished > 0 {
-		return obj.Spec.TTlSecondsAfterFinished
-	}
-	return DefaultTTLSecondsAfterFinished
+func (obj *Task) IsClusterTypeRef() bool {
+	return obj.Spec.TypeRef == TypeRefCluster || obj.Spec.NodeName == opsconstants.AnyMaster
 }
 
 //+kubebuilder:object:root=true

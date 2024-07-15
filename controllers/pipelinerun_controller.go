@@ -138,7 +138,6 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			continue
 		}
 		tr := opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
-		tr.FilledByVariables()
 		// pin some variable
 		if t.Spec.NodeName == opsconstants.AnyMaster {
 			tr.Spec.NodeName = opsconstants.AnyMaster

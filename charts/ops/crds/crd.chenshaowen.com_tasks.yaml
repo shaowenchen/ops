@@ -16,9 +16,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.crontab
-      name: Crontab
-      type: string
     - jsonPath: .spec.typeRef
       name: TypeRef
       type: string
@@ -55,10 +52,6 @@ spec:
             properties:
               all:
                 type: boolean
-              crontab:
-                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file'
-                type: string
               desc:
                 type: string
               name:
@@ -95,6 +88,8 @@ spec:
               ttlSecondsAfterFinished:
                 type: integer
               typeRef:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
                 type: string
               variables:
                 additionalProperties:

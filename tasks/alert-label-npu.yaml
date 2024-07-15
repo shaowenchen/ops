@@ -5,7 +5,6 @@ metadata:
     namespace: ops-system
 spec:
     desc: label host alert for gpu
-    crontab: "2 * * * *"
     typeRef: cluster
     nodeName: anymaster
     steps:

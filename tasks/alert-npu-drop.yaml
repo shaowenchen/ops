@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
     desc: check npu drop in specified host
-    crontab: "*/10 * * * *"
     selector:
       alert-npu-drop: enabled
     typeRef: host

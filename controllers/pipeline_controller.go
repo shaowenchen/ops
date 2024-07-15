@@ -18,32 +18,24 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/go-cmp/cmp"
-	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	"math/rand"
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"time"
 )
 
 // PipelineReconciler reconciles a Pipeline object
 type PipelineReconciler struct {
 	client.Client
 	Scheme     *runtime.Scheme
-	crontabMap map[string]cron.EntryID
-	cron       *cron.Cron
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
@@ -69,87 +61,20 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 	if os.Getenv("DEBUG") == "true" {
 		logger.SetVerbose("debug").Build()
 	}
-	if r.crontabMap == nil {
-		r.crontabMap = make(map[string]cron.EntryID)
-	}
-	if r.cron == nil {
-		r.cron = cron.New()
-		r.cron.Start()
-	}
 
 	obj := &opsv1.Pipeline{}
 	err = r.Client.Get(ctx, req.NamespacedName, obj)
 
 	//if delete, stop ticker
 	if apierrors.IsNotFound(err) {
-		return ctrl.Result{}, r.deleteTicker(ctx, req.NamespacedName)
+		return ctrl.Result{}, nil
 	}
 
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	// validate crontab
-	if obj.GetCrontab() == "" {
-		return ctrl.Result{}, nil
-	}
-	// create task
-	r.createObjRun(logger, ctx, obj)
-	if err != nil {
-		logger.Error.Println(err)
-	}
 
 	return ctrl.Result{}, nil
-}
-
-func (r *PipelineReconciler) createObjRun(logger *opslog.Logger, ctx context.Context, obj *opsv1.Pipeline) (err error) {
-	_, ok := r.crontabMap[obj.GetUniqueKey()]
-	if ok {
-		logger.Info.Println(fmt.Sprintf("clear ticker for pipeline %s", obj.GetUniqueKey()))
-		r.cron.Remove(r.crontabMap[obj.GetUniqueKey()])
-	}
-	if obj.GetCrontab() == "" {
-		return nil
-	}
-	r.crontabMap[obj.GetUniqueKey()], err = r.cron.AddFunc(obj.GetCrontab(), func() {
-		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
-		objRunList := opsv1.PipelineRunList{}
-		err := r.Client.List(ctx, &objRunList, &client.ListOptions{
-			LabelSelector: labels.SelectorFromSet(map[string]string{
-				opsv1.LabelCronKey: opsv1.LabelCronPipelineValue,
-				opsv1.LabelPipelineRefKey:     obj.Name,
-			}),
-		})
-		if err != nil {
-			logger.Error.Println(err)
-			return
-		}
-		for _, objRun := range objRunList.Items {
-			if objRun.Status.RunStatus == opsv1.StatusRunning || objRun.Status.RunStatus == opsv1.StatusEmpty {
-				logger.Info.Println(fmt.Sprintf("skip running pipelinerun %s", objRun.Name))
-				return
-			}
-		}
-		objRun := opsv1.NewPipelineRun(obj)
-		objRun.Labels = map[string]string{
-			opsv1.LabelCronKey: opsv1.LabelCronPipelineValue,
-			opsv1.LabelPipelineRefKey:     obj.Name,
-		}
-		r.Client.Create(ctx, &objRun)
-	})
-	logger.Info.Println(fmt.Sprintf("start ticker for pipeline %s", obj.GetUniqueKey()))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (r *PipelineReconciler) deleteTicker(ctx context.Context, namespacedName types.NamespacedName) error {
-	_, ok := r.crontabMap[namespacedName.String()]
-	if ok {
-		r.cron.Remove(r.crontabMap[namespacedName.String()])
-		delete(r.crontabMap, namespacedName.String())
-	}
-	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
