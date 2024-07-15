@@ -10,7 +10,7 @@ spec:
   variables:
     namespace:
       display: namespace
-      required: true
+      default: ops-system
   steps:
     - name: clear ops task pod
       content: kubectl -n ${namespace} delete  pod -l ops=task
