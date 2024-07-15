@@ -28,7 +28,7 @@ const SyncResourceRandomBiasSeconds = 60 * 2
 const SyncCronRandomBiasSeconds = 30
 
 const MaxResourceConcurrentReconciles = 1
-const MaxTaskrunConcurrentReconciles = 5
+const MaxTaskrunConcurrentReconciles = 50
 
 const (
 	ContainersReady string = "ContainersReady"
