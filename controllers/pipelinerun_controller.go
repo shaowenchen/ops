@@ -82,7 +82,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 	// had run once, skip
-	if !(pr.Status.RunStatus == opsv1.StatusEmpty) {
+	if !(pr.Status.RunStatus == opsv1.StatusEmpty || pr.Status.RunStatus == opsv1.StatusRunning) {
 		return ctrl.Result{}, nil
 	}
 	// get pipeline
