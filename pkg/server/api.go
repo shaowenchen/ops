@@ -631,9 +631,6 @@ func CreatePipelineRun(c *gin.Context) {
 	type Params struct {
 		Namespace   string            `uri:"namespace"`
 		PipelineRef string            `json:"pipelineRef"`
-		TypeRef     string            `json:"typeRef"`
-		NameRef     string            `json:"nameRef"`
-		NodeName    string            `json:"nodeName"`
 		Variables   map[string]string `json:"variables"`
 	}
 	var req = Params{}
@@ -664,17 +661,6 @@ func CreatePipelineRun(c *gin.Context) {
 	}
 	// create pipelinerun
 	pipelinerun := opsv1.NewPipelineRun(pipeline)
-
-	// patch
-	if req.NameRef != "" {
-		pipelinerun.Spec.NameRef = req.NameRef
-	}
-	if req.TypeRef != "" {
-		pipelinerun.Spec.TypeRef = req.TypeRef
-	}
-	if req.NodeName != "" {
-		pipelinerun.Spec.NodeName = req.NodeName
-	}
 	if req.Variables != nil {
 		pipelinerun.Spec.Variables = req.Variables
 	}
