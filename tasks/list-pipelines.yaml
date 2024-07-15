@@ -9,6 +9,7 @@ spec:
     namespace:
       desc: namespace
       required: true
+      default: ops-system
   nodeName: anymaster
   typeRef: cluster
   steps:
