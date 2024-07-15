@@ -153,6 +153,7 @@ func (objs Variables) MergeHighPriorityVariables(others Variables) Variables {
 }
 
 func (objs Variables) GetVariables() (result map[string]string) {
+	result = make(map[string]string)
 	for k, v := range objs {
 		if v.Value != "" {
 			result[k] = v.Value
