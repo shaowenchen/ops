@@ -132,11 +132,11 @@ func (r *PipelineRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Co
 	}
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
-		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.Name))
+		logger.Info.Println(fmt.Sprintf("ticker pipelinerun %s", objRun.Name))
 		if objRun.Status.RunStatus == opsv1.StatusEmpty || objRun.Status.RunStatus == opsv1.StatusRunning {
 			return
 		}
-		// clear taskrun status
+		// clear pipelinerun status
 		objRun.Status = opsv1.PipelineRunStatus{}
 		r.commitStatus(logger, ctx, objRun, "", "", "", nil)
 		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
