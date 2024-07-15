@@ -28,18 +28,18 @@ import (
 type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Crontab         string               `json:"crontab,omitempty" yaml:"crontab,omitempty"`
-	Variables       Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Steps           []Step               `json:"steps,omitempty" yaml:"steps,omitempty"`
-	Name            string               `json:"name,omitempty" yaml:"name,omitempty"`
-	Desc            string               `json:"desc,omitempty" yaml:"desc,omitempty"`
-	TypeRef         string               `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
-	Selector        map[string]string    `json:"selector,omitempty" yaml:"selector,omitempty"`
-	NameRef         string               `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
-	NodeName        string               `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
-	All             bool                 `json:"all,omitempty" yaml:"all,omitempty"`
-	RuntimeImage    string               `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
-	TTlSecondsAfterFinished int `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
+	TypeRef                 string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
+	NameRef                 string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
+	NodeName                string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	Crontab                 string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
+	Variables               Variables         `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Steps                   []Step            `json:"steps,omitempty" yaml:"steps,omitempty"`
+	Name                    string            `json:"name,omitempty" yaml:"name,omitempty"`
+	Desc                    string            `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Selector                map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
+	All                     bool              `json:"all,omitempty" yaml:"all,omitempty"`
+	RuntimeImage            string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
+	TTlSecondsAfterFinished int               `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
 }
 
 const TypeRefHost = "host"

@@ -17,9 +17,8 @@ limitations under the License.
 package v1
 
 import (
-	"os"
 	"time"
-
+	"fmt"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -31,18 +30,11 @@ import (
 type TaskRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	TypeRef      string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
-	NameRef      string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
-	NodeName     string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
-	Selector     map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
-	All          bool              `json:"all,omitempty" yaml:"all,omitempty"`
-	RuntimeImage string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
-	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
-	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
-}
-
-func (obj *TaskRun) GetSpec() *TaskRunSpec {
-	return &obj.Spec
+	TypeRef   string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
+	NameRef   string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
+	NodeName  string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	TaskRef   string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 }
 
 func (obj *TaskRun) IsHostTypeRef() bool {
@@ -74,14 +66,11 @@ func NewTaskRun(t *Task) TaskRun {
 			Namespace:    t.Namespace,
 		},
 		Spec: TaskRunSpec{
-			TaskRef:      t.GetObjectMeta().GetName(),
-			Variables:    t.Spec.Variables.GetVariables(),
-			TypeRef:      t.Spec.TypeRef,
-			Selector:     t.Spec.Selector,
-			NameRef:      t.Spec.NameRef,
-			NodeName:     t.Spec.NodeName,
-			All:          t.Spec.All,
-			RuntimeImage: t.Spec.RuntimeImage,
+			TaskRef:   t.ObjectMeta.GetName(),
+			Variables: t.Spec.Variables.GetVariables(),
+			TypeRef:   t.Spec.TypeRef,
+			NameRef:   t.Spec.NameRef,
+			NodeName:  t.Spec.NodeName,
 		},
 	}
 	// fill owner ref
@@ -95,15 +84,6 @@ func NewTaskRun(t *Task) TaskRun {
 			},
 		}
 	}
-	// validate task
-	if t.Spec.RuntimeImage == "" {
-		defaultRuntimeImage := os.Getenv("DEFAULT_RUNTIME_IMAGE")
-		if defaultRuntimeImage != "" {
-			tr.Spec.RuntimeImage = defaultRuntimeImage
-		} else {
-			tr.Spec.RuntimeImage = opsconstants.DefaultRuntimeImage
-		}
-	}
 	if tr.Spec.TypeRef == "" && tr.Spec.NameRef == opsconstants.AnyMaster {
 		tr.Spec.TypeRef = TypeRefCluster
 	} else if tr.Spec.TypeRef == "" {
@@ -113,6 +93,50 @@ func NewTaskRun(t *Task) TaskRun {
 	if tr.Spec.TypeRef == TypeRefCluster && tr.Spec.NodeName != "" && tr.Spec.NameRef == "" {
 		tr.Spec.NameRef = opsconstants.CurrentRuntime
 	}
+	return tr
+}
+
+func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun {
+	tr := &TaskRun{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: pr.Namespace,
+			Name:      fmt.Sprintf("%s-%s", pr.Name, tRef.Name),
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: APIVersion,
+					Kind:       PipelineRunKind,
+					Name:       pr.Name,
+					UID:        pr.UID,
+				},
+			},
+		},
+		Spec: TaskRunSpec{
+			TaskRef:   t.ObjectMeta.GetName(),
+			TypeRef:   t.Spec.TypeRef,
+			NameRef:   t.Spec.NameRef,
+			NodeName:  t.Spec.NodeName,
+			Variables: t.Spec.Variables.GetVariables(),
+		},
+	}
+	// merge typeRef/nameRef/nodeName
+	if tr.Spec.TypeRef == ""{
+		tr.Spec.TypeRef = pr.Spec.TypeRef
+	}
+	if tr.Spec.NameRef == ""{
+		tr.Spec.NameRef = pr.Spec.NameRef
+	}
+	if tr.Spec.NodeName == ""{
+		tr.Spec.NodeName = pr.Spec.NodeName
+	}
+	// merge variables
+	if pr.Spec.Variables != nil {
+		for k, value := range pr.Spec.Variables {
+			if _, ok := tr.Spec.Variables[k]; !ok {
+				tr.Spec.Variables[k] = value	
+			}
+		}
+	}
+
 	return tr
 }
 
@@ -161,8 +185,6 @@ func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepO
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
 // +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
-// +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
-// +kubebuilder:printcolumn:name="Selector",type=string,JSONPath=`.spec.selector`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`
 // TaskRun is the Schema for the taskruns API

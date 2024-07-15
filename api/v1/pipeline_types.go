@@ -28,11 +28,11 @@ import (
 type PipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Crontab         string               `json:"crontab,omitempty" yaml:"crontab,omitempty"`
-	Desc            string               `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Variables       Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Tasks           []TaskRef            `json:"tasks" yaml:"tasks"`
-	TTlSecondsAfterFinished int `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
+	Crontab                 string    `json:"crontab,omitempty" yaml:"crontab,omitempty"`
+	Desc                    string    `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Variables               Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Tasks                   []TaskRef `json:"tasks" yaml:"tasks"`
+	TTlSecondsAfterFinished int       `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
 }
 
 type TaskRef struct {

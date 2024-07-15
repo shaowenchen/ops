@@ -28,12 +28,6 @@ spec:
     - jsonPath: .spec.nodeName
       name: NodeName
       type: string
-    - jsonPath: .spec.all
-      name: All
-      type: boolean
-    - jsonPath: .spec.selector
-      name: Selector
-      type: string
     - jsonPath: .status.startTime
       name: StartTime
       type: date
@@ -60,23 +54,15 @@ spec:
           spec:
             description: TaskRunSpec defines the desired state of TaskRun
             properties:
-              all:
-                type: boolean
               nameRef:
                 type: string
               nodeName:
                 type: string
-              runtimeImage:
-                type: string
-              selector:
-                additionalProperties:
-                  type: string
-                type: object
               taskRef:
-                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file'
                 type: string
               typeRef:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
                 type: string
               variables:
                 additionalProperties:

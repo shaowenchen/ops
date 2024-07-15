@@ -138,7 +138,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	if tr.IsHostTypeRef() {
 		hs := []opsv1.Host{}
-		if tr.Spec.Selector == nil {
+		if t.Spec.Selector == nil {
 			h := opsv1.Host{}
 			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, &h)
 			if err != nil {
@@ -153,7 +153,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			}
 			hs = append(hs, h)
 		} else {
-			hs = r.getSelectorHosts(logger, ctx, tr)
+			hs = r.getSelectorHosts(logger, ctx, t)
 		}
 		if len(hs) == 0 {
 			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
@@ -196,9 +196,9 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		}
 		kubeOpt := opsoption.KubeOption{
 			Debug:        strings.ToLower(os.Getenv("DEBUG")) == "true",
-			NodeName:     tr.GetSpec().NodeName,
-			All:          tr.GetSpec().All,
-			RuntimeImage: tr.GetSpec().RuntimeImage,
+			NodeName:     t.Spec.NodeName,
+			All:          t.Spec.All,
+			RuntimeImage: t.Spec.RuntimeImage,
 			OpsNamespace: opsconstants.DefaultOpsNamespace,
 		}
 		if tr.Spec.NameRef != opsconstants.CurrentRuntime {
@@ -246,7 +246,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	for _, node := range nodes {
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
-				Variables: tr.GetSpec().Variables,
+				Variables: tr.Spec.Variables,
 			}, kubeOpt)
 	}
 	// get taskrun status
@@ -291,9 +291,9 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	return
 }
 
-func (r *TaskRunReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.Context, tr *opsv1.TaskRun) (hosts []opsv1.Host) {
+func (r *TaskRunReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (hosts []opsv1.Host) {
 	hostList := &opsv1.HostList{}
-	err := r.Client.List(ctx, hostList, client.MatchingLabels(tr.Spec.Selector))
+	err := r.Client.List(ctx, hostList, client.MatchingLabels(t.Spec.Selector))
 	if err != nil {
 		logger.Error.Println(err, "failed to list hosts")
 		return

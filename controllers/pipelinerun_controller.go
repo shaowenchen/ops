@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
@@ -26,7 +25,6 @@ import (
 	cron "github.com/robfig/cron/v3"
 	crdv1 "github.com/shaowenchen/ops/api/v1"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -138,32 +136,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			})
 			continue
 		}
-		runtimeImage := opsconstants.DefaultRuntimeImage
-		if len(os.Getenv("DEFAULT_RUNTIME_IMAGE")) > 0 {
-			runtimeImage = os.Getenv("DEFAULT_RUNTIME_IMAGE")
-		}
-		tr := &opsv1.TaskRun{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:    pr.Namespace,
-				GenerateName: fmt.Sprintf("%s-%s-", pr.Name, t.Name),
-				OwnerReferences: []metav1.OwnerReference{
-					{
-						APIVersion: opsv1.APIVersion,
-						Kind:       opsv1.PipelineRunKind,
-						Name:       pr.Name,
-						UID:        pr.UID,
-					},
-				},
-			},
-			Spec: opsv1.TaskRunSpec{
-				TaskRef:      tRef.TaskRef,
-				TypeRef:      mergeValue(t.Spec.TypeRef, pr.Spec.TypeRef),
-				NameRef:      mergeValue(t.Spec.NameRef, pr.Spec.NameRef),
-				NodeName:     mergeValue(t.Spec.NodeName, pr.Spec.NodeName),
-				Variables:    mergeMapValue(t.Spec.Variables.GetVariables(), pr.Spec.Variables),
-				RuntimeImage: runtimeImage,
-			},
-		}
+		tr := opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
 		// merge variable to spec
 		if tr.Spec.Variables != nil {
 			if _, ok := tr.Spec.Variables["typeRef"]; ok {
@@ -218,26 +191,6 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 	}
 	r.commitStatus(logger, ctx, pr, finallyStatus, "", "", nil)
 	return
-}
-
-func mergeValue(value1 string, value2 string) string {
-	if value1 == "" {
-		return value2
-	}
-	return value1
-}
-
-func mergeMapValue(value1 map[string]string, value2 map[string]string) map[string]string {
-	if value2 == nil {
-		return value1
-	}
-	// 如果 value2 中的 key 值为空，并且存在于 value1 中
-	for k, v := range value2 {
-		if v == "" && value1[k] != "" {
-			value2[k] = value1[k]
-		}
-	}
-	return value2
 }
 
 // SetupWithManager sets up the controller with the Manager.
