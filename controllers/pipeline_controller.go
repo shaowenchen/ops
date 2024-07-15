@@ -35,7 +35,7 @@ import (
 // PipelineReconciler reconciles a Pipeline object
 type PipelineReconciler struct {
 	client.Client
-	Scheme     *runtime.Scheme
+	Scheme *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=pipelines,verbs=get;list;watch;create;update;patch;delete

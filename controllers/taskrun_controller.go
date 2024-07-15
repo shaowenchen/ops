@@ -137,25 +137,20 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 	}
 	_, ok := r.crontabMap[objRun.GetUniqueKey()]
 	if ok {
-		logger.Info.Println(fmt.Sprintf("clear ticker for task %s", objRun.GetUniqueKey()))
-		r.cron.Remove(r.crontabMap[objRun.GetUniqueKey()])
+		return
 	}
-	r.cron.AddFunc(objRun.Spec.Crontab, func() {
+	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
 		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.Name))
+		if objRun.Status.RunStatus == opsv1.StatusEmpty || objRun.Status.RunStatus == opsv1.StatusRunning {
+			return
+		}
 		// clear taskrun status
 		objRun.Status = opsv1.TaskRunStatus{}
-		err := r.Client.Status().Update(ctx, objRun)
+		r.commitStatus(logger, ctx, objRun, opsv1.StatusRunning)
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
 		if err != nil {
 			logger.Error.Println(err)
-			return
-		}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
-		if err != nil {
-			logger.Error.Println(err)
-			return
-		}
-		if objRun.Status.RunStatus == opsv1.StatusEmpty || objRun.Status.RunStatus == opsv1.StatusRunning {
 			return
 		}
 		obj := &opsv1.Task{}
@@ -166,6 +161,11 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 		}
 		r.run(logger, ctx, obj, objRun)
 	})
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	}
+	r.crontabMap[objRun.GetUniqueKey()] = id
 }
 
 func (r *TaskRunReconciler) registerClearCron() {
@@ -196,7 +196,7 @@ func (r *TaskRunReconciler) registerClearCron() {
 }
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
-	tr.FilledByVariables()
+	tr.FilledByVariables(t)
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	if t.IsHostTypeRef() {
 		hs := []opsv1.Host{}

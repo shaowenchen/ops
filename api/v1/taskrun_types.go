@@ -40,24 +40,34 @@ type TaskRunSpec struct {
 	TaskRef   string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 }
 
-func (obj *TaskRun) FilledByVariables() {
-	if obj.Spec.Variables != nil {
-		if _, ok := obj.Spec.Variables["typeRef"]; ok {
-			obj.Spec.TypeRef = obj.Spec.Variables["typeRef"]
-		}
-		if _, ok := obj.Spec.Variables["nameRef"]; ok {
-			obj.Spec.NameRef = obj.Spec.Variables["nameRef"]
-		}
-		if _, ok := obj.Spec.Variables["nodeName"]; ok {
-			obj.Spec.NodeName = obj.Spec.Variables["nodeName"]
-		}
+func (obj *TaskRun) FilledByVariables(t *Task) {
+	if obj.Spec.Variables == nil {
+		obj.Spec.Variables = make(map[string]string)
 	}
-	if obj.Spec.NodeName == opsconstants.AnyMaster {
+	if _, ok := obj.Spec.Variables["typeRef"]; ok {
+		obj.Spec.TypeRef = obj.Spec.Variables["typeRef"]
+	}
+	if _, ok := obj.Spec.Variables["nameRef"]; ok {
+		obj.Spec.NameRef = obj.Spec.Variables["nameRef"]
+	}
+	if _, ok := obj.Spec.Variables["nodeName"]; ok {
+		obj.Spec.NodeName = obj.Spec.Variables["nodeName"]
+	}
+	if t.Spec.NodeName == opsconstants.AnyMaster {
+		obj.Spec.NameRef = opsconstants.CurrentRuntime
 		obj.Spec.TypeRef = TypeRefCluster
-		if obj.Spec.NameRef == "" {
-			obj.Spec.NameRef = opsconstants.CurrentRuntime
+	}
+	for k, v := range t.Spec.Variables {
+		if _, ok := obj.Spec.Variables[k]; !ok {
+			obj.Spec.Variables[k] = v.GetValue()
+			continue
+		}
+		if v.Value != "" {
+			obj.Spec.Variables[k] = v.Value
+			continue
 		}
 	}
+
 }
 
 func (obj *TaskRun) GetUniqueKey() string {
