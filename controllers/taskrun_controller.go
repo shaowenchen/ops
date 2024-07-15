@@ -196,7 +196,7 @@ func (r *TaskRunReconciler) registerClearCron() {
 }
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
-	tr.FilledByVariables(t)
+	tr.Patch(t)
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	if t.IsHostTypeRef() {
 		hs := []opsv1.Host{}

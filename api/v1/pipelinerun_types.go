@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	"k8s.io/apimachinery/pkg/types"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,10 +27,9 @@ import (
 // PipelineRunSpec defines the desired state of PipelineRun
 type PipelineRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	Crontab string `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	// Important: Run "make" to regenerate code after modifying this file
-	TypeRef     string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
-	NameRef     string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
-	NodeName    string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	Desc        string            `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Variables   map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	PipelineRef string            `json:"pipelineRef,omitempty" yaml:"pipelineRef,omitempty"`
 }
@@ -70,9 +70,10 @@ type PipelineRunTaskStatus struct {
 	TaskRunStatus *TaskRunStatus `json:"taskRunStatus,omitempty" yaml:"taskRunStatus,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
+// +kubebuilder:printcolumn:name="Desc",type=string,JSONPath=`.spec.desc`
 // +kubebuilder:printcolumn:name="PipelineRef",type=string,JSONPath=`.spec.pipelineRef`
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.runStatus`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
@@ -82,6 +83,13 @@ type PipelineRun struct {
 
 	Spec   PipelineRunSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
 	Status PipelineRunStatus `json:"status,omitempty" yaml:"status,omitempty"`
+}
+
+func (obj *PipelineRun) GetUniqueKey() string {
+	return types.NamespacedName{
+		Namespace: obj.Namespace,
+		Name:      obj.Name,
+	}.String()
 }
 
 func NewPipelineRun(p *Pipeline) PipelineRun {

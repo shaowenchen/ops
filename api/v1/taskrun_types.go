@@ -35,15 +35,17 @@ type TaskRunSpec struct {
 	TypeRef   string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
 	NameRef   string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
 	NodeName  string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
+	Selector  map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
 	Crontab   string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	TaskRef   string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 }
 
-func (obj *TaskRun) FilledByVariables(t *Task) {
+func (obj *TaskRun) Patch(t *Task) {
 	if obj.Spec.Variables == nil {
 		obj.Spec.Variables = make(map[string]string)
 	}
+	// patch typeRef/nameRef/nodeName
 	if _, ok := obj.Spec.Variables["typeRef"]; ok {
 		obj.Spec.TypeRef = obj.Spec.Variables["typeRef"]
 	}
@@ -53,9 +55,14 @@ func (obj *TaskRun) FilledByVariables(t *Task) {
 	if _, ok := obj.Spec.Variables["nodeName"]; ok {
 		obj.Spec.NodeName = obj.Spec.Variables["nodeName"]
 	}
+	// patch anymaster
 	if t.Spec.NodeName == opsconstants.AnyMaster {
 		obj.Spec.NameRef = opsconstants.CurrentRuntime
 		obj.Spec.TypeRef = TypeRefCluster
+	}
+	// patch selector
+	if len(obj.Spec.Selector) == 0 {
+		obj.Spec.Selector = t.Spec.Selector
 	}
 	for k, v := range t.Spec.Variables {
 		if _, ok := obj.Spec.Variables[k]; !ok {
@@ -136,16 +143,6 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 			Variables: t.Spec.Variables.GetVariables(),
 		},
 	}
-	// merge typeRef/nameRef/nodeName
-	if tr.Spec.TypeRef == "" {
-		tr.Spec.TypeRef = pr.Spec.TypeRef
-	}
-	if tr.Spec.NameRef == "" {
-		tr.Spec.NameRef = pr.Spec.NameRef
-	}
-	if tr.Spec.NodeName == "" {
-		tr.Spec.NodeName = pr.Spec.NodeName
-	}
 	// merge variables
 	if pr.Spec.Variables != nil {
 		for k, value := range pr.Spec.Variables {
@@ -202,6 +199,7 @@ func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepO
 // +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
 // +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
 // +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
+// +kubebuilder:printcolumn:name="Selector",type=string,JSONPath=`.spec.selector`
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`

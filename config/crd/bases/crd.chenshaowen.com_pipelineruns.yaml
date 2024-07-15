@@ -16,6 +16,12 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.crontab
+      name: Crontab
+      type: string
+    - jsonPath: .spec.desc
+      name: Desc
+      type: string
     - jsonPath: .spec.pipelineRef
       name: PipelineRef
       type: string
@@ -44,15 +50,14 @@ spec:
           spec:
             description: PipelineRunSpec defines the desired state of PipelineRun
             properties:
-              nameRef:
+              crontab:
+                description: INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 type: string
-              nodeName:
+              desc:
+                description: 'Important: Run "make" to regenerate code after modifying
+                  this file'
                 type: string
               pipelineRef:
-                type: string
-              typeRef:
-                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file'
                 type: string
               variables:
                 additionalProperties:

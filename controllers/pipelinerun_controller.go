@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -42,8 +44,10 @@ const CommitStatusMaxRetries = 5
 // PipelineRunReconciler reconciles a PipelineRun object
 type PipelineRunReconciler struct {
 	client.Client
-	Scheme    *runtime.Scheme
-	clearCron *cron.Cron
+	Scheme     *runtime.Scheme
+	crontabMap map[string]cron.EntryID
+	cron       *cron.Cron
+	clearCron  *cron.Cron
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=pipelineruns,verbs=get;list;watch;create;update;patch;delete
@@ -61,7 +65,7 @@ type PipelineRunReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// start clear cron
-	r.RegisterClearCron()
+	r.registerClearCron()
 	// only reconcile active namespace
 	actionNs := os.Getenv("ACTIVE_NAMESPACE")
 	if actionNs != "" && actionNs != req.Namespace {
@@ -71,15 +75,26 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if os.Getenv("DEBUG") == "true" {
 		logger.SetVerbose("debug").Build()
 	}
+	if r.crontabMap == nil {
+		r.crontabMap = make(map[string]cron.EntryID)
+	}
+	if r.cron == nil {
+		r.cron = cron.New()
+		r.cron.Start()
+	}
+
 	pr := &opsv1.PipelineRun{}
 	err := r.Client.Get(ctx, req.NamespacedName, pr)
 
 	if apierrors.IsNotFound(err) {
+		r.deleteCronTab(logger, ctx, req.NamespacedName)
 		return ctrl.Result{}, nil
 	}
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// add crontab
+	r.addCronTab(logger, ctx, pr)
 	// had run once, skip
 	if !(pr.Status.RunStatus == opsv1.StatusEmpty || pr.Status.RunStatus == opsv1.StatusRunning) {
 		return ctrl.Result{}, nil
@@ -91,12 +106,60 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		r.commitStatus(logger, ctx, pr, opsv1.StatusFailed, "", "", nil)
 		return ctrl.Result{}, err
 	}
+
 	// run
 	err = r.run(logger, ctx, p, pr)
 	return ctrl.Result{}, err
 }
 
-func (r *PipelineRunReconciler) RegisterClearCron() {
+func (r *PipelineRunReconciler) deleteCronTab(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {
+	_, ok := r.crontabMap[namespacedName.String()]
+	if ok {
+		r.cron.Remove(r.crontabMap[namespacedName.String()])
+		delete(r.crontabMap, namespacedName.String())
+		logger.Info.Println(fmt.Sprintf("clear ticker for taskrun %s", namespacedName.String()))
+	}
+	return nil
+}
+
+func (r *PipelineRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Context, objRun *opsv1.PipelineRun) {
+	if objRun.Spec.Crontab == "" {
+		return
+	}
+	_, ok := r.crontabMap[objRun.GetUniqueKey()]
+	if ok {
+		return
+	}
+	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
+		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
+		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.Name))
+		if objRun.Status.RunStatus == opsv1.StatusEmpty || objRun.Status.RunStatus == opsv1.StatusRunning {
+			return
+		}
+		// clear taskrun status
+		objRun.Status = opsv1.PipelineRunStatus{}
+		r.commitStatus(logger, ctx, objRun, "", "", "", nil)
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
+		obj := &opsv1.Pipeline{}
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.PipelineRef}, obj)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
+		r.run(logger, ctx, obj, objRun)
+	})
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	}
+	r.crontabMap[objRun.GetUniqueKey()] = id
+}
+
+func (r *PipelineRunReconciler) registerClearCron() {
 	if r.clearCron != nil {
 		return
 	}

@@ -28,6 +28,9 @@ spec:
     - jsonPath: .spec.nodeName
       name: NodeName
       type: string
+    - jsonPath: .spec.selector
+      name: Selector
+      type: string
     - jsonPath: .spec.crontab
       name: Crontab
       type: string
@@ -63,6 +66,10 @@ spec:
                 type: string
               nodeName:
                 type: string
+              selector:
+                additionalProperties:
+                  type: string
+                type: object
               taskRef:
                 type: string
               typeRef:
