@@ -33,6 +33,7 @@ spec:
 
               card_id = ''
               reason = '掉卡'
+              error_message = ''
 
               def send(message):
                   payload = {
@@ -65,7 +66,6 @@ spec:
                   except:
                       pass
                   card_count = 0
-                  error_message = ''
                   lines = [line for line in output.split('\n') if line.startswith('GPU')]
                   for index, line in enumerate(lines):
                       line = line.strip()
@@ -79,7 +79,6 @@ spec:
                   # 3. lspci check
                   output = subprocess.check_output(['lspci'], universal_newlines=True)
                   card_count = 0
-                  error_message = ''
                   lines = [line for line in output.split('\n') if 'controller: NVIDIA Corporation' in line and 'USB' not in line]
                   for index, line in enumerate(lines):
                       line = line.strip()

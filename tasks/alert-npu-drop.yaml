@@ -33,6 +33,7 @@ spec:
 
               card_id = ''
               reason = '掉卡'
+              error_message = ''
 
               def send(message):
                   payload = {
@@ -60,7 +61,6 @@ spec:
                   # npu-smi info |grep 910
                   output = subprocess.check_output(['/usr/local/bin/npu-smi', 'info'], universal_newlines=True)
                   card_count = 0
-                  error_message = ''
                   lines = [line for line in output.split('\n') if '910B' in line]
                   for _, line in enumerate(lines):
                       line = line.strip()
