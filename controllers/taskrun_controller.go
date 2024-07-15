@@ -194,11 +194,19 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 				Name: tr.Spec.NameRef,
 			},
 		}
+		// task > env > default
+		runtimeImage := t.Spec.RuntimeImage
+		if runtimeImage == "" {
+			runtimeImage = os.Getenv("DEFAULT_RUNTIME_IMAGE")
+		}
+		if runtimeImage == "" {
+			runtimeImage = opsconstants.DefaultRuntimeImage
+		}
 		kubeOpt := opsoption.KubeOption{
 			Debug:        strings.ToLower(os.Getenv("DEBUG")) == "true",
 			NodeName:     t.Spec.NodeName,
 			All:          t.Spec.All,
-			RuntimeImage: t.Spec.RuntimeImage,
+			RuntimeImage: runtimeImage,
 			OpsNamespace: opsconstants.DefaultOpsNamespace,
 		}
 		if tr.Spec.NameRef != opsconstants.CurrentRuntime {

@@ -28,6 +28,7 @@ import (
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -137,21 +138,10 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			continue
 		}
 		tr := opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
-		// merge variable to spec
-		if tr.Spec.Variables != nil {
-			if _, ok := tr.Spec.Variables["typeRef"]; ok {
-				tr.Spec.TypeRef = tr.Spec.Variables["typeRef"]
-			}
-			if _, ok := tr.Spec.Variables["nameRef"]; ok {
-				tr.Spec.NameRef = tr.Spec.Variables["nameRef"]
-			}
-			if _, ok := tr.Spec.Variables["nodeName"]; ok {
-				tr.Spec.NodeName = tr.Spec.Variables["nodeName"]
-			}
-		}
+		tr.FilledByVariables()
 		// pin some variable
-		if t.Spec.NodeName == "anymaster" {
-			tr.Spec.NodeName = "anymaster"
+		if t.Spec.NodeName == opsconstants.AnyMaster {
+			tr.Spec.NodeName = opsconstants.AnyMaster
 		}
 		err = r.Client.Create(ctx, tr)
 		if err != nil {
