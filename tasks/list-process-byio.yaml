@@ -4,6 +4,7 @@ metadata:
   name: list-process-byio
   namespace: ops-system
 spec:
+  typeRef: cluster
   desc: list process by io in node
   variables:
     topk: 

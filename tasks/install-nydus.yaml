@@ -4,6 +4,7 @@ metadata:
   name: install-nydus
   namespace: ops-system
 spec:
+  typeRef: cluster
   desc: install nydus kit in specified host
   variables:
     proxy: 

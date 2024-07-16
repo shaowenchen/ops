@@ -4,6 +4,7 @@ metadata:
   name: set-host
   namespace: ops-system
 spec:
+  typeRef: cluster
   desc: set a better kernel parameters for kubernetes host
   steps:
     - name: install required packages

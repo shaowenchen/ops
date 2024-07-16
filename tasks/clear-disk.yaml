@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: clear disk
+  typeRef: cluster
   steps:
     - name: before clear
       content: |

@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: add a super user to specified host
+  typeRef: cluster
   variables:
     name:
       required: true

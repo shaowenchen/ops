@@ -4,6 +4,7 @@ metadata:
   name: pull-file
   namespace: ops-system
 spec:
+  typeRef: cluster
   desc: pull from remote file    
   steps:
     - name: Pull File

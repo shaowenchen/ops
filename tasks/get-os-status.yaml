@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: get status information of OS in specified host
+  typeRef: cluster
   steps:
     - name: Kernel Version
       content: uname -r

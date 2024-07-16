@@ -4,6 +4,7 @@ metadata:
   name: set-docker-liverestore
   namespace: ops-system
 spec:
+  typeRef: cluster
   desc: set docker live-restore for specified host
   steps:
     - name: Make Docker Etc Dir

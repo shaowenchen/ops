@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: clear runc log in specified path for specified host
+  typeRef: cluster
   variables:
     size: 
       default: 100M

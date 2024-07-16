@@ -4,6 +4,7 @@ metadata:
   name: set-mirror
   namespace: ops-system
 spec:
+  typeRef: cluster
   desc: set a faster mirror for os
   steps:
     - name: install required packages

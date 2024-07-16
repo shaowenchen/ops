@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: add hosts to /etc/hosts for specified host
+  typeRef: cluster
   variables:
     ip:
       required: true

@@ -4,6 +4,7 @@ metadata:
   name: install-opscli
   namespace: ops-system
 spec:
+  typeRef: cluster
   desc: install opscli tool in specified host
   variables:
     proxy: 

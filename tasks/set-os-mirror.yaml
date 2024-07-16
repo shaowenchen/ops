@@ -4,6 +4,7 @@ metadata:
   name: set-os-mirror
   namespace: ops-system
 spec:
+  typeRef: cluster
   desc: set os mirror friendly to China for specified host
   variables:
     proxy: 
