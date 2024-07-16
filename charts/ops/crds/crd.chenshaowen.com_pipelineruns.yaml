@@ -16,14 +16,14 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.ref
+      name: Ref
+      type: string
     - jsonPath: .spec.crontab
       name: Crontab
       type: string
     - jsonPath: .spec.desc
       name: Desc
-      type: string
-    - jsonPath: .spec.pipelineRef
-      name: PipelineRef
       type: string
     - jsonPath: .status.runStatus
       name: Status
@@ -57,7 +57,7 @@ spec:
                 description: 'Important: Run "make" to regenerate code after modifying
                   this file'
                 type: string
-              pipelineRef:
+              ref:
                 type: string
               variables:
                 additionalProperties:

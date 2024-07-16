@@ -35,8 +35,8 @@ type PipelineSpec struct {
 }
 
 type TaskRef struct {
-	Name         string            `json:"name" yaml:"name"`
-	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
+	Name         string            `json:"name,omitempty" yaml:"name,omitempty"`
+	Ref          string            `json:"ref" yaml:"ref"`
 	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	AllowFailure bool              `json:"allowFailure,omitempty" yaml:"allowFailure,omitempty"`
 	RunAlways    bool              `json:"runAlways,omitempty" yaml:"runAlways,omitempty"`

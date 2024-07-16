@@ -101,7 +101,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 	// get pipeline
 	p := &opsv1.Pipeline{}
-	err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: pr.Spec.PipelineRef}, p)
+	err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: pr.Spec.Ref}, p)
 	if err != nil {
 		r.commitStatus(logger, ctx, pr, opsv1.StatusFailed, "", "", nil)
 		return ctrl.Result{}, err
@@ -145,7 +145,7 @@ func (r *PipelineRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Co
 			return
 		}
 		obj := &opsv1.Pipeline{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.PipelineRef}, obj)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.Ref}, obj)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -191,25 +191,21 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		}
 		// create taskrun
 		t := &opsv1.Task{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: tRef.TaskRef}, t)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: tRef.Ref}, t)
 		if err != nil {
 			logger.Error.Println(err)
 			runAlways = true
-			r.commitStatus(logger, ctx, pr, opsv1.StatusDataInValid, tRef.Name, tRef.TaskRef, &opsv1.TaskRunStatus{
+			r.commitStatus(logger, ctx, pr, opsv1.StatusDataInValid, tRef.Name, tRef.Ref, &opsv1.TaskRunStatus{
 				RunStatus: opsv1.StatusDataInValid,
 			})
 			continue
 		}
 		tr := opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
-		// pin some variable
-		if t.Spec.NodeName == opsconstants.AnyMaster {
-			tr.Spec.NodeName = opsconstants.AnyMaster
-		}
 		err = r.Client.Create(ctx, tr)
 		if err != nil {
 			logger.Error.Println(err)
 			runAlways = true
-			r.commitStatus(logger, ctx, pr, opsv1.StatusDataInValid, tRef.Name, tRef.TaskRef, nil)
+			r.commitStatus(logger, ctx, pr, opsv1.StatusDataInValid, tRef.Name, tRef.Ref, nil)
 			continue
 		}
 		// run task and commit status
@@ -220,7 +216,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 				logger.Error.Println(err)
 				break
 			}
-			r.commitStatus(logger, ctx, pr, opsv1.StatusRunning, tRef.Name, trRunning.Spec.TaskRef, &trRunning.Status)
+			r.commitStatus(logger, ctx, pr, opsv1.StatusRunning, tRef.Name, trRunning.Spec.Ref, &trRunning.Status)
 			if trRunning.Status.RunStatus == opsv1.StatusRunning || trRunning.Status.RunStatus == opsv1.StatusEmpty {
 				continue
 			} else if trRunning.Status.RunStatus == opsv1.StatusSuccessed {
@@ -249,7 +245,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.PipelineRun{}, ".spec.pipelineRef", func(rawObj client.Object) []string {
 		pr := rawObj.(*opsv1.PipelineRun)
-		return []string{pr.Spec.PipelineRef}
+		return []string{pr.Spec.Ref}
 	}); err != nil {
 		return err
 	}

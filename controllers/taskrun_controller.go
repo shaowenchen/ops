@@ -98,7 +98,7 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	// get task
 	t := &opsv1.Task{}
-	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Spec.TaskRef}, t)
+	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Spec.Ref}, t)
 	if err != nil {
 		r.commitStatus(logger, ctx, tr, opsv1.StatusDataInValid)
 		return ctrl.Result{}, err
@@ -151,7 +151,7 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 			return
 		}
 		obj := &opsv1.Task{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.TaskRef}, obj)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.Ref}, obj)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -200,7 +200,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		hs := []opsv1.Host{}
 		if t.Spec.Selector == nil {
 			h := opsv1.Host{}
-			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, &h)
+			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: t.GetNameRef(tr.Spec.Variables)}, &h)
 			if err != nil {
 				logger.Error.Println(err)
 				r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
@@ -249,9 +249,11 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 		}
 	} else if t.IsClusterTypeRef() {
+		nameRef := t.GetNameRef(tr.Spec.Variables)
+		nodeName := t.GetNodeName(tr.Spec.Variables)
 		c := &opsv1.Cluster{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: tr.Spec.NameRef,
+				Name: nameRef,
 			},
 		}
 		// task > env > default
@@ -264,19 +266,19 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		}
 		kubeOpt := opsoption.KubeOption{
 			Debug:        strings.ToLower(os.Getenv("DEBUG")) == "true",
-			NodeName:     tr.Spec.NodeName,
+			NodeName:     nodeName,
 			All:          t.Spec.All,
 			RuntimeImage: runtimeImage,
 			OpsNamespace: opsconstants.DefaultOpsNamespace,
 		}
-		if tr.Spec.NameRef != opsconstants.CurrentRuntime {
-			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.Spec.NameRef}, c)
+		if nameRef != opsconstants.CurrentRuntime {
+			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: nameRef}, c)
 			if err != nil {
 				logger.Error.Println(err)
 				r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
 				return
 			}
-			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), t.Spec.NameRef))
+			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), nameRef))
 		}
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 		r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
@@ -376,7 +378,7 @@ func (r *TaskRunReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.
 func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.TaskRun{}, ".spec.taskRef", func(rawObj client.Object) []string {
 		tr := rawObj.(*opsv1.TaskRun)
-		return []string{tr.Spec.TaskRef}
+		return []string{tr.Spec.Ref}
 	}); err != nil {
 		return err
 	}

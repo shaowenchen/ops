@@ -51,7 +51,7 @@ func RunPipeline(logger *log.Logger, chat func(string, string, *RoleContentList)
 	}
 	// validate parameters
 	// run pipelinerun
-	logger.Debug.Printf("> run pipeline %s on %s, variables: %v\n", prResult.Spec.PipelineRef, prResult.Namespace, prResult.Spec.Variables)
+	logger.Debug.Printf("> run pipeline %s on %s, variables: %v\n", prResult.Spec.Ref, prResult.Namespace, prResult.Spec.Variables)
 	err = pipelinerunsManager.Run(logger, prResult)
 	return
 }

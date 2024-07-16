@@ -532,9 +532,6 @@ func CreateTaskRun(c *gin.Context) {
 	type Params struct {
 		Namespace    string            `uri:"namespace"`
 		TaskRef      string            `json:"taskRef"`
-		TypeRef      string            `json:"typeRef"`
-		NameRef      string            `json:"nameRef"`
-		NodeName     string            `json:"nodeName"`
 		All          bool              `json:"all"`
 		RuntimeImage string            `json:"runtimeImage"`
 		Variables    map[string]string `json:"variables"`
@@ -548,11 +545,6 @@ func CreateTaskRun(c *gin.Context) {
 	err = c.ShouldBindJSON(&req)
 	if err != nil {
 		showError(c, "get body error "+err.Error())
-		return
-	}
-	// validate
-	if req.NameRef == "" {
-		showError(c, "nameRef is required")
 		return
 	}
 	if req.TaskRef == "" {
@@ -575,7 +567,6 @@ func CreateTaskRun(c *gin.Context) {
 		return
 	}
 	taskRun := opsv1.NewTaskRun(task)
-	taskRun.Spec.NameRef = req.NameRef
 	if req.Variables != nil {
 		if taskRun.Spec.Variables == nil {
 			taskRun.Spec.Variables = make(map[string]string)
@@ -583,12 +574,6 @@ func CreateTaskRun(c *gin.Context) {
 		for k, v := range req.Variables {
 			taskRun.Spec.Variables[k] = v
 		}
-	}
-	if req.TypeRef != "" {
-		taskRun.Spec.TypeRef = req.TypeRef
-	}
-	if req.NodeName != "" {
-		taskRun.Spec.NodeName = req.NodeName
 	}
 	taskRun.Namespace = req.Namespace
 	err = client.Create(context.TODO(), &taskRun)

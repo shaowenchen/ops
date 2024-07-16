@@ -83,6 +83,26 @@ func (obj *Task) GetUniqueKey() string {
 	}.String()
 }
 
+func (obj *Task) GetNameRef(variables map[string]string) string {
+	if len(obj.Spec.NameRef) > 0 {
+		return obj.Spec.NameRef
+	}
+	if _, ok := variables["nameRef"]; ok {
+		return variables["nameRef"]
+	}
+	return ""
+}
+
+func (obj *Task) GetNodeName(variables map[string]string) string {
+	if len(obj.Spec.NodeName) > 0 {
+		return obj.Spec.NodeName
+	}
+	if _, ok := variables["nodeName"]; ok {
+		return variables["nodeName"]
+	}
+	return ""
+}
+
 func (obj *Task) IsHostTypeRef() bool {
 	return obj.Spec.TypeRef == TypeRefHost
 }

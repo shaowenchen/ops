@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"time"
 
-	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -32,37 +31,14 @@ import (
 type TaskRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	TypeRef   string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
-	NameRef   string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
-	NodeName  string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
-	Selector  map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
 	Crontab   string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
-	TaskRef   string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
+	Ref       string            `json:"ref,omitempty" yaml:"ref,omitempty"`
 }
 
 func (obj *TaskRun) Patch(t *Task) {
 	if obj.Spec.Variables == nil {
 		obj.Spec.Variables = make(map[string]string)
-	}
-	// patch typeRef/nameRef/nodeName
-	if _, ok := obj.Spec.Variables["typeRef"]; ok {
-		obj.Spec.TypeRef = obj.Spec.Variables["typeRef"]
-	}
-	if _, ok := obj.Spec.Variables["nameRef"]; ok {
-		obj.Spec.NameRef = obj.Spec.Variables["nameRef"]
-	}
-	if _, ok := obj.Spec.Variables["nodeName"]; ok {
-		obj.Spec.NodeName = obj.Spec.Variables["nodeName"]
-	}
-	// patch anymaster
-	if t.Spec.NodeName == opsconstants.AnyMaster {
-		obj.Spec.NameRef = opsconstants.CurrentRuntime
-		obj.Spec.TypeRef = TypeRefCluster
-	}
-	// patch selector
-	if len(obj.Spec.Selector) == 0 {
-		obj.Spec.Selector = t.Spec.Selector
 	}
 	for k, v := range t.Spec.Variables {
 		if _, ok := obj.Spec.Variables[k]; !ok {
@@ -73,9 +49,6 @@ func (obj *TaskRun) Patch(t *Task) {
 			obj.Spec.Variables[k] = v.Value
 			continue
 		}
-	}
-	if obj.Spec.TypeRef == TypeRefCluster && obj.Spec.NameRef == "" {
-		obj.Spec.NameRef = opsconstants.CurrentRuntime
 	}
 }
 
@@ -93,11 +66,8 @@ func NewTaskRun(t *Task) TaskRun {
 			Namespace:    t.Namespace,
 		},
 		Spec: TaskRunSpec{
-			TaskRef:   t.ObjectMeta.GetName(),
+			Ref:       t.ObjectMeta.GetName(),
 			Variables: t.Spec.Variables.GetVariables(),
-			TypeRef:   t.Spec.TypeRef,
-			NameRef:   t.Spec.NameRef,
-			NodeName:  t.Spec.NodeName,
 		},
 	}
 	// fill owner ref
@@ -111,15 +81,6 @@ func NewTaskRun(t *Task) TaskRun {
 			},
 		}
 	}
-	if tr.Spec.TypeRef == "" && tr.Spec.NameRef == opsconstants.AnyMaster {
-		tr.Spec.TypeRef = TypeRefCluster
-	} else if tr.Spec.TypeRef == "" {
-		tr.Spec.TypeRef = TypeRefHost
-	}
-	// fill nameRef
-	if tr.Spec.TypeRef == TypeRefCluster && tr.Spec.NodeName != "" && tr.Spec.NameRef == "" {
-		tr.Spec.NameRef = opsconstants.CurrentRuntime
-	}
 	return tr
 }
 
@@ -127,7 +88,7 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 	tr := &TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    pr.Namespace,
-			GenerateName: fmt.Sprintf("%s-%s-", pr.Name, tRef.TaskRef),
+			GenerateName: fmt.Sprintf("%s-%s-", pr.Name, tRef.Ref),
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: APIVersion,
@@ -138,21 +99,13 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 			},
 		},
 		Spec: TaskRunSpec{
-			TaskRef:   t.ObjectMeta.GetName(),
-			TypeRef:   t.Spec.TypeRef,
-			NameRef:   t.Spec.NameRef,
-			NodeName:  t.Spec.NodeName,
+			Ref:       t.ObjectMeta.GetName(),
 			Variables: t.Spec.Variables.GetVariables(),
 		},
 	}
 	// merge variables
-	if pr.Spec.Variables != nil {
-		for k, value := range pr.Spec.Variables {
-			_, ok := tr.Spec.Variables[k]
-			if ok || k == "typeRef" || k == "nameRef" || k == "nodeName" {
-				tr.Spec.Variables[k] = value
-			}
-		}
+	for k, value := range pr.Spec.Variables {
+		tr.Spec.Variables[k] = value
 	}
 
 	return tr
@@ -202,11 +155,7 @@ func (tr *TaskRunStatus) ClearNodeStatus() {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="TaskRef",type=string,JSONPath=`.spec.taskRef`
-// +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
-// +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
-// +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
-// +kubebuilder:printcolumn:name="Selector",type=string,JSONPath=`.spec.selector`
+// +kubebuilder:printcolumn:name="Ref",type=string,JSONPath=`.spec.ref`
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`

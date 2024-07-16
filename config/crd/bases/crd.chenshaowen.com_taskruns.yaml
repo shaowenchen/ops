@@ -16,20 +16,8 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.taskRef
-      name: TaskRef
-      type: string
-    - jsonPath: .spec.typeRef
-      name: TypeRef
-      type: string
-    - jsonPath: .spec.nameRef
-      name: NameRef
-      type: string
-    - jsonPath: .spec.nodeName
-      name: NodeName
-      type: string
-    - jsonPath: .spec.selector
-      name: Selector
+    - jsonPath: .spec.ref
+      name: Ref
       type: string
     - jsonPath: .spec.crontab
       name: Crontab
@@ -61,20 +49,10 @@ spec:
             description: TaskRunSpec defines the desired state of TaskRun
             properties:
               crontab:
-                type: string
-              nameRef:
-                type: string
-              nodeName:
-                type: string
-              selector:
-                additionalProperties:
-                  type: string
-                type: object
-              taskRef:
-                type: string
-              typeRef:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              ref:
                 type: string
               variables:
                 additionalProperties:

@@ -13,6 +13,6 @@ spec:
       required: true
   tasks:
     - name: 列出集群的节点
-      taskRef: list-nodes
+      ref: list-nodes
     - name: 列出集群的节点
-      taskRef: list-nodes
+      ref: list-nodes

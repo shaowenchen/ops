@@ -29,9 +29,9 @@ type PipelineRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	Crontab string `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	// Important: Run "make" to regenerate code after modifying this file
-	Desc        string            `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Variables   map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
-	PipelineRef string            `json:"pipelineRef,omitempty" yaml:"pipelineRef,omitempty"`
+	Desc      string            `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Ref       string            `json:"ref,omitempty" yaml:"ref,omitempty"`
 }
 
 // PipelineRunStatus defines the observed state of PipelineRun
@@ -72,9 +72,9 @@ type PipelineRunTaskStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Ref",type=string,JSONPath=`.spec.ref`
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="Desc",type=string,JSONPath=`.spec.desc`
-// +kubebuilder:printcolumn:name="PipelineRef",type=string,JSONPath=`.spec.pipelineRef`
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.runStatus`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 type PipelineRun struct {
@@ -102,8 +102,8 @@ func NewPipelineRun(p *Pipeline) PipelineRun {
 			Namespace:    p.Namespace,
 		},
 		Spec: PipelineRunSpec{
-			PipelineRef: p.Name,
-			Variables:   make(map[string]string),
+			Ref:       p.Name,
+			Variables: make(map[string]string),
 		},
 	}
 	if p.Spec.Variables != nil {

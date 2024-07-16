@@ -20,6 +20,6 @@ spec:
       required: true
   tasks:
     - name: 检查 Pod 是否存在
-      taskRef: check-pod-existed
+      ref: check-pod-existed
     - name: 删除 Pod
-      taskRef: delete-pod
+      ref: delete-pod
