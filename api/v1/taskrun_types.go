@@ -146,9 +146,10 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 	// merge variables
 	if pr.Spec.Variables != nil {
 		for k, value := range pr.Spec.Variables {
-			if _, ok := tr.Spec.Variables[k]; !ok {
+			_, ok := tr.Spec.Variables[k];
+			if ok || k == "typeRef" || k == "nameRef" || k == "nodeName" {
 				tr.Spec.Variables[k] = value
-			}
+			} 
 		}
 	}
 
