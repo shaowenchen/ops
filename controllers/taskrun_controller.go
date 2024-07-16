@@ -145,9 +145,6 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 		if objRun.Status.RunStatus == opsv1.StatusEmpty || objRun.Status.RunStatus == opsv1.StatusRunning {
 			return
 		}
-		// clear taskrun status
-		objRun.Status = opsv1.TaskRunStatus{}
-		r.commitStatus(logger, ctx, objRun, opsv1.StatusRunning)
 		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
 		if err != nil {
 			logger.Error.Println(err)
@@ -197,6 +194,7 @@ func (r *TaskRunReconciler) registerClearCron() {
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
 	tr.Patch(t)
+	tr.Status.ClearNodeStatus()
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	if t.IsHostTypeRef() {
 		hs := []opsv1.Host{}

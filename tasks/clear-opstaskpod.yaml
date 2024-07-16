@@ -13,4 +13,4 @@ spec:
       default: ops-system
   steps:
     - name: clear ops task pod
-      content: kubectl -n ${namespace} delete  pod -l ops=task
+      content: kubectl -n ${namespace} delete  pod -l ops=task || exit 0

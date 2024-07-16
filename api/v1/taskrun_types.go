@@ -124,8 +124,8 @@ func NewTaskRun(t *Task) TaskRun {
 func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun {
 	tr := &TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: pr.Namespace,
-			Name:      fmt.Sprintf("%s-%s", pr.Name, tRef.Name),
+			Namespace:    pr.Namespace,
+			GenerateName: fmt.Sprintf("%s-%s", pr.Name, tRef.TaskRef),
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: APIVersion,
@@ -191,6 +191,10 @@ func (tr *TaskRunStatus) AddOutputStep(nodeName string, stepName, stepCmd, stepO
 	})
 	tr.TaskRunNodeStatus[nodeName].StartTime = &metav1.Time{Time: time.Now()}
 	tr.TaskRunNodeStatus[nodeName].RunStatus = stepStatus
+}
+
+func (tr *TaskRunStatus) ClearNodeStatus() {
+	tr.TaskRunNodeStatus = nil
 }
 
 // +kubebuilder:object:root=true
