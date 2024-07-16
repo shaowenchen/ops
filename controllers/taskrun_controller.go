@@ -223,9 +223,9 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		var orErr error
 		for _, h := range hs {
 			// fill variables
-			extraVariables := map[string]string{
-				"hostname": h.GetHostname(),
-			}
+			extraVariables := tr.Spec.Variables
+			extraVariables["hostname"] = h.GetHostname()
+
 			// filled host
 			if h.Spec.SecretRef != "" {
 				err = filledHostFromSecret(&h, r.Client, h.Spec.SecretRef)
