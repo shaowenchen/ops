@@ -220,7 +220,6 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			return
 		}
 		r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
-		var orErr error
 		for _, h := range hs {
 			// fill variables
 			extraVariables := tr.Spec.Variables
@@ -238,15 +237,9 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 			err = r.runTaskOnHost(cliLogger, ctx, t, tr, &h, extraVariables)
 			if err != nil {
-				orErr = err
+				logger.Error.Println(err)
 			}
 			cliLogger.Flush()
-		}
-		if orErr != nil {
-			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
-			return
-		} else {
-			r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 		}
 	} else if t.IsClusterTypeRef() {
 		nameRef := t.GetNameRef(tr.Spec.Variables)
@@ -283,9 +276,15 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 		r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
 		cliLogger.Flush()
-	} else {
-		r.commitStatus(logger, ctx, tr, opsv1.StatusDataInValid)
 	}
+	// get taskrun status
+	for _, node := range tr.Status.TaskRunNodeStatus {
+		if node.RunStatus != opsv1.StatusSuccessed {
+			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+			return
+		}
+	}
+	r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 	return
 }
 
@@ -319,14 +318,6 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 				Variables: tr.Spec.Variables,
 			}, kubeOpt)
 	}
-	// get taskrun status
-	for _, node := range tr.Status.TaskRunNodeStatus {
-		if node.RunStatus == opsv1.StatusFailed {
-			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
-			return
-		}
-	}
-	r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
 	return
 }
 
