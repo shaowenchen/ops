@@ -16,8 +16,8 @@ spec:
                   hostname=$(kubectl -n ops-system get hosts $host | awk 'NR>1 {print $2}')
                   node_status=$(kubectl get node $hostname)
                   if echo "$node_status" | grep -q "SchedulingDisabled"; then
-                      kubectl -n ops-system label host $host alert-npu-drop=disabled --overwrite
+                      kubectl -n ops-system label host $host alert-npu=disabled --overwrite
                   else
-                      kubectl -n ops-system label host $host alert-npu-drop=enabled --overwrite
+                      kubectl -n ops-system label host $host alert-npu=enabled --overwrite
                   fi
               done
