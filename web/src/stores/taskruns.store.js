@@ -27,13 +27,12 @@ export const useTaskRunsStore = defineStore({
       );
       return res.data;
     },
-    async create(namespace, taskRef, typeRef, nameRef) {
+    async create(namespace, ref, vars) {
       const res = await fetchWrapper.post(
         `/api/v1/namespaces/${namespace}/taskruns`,
         {
-          taskRef: taskRef,
-          typeRef: typeRef,
-          nameRef: nameRef,
+          ref: ref,
+          vars: vars,
         }
       );
       if (res.code == 0) {

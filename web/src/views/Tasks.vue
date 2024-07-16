@@ -25,7 +25,10 @@ var dialogVisble = ref(false);
 var selectedItem = ref(null);
 async function confirm() {
     const store = useTaskRunsStore();
-    await store.create(selectedItem.metadata.namespace, selectedItem.metadata.name, selectedItem.spec.typeRef, selectedItem.spec.nameRef);
+    const vars = {};
+    vars['typeRef'] = selectedItem.spec.typeRef;
+    vars['nameRef'] = selectedItem.spec.nameRef;
+    await store.create(selectedItem.metadata.namespace, selectedItem.metadata.name, vars);
     dialogVisble.value = false;
 }
 
@@ -104,6 +107,7 @@ function run(item) {
             <el-table-column prop="spec.crontab" label="Crontab" />
             <el-table-column prop="spec.typeRef" label="TypeRef" />
             <el-table-column prop="spec.nameRef" label="NameRef" />
+            <el-table-column prop="spec.nodeName" label="NodeName" />
             <el-table-column prop="status.startTime" label="Start Time" />
             <el-table-column prop="status.runStatus" label="Run Status" />
             <el-table-column label="Actions">

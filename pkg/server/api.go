@@ -530,11 +530,9 @@ func ListPipelineRun(c *gin.Context) {
 
 func CreateTaskRun(c *gin.Context) {
 	type Params struct {
-		Namespace    string            `uri:"namespace"`
-		TaskRef      string            `json:"taskRef"`
-		All          bool              `json:"all"`
-		RuntimeImage string            `json:"runtimeImage"`
-		Variables    map[string]string `json:"variables"`
+		Namespace string            `uri:"namespace"`
+		Ref       string            `json:"ref"`
+		Variables map[string]string `json:"variables"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -547,8 +545,8 @@ func CreateTaskRun(c *gin.Context) {
 		showError(c, "get body error "+err.Error())
 		return
 	}
-	if req.TaskRef == "" {
-		showError(c, "taskRef is required")
+	if req.Ref == "" {
+		showError(c, "ref is required")
 		return
 	}
 	client, err := getRuntimeClient("")
@@ -560,7 +558,7 @@ func CreateTaskRun(c *gin.Context) {
 	task := &opsv1.Task{}
 	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 		Namespace: req.Namespace,
-		Name:      req.TaskRef,
+		Name:      req.Ref,
 	}, task)
 	if err != nil {
 		showError(c, err.Error())
@@ -600,7 +598,7 @@ func CreateTaskRun(c *gin.Context) {
 				showError(c, err.Error())
 				return
 			}
-			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed || latest.Status.RunStatus == opsv1.StatusAborted {
+			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed || latest.Status.RunStatus == opsv1.StatusAborted || latest.Status.RunStatus == opsv1.StatusDataInValid {
 				showData(c, latest)
 				return
 			}
@@ -614,9 +612,9 @@ func CreateTaskRun(c *gin.Context) {
 
 func CreatePipelineRun(c *gin.Context) {
 	type Params struct {
-		Namespace   string            `uri:"namespace"`
-		PipelineRef string            `json:"pipelineRef"`
-		Variables   map[string]string `json:"variables"`
+		Namespace string            `uri:"namespace"`
+		Ref       string            `json:"Ref"`
+		Variables map[string]string `json:"variables"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -638,7 +636,7 @@ func CreatePipelineRun(c *gin.Context) {
 	pipeline := &opsv1.Pipeline{}
 	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 		Namespace: req.Namespace,
-		Name:      req.PipelineRef,
+		Name:      req.Ref,
 	}, pipeline)
 	if err != nil {
 		showError(c, err.Error())

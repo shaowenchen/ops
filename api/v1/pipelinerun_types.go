@@ -106,14 +106,8 @@ func NewPipelineRun(p *Pipeline) PipelineRun {
 			Variables: make(map[string]string),
 		},
 	}
-	if p.Spec.Variables != nil {
-		for k, v := range p.Spec.Variables {
-			if v.Value != "" {
-				pr.Spec.Variables[k] = v.Value
-			} else {
-				pr.Spec.Variables[k] = v.Default
-			}
-		}
+	for k, v := range p.Spec.Variables {
+		pr.Spec.Variables[k] = v.GetValue()
 	}
 	// fill owner ref
 	if p.UID != "" {
