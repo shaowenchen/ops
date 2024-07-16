@@ -41,12 +41,12 @@ func (obj *TaskRun) Patch(t *Task) {
 		obj.Spec.Variables = make(map[string]string)
 	}
 	for k, v := range t.Spec.Variables {
-		if _, ok := obj.Spec.Variables[k]; !ok {
-			obj.Spec.Variables[k] = v.GetValue()
-			continue
-		}
 		if v.Value != "" {
 			obj.Spec.Variables[k] = v.Value
+			continue
+		}
+		if _, ok := obj.Spec.Variables[k]; !ok {
+			obj.Spec.Variables[k] = v.GetValue()
 			continue
 		}
 	}
@@ -100,14 +100,9 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 		},
 		Spec: TaskRunSpec{
 			Ref:       t.ObjectMeta.GetName(),
-			Variables: t.Spec.Variables.GetVariables(),
+			Variables: pr.Spec.Variables,
 		},
 	}
-	// merge variables
-	for k, value := range pr.Spec.Variables {
-		tr.Spec.Variables[k] = value
-	}
-
 	return tr
 }
 

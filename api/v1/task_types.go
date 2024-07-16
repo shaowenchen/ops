@@ -90,7 +90,7 @@ func (obj *Task) GetNameRef(variables map[string]string) string {
 	if _, ok := variables["nameRef"]; ok {
 		return variables["nameRef"]
 	}
-	return ""
+	return opsconstants.CurrentRuntime
 }
 
 func (obj *Task) GetNodeName(variables map[string]string) string {
