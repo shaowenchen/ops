@@ -4,7 +4,7 @@ metadata:
   name: cluster-clear-disk
   namespace: ops-system
 spec:
-  desc: 清理集群中某个节点的磁盘
+  desc: 磁盘使用率超过阈值时清理磁盘
   variables:
     typeRef:
       value: "cluster"
