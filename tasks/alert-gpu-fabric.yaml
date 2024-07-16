@@ -1,0 +1,78 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: alert-gpu-fabric
+  namespace: ops-system
+spec:
+  desc: check fabricmanager in specified host
+  selector:
+    alert-gpu: enabled
+  typeRef: host
+  variables:
+    cluster:
+      default: default
+    notifaction:
+      required: true
+  steps:
+    - name: alert-fabric
+      content: |
+        #!/usr/bin/python
+        import os
+        import requests
+        import json
+        from datetime import datetime, timedelta
+
+        cluster = '${cluster}'
+        hostname = '${hostname}'
+        notifaction = '${notifaction}'
+
+        max = 3
+        reason = 'fabricmanager异常'
+        error_message = ''
+
+        def send(message):
+            payload = {
+                'msgtype': 'text',
+                'text': {
+                    'content': message
+                }
+            }
+            headers = {
+                'Content-Type': 'application/json'
+            }
+            response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+            print(response.text)
+
+        try:
+            log_file = '/var/log/fabricmanager.log'
+            if not os.path.exists(log_file):
+                print('日志文件不存在')
+                exit(0)
+            
+            current_time = datetime.now()
+            one_hour_ago = current_time - timedelta(hours=1)
+            error_logs = []
+
+            with open(log_file, 'r') as f:
+                count = 0
+                for line in f:
+                    if 'error' in line.lower():
+                        timestamp_str = line.split(']')[0].strip('[')
+                        log_time = datetime.strptime(timestamp_str, '%b %d %Y %H:%M:%S')
+                        if log_time >= one_hour_ago:
+                            count += 1
+                            if count > max:
+                                break
+                            error_logs.append(line.strip())
+
+            if error_logs:
+                error_message += '错误日志:\n' + '\n'.join(error_logs) + '\n'
+                raise Exception(error_message)
+
+        except Exception as e:
+            if len(error_message) == 0:
+                error_message = str(e)
+        finally:
+            if len(error_message) > 0:
+                error_message = f'集群: {cluster} \n节点: {hostname} \n{error_message}异常判断: {reason}\n'
+                send(error_message)

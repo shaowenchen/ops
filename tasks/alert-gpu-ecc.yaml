@@ -6,7 +6,7 @@ metadata:
 spec:
     desc: check gpu drop in specified host
     selector:
-        alert-gpu-ecc: enabled
+        alert-gpu: enabled
     typeRef: host
     variables:
         max:

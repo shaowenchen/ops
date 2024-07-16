@@ -6,7 +6,7 @@ metadata:
 spec:
     desc: check gpu
     selector:
-      alert-gpu-zombie: enabled
+      alert-gpu: enabled
     typeRef: host
     variables:
       cluster:

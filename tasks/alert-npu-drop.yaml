@@ -6,7 +6,7 @@ metadata:
 spec:
     desc: check npu drop in specified host
     selector:
-      alert-npu-drop: enabled
+      alert-npu: enabled
     typeRef: host
     variables:
       cluster: 

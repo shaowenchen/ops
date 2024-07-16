@@ -16,12 +16,8 @@ spec:
                   hostname=$(kubectl -n ops-system get hosts $host | awk 'NR>1 {print $2}')
                   node_status=$(kubectl get node $hostname)
                   if echo "$node_status" | grep -q "SchedulingDisabled"; then
-                      kubectl -n ops-system label host $host alert-gpu-drop=disabled --overwrite
-                      kubectl -n ops-system label host $host alert-gpu-zombie=disabled --overwrite
-                      kubectl -n ops-system label host $host alert-gpu-ecc=disabled --overwrite
+                      kubectl -n ops-system label host $host alert-gpu=disabled --overwrite
                   else
-                      kubectl -n ops-system label host $host alert-gpu-drop=enabled --overwrite
-                      kubectl -n ops-system label host $host alert-gpu-zombie=enabled --overwrite
-                      kubectl -n ops-system label host $host alert-gpu-ecc=enabled --overwrite
+                      kubectl -n ops-system label host $host alert-gpu=enabled --overwrite
                   fi
               done
