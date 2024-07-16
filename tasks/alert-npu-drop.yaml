@@ -58,7 +58,7 @@ spec:
                       raise Exception(build_error_message('找不到 npu-smi 命令'))
                   # 2. check count from npu-smi
                   # npu-smi info |grep 910
-                  output = subprocess.check_output(['/usr/local/bin/npu-smi', 'info'], universal_newlines=True)
+                  output = subprocess.run(['/usr/local/bin/npu-smi', 'info'], universal_newlines=True, stdout=subprocess.PIPE).stdout
                   card_count = 0
                   lines = [line for line in output.split('\n') if '910B' in line]
                   for _, line in enumerate(lines):
@@ -70,7 +70,7 @@ spec:
                   if card_count != desired_card_count:
                       raise Exception(error_message)
                   # 3. lspci check, lspci |grep d80
-                  output = subprocess.check_output(['lspci'], universal_newlines=True)
+                  output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
                   card_count = 0
                   error_message = ''
                   lines = [line for line in output.split('\n') if 'd80' in line]

@@ -55,7 +55,7 @@ spec:
                   if not os.path.exists('/usr/bin/nvidia-smi'):
                       raise Exception(build_error_message('找不到 nvidia-smi 命令'))
                   # 2. check ecc from nvidia-smi
-                  output = subprocess.check_output(['nvidia-smi'], universal_newlines=True)
+                  output = subprocess.run(['nvidia-smi'], universal_newlines=True, stdout=subprocess.PIPE).stdout
                   error_message = ''
                   lines = [line for line in output.split('\n') if "NVIDIA" in line and "Driver" not in line]
                   for index, line in enumerate(lines):
