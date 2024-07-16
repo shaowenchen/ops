@@ -74,7 +74,9 @@ func (obj *TaskRun) Patch(t *Task) {
 			continue
 		}
 	}
-
+	if obj.Spec.TypeRef == TypeRefCluster && obj.Spec.NameRef == "" {
+		obj.Spec.NameRef = opsconstants.CurrentRuntime
+	}
 }
 
 func (obj *TaskRun) GetUniqueKey() string {
@@ -125,7 +127,7 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 	tr := &TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    pr.Namespace,
-			GenerateName: fmt.Sprintf("%s-%s", pr.Name, tRef.TaskRef),
+			GenerateName: fmt.Sprintf("%s-%s-", pr.Name, tRef.TaskRef),
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: APIVersion,
@@ -146,10 +148,10 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 	// merge variables
 	if pr.Spec.Variables != nil {
 		for k, value := range pr.Spec.Variables {
-			_, ok := tr.Spec.Variables[k];
+			_, ok := tr.Spec.Variables[k]
 			if ok || k == "typeRef" || k == "nameRef" || k == "nodeName" {
 				tr.Spec.Variables[k] = value
-			} 
+			}
 		}
 	}
 

@@ -264,7 +264,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		}
 		kubeOpt := opsoption.KubeOption{
 			Debug:        strings.ToLower(os.Getenv("DEBUG")) == "true",
-			NodeName:     t.Spec.NodeName,
+			NodeName:     tr.Spec.NodeName,
 			All:          t.Spec.All,
 			RuntimeImage: runtimeImage,
 			OpsNamespace: opsconstants.DefaultOpsNamespace,
