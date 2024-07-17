@@ -1,0 +1,26 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: cron-clear-disk
+  namespace: ops-system
+spec:
+  desc: cron to create clear disk
+  selector:
+    managed-by: ops
+  typeRef: host
+  steps:
+    - name: clear image
+      content: (nerdctl --namespace k8s.io image prune -f 2>/dev/null || docker image prune -a -f 2>/dev/null || true) | grep "Untagged" || true
+    - name: clear container
+      content: nerdctl --namespace k8s.io container prune -f 2>/dev/null || docker container prune -a -f 2>/dev/null || true
+    - name: clear network
+      content: nerdctl --namespace k8s.io network prune -f 2>/dev/null || docker network prune -a -f 2>/dev/null || true
+    - name: clear volume
+      content: nerdctl --namespace k8s.io volume prune -f 2>/dev/null || docker volume prune -a -f 2>/dev/null || true
+    - name: clear > 100M log
+      content: find /var/log -type f -name "*.log" -size +100M -exec rm -f {} \; 2>/dev/null || true
+    - name: clear jfs cache
+      content: |
+        find /data/jfs/cache2/mem -maxdepth 1 -type d -atime +15 -exec rm -rf {} + 2>/dev/null || true
+        find /var/lib/jfs/cache -maxdepth 1 -type d -atime +15 -exec rm -rf {} + 2>/dev/null || true
+        find /var/lib/jfs/cache2 -maxdepth 1 -type d -atime +15 -exec rm -rf {} + 2>/dev/null || true
