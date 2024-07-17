@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/shaowenchen/ops/pkg/option"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"strings"
@@ -66,6 +66,12 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 							Privileged: &priviBool,
 						},
 						ImagePullPolicy: corev1.PullIfNotPresent,
+						VolumeMounts: []v1.VolumeMount{
+							{
+								Name:      "data",
+								MountPath: "/host",
+							},
+						},
 					},
 				},
 				HostIPC:       hostFlag,
@@ -73,6 +79,16 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 				HostPID:       hostFlag,
 				RestartPolicy: corev1.RestartPolicyNever,
 				Tolerations:   tolerations,
+				Volumes: []v1.Volume{
+					{
+						Name: "data",
+						VolumeSource: v1.VolumeSource{
+							HostPath: &v1.HostPathVolumeSource{
+								Path: "/",
+							},
+						},
+					},
+				},
 			},
 		},
 		metav1.CreateOptions{},
@@ -110,8 +126,8 @@ func UploadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedN
 						Image:   image,
 						Command: []string{"bash"},
 						Args: []string{"-c", fmt.Sprintf("opscli file --direction upload"+
-							" --ak %s --sk %s --region %s --bucket %s --localfile /host%s --remotefile %s",
-							s3Opt.AK, s3Opt.SK, s3Opt.Region, s3Opt.Bucket, localfile, remoteFile)},
+							" --endpoint %s --ak %s --sk %s --region %s --bucket %s --localfile /host%s --remotefile s3://%s",
+							s3Opt.Endpoint, s3Opt.AK, s3Opt.SK, s3Opt.Region, s3Opt.Bucket, localfile, remoteFile)},
 						ImagePullPolicy: corev1.PullAlways,
 						VolumeMounts: []v1.VolumeMount{
 							{

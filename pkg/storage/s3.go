@@ -16,7 +16,7 @@ func S3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string
 		Endpoint:         aws.String(endpoint),
 		Region:           aws.String(region),
 		DisableSSL:       aws.Bool(true),
-		S3ForcePathStyle: aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(false),
 	})
 	uploader := s3manager.NewUploader(sess)
 	file, err := os.Open(localFilePath)
@@ -46,7 +46,7 @@ func S3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile stri
 		Endpoint:         aws.String(endpoint),
 		Region:           aws.String(region),
 		DisableSSL:       aws.Bool(true),
-		S3ForcePathStyle: aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(false),
 	})
 	downloader := s3manager.NewDownloader(sess)
 	file, err := os.Create(localFilePath)

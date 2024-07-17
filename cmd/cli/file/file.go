@@ -110,8 +110,8 @@ func init() {
 	FileCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	FileCmd.Flags().StringVarP(&kubeOpt.OpsNamespace, "opsnamespace", "", constants.DefaultOpsNamespace, "ops work namespace")
 
-	FileCmd.Flags().StringVarP(&s3Opt.Region, "region", "", "ap-southeast-3", "")
-	FileCmd.Flags().StringVarP(&s3Opt.Endpoint, "endpoint", "", "obs.ap-southeast-3.myhuaweicloud.com", "")
+	FileCmd.Flags().StringVarP(&s3Opt.Region, "region", "", "", "")
+	FileCmd.Flags().StringVarP(&s3Opt.Endpoint, "endpoint", "", "", "")
 	FileCmd.Flags().StringVarP(&s3Opt.Bucket, "bucket", "", "", "")
 	FileCmd.Flags().StringVarP(&s3Opt.AK, "ak", "", "", "")
 	FileCmd.Flags().StringVarP(&s3Opt.SK, "sk", "", "", "")

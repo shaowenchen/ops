@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
-	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -177,11 +177,11 @@ func runStepFileOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnec
 		RemoteFile: step.RemoteFile,
 	}
 	s3Opt := option.S3FileOption{
-		AK: taskOpt.Variables["ak"],
-		SK: taskOpt.Variables["sk"],
-		Region: taskOpt.Variables["region"],
+		AK:       taskOpt.Variables["ak"],
+		SK:       taskOpt.Variables["sk"],
+		Region:   taskOpt.Variables["region"],
 		Endpoint: taskOpt.Variables["endpoint"],
-		Bucket: taskOpt.Variables["bucket"],
+		Bucket:   taskOpt.Variables["bucket"],
 	}
 	output, err = kc.FileNode(
 		logger,

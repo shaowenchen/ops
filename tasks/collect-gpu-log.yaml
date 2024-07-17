@@ -1,0 +1,44 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: collect-gpu-log
+  namespace: ops-system
+spec:
+  typeRef: cluster
+  desc: run col_gpu_log.sh to collect gpu log and upload to s3
+  runtimeImage: shaowenchen/ops-cli:latest
+  variables:
+    ak:
+      display: access key
+      required: true
+    sk:
+      display: secret key
+      required: true
+    region:
+      display: region
+      required: true
+    endpoint:
+      display: endpoint
+      required: true
+    bucket:
+      display: bucket
+      required: true
+  steps:
+    - name: run col_gpu_log.sh
+      content: |
+        rm -rf /tmp/col-gpu-log-${random} || true
+        mkdir -p /tmp/col-gpu-log-${random} && cd /tmp/col-gpu-log-${random}
+        curl -sfL https://mirror.ghproxy.com/https://raw.githubusercontent.com/shaowenchen/hubimage/main/ai/col_gpu_log.sh | bash
+        mv *.tar.gz ${hostname}-col-gpu-log-${random}.tar.gz
+    - name: upload to s3
+      remotefile: s3://collect-gpu-log/${hostname}-col-gpu-log-${random}.tar.gz
+      localfile: /tmp/col-gpu-log-${random}/${hostname}-col-gpu-log-${random}.tar.gz
+      direction: upload
+    - name: get 2h shared link
+      content: |
+        curl -sfL https://ks3util-version-update.ks3-cn-beijing.ksyuncs.com/2.6.0/ks3util-linux-amd64 -o /usr/local/bin/ks3util >/dev/null
+        chmod +x /usr/local/bin/ks3util
+        /usr/local/bin/ks3util sign ks3://${bucket}/collect-gpu-log/${hostname}-col-gpu-log-${random}.tar.gz --endpoint ${endpoint} --timeout 7200 -i ${ak} -k ${sk}
+    - name: clean
+      content: |
+        rm -rf /tmp/col-gpu-log-${random} || true
