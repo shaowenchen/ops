@@ -17,7 +17,7 @@ func File(ctx context.Context, logger *log.Logger, h *opsv1.Host, fileOpt option
 		logger.Error.Println(err)
 		return err
 	}
-	return c.File(ctx, fileOpt.Sudo, fileOpt.Direction, fileOpt.LocalFile, fileOpt.RemoteFile)
+	return c.File(ctx, fileOpt)
 }
 
 func Shell(ctx context.Context, logger *log.Logger, h *opsv1.Host, option option.ShellOption, hostOption option.HostOption) (err error) {

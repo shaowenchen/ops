@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -194,6 +195,7 @@ func (r *TaskRunReconciler) registerClearCron() {
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
 	tr.Patch(t)
+	tr.Spec.Variables["random"] = uuid.New().String()
 	tr.Status.ClearNodeStatus()
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	if t.IsHostTypeRef() {
@@ -313,9 +315,11 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	}
 	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
 	for _, node := range nodes {
+		vars := tr.Spec.Variables
+		vars["hostname"] = node.Name
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
-				Variables: tr.Spec.Variables,
+				Variables: vars,
 			}, kubeOpt)
 	}
 	return

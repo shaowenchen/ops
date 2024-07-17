@@ -39,17 +39,30 @@ func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shell
 	return
 }
 
-func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, option option.FileOption, kubeOption option.KubeOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(client, kubeOption.OpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
+func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, fileOpt option.FileOption, kubeOpt option.KubeOption, s3Opt option.S3FileOption) (stdout string, err error) {
+	namespacedName, err := utils.GetOrCreateNamespacedName(client, kubeOpt.OpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := DownloadFileOnNode(client, &node, namespacedName, option.StorageImage, option.RemoteFile, option.LocalFile)
-	if err != nil {
-		logger.Error.Println(err)
+	fileOpt.Filling()
+	if fileOpt.StorageType == constants.RemoteStorageTypeS3 {
+		if utils.IsUploadDirection(fileOpt.Direction) {
+			s3Opt := option.S3FileOption{
+				Region:   s3Opt.Region,
+				Endpoint: s3Opt.Endpoint,
+				Bucket:   s3Opt.Bucket,
+				AK:       s3Opt.AK,
+				SK:       s3Opt.SK,
+			}
+			pod, err := UploadS3FileOnNode(client, &node, namespacedName, kubeOpt.RuntimeImage, s3Opt, fileOpt.LocalFile, fileOpt.RemoteFile)
+			if err != nil {
+				logger.Error.Println(err)
+			}
+			stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
+			logger.Info.Println(stdout)
+		}
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
-	logger.Info.Println(stdout)
+
 	return
 }
 

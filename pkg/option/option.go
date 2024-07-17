@@ -72,6 +72,9 @@ type FileServerOption struct {
 }
 
 func (f *FileOption) Filling() {
+	if f.StorageType != "" {
+		return
+	}
 	remoteSplit := strings.Split(f.RemoteFile, "://")
 	if len(remoteSplit) == 1 {
 		f.StorageType = constants.RemoteStorageTypeLocal

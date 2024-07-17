@@ -87,8 +87,17 @@ func KubeTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskO
 	nodes, err := kube.GetNodes(ctx, logger, kc.Client, kubeOpt)
 	for _, node := range nodes {
 		for _, t := range tasks {
+			newKubeOpt := kubeOpt
+			if t.Spec.RuntimeImage != "" {
+				newKubeOpt.RuntimeImage = t.Spec.RuntimeImage
+			}
+			for k, v := range t.Spec.Variables {
+				if _, ok := taskOpt.Variables[k]; !ok {
+					taskOpt.Variables[k] = v.GetValue()
+				}
+			}
 			tr := opsv1.NewTaskRun(&t)
-			err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, kubeOpt)
+			err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, newKubeOpt)
 			if err != nil {
 				logger.Error.Println(err)
 			}

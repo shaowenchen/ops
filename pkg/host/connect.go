@@ -19,6 +19,7 @@ import (
 	"github.com/pkg/errors"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
+	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"golang.org/x/crypto/ssh"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -94,14 +95,14 @@ func (c *HostConnection) isInChina(ctx context.Context) (ok bool) {
 	return false
 }
 
-func (c *HostConnection) File(ctx context.Context, sudo bool, direction, localfile, remotefile string) (err error) {
-	if utils.IsDownloadDirection(direction) {
-		err = c.scpPull(ctx, sudo, remotefile, localfile)
+func (c *HostConnection) File(ctx context.Context, fileOpt option.FileOption) (err error) {
+	if utils.IsDownloadDirection(fileOpt.Direction) {
+		err = c.scpPull(ctx, fileOpt.Sudo, fileOpt.RemoteFile, fileOpt.LocalFile)
 		if err != nil {
 			return err
 		}
-	} else if utils.IsUploadDirection(direction) {
-		err = c.scpPush(ctx, sudo, localfile, remotefile)
+	} else if utils.IsUploadDirection(fileOpt.Direction) {
+		err = c.scpPush(ctx, fileOpt.Sudo, fileOpt.RemoteFile, fileOpt.LocalFile)
 		if err != nil {
 			return err
 		}

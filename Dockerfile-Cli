@@ -1,10 +1,10 @@
 FROM hubimage/builder-golang:1.19 as builder
 WORKDIR /workspace
 COPY . .
-RUN make cli 
+RUN make cli
 
 FROM hubimage/runtime-ubuntu:22.04
 WORKDIR /
 COPY --from=builder /workspace/bin/opscli /bin/opscli
 COPY --from=builder /workspace/tasks /root/.ops/tasks
-ENTRYPOINT ["/bin/opscli"]
+COPY --from=builder /workspace/tasks /root/.ops/pipelines

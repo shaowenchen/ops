@@ -9,6 +9,7 @@ import (
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -116,7 +117,7 @@ func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection
 	if len(step.Content) > 0 {
 		return runStepShellOnHost
 	}
-	return runStepCopyOnHost
+	return runStepFileOnHost
 }
 
 func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, stdout string, err error) {
@@ -124,8 +125,20 @@ func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, 
 	return
 }
 
-func runStepCopyOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, output string, err error) {
-	err = c.File(context.Background(), option.Sudo, step.Direction, step.LocalFile, step.RemoteFile)
+func runStepFileOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, taskOpt option.TaskOption) (status, output string, err error) {
+	fileOpt := option.FileOption{
+		Sudo:       taskOpt.Sudo,
+		Direction:  step.Direction,
+		LocalFile:  step.LocalFile,
+		RemoteFile: step.RemoteFile,
+	}
+	fileOpt.Filling()
+	if fileOpt.StorageType == opsconstants.RemoteStorageTypeS3 {
+		println("TODO: S3 ON HOST")
+	} else if fileOpt.StorageType == opsconstants.RemoteStorageTypeLocal {
+		err = c.File(context.Background(), fileOpt)
+	}
+
 	return
 }
 
@@ -133,7 +146,7 @@ func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task,
 	if len(step.Content) > 0 {
 		return runStepShellOnKube
 	} else {
-		return runStepCopyOnKube
+		return runStepFileOnKube
 	}
 }
 
@@ -156,15 +169,26 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 	return
 }
 
-func runStepCopyOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
-	output, err = kc.FileonNode(
+func runStepFileOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
+	fileOpt := option.FileOption{
+		Sudo:       taskOpt.Sudo,
+		Direction:  step.Direction,
+		LocalFile:  step.LocalFile,
+		RemoteFile: step.RemoteFile,
+	}
+	s3Opt := option.S3FileOption{
+		AK: taskOpt.Variables["ak"],
+		SK: taskOpt.Variables["sk"],
+		Region: taskOpt.Variables["region"],
+		Endpoint: taskOpt.Variables["endpoint"],
+		Bucket: taskOpt.Variables["bucket"],
+	}
+	output, err = kc.FileNode(
 		logger,
 		node,
-		option.FileOption{
-			Sudo:       taskOpt.Sudo,
-			Direction:  step.Direction,
-			LocalFile:  step.LocalFile,
-			RemoteFile: step.RemoteFile,
-		})
+		kubeOpt.RuntimeImage,
+		fileOpt,
+		s3Opt,
+	)
 	return
 }

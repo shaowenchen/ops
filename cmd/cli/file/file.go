@@ -42,7 +42,7 @@ var FileCmd = &cobra.Command{
 		if fileOpt.StorageType == constants.RemoteStorageTypeS3 {
 			S3File(logger, fileOpt, s3Opt)
 		} else if fileOpt.StorageType == constants.RemoteStorageTypeImage {
-			KubeFile(ctx, logger, fileOpt, kubeOpt, inventory)
+			KubeFile(ctx, logger, fileOpt, kubeOpt, s3Opt, inventory)
 		} else if fileOpt.StorageType == constants.RemoteStorageTypeLocal {
 			HostFile(ctx, logger, fileOpt, hostOpt, inventory)
 		}
@@ -65,7 +65,7 @@ func HostFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption
 	return
 }
 
-func KubeFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption, kubeOpt option.KubeOption, inventory string) (err error) {
+func KubeFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption, kubeOpt option.KubeOption, s3Opt option.S3FileOption, inventory string) (err error) {
 	client, err := utils.NewKubernetesClient(inventory)
 	if err != nil {
 		logger.Error.Println(err)
@@ -79,7 +79,7 @@ func KubeFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption
 		logger.Info.Println("Please provide a node at least")
 	}
 	for _, node := range nodeList {
-		kube.File(logger, client, node, fileOpt, kubeOpt)
+		kube.File(logger, client, node, fileOpt, kubeOpt, s3Opt)
 	}
 	return
 }

@@ -8,6 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/shaowenchen/ops/pkg/option"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"strings"
@@ -79,7 +80,7 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 	return
 }
 
-func DownloadFileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image, remotefile, localfile string) (pod *corev1.Pod, err error) {
+func UploadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, s3Opt option.S3FileOption, localfile, remoteFile string) (pod *corev1.Pod, err error) {
 	tolerations := []v1.Toleration{}
 	for _, taint := range node.Spec.Taints {
 		tolerations = append(tolerations, v1.Toleration{
@@ -105,10 +106,12 @@ func DownloadFileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedN
 				NodeName:                     node.Name,
 				Containers: []corev1.Container{
 					{
-						Name:            "file",
-						Image:           image,
-						Command:         []string{"bash"},
-						Args:            []string{"-c", fmt.Sprintf("cp -R %s /host%s", remotefile, localfile)},
+						Name:    "file",
+						Image:   image,
+						Command: []string{"bash"},
+						Args: []string{"-c", fmt.Sprintf("opscli file --direction upload"+
+							" --ak %s --sk %s --region %s --bucket %s --localfile /host%s --remotefile %s",
+							s3Opt.AK, s3Opt.SK, s3Opt.Region, s3Opt.Bucket, localfile, remoteFile)},
 						ImagePullPolicy: corev1.PullAlways,
 						VolumeMounts: []v1.VolumeMount{
 							{
