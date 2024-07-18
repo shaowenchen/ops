@@ -1,0 +1,86 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alert-cluster-pod
+    namespace: ops-system
+spec:
+    desc: alert cluster pod
+    nodeName: anymaster
+    typeRef: cluster
+    variables:
+        max:
+            default: "20"
+        cluster:
+            default: default
+        notifaction:
+            required: true
+    steps:
+        - name: alert cluster pod
+          content: |
+              #!/usr/bin/python
+              import os
+              import subprocess
+              import requests
+              import json
+              from datetime import datetime
+
+              cluster = '${cluster}'
+              notifaction = '${notifaction}'
+
+              error_message = ''
+              reason = '异常Pod数量超过阈值'
+              threshold = int("${max}")
+
+              def send(message):
+                  payload = {
+                      'msgtype': 'text',
+                      'text': {
+                          'content': message
+                      }
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              def get_pod_status():
+                  cmd = ["kubectl", "get", "pods", "--all-namespaces", "-o", "json"]
+                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                  if result.returncode != 0:
+                      print(f"Error fetching pods: {result.stderr}")
+                      return None
+                  return json.loads(result.stdout)
+
+              def count_abnormal_pods(pods):
+                  abnormal_statuses = ['UnexpectedAdmissionError', 'ImagePullBackOff', 'CrashLoopBackOff', 'Error', 'ContainerStatusUnknown', 'Evicted', 'Terminating', 'OOMKilled']
+                  abnormal_pods = []
+                  for item in pods.get("items", []):
+                      pod_name = item.get("metadata", {}).get("name")
+                      pod_namespace = item.get("metadata", {}).get("namespace")
+                      pod_status = item.get("status", {}).get("phase")
+                      container_statuses = item.get("status", {}).get("containerStatuses", [])
+                      
+                      for container_status in container_statuses:
+                          if container_status.get("state", {}).get("waiting", {}).get("reason") in abnormal_statuses:
+                              abnormal_pods.append((pod_namespace, pod_name, container_status.get("state", {}).get("waiting", {}).get("reason")))
+                          elif container_status.get("state", {}).get("terminated", {}).get("reason") in abnormal_statuses:
+                              abnormal_pods.append((pod_namespace, pod_name, container_status.get("state", {}).get("terminated", {}).get("reason")))
+                  
+                  return abnormal_pods
+
+              try:
+                  pods = get_pod_status()
+                  if pods:
+                      abnormal_pods = count_abnormal_pods(pods)
+                      if len(abnormal_pods) > threshold:
+                          error_message += f"异常Pod数量: {len(abnormal_pods)}\n"
+                          for ns, pod, r in abnormal_pods:
+                              error_message += f"{ns}/{pod} {r}\n"
+              except Exception as e:
+                  if len(error_message) == 0:
+                      error_message = str(e)
+              finally:
+                  if len(abnormal_pods) > threshold:
+                      error_message = f'集群: {cluster} \n{error_message}异常判断: {reason}\n'
+                      send(error_message)

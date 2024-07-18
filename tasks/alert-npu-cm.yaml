@@ -5,7 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: check npu cm in specified host
-    nodeName: "anymaster"
+    nodeName: anymaster
     typeRef: cluster
     variables:
       cluster: 

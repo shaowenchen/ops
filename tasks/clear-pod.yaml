@@ -1,0 +1,13 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: clear-pod
+  namespace: ops-system
+spec:
+  typeRef: cluster
+  nodeName: anymaster
+  desc: clear ops
+  steps:
+    - name: clear ops task pod
+      content: |
+        kubectl get pods --all-namespaces | grep -E 'UnexpectedAdmissionError|ImagePullBackOff|CrashLoopBackOff|Error|ContainerStatusUnknown|Evicted|Terminating|OOMKilled' | awk '{print $1, $2}' | xargs -n2 sh -c 'kubectl delete pod $1 -n $0'

@@ -9,4 +9,5 @@ spec:
   typeRef: cluster
   steps:
     - name: list nodes
-      content: kubectl get nodes
+      content: |
+        kubectl get nodes -o wide | awk '{print $1, $2, $4, $6}'
