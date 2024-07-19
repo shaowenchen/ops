@@ -1,8 +1,5 @@
 name: Sync-ACR
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 jobs:
   docker:

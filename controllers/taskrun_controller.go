@@ -227,6 +227,11 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			extraVariables := tr.Spec.Variables
 			extraVariables["hostname"] = h.GetHostname()
 
+			// insert host labels
+			for k, v := range h.ObjectMeta.Labels {
+				extraVariables[k] = v
+			}
+
 			// filled host
 			if h.Spec.SecretRef != "" {
 				err = filledHostFromSecret(&h, r.Client, h.Spec.SecretRef)
