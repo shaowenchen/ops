@@ -11,8 +11,6 @@ spec:
     variables:
       cluster: 
         default: default
-      desired_card_count: 
-        default: "16"
       notifaction: 
         required: true
     steps:
@@ -28,7 +26,7 @@ spec:
               cluster = '${cluster}'
               hostname = '${hostname}'
               notifaction = '${notifaction}'
-              desired_card_count = int('${desired_card_count}')
+              desired_card_count = int('${card-num}')
 
               card_id = ''
               reason = '掉卡'
