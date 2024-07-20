@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
@@ -131,14 +130,14 @@ func runStepFileOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, t
 		Direction:  step.Direction,
 		LocalFile:  step.LocalFile,
 		RemoteFile: step.RemoteFile,
+		AesKey:     taskOpt.Variables["aeskey"],
+		Api:        taskOpt.Variables["api"],
+		Region:     taskOpt.Variables["region"],
+		Endpoint:   taskOpt.Variables["endpoint"],
+		AK:         taskOpt.Variables["ak"],
+		SK:         taskOpt.Variables["sk"],
 	}
-	fileOpt.Filling()
-	if fileOpt.StorageType == opsconstants.RemoteStorageTypeS3 {
-		println("TODO: S3 ON HOST")
-	} else if fileOpt.StorageType == opsconstants.RemoteStorageTypeLocal {
-		err = c.File(context.Background(), fileOpt)
-	}
-
+	output, err = c.File(context.Background(), fileOpt)
 	return
 }
 
@@ -175,20 +174,16 @@ func runStepFileOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnec
 		Direction:  step.Direction,
 		LocalFile:  step.LocalFile,
 		RemoteFile: step.RemoteFile,
-	}
-	s3Opt := option.S3FileOption{
-		AK:       taskOpt.Variables["ak"],
-		SK:       taskOpt.Variables["sk"],
-		Region:   taskOpt.Variables["region"],
-		Endpoint: taskOpt.Variables["endpoint"],
-		Bucket:   taskOpt.Variables["bucket"],
+		AK:         taskOpt.Variables["ak"],
+		SK:         taskOpt.Variables["sk"],
+		Region:     taskOpt.Variables["region"],
+		Endpoint:   taskOpt.Variables["endpoint"],
+		Bucket:     taskOpt.Variables["bucket"],
 	}
 	output, err = kc.FileNode(
 		logger,
 		node,
-		kubeOpt.RuntimeImage,
 		fileOpt,
-		s3Opt,
 	)
 	return
 }

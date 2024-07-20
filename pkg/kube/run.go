@@ -96,7 +96,7 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 	return
 }
 
-func UploadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, s3Opt option.S3FileOption, localfile, remoteFile string) (pod *corev1.Pod, err error) {
+func UploadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, fileOpt option.FileOption) (pod *corev1.Pod, err error) {
 	tolerations := []v1.Toleration{}
 	for _, taint := range node.Spec.Taints {
 		tolerations = append(tolerations, v1.Toleration{
@@ -123,11 +123,71 @@ func UploadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedN
 				Containers: []corev1.Container{
 					{
 						Name:    "file",
-						Image:   image,
+						Image:   fileOpt.RuntimeImage,
 						Command: []string{"bash"},
 						Args: []string{"-c", fmt.Sprintf("opscli file --direction upload"+
 							" --endpoint %s --ak %s --sk %s --region %s --bucket %s --localfile /host%s --remotefile s3://%s",
-							s3Opt.Endpoint, s3Opt.AK, s3Opt.SK, s3Opt.Region, s3Opt.Bucket, localfile, remoteFile)},
+							fileOpt.Endpoint, fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.Endpoint)},
+						ImagePullPolicy: corev1.PullAlways,
+						VolumeMounts: []v1.VolumeMount{
+							{
+								Name:      "data",
+								MountPath: "/host",
+							},
+						},
+					},
+				},
+				RestartPolicy: corev1.RestartPolicyNever,
+				Tolerations:   tolerations,
+				Volumes: []v1.Volume{
+					{
+						Name: "data",
+						VolumeSource: v1.VolumeSource{
+							HostPath: &v1.HostPathVolumeSource{
+								Path: "/",
+							},
+						},
+					},
+				},
+			},
+		},
+		metav1.CreateOptions{},
+	)
+	return
+}
+
+func DownloadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, fileOpt option.FileOption) (pod *corev1.Pod, err error) {
+	tolerations := []v1.Toleration{}
+	for _, taint := range node.Spec.Taints {
+		tolerations = append(tolerations, v1.Toleration{
+			Key:      taint.Key,
+			Value:    "",
+			Operator: v1.TolerationOperator(v1.TolerationOpExists),
+			Effect:   taint.Effect,
+		})
+	}
+	automountSA := false
+	pod, err = client.CoreV1().Pods(namespacedName.Namespace).Create(
+		context.TODO(),
+		&corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      namespacedName.Name,
+				Namespace: namespacedName.Namespace,
+				Labels: map[string]string{
+					constants.LabelOpsTaskKey: constants.LabelOpsTaskValue,
+				},
+			},
+			Spec: corev1.PodSpec{
+				AutomountServiceAccountToken: &automountSA,
+				NodeName:                     node.Name,
+				Containers: []corev1.Container{
+					{
+						Name:    "file",
+						Image:   fileOpt.RuntimeImage,
+						Command: []string{"bash"},
+						Args: []string{"-c", fmt.Sprintf("opscli file --direction upload"+
+							" --endpoint %s --ak %s --sk %s --region %s --bucket %s --localfile /host%s --remotefile s3://%s",
+							fileOpt.Endpoint, fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.LocalFile)},
 						ImagePullPolicy: corev1.PullAlways,
 						VolumeMounts: []v1.VolumeMount{
 							{

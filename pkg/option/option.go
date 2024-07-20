@@ -24,14 +24,6 @@ type KubeOption struct {
 	All          bool
 }
 
-type S3FileOption struct {
-	Region   string
-	Endpoint string
-	Bucket   string
-	AK       string
-	SK       string
-}
-
 type TaskOption struct {
 	Sudo      bool
 	FilePath  string
@@ -65,30 +57,37 @@ type FileOption struct {
 	Direction    string
 	Sudo         bool
 	AesKey       string
+	Api          string
+	Region       string
+	Endpoint     string
+	Bucket       string
+	AK           string
+	SK           string
 }
 
-type FileServerOption struct {
-	Api string
-}
-
-func (f *FileOption) Filling() {
+func (f *FileOption) GetStorageType() string {
 	if f.StorageType != "" {
-		return
+		return f.StorageType
 	}
 	remoteSplit := strings.Split(f.RemoteFile, "://")
-	if len(remoteSplit) == 1 {
-		f.StorageType = constants.RemoteStorageTypeLocal
-		return
+	if len(f.Api) != 0 {
+		f.StorageType = constants.RemoteStorageTypeServer
 	} else if remoteSplit[0] == "s3" {
 		f.StorageType = constants.RemoteStorageTypeS3
 		f.RemoteFile = remoteSplit[1]
-		return
 	} else {
 		f.StorageType = constants.RemoteStorageTypeImage
-		f.StorageImage = remoteSplit[0]
 		f.RemoteFile = remoteSplit[1]
-		return
 	}
+	return f.StorageType
+}
+
+func (f *FileOption) IsUploadDirection() bool {
+	return strings.Contains(strings.ToLower(f.Direction), "up")
+}
+
+func (f *FileOption) IsDownloadDirection() bool {
+	return strings.Contains(strings.ToLower(f.Direction), "down")
 }
 
 type KubernetesOption struct {

@@ -204,16 +204,15 @@ func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt opsopt.ShellOpti
 	return
 }
 
-func (kc *KubeConnection) FileNode(logger *opslog.Logger, node *corev1.Node, runtimeImage string, fileOpt opsopt.FileOption, s3Opt opsopt.S3FileOption) (stdout string, err error) {
+func (kc *KubeConnection) FileNode(logger *opslog.Logger, node *corev1.Node, fileOpt opsopt.FileOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.DefaultOpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
 	}
-	fileOpt.Filling()
 	pod := &corev1.Pod{}
-	if fileOpt.StorageType == constants.RemoteStorageTypeS3 {
-		if utils.IsUploadDirection(fileOpt.Direction) {
-			pod, err = UploadS3FileOnNode(kc.Client, node, namespacedName, runtimeImage, s3Opt, fileOpt.LocalFile, fileOpt.RemoteFile)
+	if fileOpt.GetStorageType() == constants.RemoteStorageTypeS3 {
+		if fileOpt.IsUploadDirection() {
+			pod, err = UploadS3FileOnNode(kc.Client, node, namespacedName, fileOpt)
 			if err != nil {
 				return
 			}
@@ -222,13 +221,13 @@ func (kc *KubeConnection) FileNode(logger *opslog.Logger, node *corev1.Node, run
 	return GetPodLog(logger, context.TODO(), false, kc.Client, pod)
 }
 
-func (kc *KubeConnection) FileNodes(logger *opslog.Logger, runtimeImage string, fileOpt opsopt.FileOption, s3Opt opsopt.S3FileOption) (err error) {
+func (kc *KubeConnection) FileNodes(logger *opslog.Logger, runtimeImage string, fileOpt opsopt.FileOption) (err error) {
 	nodes, err := kc.GetNodeByName(fileOpt.NodeName)
 	if fileOpt.All {
 		nodes, err = kc.GetNodes()
 	}
 	for _, node := range nodes.Items {
-		kc.FileNode(logger, &node, runtimeImage, fileOpt, s3Opt)
+		kc.FileNode(logger, &node, fileOpt)
 	}
 	return
 }

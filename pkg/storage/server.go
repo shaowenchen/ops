@@ -3,10 +3,9 @@ package storage
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
 	"fmt"
-	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/utils"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -16,53 +15,54 @@ import (
 	"strings"
 )
 
-func ServerFile(logger *log.Logger, fileOpt option.FileOption, serverOpt option.FileServerOption) (err error) {
-	if serverOpt.Api == "" {
-		return fmt.Errorf("please provide a valid api")
+func ServerFile(fileOpt option.FileOption) (stdout string, err error) {
+	if fileOpt.Api == "" {
+		err = errors.New("please provide a valid api")
+		return
 	}
-	if utils.IsUploadDirection(fileOpt.Direction) || fileOpt.RemoteFile == "" {
+	if fileOpt.IsUploadDirection() {
 		if fileOpt.AesKey != UnSetFlag {
 			if fileOpt.AesKey == "" {
-				aesKey, err := GetDefaultRandomKey()
-				if err != nil {
-					return err
+				aesKey, err1 := GetDefaultRandomKey()
+				if err1 != nil {
+					err = err1
+					return
 				}
 				fileOpt.AesKey = string(aesKey)
 			}
 			tartgetFile := fileOpt.LocalFile + ".aes"
 			err = EncryptFile(fileOpt.AesKey, fileOpt.LocalFile, tartgetFile)
 			if err != nil {
-				return err
+				return
 			}
 			fileOpt.LocalFile = tartgetFile
 		}
 
-		err, resp := postFileToRemote(fileOpt.LocalFile, serverOpt.Api)
-		if err != nil {
-			logger.Error.Println(err)
+		err1, resp := postFileToRemote(fileOpt.LocalFile, fileOpt.Api)
+		if err1 != nil {
+			err = err1
+			return
 		}
-		logger.Info.Println("Please use the following command to download the file:")
-		logger.Info.Println(buildDowloadOpscliCmd(serverOpt.Api, resp, hex.EncodeToString([]byte(fileOpt.AesKey))))
-	} else if utils.IsDownloadDirection(fileOpt.Direction) || fileOpt.LocalFile == "" {
+		stdout = "Please use the following command to download the file:" +
+			buildDowloadOpscliCmd(fileOpt.Api, resp, hex.EncodeToString([]byte(fileOpt.AesKey)))
+		return
+	} else if fileOpt.IsDownloadDirection() {
 		if fileOpt.LocalFile == "" {
 			fileOpt.LocalFile = filepath.Base(fileOpt.RemoteFile)
 		}
 		err = getFileToLocal(fileOpt.RemoteFile, fileOpt.LocalFile)
 		if err != nil {
-			logger.Error.Println(err)
+			return
 		}
 		if fileOpt.AesKey != UnSetFlag && strings.HasSuffix(fileOpt.LocalFile, ".aes") {
 			tartgetFile := strings.TrimSuffix(fileOpt.LocalFile, ".aes")
 			err = DecryptFile(fileOpt.AesKey, fileOpt.LocalFile, tartgetFile)
 			if err != nil {
-				return err
+				return
 			}
 		}
 	} else {
-		logger.Error.Println("Please provide a valid direction")
-	}
-	if err != nil {
-		logger.Error.Println(err)
+		err = errors.New("Please provide a valid direction")
 	}
 	return
 }

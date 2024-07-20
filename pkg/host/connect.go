@@ -20,6 +20,7 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/option"
+	"github.com/shaowenchen/ops/pkg/storage"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"golang.org/x/crypto/ssh"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -95,19 +96,56 @@ func (c *HostConnection) isInChina(ctx context.Context) (ok bool) {
 	return false
 }
 
-func (c *HostConnection) File(ctx context.Context, fileOpt option.FileOption) (err error) {
-	if utils.IsDownloadDirection(fileOpt.Direction) {
-		err = c.scpPull(ctx, fileOpt.Sudo, fileOpt.RemoteFile, fileOpt.LocalFile)
-		if err != nil {
-			return err
-		}
-	} else if utils.IsUploadDirection(fileOpt.Direction) {
-		err = c.scpPush(ctx, fileOpt.Sudo, fileOpt.RemoteFile, fileOpt.LocalFile)
-		if err != nil {
-			return err
-		}
+func (c *HostConnection) File(ctx context.Context, fileOpt option.FileOption) (out string, err error) {
+	switch fileOpt.GetStorageType() {
+	case constants.RemoteStorageTypeS3:
+		return c.fileS3(ctx, fileOpt)
+	case constants.RemoteStorageTypeServer:
+		return c.filseServer(ctx, fileOpt)
+	default:
+		err = errors.New("invalid storage type")
+	}
+	return
+}
+
+func (c *HostConnection) fileS3(ctx context.Context, fileOpt option.FileOption) (output string, err error) {
+	if c.Host.Spec.Address == constants.LocalHostIP {
+		// use func to
+		return storage.S3File(fileOpt)
+	}
+	// use opscli to transfer file
+	cmd := ""
+	if fileOpt.IsUploadDirection() {
+		cmd = utils.ShellOpscliDownS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.AK, fileOpt.SK, fileOpt.LocalFile, fileOpt.RemoteFile)
+	} else if fileOpt.IsDownloadDirection() {
+		cmd = utils.ShellOpscliUploadS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.AK, fileOpt.SK, fileOpt.LocalFile, fileOpt.RemoteFile)
+	}
+	if cmd != "" {
+		_, err = c.execScript(ctx, fileOpt.Sudo, cmd)
+		return
 	} else {
-		return errors.New("invalid file transfer direction")
+		errors.New("invalid direction")
+	}
+	return
+}
+
+func (c *HostConnection) filseServer(ctx context.Context, fileOpt option.FileOption) (output string, err error) {
+	if c.Host.Spec.Address == constants.LocalHostIP {
+		// use func to
+		return storage.ServerFile(fileOpt)
+	}
+	// use opscli to transfer file
+	cmd := ""
+	if fileOpt.IsUploadDirection() {
+		cmd = utils.ShellOpscliDownServer(fileOpt.Api, fileOpt.AesKey, fileOpt.LocalFile, fileOpt.RemoteFile)
+	} else if fileOpt.IsDownloadDirection() {
+		cmd = utils.ShellOpscliUploadServer(fileOpt.Api, fileOpt.AesKey, fileOpt.LocalFile, fileOpt.RemoteFile)
+	}
+	if cmd != "" {
+		_, err = c.execScript(ctx, fileOpt.Sudo, cmd)
+		return
+	} else {
+		errors.New("invalid direction")
 	}
 	return
 }
@@ -280,7 +318,7 @@ func (c *HostConnection) connecting() (err error) {
 	}
 	sshConfig := &ssh.ClientConfig{
 		User:            c.Host.Spec.Username,
-		Timeout:         time.Duration(c.Host.GetSpec().TimeOutSeconds) * time.Second,
+		Timeout:         time.Duration(c.Host.Spec.TimeOutSeconds) * time.Second,
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}

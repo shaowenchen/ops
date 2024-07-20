@@ -7,6 +7,22 @@ import (
 	"time"
 )
 
+func ShellOpscliDownServer(api, aeskey, localfile, remotefile string) string {
+	return fmt.Sprintf(`opscli file --direction down --api %s --aeskey %s --localfile %s --remotefile %s`, api, aeskey, localfile, remotefile)
+}
+
+func ShellOpscliUploadServer(api, aeskey, localfile, remotefile string) string {
+	return fmt.Sprintf(`opscli file --direction upload --api %s --aeskey %s --localfile %s --remotefile %s`, api, aeskey, localfile, remotefile)
+}
+
+func ShellOpscliDownS3(region, endpoint, bucket, ak, sk, localfile, remotefile string) string {
+	return fmt.Sprintf(`opscli file --direction down --region %s --endpoint %s --bucket %s --ak %s --sk %s --localfile %s --remotefile s3://%s`, region, endpoint, bucket, ak, sk, localfile, remotefile)
+}
+
+func ShellOpscliUploadS3(region, endpoint, bucket, ak, sk, localfile, remotefile string) string {
+	return fmt.Sprintf(`opscli file --direction upload --region %s --endpoint %s --bucket %s --ak %s --sk %s --localfile %s --remotefile s3://%s`, region, endpoint, bucket, ak, sk, localfile, remotefile)
+}
+
 func ShellDownloadFile(proxy, sourceUrl, distPath string) string {
 	return fmt.Sprintf(`curl -sfL %s -o %s`, GetAvailableUrl(sourceUrl, proxy), distPath)
 }

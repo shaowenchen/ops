@@ -1,14 +1,39 @@
 package storage
 
 import (
-	"os"
-
+	"errors"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/shaowenchen/ops/pkg/option"
+	"os"
 )
+
+func S3File(fileOpt option.FileOption) (output string, err error) {
+	if len(fileOpt.AK) == 0 {
+		fileOpt.AK = os.Getenv("ak")
+	}
+	if len(fileOpt.SK) == 0 {
+		fileOpt.SK = os.Getenv("sk")
+	}
+	if len(fileOpt.AK) == 0 || len(fileOpt.SK) == 0 {
+		err = errors.New("Please provide ak sk in params or env")
+		return
+	}
+	fmt.Println(fileOpt.RemoteFile)
+	if fileOpt.IsUploadDirection() {
+		_, err = S3Upload(fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.RemoteFile)
+	} else if fileOpt.IsDownloadDirection() {
+		err = S3Download(fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.RemoteFile)
+	} else {
+		err = errors.New("Please provide a valid direction")
+		return
+	}
+	return
+}
 
 func S3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (location string, err error) {
 	sess, _ := session.NewSession(&aws.Config{

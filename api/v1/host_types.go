@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	"github.com/shaowenchen/ops/pkg/option"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -82,6 +83,28 @@ type Host struct {
 	Status HostStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
+func (obj *Host) FilledByOption(hostOpt option.HostOption) *Host {
+	if obj == nil {
+		return obj
+	}
+	if hostOpt.Username != "" && obj.Spec.Username == "" {
+		obj.Spec.Username = hostOpt.Username
+	}
+	if hostOpt.Password != "" && obj.Spec.Password == "" {
+		obj.Spec.Password = hostOpt.Password
+	}
+	if hostOpt.Port != 0 && obj.Spec.Port == 0 {
+		obj.Spec.Port = hostOpt.Port
+	}
+	if hostOpt.PrivateKey != "" && obj.Spec.PrivateKey == "" {
+		obj.Spec.PrivateKey = hostOpt.PrivateKey
+	}
+	if hostOpt.PrivateKeyPath != "" && obj.Spec.PrivateKeyPath == "" {
+		obj.Spec.PrivateKeyPath = hostOpt.PrivateKeyPath
+	}
+	return obj
+}
+
 func (h *Host) GetUniqueKey() string {
 	return types.NamespacedName{
 		Namespace: h.Namespace,
@@ -89,19 +112,11 @@ func (h *Host) GetUniqueKey() string {
 	}.String()
 }
 
-func (h *Host) GetSpec() HostSpec {
-	return h.Spec
-}
-
 func (h *Host) GetHostname() string {
-	if h.Status.Hostname == "" {
-		return h.Name
+	if h.Status.Hostname != "" {
+		return h.Status.Hostname
 	}
-	return h.Status.Hostname
-}
-
-func (h *Host) GetAddress() string {
-	return h.Spec.Address
+	return h.Name
 }
 
 func NewHost(namespace, name, address string, port int, username, password, privateKey, privateKeyPath string, timeoutSeconds int64, secretRef string) (h *Host) {

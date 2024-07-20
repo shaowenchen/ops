@@ -21,9 +21,8 @@ const (
 )
 
 const (
-	RemoteStorageTypeImage  = "image"
 	RemoteStorageTypeS3     = "s3"
-	RemoteStorageTypeLocal  = "local"
+	RemoteStorageTypeImage  = "image"
 	RemoteStorageTypeServer = "server"
 )
 

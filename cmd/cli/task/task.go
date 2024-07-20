@@ -67,7 +67,7 @@ func HostTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskO
 				continue
 			}
 			newTaskOpt := taskOpt
-			newTaskOpt.Variables["hostname"] = h.GetAddress()
+			newTaskOpt.Variables["hostname"] = h.GetHostname()
 			err = opstask.RunTaskOnHost(ctx, logger, &t, &tr, hc, newTaskOpt)
 			if err != nil {
 				logger.Error.Println(err)

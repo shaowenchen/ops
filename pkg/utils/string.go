@@ -64,14 +64,6 @@ func GetSudoString(sudo bool) string {
 	}
 }
 
-func IsUploadDirection(direction string) bool {
-	return strings.Contains(strings.ToLower(direction), "up")
-}
-
-func IsDownloadDirection(direction string) bool {
-	return strings.Contains(strings.ToLower(direction), "down")
-}
-
 func SplitDirPath(filepath string) string {
 	pathItems := strings.Split(filepath, "/")
 	if len(pathItems) > 2 {
