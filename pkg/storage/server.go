@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/shaowenchen/ops/pkg/option"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -13,6 +12,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/shaowenchen/ops/pkg/option"
+	"github.com/shaowenchen/ops/pkg/utils"
 )
 
 func ServerFile(fileOpt option.FileOption) (stdout string, err error) {
@@ -29,9 +31,17 @@ func ServerFile(fileOpt option.FileOption) (stdout string, err error) {
 					return
 				}
 				fileOpt.AesKey = string(aesKey)
+			} else {
+				aeskeyBytes, err1 := hex.DecodeString(fileOpt.AesKey)
+				if err1 != nil {
+					stdout = err1.Error()
+					return stdout, err
+				}
+				fileOpt.AesKey = string(aeskeyBytes)
 			}
 			tartgetFile := fileOpt.LocalFile + ".aes"
 			err = EncryptFile(fileOpt.AesKey, fileOpt.LocalFile, tartgetFile)
+			defer os.Remove(tartgetFile)
 			if err != nil {
 				return
 			}
@@ -43,7 +53,7 @@ func ServerFile(fileOpt option.FileOption) (stdout string, err error) {
 			err = err1
 			return
 		}
-		stdout = "Please use the following command to download the file:" +
+		stdout = "Please use the following command to download the file: \n" +
 			buildDowloadOpscliCmd(fileOpt.Api, resp, hex.EncodeToString([]byte(fileOpt.AesKey)))
 		return
 	} else if fileOpt.IsDownloadDirection() {
@@ -54,15 +64,20 @@ func ServerFile(fileOpt option.FileOption) (stdout string, err error) {
 		if err != nil {
 			return
 		}
+		targetFile := fileOpt.LocalFile
 		if fileOpt.AesKey != UnSetFlag && strings.HasSuffix(fileOpt.LocalFile, ".aes") {
-			tartgetFile := strings.TrimSuffix(fileOpt.LocalFile, ".aes")
-			err = DecryptFile(fileOpt.AesKey, fileOpt.LocalFile, tartgetFile)
+			targetFile = strings.TrimSuffix(fileOpt.LocalFile, ".aes")
+			err = DecryptFile(fileOpt.AesKey, fileOpt.LocalFile, targetFile)
+			defer os.Remove(fileOpt.LocalFile)
 			if err != nil {
 				return
 			}
 		}
+		stdout = fmt.Sprintf("success download %s to %s", fileOpt.RemoteFile, targetFile)
 	} else {
-		err = errors.New("Please provide a valid direction")
+		stdout = fmt.Sprintf("Unknown direction: %s", fileOpt.Direction)
+		err = errors.New(stdout)
+
 	}
 	return
 }
@@ -80,7 +95,7 @@ func buildDowloadOpscliCmd(api, resp, aesKey string) string {
 }
 
 func getFileToLocal(downloadUrl, localFilePath string) (err error) {
-	file, err := os.Create(localFilePath)
+	file, err := utils.CreateFile(localFilePath)
 	if err != nil {
 		return err
 	}

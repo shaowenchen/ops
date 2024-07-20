@@ -212,7 +212,7 @@ func (kc *KubeConnection) FileNode(logger *opslog.Logger, node *corev1.Node, fil
 	pod := &corev1.Pod{}
 	if fileOpt.GetStorageType() == constants.RemoteStorageTypeS3 {
 		if fileOpt.IsUploadDirection() {
-			pod, err = UploadS3FileOnNode(kc.Client, node, namespacedName, fileOpt)
+			pod, err = RunFileOnNode(kc.Client, node, namespacedName, fileOpt)
 			if err != nil {
 				return
 			}

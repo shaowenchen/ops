@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/shaowenchen/ops/pkg/constants"
 )
@@ -59,6 +60,28 @@ func IsExistsFile(filepath string) bool {
 
 func CreateDir(dirpath string) error {
 	return os.MkdirAll(dirpath, os.ModePerm)
+}
+
+func CreateFile(localfile string) (file *os.File, err error) {
+	dir := filepath.Dir(localfile)
+
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return
+	}
+
+	if _, err = os.Stat(localfile); err == nil {
+		newName := localfile + "." + time.Now().Format("2006-01-02-15-04-05-backup")
+		err = os.Rename(localfile, newName)
+		if err != nil {
+			return
+		}
+	}
+	file, err = os.Create(localfile)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func FileMD5(path string) (string, error) {

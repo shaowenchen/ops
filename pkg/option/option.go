@@ -77,6 +77,7 @@ func (f *FileOption) GetStorageType() string {
 		f.RemoteFile = remoteSplit[1]
 	} else {
 		f.StorageType = constants.RemoteStorageTypeImage
+		f.RuntimeImage = remoteSplit[0]
 		f.RemoteFile = remoteSplit[1]
 	}
 	return f.StorageType

@@ -1,4 +1,4 @@
-name: Sync-ACR
+name: Deploy to ACR
 on:
   workflow_dispatch:
 jobs:
@@ -11,17 +11,17 @@ jobs:
           login-server: https://registry.cn-hangzhou.aliyuncs.com
           username: "${{ secrets.ACR_USERNAME }}"
           password: "${{ secrets.ACR_PASSWORD }}"
-      - name: Tag and Push
+      - name: Tag and Push ops-controller-manager
         run: |
           docker pull shaowenchen/ops-controller-manager:latest
           docker tag shaowenchen/ops-controller-manager:latest registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-controller-manager:latest
           docker push registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-controller-manager:latest
-      - name: Tag and Push
+      - name: Tag and Push ops-server
         run: |
           docker pull shaowenchen/ops-server:latest
           docker tag shaowenchen/ops-server:latest registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-server:latest
           docker push registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-server:latest
-      - name: Tag and Push
+      - name: Tag and Push ops-cli
         run: |
           docker pull shaowenchen/ops-cli:latest
           docker tag shaowenchen/ops-cli:latest registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-cli:latest

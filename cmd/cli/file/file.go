@@ -14,7 +14,6 @@ import (
 
 var hostOpt option.HostOption
 var fileOpt option.FileOption
-var kubeOpt option.KubeOption
 var inventory string
 var verbose string
 
@@ -32,7 +31,7 @@ var FileCmd = &cobra.Command{
 		if inventoryType == constants.InventoryTypeHosts {
 			HostFile(ctx, logger, fileOpt, hostOpt, inventory)
 		} else if inventoryType == constants.InventoryTypeKubernetes {
-			KubeFile(ctx, logger, fileOpt, kubeOpt, inventory)
+			KubeFile(ctx, logger, fileOpt, inventory)
 		}
 	},
 }
@@ -51,13 +50,13 @@ func HostFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption
 	return
 }
 
-func KubeFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption, kubeOpt option.KubeOption, inventory string) (err error) {
+func KubeFile(ctx context.Context, logger *log.Logger, fileOpt option.FileOption, inventory string) (err error) {
 	client, err := utils.NewKubernetesClient(inventory)
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	nodeList, err := kube.GetNodes(ctx, logger, client, kubeOpt)
+	nodeList, err := kube.GetNodes(ctx, logger, client, fileOpt.KubeOption)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -93,6 +92,7 @@ func init() {
 	FileCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")
 	FileCmd.Flags().IntVar(&hostOpt.Port, "port", 22, "")
 
-	FileCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
-	FileCmd.Flags().StringVarP(&kubeOpt.OpsNamespace, "opsnamespace", "", constants.DefaultOpsNamespace, "ops work namespace")
+	FileCmd.Flags().StringVarP(&fileOpt.NodeName, "nodename", "", "", "")
+	FileCmd.Flags().StringVarP(&fileOpt.RuntimeImage, "runtimeimage", "", constants.OpsCliRuntimeImage, "")
+	FileCmd.Flags().StringVarP(&fileOpt.OpsNamespace, "opsnamespace", "", constants.DefaultOpsNamespace, "ops work namespace")
 }

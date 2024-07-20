@@ -54,7 +54,6 @@ func decrypt(ciphertext []byte, key []byte) ([]byte, error) {
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
 
-	// 使用AES加密算法中的CTR模式
 	stream := cipher.NewCTR(block, iv)
 	stream.XORKeyStream(ciphertext, ciphertext)
 

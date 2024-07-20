@@ -2,7 +2,10 @@ package kube
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
@@ -11,7 +14,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
-	"strings"
 )
 
 func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string) (pod *corev1.Pod, err error) {
@@ -96,7 +98,34 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 	return
 }
 
-func UploadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, fileOpt option.FileOption) (pod *corev1.Pod, err error) {
+func RunFileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, fileOpt option.FileOption) (pod *corev1.Pod, err error) {
+	hostLocalfile := "/host" + fileOpt.LocalFile
+	cmd := ""
+	switch fileOpt.GetStorageType() {
+	case constants.RemoteStorageTypeS3:
+		if fileOpt.IsDownloadDirection() {
+			cmd = utils.ShellOpscliDownS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket,
+				fileOpt.AK, fileOpt.SK, hostLocalfile, fileOpt.RemoteFile)
+		} else if fileOpt.IsUploadDirection() {
+			cmd = utils.ShellOpscliUploadS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket,
+				fileOpt.AK, fileOpt.SK, hostLocalfile, fileOpt.RemoteFile)
+		}
+	case constants.RemoteStorageTypeServer:
+		if fileOpt.IsDownloadDirection() {
+			cmd = utils.ShellOpscliDownServer(fileOpt.Api, fileOpt.AesKey, hostLocalfile, fileOpt.RemoteFile)
+		} else if fileOpt.IsUploadDirection() {
+			cmd = utils.ShellOpscliUploadServer(fileOpt.Api, fileOpt.AesKey, hostLocalfile, fileOpt.RemoteFile)
+		}
+	case constants.RemoteStorageTypeImage:
+		if fileOpt.IsDownloadDirection() {
+			cmd = fmt.Sprintf("cp -rbf %s %s", fileOpt.RemoteFile, hostLocalfile)
+		}
+	}
+	if cmd == "" {
+		err = errors.New("empty cmd")
+		return
+	}
+
 	tolerations := []v1.Toleration{}
 	for _, taint := range node.Spec.Taints {
 		tolerations = append(tolerations, v1.Toleration{
@@ -122,13 +151,11 @@ func UploadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedN
 				NodeName:                     node.Name,
 				Containers: []corev1.Container{
 					{
-						Name:    "file",
-						Image:   fileOpt.RuntimeImage,
-						Command: []string{"bash"},
-						Args: []string{"-c", fmt.Sprintf("opscli file --direction upload"+
-							" --endpoint %s --ak %s --sk %s --region %s --bucket %s --localfile /host%s --remotefile s3://%s",
-							fileOpt.Endpoint, fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.Endpoint)},
-						ImagePullPolicy: corev1.PullAlways,
+						Name:            "file",
+						Image:           fileOpt.RuntimeImage,
+						Command:         []string{"bash"},
+						Args:            []string{"-c", cmd},
+						ImagePullPolicy: corev1.PullIfNotPresent,
 						VolumeMounts: []v1.VolumeMount{
 							{
 								Name:      "data",
@@ -188,7 +215,7 @@ func DownloadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespace
 						Args: []string{"-c", fmt.Sprintf("opscli file --direction upload"+
 							" --endpoint %s --ak %s --sk %s --region %s --bucket %s --localfile /host%s --remotefile s3://%s",
 							fileOpt.Endpoint, fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.LocalFile)},
-						ImagePullPolicy: corev1.PullAlways,
+						ImagePullPolicy: corev1.PullIfNotPresent,
 						VolumeMounts: []v1.VolumeMount{
 							{
 								Name:      "data",

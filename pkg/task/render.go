@@ -22,9 +22,9 @@ func GetRealVariables(t *opsv1.Task, taskOpt option.TaskOption) (map[string]stri
 
 	globalVariables = RenderVarsVariables(globalVariables)
 	// check variable in task is not empty
-	for key := range t.Spec.Variables {
-		if len(globalVariables[key]) == 0 {
-			return nil, errors.New("please set variable: " + key)
+	for k, v := range t.Spec.Variables {
+		if len(globalVariables[k]) == 0 && v.Required {
+			return nil, errors.New("please set variable: " + k)
 		}
 	}
 	return globalVariables, nil

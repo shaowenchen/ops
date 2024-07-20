@@ -76,3 +76,44 @@ node1 为节点名称。
 ```bash
 /usr/local/bin/opscli task -f ~/.ops/tasks/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf --action delete
 ```
+
+### 上传文件
+
+- 上传到 Server
+
+```bash
+/usr/local/bin/opscli task -f tasks/file-upload.yaml --api https://uploadapi.vinqi.com/api/v1/files --localfile dockerfile
+
+> Run Task  ops-system/file-upload  on  127.0.0.1
+(1/1) upload file
+Please use the following command to download the file: 
+opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey a9f891afe71fda777b05a7063068360a914e83848d7da46d7513aee86c053f6c --direction download --remotefile https://uploadapi.vinqi.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes
+```
+
+- 上传到 S3
+
+```bash
+/usr/local/bin/opscli task -f tasks/file-upload.yaml --ak xxx --sk xxx --region beijing --endpoint ks3-cn-beijing.ksyun.com --bucket xxx --localfile dockerfile --remotefile s3://dockerfile
+```
+
+### 下载文件
+
+- 从 Server 下载
+
+```bash
+/usr/local/bin/opscli task -f task -f tasks/file-download.yaml --api https://uploadapi.vinqi.com/api/v1/files --aeskey a9f891afe71fda777b05a7063068360a914e83848d7da46d7513aee86c053f6c --remotefile https://uploadapi.vinqi.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes --localfile dockerfile1
+
+> Run Task  ops-system/file-download  on  127.0.0.1
+(1/1) download file
+success download https://uploadapi.vinqi.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes to dockerfile1
+```
+
+- 从 S3 下载
+
+```bash
+/usr/local/bin/opscli task -f tasks/file-download.yaml --ak xxx --sk xxx  --region beijing --endpoint ks3-cn-beijing.ksyun.com --bucket xxx --localfile dockerfile2 --remotefile s3://dockerfile
+
+> Run Task  ops-system/file-download  on  127.0.0.1
+(1/1) download file
+success download s3 dockerfile to dockerfile2
+```

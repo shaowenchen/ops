@@ -44,17 +44,13 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, fileOp
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	if fileOpt.GetStorageType() == constants.RemoteStorageTypeS3 {
-		if fileOpt.IsUploadDirection() {
-			pod, err := UploadS3FileOnNode(client, &node, namespacedName, fileOpt)
-			if err != nil {
-				logger.Error.Println(err)
-			}
-			stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
-			logger.Info.Println(stdout)
-		}
+	pod := &v1.Pod{}
+	pod, err = RunFileOnNode(client, &node, namespacedName, fileOpt)
+	if err != nil {
+		logger.Error.Println(err)
 	}
-
+	stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
+	logger.Info.Println(stdout)
 	return
 }
 

@@ -2,13 +2,13 @@ package storage
 
 import (
 	"errors"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/shaowenchen/ops/pkg/option"
+	"github.com/shaowenchen/ops/pkg/utils"
 	"os"
 )
 
@@ -23,19 +23,19 @@ func S3File(fileOpt option.FileOption) (output string, err error) {
 		err = errors.New("Please provide ak sk in params or env")
 		return
 	}
-	fmt.Println(fileOpt.RemoteFile)
 	if fileOpt.IsUploadDirection() {
-		_, err = S3Upload(fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.RemoteFile)
+		output, err = S3Upload(fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.RemoteFile)
 	} else if fileOpt.IsDownloadDirection() {
-		err = S3Download(fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.RemoteFile)
+		output, err = S3Download(fileOpt.AK, fileOpt.SK, fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.LocalFile, fileOpt.RemoteFile)
 	} else {
-		err = errors.New("Please provide a valid direction")
+		output = "invalid direction"
+		err = errors.New(output)
 		return
 	}
 	return
 }
 
-func S3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (location string, err error) {
+func S3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (output string, err error) {
 	sess, _ := session.NewSession(&aws.Config{
 		Credentials:      credentials.NewStaticCredentials(ak, sk, ""),
 		Endpoint:         aws.String(endpoint),
@@ -62,10 +62,11 @@ func S3Upload(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string
 	if err != nil {
 		return
 	}
-	return result.Location, err
+	output = "success upload " + localFilePath + " to s3 " + result.Location
+	return
 }
 
-func S3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (err error) {
+func S3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile string) (output string, err error) {
 	sess, _ := session.NewSession(&aws.Config{
 		Credentials:      credentials.NewStaticCredentials(ak, sk, ""),
 		Endpoint:         aws.String(endpoint),
@@ -74,7 +75,7 @@ func S3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile stri
 		S3ForcePathStyle: aws.Bool(false),
 	})
 	downloader := s3manager.NewDownloader(sess)
-	file, err := os.Create(localFilePath)
+	file, err := utils.CreateFile(localFilePath)
 	if err != nil {
 		return
 	}
@@ -86,5 +87,6 @@ func S3Download(ak, sk, region, endpoint, bucket, localFilePath, remoteFile stri
 	if err != nil {
 		return
 	}
+	output = "success download s3 " + remoteFile + " to " + localFilePath
 	return
 }
