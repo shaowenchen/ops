@@ -49,7 +49,7 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, fileOp
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	stdout, err = GetPodLog(logger, context.TODO(), false, client, pod)
+	stdout, err = GetPodLog(logger, context.TODO(), fileOpt.Debug, client, pod)
 	logger.Info.Println(stdout)
 	return
 }

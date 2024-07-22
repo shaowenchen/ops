@@ -182,6 +182,7 @@ func runStepFileOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnec
 		Region:     taskOpt.Variables["region"],
 		Endpoint:   taskOpt.Variables["endpoint"],
 		Bucket:     taskOpt.Variables["bucket"],
+		KubeOption: kubeOpt,
 	}
 	output, err = kc.FileNode(
 		logger,
