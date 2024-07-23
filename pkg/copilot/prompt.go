@@ -30,18 +30,22 @@ func GetParametersPrompt(pipeline opsv1.Pipeline, clusters []opsv1.Cluster) stri
 	if len(pipeline.Spec.Variables) >= 0 {
 		desc.WriteString("It requires the following parameters(if enum provided, choose one of them):\n")
 	}
-	clusterEnums := []string{}
+	clusterEnum := []string{}
 	for _, cluster := range clusters {
-		clusterEnums = append(clusterEnums, cluster.Name)
+		clusterEnum = append(clusterEnum, cluster.Name)
 	}
 	for k, _ := range pipeline.Spec.Variables {
 		vt := pipeline.Spec.Variables[k]
 		if k == "nameRef" {
-			vt.Enums = clusterEnums
+			vt.Enums = clusterEnum
 		}
 		vStr, _ := json.Marshal(vt)
 		parmDesc := fmt.Sprintf("\t- %s \t %s\n", k, string(vStr))
 		desc.WriteString(parmDesc)
+	}
+	clustersInfo := ""
+	for i := 0; i < len(clusters); i++ {
+		clustersInfo += fmt.Sprintf("- %s, desc: %s\n", clusters[i].Name, clusters[i].Spec.Desc)
 	}
 	outputScheme := map[string]string{}
 	for key, value := range pipeline.Spec.Variables {
@@ -56,6 +60,9 @@ func GetParametersPrompt(pipeline opsv1.Pipeline, clusters []opsv1.Cluster) stri
 
 -understand < Workflow > and output as required.
 -understand the pipeline description and parameters provided.
+
+< Clusters information >
+` + clustersInfo + `
 
 < Workflow >
 1. According to the following pipeline definition, accurately extract the appropriate parameters from the user input, and pay attention to the data type of the parameters.

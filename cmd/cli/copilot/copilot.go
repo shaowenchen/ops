@@ -65,7 +65,7 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 			break
 		}
 		input = strings.TrimSpace(input)
-		pr, exitCode, err := copilot.RunPipeline(logger, chat, &history, pipelinerunsManager, input, "copilot")
+		pr, exitCode, err := copilot.RunPipeline(logger, chat, &history, pipelinerunsManager, input, nil)
 		output := ""
 		if exitCode == copilot.ExitCodeIntentionEmpty {
 			output = "I can not understand your input:" + input + ", please help me to solve it, use following intention:\n " + pipelinerunsManager.GetForIntent()

@@ -208,6 +208,10 @@ Again:
 		logger.Error.Printf("llm chatParameters error: %v\n", err)
 		return
 	}
+	clusterEnums := []string{}
+	for _, cluster := range clusters {
+		clusterEnums = append(clusterEnums, cluster.Name)
+	}
 	// clean string
 	start := -1
 	end := -1
@@ -238,17 +242,27 @@ Again:
 	}
 
 	for k, v := range pipeline.Spec.Variables {
+		if k == "nameRef" {
+			v.Enums = clusterEnums
+		}
 		if v.Value != "" {
 			pr.Spec.Variables[k] = v.Value
 		} else if _, ok := outputVars[k]; ok {
 			outV := outputVars[k]
 			pr.Spec.Variables[k] = ""
-			// if in enum keep it
-			for _, enum := range v.Enums {
-				if outV == enum {
-					pr.Spec.Variables[k] = outV
-					break
+			if len(v.Enums) > 0 {
+				found := false
+				for _, enum := range v.Enums {
+					if outV == enum {
+						found = true
+						break
+					}
 				}
+				if found {
+					pr.Spec.Variables[k] = outV
+				}
+			} else {
+				pr.Spec.Variables[k] = outV
 			}
 		} else {
 			pr.Spec.Variables[k] = ""

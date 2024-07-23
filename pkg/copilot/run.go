@@ -9,7 +9,7 @@ const ExitCodeDefault = 0
 const ExitCodeIntentionEmpty = 1
 const ExitCodeParametersNotFound = 2
 
-func RunPipeline(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, pipelinerunsManager *PipelineRunsManager, input string, creator string) (prResult *opsv1.PipelineRun, exit int, err error) {
+func RunPipeline(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, pipelinerunsManager *PipelineRunsManager, input string, extraVariables map[string]string) (prResult *opsv1.PipelineRun, exit int, err error) {
 	exit = ExitCodeDefault
 	pipelines, err := pipelinerunsManager.GetPipelines()
 	if err != nil {
@@ -22,7 +22,7 @@ func RunPipeline(logger *log.Logger, chat func(string, string, *RoleContentList)
 	logger.Debug.Println("available pipelines num: ", len(pipelines))
 	// chat intention
 	history.WithHistory(0)
-	_, pipeline, prResult, err := ChatIntention(logger, chat, GetIntentionPrompt, pipelines, history, input, 1)
+	_, pipeline, prResult, err := ChatIntention(logger, chat, GetIntentionPrompt, pipelines, history, input, 3)
 	if err != nil {
 		return
 	}
@@ -32,16 +32,20 @@ func RunPipeline(logger *log.Logger, chat func(string, string, *RoleContentList)
 	}
 	// chat parameters
 	history.WithHistory(0)
-	ChatParameters(logger, chat, GetParametersPrompt, pipelines, clusters, history, pipeline, prResult, input, 1)
+	ChatParameters(logger, chat, GetParametersPrompt, pipelines, clusters, history, pipeline, prResult, input, 3)
 	if pipeline.Spec.Variables != nil {
 		variables := map[string]string{}
 		for k, _ := range pipeline.Spec.Variables {
 			if val, ok := prResult.Spec.Variables[k]; ok && val != "" {
 				variables[k] = val
-			} else {
+			} else if _, ok := extraVariables[k]; !ok {
 				exit = ExitCodeParametersNotFound
 				variables[k] = ""
 			}
+		}
+		// merge extra variables
+		for k, v := range extraVariables {
+			variables[k] = v
 		}
 		prResult.Spec.Variables = variables
 	}

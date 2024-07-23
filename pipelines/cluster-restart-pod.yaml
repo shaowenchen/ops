@@ -18,7 +18,13 @@ spec:
       desc: "For example, `pod: doc-translate-ec-long-v1-64cf8d5478-5zsvk or name: doc-translate-ec-long-v1-64cf8d5478-5zsvk`, where doc-translate-ec-long-v1-64cf8d5478-5zsvk is podname"
       value: ""
       required: true
+    white:
+      required: true
+    whitelist:
+      required: true
   tasks:
+    - name: 白名单检测
+      ref: check-whitelist
     - name: 检查 Pod 是否存在
       ref: check-pod-existed
     - name: 删除 Pod
