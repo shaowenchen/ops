@@ -47,7 +47,7 @@ spec:
 
               def build_error_message(message, card_id=''):
                   if card_id == '':
-                      return f': {message}\n'
+                      return f'{message}\n'
                   return f'异常位置: {card_id}\n异常信息: {message}\n'
 
               try:
@@ -86,5 +86,5 @@ spec:
               finally:
                   if len(error_message) > 0:
                       print(error_message)
-                      error_message = f'cluster: {cluster} \n nodename: {hostname} \n{error_message}reason: {reason}\n'
+                      error_message = f'cluster: {cluster} \nnodename: {hostname} \n{error_message}reason: {reason}\n'
                       send(error_message)
