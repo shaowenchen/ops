@@ -66,6 +66,7 @@ spec:
                       else:
                           error_message += build_error_message(line, card_count)
                   if card_count != desired_card_count:
+                      error_message += build_error_message('npu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
                       raise Exception(error_message)
                   # 3. lspci check, lspci |grep d80
                   output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
