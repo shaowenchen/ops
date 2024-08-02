@@ -1,0 +1,19 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: restart-kubelet
+  namespace: ops-system
+spec:
+  desc: restart kubelet
+  typeRef: cluster
+  steps:
+    - name: restart-kubelet
+      content: |
+        systemctl restart kubelet
+    - name: check-kubelet-status
+      content: |
+        systemctl is-active kubelet
+    - name: check-kubelet-activeEnterTimestamp
+      content: |
+        systemctl show kubelet -p ActiveEnterTimestamp
+
