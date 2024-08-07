@@ -1,0 +1,19 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: restart-fabricmanager
+  namespace: ops-system
+spec:
+  desc: restart fabricmanager
+  typeRef: cluster
+  steps:
+    - name: restart-fabricmanager
+      content: |
+        systemctl restart nvidia-fabricmanager
+    - name: check-fabricmanager-status
+      content: |
+        systemctl is-active nvidia-fabricmanager
+    - name: check-fabricmanager-activeEnterTimestamp
+      content: |
+        systemctl show nvidia-fabricmanager -p ActiveEnterTimestamp
+
