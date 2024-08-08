@@ -1,0 +1,22 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: restart-deploy
+  namespace: ops-system
+spec:
+  desc: restart deploy
+  typeRef: cluster
+  nodeName: anymaster
+  variables:
+    namespace:
+      required: true
+    deploy:
+      required: true
+  steps:
+    - name: restart-deploy
+      content: |
+        if [ -z "${namespace}" ] || [ -z "${deploy}" ]; then
+          echo "namespace or deploy is empty"
+          exit 1
+        fi
+        kubectl rollout restart deploy ${deploy} -n ${namespace}
