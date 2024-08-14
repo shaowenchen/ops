@@ -21,8 +21,8 @@ const LabelOpsTaskValue = "task"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
-const DefaultRuntimeImage = "docker.io/library/ubuntu:20.04"
-const OpsCliRuntimeImage = "shaowenchen/opscli"
+const DefaultRuntimeImage = "ac2-registry.cn-hangzhou.cr.aliyuncs.com/ac2/base:ubuntu22.04"
+const OpsCliRuntimeImage = "registry.cn-hangzhou.aliyuncs.com/shaowenchen/opscli:latest"
 
 const SyncResourceStatusHeatSeconds = 60 * 5
 const SyncResourceRandomBiasSeconds = 60 * 2

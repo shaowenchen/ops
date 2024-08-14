@@ -72,30 +72,176 @@ opscli task -f ~/.ops/tasks/install-opscli.yaml -i master-ips.txt
 kubectl -n ops-system create secret generic host-secret --from-file=privatekey=/root/.ssh/id_rsa
 ```
 
-- 自动发现集群主机
+- 添加全部 task 模板
 
 ```bash
-kubectl apply -f ~/.ops/tasks/auto-create-host.yaml
+kubectl apply -f ~/.ops/tasks/
 ```
 
-- 自动给 host 对象打上标签
+- 配置环境变量
 
 ```bash
-kubectl apply -f ~/.ops/tasks/alert-label-gpu.yaml
+export cluster=
+export notifaction=https://xz.wps.cn/api/v1/webhook/send?key=
 ```
 
-- 配置巡检任务
+- 自动发现主机
 
 ```bash
-kubectl apply -f ~/.ops/tasks/alert-gpu-drop.yaml
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: auto-create-host
+  namespace: ops-system
+spec:
+  crontab: 40 * * * *
+  ref: auto-create-host
+  variables:
+    cluster: ${cluster}
+    notifaction: ${notifaction}
+EOF
 ```
 
+- 自动打上标签
+
 ```bash
-kubectl apply -f ~/.ops/tasks/alert-gpu-zombie.yaml
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-label-gpu
+  namespace: ops-system
+spec:
+  crontab: 40 * * * *
+  ref: alert-label-gpu
+  variables:
+    cluster: ${cluster}
+    notifaction: ${notifaction}
+EOF
 ```
 
-- 自动清理 Ops 运行 Task 创建的临时 Pod 对象
+- GPU 掉卡巡检
 
 ```bash
-kubectl apply -f ~/.ops/tasks/clear-opstaskpod.yaml
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-gpu-drop
+  namespace: ops-system
+spec:
+  crontab: 40 * * * *
+  ref: alert-gpu-drop
+  variables:
+    cluster: ${cluster}
+    notifaction: ${notifaction}
+EOF
+```
+
+- GPU ECC 巡检
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-gpu-ecc
+  namespace: ops-system
+spec:
+  crontab: 40 * * * *
+  ref: alert-gpu-ecc
+  variables:
+    cluster: ${cluster}
+    notifaction: ${notifaction}
+EOF
+```
+
+- GPU Fabric 巡检
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-gpu-fabric
+  namespace: ops-system
+spec:
+  crontab: 40 * * * *
+  ref: alert-gpu-fabric
+  variables:
+    cluster: ${cluster}
+    notifaction: ${notifaction}
+EOF
+```
+
+- GPU Zombie 巡检
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-gpu-zombie
+  namespace: ops-system
+spec:
+  crontab: 40 * * * *
+  ref: alert-gpu-zombie
+  variables:
+    cluster: ${cluster}
+    notifaction: ${notifaction}
+EOF
+```
+
+- 磁盘使用率巡检
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-usage-disk
+  namespace: ops-system
+spec:
+  crontab: 40 * * * *
+  ref: alert-usage-disk
+  variables:
+    cluster: ${cluster}
+    notifaction: ${notifaction}
+    usage: "80"
+EOF
+```
+
+- 内存使用率巡检
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-usage-mem
+  namespace: ops-system
+spec:
+  crontab: 40 * * * *
+  ref: alert-usage-mem
+  variables:
+    cluster: ${cluster}
+    notifaction: ${notifaction}
+    usage: "80"
+EOF
+```
+
+- 定时清理磁盘
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-usage-mem
+  namespace: ops-system
+spec:
+  crontab: 0 1 * * *
+  ref: alert-usage-mem
+EOF
 ```
