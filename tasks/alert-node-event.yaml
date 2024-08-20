@@ -1,0 +1,103 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alert-node-event
+    namespace: ops-system
+spec:
+    desc: check node event alert specified keywords
+    nodeName: anymaster
+    typeRef: cluster
+    variables:
+        cluster:
+            default: default
+        notifaction:
+            required: true
+    steps:
+        - name: alert-node-event
+          content: |
+              #!/usr/bin/python
+              import subprocess
+              import requests
+              import json
+              from datetime import datetime
+              from datetime import timedelta
+
+              cluster = '${cluster}'
+              notifaction = '${notifaction}'
+              keywords = ['invalid', 'error']
+
+              def send(message):
+                  payload = {
+                      'msgtype': 'text',
+                      'text': {
+                          'content': message
+                      }
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              def get_node_events_and_info(node_name):
+                  cmd = ["kubectl", "describe", "node", node_name]
+                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                  if result.returncode != 0:
+                      print(f"Error fetching node events: {result.stderr}")
+                      return None
+                  return result.stdout
+
+              def is_target_time(event_line):
+                  parts = event_line.split()
+                  if len(parts) > 2:
+                      time_str = parts[2]
+                      if "h" not in time_str:
+                          return True
+                  return False
+
+              def parse_events(describe_output):
+                  events_section = False
+                  error_message = ''
+                  node_info = ''
+
+                  for line in describe_output.splitlines():
+                      if line.startswith("Name:"):
+                          node_info += f"{line}\n"
+                      elif line.startswith("Conditions:") or line.startswith("Addresses:"):
+                          node_info += f"{line}\n"
+                      elif any(section in line for section in ["Ready", "MemoryPressure", "DiskPressure", "PIDPressure"]):
+                          node_info += f"{line.strip()}\n"
+
+                      if line.startswith("Events:"):
+                          events_section = True
+
+                      if events_section and line.strip() and not line.startswith("Events:") and is_target_time(line):
+                          if any(keyword.lower() in line.lower() for keyword in keywords):
+                              error_message += f"{line.strip()}\n"
+
+                  return node_info, error_message
+
+              def get_schedulable_nodes():
+                  cmd = ["kubectl", "get", "nodes", "-o", "jsonpath={.items[*].metadata.name}"]
+                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                  if result.returncode != 0:
+                      print(f"Error fetching nodes: {result.stderr}")
+                      return []
+                  return result.stdout.split()
+
+              try:
+                  schedulable_nodes = get_schedulable_nodes()
+                  error_message = ''
+                  for node_name in schedulable_nodes:
+                      describe_output = get_node_events_and_info(node_name)
+                      if describe_output:
+                          node_info, event_errors = parse_events(describe_output)
+                          if event_errors:
+                              error_message += f'\n集群: {cluster}\n节点: {node_name}\nEvents:\n{event_errors}'
+
+              except Exception as e:
+                  error_message = str(e)
+              finally:
+                  if len(error_message) > 0:
+                      print(error_message)
+                      send(f'{error_message}关键字: {", ".join(keywords)}\n')
