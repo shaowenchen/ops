@@ -24,7 +24,7 @@ spec:
 
               cluster = '${cluster}'
               notifaction = '${notifaction}'
-              keywords = ['NodeNotReady']
+              keywords = ['NodeNotReady', 'ImageGCFailed']
 
               def send(message):
                   payload = {
