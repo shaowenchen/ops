@@ -14,14 +14,6 @@ import (
 
 var GlobalCopilotOption *option.CopilotOption
 
-type ChatCodeResponse Langcode
-
-type Langcode struct {
-	Language string `json:"language"`
-	Code     string `json:"code"`
-	Content  string `json:"content"`
-}
-
 type RoleContent struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`

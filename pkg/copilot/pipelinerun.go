@@ -34,13 +34,25 @@ func NewPipelineRunsManager(endpoint, token, namespace string) (prManager *Pipel
 func (m *PipelineRunsManager) Init() (err error) {
 	m.pipelines, err = m.GetPipelines()
 	if err != nil {
-		return
+		return err
 	}
 	m.clusters, err = m.GetClusters()
 	if err != nil {
-		return
+		return err
 	}
-	return
+	ticker := time.NewTicker(30 * time.Second)
+	go func() {
+		for range ticker.C {
+			if p, e := m.GetPipelines(); e == nil {
+				m.pipelines = p
+			}
+			if c, e := m.GetClusters(); e == nil {
+				m.clusters = c
+			}
+		}
+	}()
+
+	return nil
 }
 
 func (m *PipelineRunsManager) PrintMarkdownPipelineRuns(pr *opsv1.PipelineRun) (output string) {
