@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Pipeline
 metadata:
-  name: cluster-clear-disk
+  name: cluster-clear-disk-more
   namespace: ops-system
 spec:
-  desc: 清理节点磁盘
+  desc: 深度、更多清理节点磁盘
   variables:
     typeRef:
       value: "cluster"
