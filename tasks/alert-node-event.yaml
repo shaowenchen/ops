@@ -24,7 +24,7 @@ spec:
 
               cluster = '${cluster}'
               notifaction = '${notifaction}'
-              keywords = ['error']
+              keywords = ['NodeNotReady']
 
               def send(message):
                   payload = {
