@@ -21,3 +21,6 @@ spec:
     - name: get dataload status
       content: |
         kubectl -n ${namespace} get dataload | sed -n '1p;/${dataset}/p'
+    - name: get dataload pod status
+      content: |
+        kubectl -n ${namespace} get pod -l targetDataset=${dataset}
