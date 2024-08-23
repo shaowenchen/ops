@@ -37,8 +37,3 @@ spec:
           - path: ${path}
             replicas: 3
         EOF
-        if [ $? -ne 0 ]; then
-          echo "create dataload failed"
-        else
-          echo "create dataload success"
-        fi
