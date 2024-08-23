@@ -1,0 +1,44 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: create-dataload
+  namespace: ops-system
+spec:
+  desc: create dataload
+  typeRef: cluster
+  nodeName: anymaster
+  variables:
+    namespace:
+      display: namespace
+      required: true
+    dataset:
+      display: dataset
+      desc: dataset name
+    path:
+      display: path
+      desc: path of the dataset
+      required: true
+  steps:
+    - name: create dataload
+      content: |
+        kubectl create -f - <<EOF
+        apiVersion: data.fluid.io/v1alpha1
+        kind: DataLoad
+        metadata:
+          generateName: ${dataset}-
+          namespace: ${namespace}
+        spec:
+          dataset:
+            name: ${dataset}
+            namespace: ${namespace}
+          options:
+            timeout: 48h
+          target:
+          - path: ${path}
+            replicas: 3
+        EOF
+        if [ $? -ne 0 ]; then
+          echo "create dataload failed"
+        else
+          echo "create dataload success"
+        fi

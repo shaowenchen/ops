@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Pipeline
 metadata:
-  name: cluster-get-dataset-status
+  name: cluster-create-dataload
   namespace: ops-system
 spec:
-  desc: 查看数据集的状态
+  desc: 预热数据集
   variables:
     typeRef:
       value: "cluster"
@@ -17,6 +17,9 @@ spec:
     dataset:
       required: true
       desc: 数据集、存储名字
+    path:
+      required: true
+      desc: 存储路径
   tasks:
-    - name: 查询数据集状态
-      ref: get-dataset-status
+    - name: 创建数据集预热任务
+      ref: create-dataload
