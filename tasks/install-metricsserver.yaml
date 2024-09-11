@@ -9,7 +9,7 @@ spec:
   typeRef: cluster
   variables:
     proxy: 
-      default: https://mirror.ghproxy.com/
+      default: https://ghp.ci/
     action: 
       default: apply
     version: 

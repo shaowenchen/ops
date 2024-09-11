@@ -8,7 +8,7 @@ spec:
   desc: install opscli tool in specified host
   variables:
     proxy: 
-      default: https://mirror.ghproxy.com/
+      default: https://ghp.ci/
   steps:
     - name: Install Opscli
       content: curl -sfL ${proxy}https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -

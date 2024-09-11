@@ -8,7 +8,7 @@ spec:
   desc: set os mirror friendly to China for specified host
   variables:
     proxy: 
-      default: https://mirror.ghproxy.com/
+      default: https://ghp.ci/
   steps:
     - name: Set mirror
       content: curl -sfL ${proxy}https://raw.githubusercontent.com/shaowenchen/hubimage/main/mirror/get.sh | sh -

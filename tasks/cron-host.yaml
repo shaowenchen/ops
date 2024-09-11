@@ -12,7 +12,7 @@ spec:
         - name: add dragonfly docker for containerd
           content: |
               if [ ! -f /usr/local/bin/gen-containerd-hosts.sh ]; then
-                curl -s https://mirror.ghproxy.com/https://raw.githubusercontent.com/shaowenchen/hubimage/main/nydus/dfget-containerd.sh | bash -
+                curl -s https://ghp.ci/https://raw.githubusercontent.com/shaowenchen/hubimage/main/nydus/dfget-containerd.sh | bash -
               fi
         - name: add dragonfly others domain
           content: |
@@ -24,7 +24,7 @@ spec:
         - name: add opscli
           content: |
               if [ ! -f /usr/local/bin/opscli ]; then
-                  curl -sfL https://mirror.ghproxy.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
+                  curl -sfL https://ghp.ci/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
               fi
         - name: add nerdctl
           content: |
