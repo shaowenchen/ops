@@ -28,7 +28,6 @@ spec:
           generateName: ${dataset}-
           namespace: ${namespace}
         spec:
-          ttlSecondsAfterFinished: 86400
           dataset:
             name: ${dataset}
             namespace: ${namespace}
