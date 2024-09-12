@@ -4,7 +4,7 @@ metadata:
   name: cluster-list-datasets
   namespace: ops-system
 spec:
-  desc: 查看命名空间下的数据集
+  desc: 列出命名空间下的数据集
   variables:
     typeRef:
       value: "cluster"
