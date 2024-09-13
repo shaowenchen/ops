@@ -1,0 +1,24 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: check-conn
+  namespace: ops-system
+spec:
+  desc: check connection to specified hosts
+  typeRef: cluster
+  variables:
+    targets:
+      display: target hosts
+      example: 1.1.1.1,2.2.2.2
+  steps:
+    - name: Check connection
+      content: |
+        targets=$(echo "${targets}" | awk -F, '{for (i=1; i<=NF; i++) print $i}')
+        for target in $targets; do
+            ping -c 2 $target > /dev/null
+            if [ $? -eq 0 ]; then
+                echo "ok: `hostname` -> $target"
+            else
+                echo "not ok: `hostname` -> $target"
+            fi
+        done
