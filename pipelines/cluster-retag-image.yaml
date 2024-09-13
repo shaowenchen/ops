@@ -1,0 +1,27 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: cluster-retag-image
+  namespace: ops-system
+spec:
+  desc: 转存、retag 容器镜像
+  variables:
+    nodeName:
+      required: true
+    typeRef:
+      value: "cluster"
+      required: true
+    nameRef:
+      required: true
+    source:
+      required: true
+      desc: 源镜像名字
+    destination:
+      required: true
+      desc: 目标镜像名字
+  tasks:
+    - name: 白名单检测
+      ref: check-whitelist
+    - name: retag image
+      ref: retag-image
+

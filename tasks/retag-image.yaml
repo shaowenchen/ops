@@ -1,0 +1,33 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: retag-image
+  namespace: ops-system
+spec:
+  desc: retag image
+  typeRef: cluster
+  variables:
+    source:
+      display: source image
+      required: true
+    destination:
+      display: destination image
+      required: true
+  steps:
+    - name: retag image
+      content: |
+        # alias nerdctl=docker
+        docker pull "${source}" > /dev/null
+        docker tag "${source}" "${destination}" > /dev/null
+        docker push "${destination}" > /dev/null
+
+        # check existence
+        docker pull "${destination}"
+        if [ $? -ne 0 ]; then
+            echo "Failed to retag ${source} to ${destination}"
+            exit 0
+        else
+            echo "Successfully retag ${source} to ${destination}"
+        fi
+        docker rmi "${source}" > /dev/null
+        docker rmi "${destination}" > /dev/null
