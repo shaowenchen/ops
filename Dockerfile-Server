@@ -10,5 +10,5 @@ FROM hubimage/runtime-ubuntu:22.04
 COPY --from=builder /builder/bin/ops-server .
 COPY --from=builder /builder/default.toml .
 COPY --from=builder-web /builder/web/dist ./web/dist
-ENTRYPOINT ["./ops-server", "-c", "./default.toml"]
+CMD ["./ops-server", "-c", "./default.toml"]
 Expose 80

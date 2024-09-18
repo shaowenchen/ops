@@ -9,6 +9,9 @@
                 <router-link to="/" class="nav-link">Home</router-link>
             </li>
             <li class="nav-item">
+                <router-link to="/copilot" class="nav-link">Copilot</router-link>
+            </li>
+            <li class="nav-item">
                 <router-link to="/hosts" class="nav-link">Hosts</router-link>
             </li>
             <li class="nav-item">

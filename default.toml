@@ -1,3 +1,9 @@
 [server]
 runmode="release"
 token="P@88w0rd"
+[copilot]
+endpoint="https://api.openai.com/v1"
+key=""
+model="gpt-3.5-turbo-16k"
+opsserver="http://myops-server.ops-system.svc"
+opstoken="P@88w0rd"

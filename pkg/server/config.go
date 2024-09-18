@@ -2,16 +2,19 @@ package server
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/shaowenchen/ops/pkg/option"
+	"github.com/spf13/viper"
 )
 
 var GlobalConfig = &ConfigOptions{}
 
 type ConfigOptions struct {
 	Server ServerOptions
+	Copilot option.CopilotOption
 }
 
 type ServerOptions struct {

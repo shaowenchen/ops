@@ -41,6 +41,10 @@ func SetupRouter(r *gin.Engine) {
 		v1Pipelineruns.POST("", CreatePipelineRun)
 		v1Pipelineruns.GET("/:pipelinerun", GetPipelineRun)
 	}
+	v1Copilot := r.Group("/api/v1/copilot").Use(AuthMiddleware())
+	{
+		v1Copilot.POST("", PostCopilot)
+	}
 }
 
 func SetHealthzRouter(r *gin.Engine) {

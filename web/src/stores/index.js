@@ -6,3 +6,4 @@ export * from './taskruns.store';
 export * from './pipelines.store';
 export * from './pipelineruns.store';
 export * from './login.store'
+export * from './copilot.store'
