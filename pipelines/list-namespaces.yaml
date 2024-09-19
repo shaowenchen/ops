@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: list-namespace
+  namespace: ops-system
+spec:
+  desc: 列出、查看所有的命名空间
+  variables:
+    typeRef:
+      value: "cluster"
+      required: true
+    nodeName:
+      value: "anymaster"
+      required: true
+  tasks:
+    - name: 列出所有命名空间
+      ref: list-namespaces
