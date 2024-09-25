@@ -4,48 +4,59 @@ import (
 	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
 )
 
-type EventPipelineRun struct {
-	Ref       string `json:"ref"`
-	Desc      string `json:"desc"`
-	Variables string `json:"variables"`
+type EventOps struct {
+	Controller string `json:"controller,omitempty" yaml:"controller,omitempty"`
 }
 
+type EventHost struct {
+	Address  string `json:"address,omitempty" yaml:"address,omitempty"`
+	Port     int    `json:"port,omitempty" yaml:"port,omitempty"`
+	Username string `json:"username,omitempty" yaml:"username,omitempty"`
+	opsv1.HostStatus
+}
+
+type EventCluster struct {
+	Server string `json:"server,omitempty" yaml:"server,omitempty" `
+	opsv1.ClusterStatus
+}
 type EventTaskRun struct {
-	Ref       string `json:"ref"`
-	Desc      string `json:"desc"`
-	Variables string `json:"variables"`
+	Ref       string            `json:"ref"`
+	Desc      string            `json:"desc"`
+	Variables map[string]string `json:"variables"`
+	opsv1.TaskRunStatus
 }
 
-type EventInspection struct {
-	TypeRef        string `json:"typeRef"`
-	NameRef        string `json:"nameRef"`
-	NodeName       string `json:"nodeName"`
-	Variables      string `json:"variables"`
-	ThresholdValue string `json:"thresholdValue"`
-	Comparator     string `json:"comparator"`
-	CurrentValue   string `json:"currentValue"`
-	Status         string `json:"status"`
-	Priority       string `json:"priority"`
+type EventPipelineRun struct {
+	Ref       string            `json:"ref"`
+	Desc      string            `json:"desc"`
+	Variables map[string]string `json:"variables"`
+	opsv1.PipelineRunStatus
 }
 
-func BuilderEvent(data interface{}) (cloudevents.Event, error) {
+func builderEvent(data interface{}) (cloudevents.Event, error) {
 	e := cloudevents.NewEvent()
 	e.SetID(uuid.New().String())
-	e.SetSource("https://www.chenshaowen.com/ops/")
+	e.SetSource(opsv1.APIVersion)
 
 	var eventType string
 	switch v := data.(type) {
-	case EventInspection:
-		eventType = "ops.inspection"
-	case *EventInspection:
-		eventType = "ops.inspection"
+	case *EventOps, EventOps:
+		eventType = opsv1.OpsKind
+	case *EventHost, EventHost:
+		eventType = opsv1.TaskKind
+	case *EventCluster, EventCluster:
+		eventType = opsv1.ClusterKind
+	case *EventTaskRun, EventTaskRun:
+		eventType = opsv1.TaskRunKind
+	case *EventPipelineRun, EventPipelineRun:
+		eventType = opsv1.PipelineRunKind
 	default:
-		eventType = "ops.unknown"
 		return e, fmt.Errorf("unsupported data type: %T", v)
 	}
 	e.SetType(eventType)
-	err := e.SetData("application/json", data)
+	err := e.SetData(cloudevents.ApplicationJSON, data)
 	return e, err
 }

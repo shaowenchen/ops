@@ -22,6 +22,7 @@ import (
 	"fmt"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opshost "github.com/shaowenchen/ops/pkg/host"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	corev1 "k8s.io/api/core/v1"
@@ -88,6 +89,14 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// push event
+	go func() {
+		if(opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
+			Controller: opsv1.HostKind,
+		}) != nil) {
+			fmt.Println("failed to publish event to ops")
+		}
+	}()
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Host{}).
 		WithOptions(controller.Options{
@@ -183,6 +192,17 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 		logger.Error.Println(err, "failed to get host status")
 	}
 	err = r.commitStatus(logger, ctx, h, status, "")
+	// push event
+	go func() {
+		if(opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectHost).Publish(ctx, opsevent.EventHost{
+			Address:    h.Spec.Address,
+			Port:       h.Spec.Port,
+			Username:   h.Spec.Username,
+			HostStatus: *status,
+		}) != nil) {
+			logger.Error.Println(err, "failed to push event to host")
+		}
+	}()
 	return
 }
 

@@ -29,6 +29,7 @@ import (
 	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opshost "github.com/shaowenchen/ops/pkg/host"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
@@ -285,13 +286,24 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		cliLogger.Flush()
 	}
 	// get taskrun status
+	finallyStatus := opsv1.StatusSuccessed
 	for _, node := range tr.Status.TaskRunNodeStatus {
 		if node.RunStatus != opsv1.StatusSuccessed {
-			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
-			return
+			finallyStatus = opsv1.StatusFailed
 		}
 	}
-	r.commitStatus(logger, ctx, tr, opsv1.StatusSuccessed)
+	r.commitStatus(logger, ctx, tr, finallyStatus)
+	// push event
+	go func() {
+		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectTaskRun).Publish(ctx, opsevent.EventTaskRun{
+			Ref:           tr.Spec.Ref,
+			Desc:          "",
+			Variables:     tr.Spec.Variables,
+			TaskRunStatus: tr.Status,
+		}) != nil) {
+			logger.Error.Println("failed to push event to taskrun")
+		}
+	}()
 	return
 }
 
@@ -382,6 +394,14 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}); err != nil {
 		return err
 	}
+	// push event
+	go func() {
+		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
+			Controller: opsv1.TaskRunKind,
+		}) != nil) {
+			fmt.Println("failed to publish event to ops")
+		}
+	}()
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.TaskRun{}).
 		WithEventFilter(

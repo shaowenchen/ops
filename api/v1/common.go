@@ -7,6 +7,9 @@ import (
 const APIVersion = "crd.chenshaowen.com/v1"
 
 const (
+	OpsKind         = "Ops"
+	HostKind        = "Host"
+	ClusterKind     = "Cluster"
 	TaskKind        = "Task"
 	TaskRunKind     = "TaskRun"
 	PipelineKind    = "Pipeline"

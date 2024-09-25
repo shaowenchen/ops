@@ -24,6 +24,7 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -86,6 +87,14 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// push event
+	go func() {
+		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
+			Controller: opsv1.ClusterKind,
+		}) != nil) {
+			fmt.Println("failed to publish event to ops")
+		}
+	}()
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Cluster{}).
 		WithOptions(controller.Options{
@@ -157,6 +166,15 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 		logger.Error.Println(err, "failed to get cluster status")
 	}
 	err = r.commitStatus(logger, ctx, c, status, "")
+	// push event
+	go func() {
+		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectCluster).Publish(ctx, opsevent.EventCluster{
+			Server:        c.Spec.Server,
+			ClusterStatus: *status,
+		}) != nil) {
+			fmt.Println("failed to publish event to cluster")
+		}
+	}()
 	return
 }
 

@@ -28,6 +28,7 @@ import (
 	crdv1 "github.com/shaowenchen/ops/api/v1"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -239,6 +240,17 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		}
 	}
 	r.commitStatus(logger, ctx, pr, finallyStatus, "", "", nil)
+	// push event
+	go func() {
+		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectPipelineRun).Publish(ctx, opsevent.EventPipelineRun{
+			Ref:               pr.Spec.Ref,
+			Desc:              pr.Spec.Desc,
+			Variables:         pr.Spec.Variables,
+			PipelineRunStatus: pr.Status,
+		}) != nil) {
+			fmt.Println("failed to push event for pipelinerun")
+		}
+	}()
 	return
 }
 
@@ -250,6 +262,14 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}); err != nil {
 		return err
 	}
+	// push event
+	go func() {
+		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
+			Controller: opsv1.PipelineRunKind,
+		}) != nil) {
+			fmt.Println("failed to publish event to ops")
+		}
+	}()
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&crdv1.PipelineRun{}).
 		WithEventFilter(
