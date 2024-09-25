@@ -62,6 +62,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: DEFAULT_RUNTIME_IMAGE
               value: ac2-registry.cn-hangzhou.cr.aliyuncs.com/ac2/base:ubuntu22.04
+            - name: CLUSTER
+              value: "default"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

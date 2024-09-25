@@ -296,6 +296,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	// push event
 	go func() {
 		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectTaskRun).Publish(ctx, opsevent.EventTaskRun{
+			Cluster:       os.Getenv("CLUSTER"),
 			Ref:           tr.Spec.Ref,
 			Desc:          "",
 			Variables:     tr.Spec.Variables,
@@ -397,6 +398,7 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	go func() {
 		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
+			Cluster:    os.Getenv("CLUSTER"),
 			Controller: opsv1.TaskRunKind,
 		}) != nil) {
 			fmt.Println("failed to publish event to ops")

@@ -90,9 +90,10 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	go func() {
 		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
+			Cluster:    os.Getenv("CLUSTER"),
 			Controller: opsv1.ClusterKind,
 		}) != nil) {
-			fmt.Println("failed to publish event to ops")
+			fmt.Println("failed to push event to ops")
 		}
 	}()
 	return ctrl.NewControllerManagedBy(mgr).
@@ -169,10 +170,11 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	// push event
 	go func() {
 		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectCluster).Publish(ctx, opsevent.EventCluster{
+			Cluster:       os.Getenv("CLUSTER"),
 			Server:        c.Spec.Server,
 			ClusterStatus: *status,
 		}) != nil) {
-			fmt.Println("failed to publish event to cluster")
+			fmt.Println("failed to push event to cluster")
 		}
 	}()
 	return

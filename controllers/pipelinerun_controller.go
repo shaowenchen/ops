@@ -243,6 +243,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 	// push event
 	go func() {
 		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectPipelineRun).Publish(ctx, opsevent.EventPipelineRun{
+			Cluster:           os.Getenv("CLUSTER"),
 			Ref:               pr.Spec.Ref,
 			Desc:              pr.Spec.Desc,
 			Variables:         pr.Spec.Variables,
@@ -265,6 +266,7 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	go func() {
 		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
+			Cluster:    os.Getenv("CLUSTER"),
 			Controller: opsv1.PipelineRunKind,
 		}) != nil) {
 			fmt.Println("failed to publish event to ops")

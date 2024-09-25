@@ -8,10 +8,12 @@ import (
 )
 
 type EventOps struct {
+	Cluster    string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Controller string `json:"controller,omitempty" yaml:"controller,omitempty"`
 }
 
 type EventHost struct {
+	Cluster  string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Address  string `json:"address,omitempty" yaml:"address,omitempty"`
 	Port     int    `json:"port,omitempty" yaml:"port,omitempty"`
 	Username string `json:"username,omitempty" yaml:"username,omitempty"`
@@ -19,10 +21,12 @@ type EventHost struct {
 }
 
 type EventCluster struct {
-	Server string `json:"server,omitempty" yaml:"server,omitempty" `
+	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Server  string `json:"server,omitempty" yaml:"server,omitempty" `
 	opsv1.ClusterStatus
 }
 type EventTaskRun struct {
+	Cluster   string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Ref       string            `json:"ref"`
 	Desc      string            `json:"desc"`
 	Variables map[string]string `json:"variables"`
@@ -30,6 +34,7 @@ type EventTaskRun struct {
 }
 
 type EventPipelineRun struct {
+	Cluster   string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Ref       string            `json:"ref"`
 	Desc      string            `json:"desc"`
 	Variables map[string]string `json:"variables"`
