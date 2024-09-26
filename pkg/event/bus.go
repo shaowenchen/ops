@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 
 	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
@@ -24,7 +25,7 @@ type ProducerConsumerClient struct {
 
 func (globalClient *GlobalEventBusClients) GetClient(server string, subject string) (*ProducerConsumerClient, error) {
 	// get from cache
-	key := fmt.Sprintf("client-%s-%s", server, subject)
+	key := fmt.Sprintf("%s-%s", server, subject)
 	globalClient.Mutex.RLock()
 	clientP, ok := globalClient.Clients[key]
 	globalClient.Mutex.RUnlock()
@@ -62,15 +63,15 @@ func (globalClient *GlobalEventBusClients) GetClient(server string, subject stri
 var CurrentEventBusClient = &GlobalEventBusClients{}
 
 type EventBus struct {
-	EventServer string
-	Subject     string
+	Server  string
+	Subject string
 }
 
 func (bus *EventBus) WithServer(server string) *EventBus {
 	if bus == nil {
 		bus = &EventBus{}
 	}
-	bus.EventServer = server
+	bus.Server = server
 	return bus
 }
 
@@ -78,18 +79,18 @@ func (bus *EventBus) WithSubject(subject string) *EventBus {
 	if bus == nil {
 		bus = &EventBus{}
 	}
-	bus.Subject = subject
-	if os.Getenv("EVENT_SERVER") != "" {
-		bus.EventServer = os.Getenv("EVENT_SERVER")
+	bus.Subject = strings.ToLower(subject)
+	if os.Getenv("EVENTBUS_SERVER") != "" {
+		bus.Server = os.Getenv("EVENTBUS_SERVER")
 	} else {
-		bus.EventServer = opsconstants.DefaultEventServer
+		bus.Server = opsconstants.DefaultEventBusServer
 	}
 	return bus
 }
 
 func (bus *EventBus) publishCloudEvent(ctx context.Context, event cloudevents.Event) error {
 	// get client
-	client, err := CurrentEventBusClient.GetClient(bus.EventServer, bus.Subject)
+	client, err := CurrentEventBusClient.GetClient(bus.Server, bus.Subject)
 	if err != nil {
 		return err
 	}
@@ -111,7 +112,7 @@ func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
 func (bus *EventBus) getCloudEvent(ctx context.Context) (*cloudevents.Event, error) {
 	var receivedEvent *cloudevents.Event
 	// get client
-	client, err := CurrentEventBusClient.GetClient(bus.EventServer, bus.Subject)
+	client, err := CurrentEventBusClient.GetClient(bus.Server, bus.Subject)
 	if err != nil {
 		return nil, err
 	}

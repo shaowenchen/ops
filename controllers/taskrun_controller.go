@@ -294,7 +294,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	}
 	r.commitStatus(logger, ctx, tr, finallyStatus)
 	// push event
-	go opsevent.FactoryPipelineRun().Publish(ctx, opsevent.EventTaskRun{
+	go opsevent.FactoryTaskRun().Publish(ctx, opsevent.EventTaskRun{
 		Cluster:       os.Getenv("CLUSTER"),
 		Ref:           tr.Spec.Ref,
 		Desc:          tr.Spec.Desc,

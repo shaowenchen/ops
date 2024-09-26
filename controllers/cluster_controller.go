@@ -164,7 +164,7 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	}
 	err = r.commitStatus(logger, ctx, c, status, "")
 	// push event
-	go opsevent.FactoryController().Publish(ctx, opsevent.EventCluster{
+	go opsevent.FactoryCluster().Publish(ctx, opsevent.EventCluster{
 		Cluster: os.Getenv("CLUSTER"),
 		Server:  c.Spec.Server,
 		Status:  *status,
