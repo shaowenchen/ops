@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -113,8 +114,8 @@ func NewPipelineRun(p *Pipeline) PipelineRun {
 	if p.UID != "" {
 		pr.OwnerReferences = []metav1.OwnerReference{
 			{
-				APIVersion: APIVersion,
-				Kind:       PipelineKind,
+				APIVersion: opsconstants.APIVersion,
+				Kind:       opsconstants.KindPipeline,
 				Name:       p.Name,
 				UID:        p.UID,
 			},

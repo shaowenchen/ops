@@ -65,15 +65,21 @@ type Step struct {
 type Task struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Spec              TaskSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Status            TaskStatus `json:"status,omitempty" yaml:"status,omitempty"`
+}
 
-	Spec TaskSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
+// TaskStatus defines the observed state of Task
+type TaskStatus struct {
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
 }
 
 func (obj *Task) GetTTLSecondsAfterFinished() int {
 	if obj.Spec.TTlSecondsAfterFinished > 0 {
 		return obj.Spec.TTlSecondsAfterFinished
 	}
-	return DefaultTTLSecondsAfterFinished
+	return opsconstants.DefaultTTLSecondsAfterFinished
 }
 
 func (obj *Task) GetUniqueKey() string {

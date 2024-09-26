@@ -18,10 +18,10 @@ import (
 	scp "github.com/bramvdbogaerde/go-scp"
 	"github.com/pkg/errors"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/storage"
-	"github.com/shaowenchen/ops/pkg/utils"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsoption "github.com/shaowenchen/ops/pkg/option"
+	opsstorage "github.com/shaowenchen/ops/pkg/storage"
+	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	"golang.org/x/crypto/ssh"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -40,10 +40,10 @@ func NewHostConnBase64(h *opsv1.Host) (hc *HostConnection, err error) {
 	hc.Host = h
 	// empty address is local host
 	if h.Spec.Address == "" {
-		h.Spec.Address = constants.LocalHostIP
+		h.Spec.Address = opsconstants.LocalHostIP
 	}
 	// local host
-	if h.Spec.Address == constants.LocalHostIP {
+	if h.Spec.Address == opsconstants.LocalHostIP {
 		return hc, nil
 	}
 	// remote host
@@ -81,26 +81,26 @@ func (c *HostConnection) install(ctx context.Context, sudo bool, component strin
 	if component == "opscli" {
 		proxy := ""
 		if !c.isInChina(ctx) {
-			proxy = constants.DefaultProxy
+			proxy = opsconstants.DefaultProxy
 		}
-		return c.execScript(ctx, sudo, utils.ShellInstallOpscli(proxy))
+		return c.execScript(ctx, sudo, opsutils.ShellInstallOpscli(proxy))
 	}
 	return
 }
 
 func (c *HostConnection) isInChina(ctx context.Context) (ok bool) {
-	_, err := c.execScript(ctx, false, utils.ShellIsInChina())
+	_, err := c.execScript(ctx, false, opsutils.ShellIsInChina())
 	if err != nil {
 		return true
 	}
 	return false
 }
 
-func (c *HostConnection) File(ctx context.Context, fileOpt option.FileOption) (out string, err error) {
+func (c *HostConnection) File(ctx context.Context, fileOpt opsoption.FileOption) (out string, err error) {
 	switch fileOpt.GetStorageType() {
-	case constants.RemoteStorageTypeS3:
+	case opsconstants.RemoteStorageTypeS3:
 		return c.fileS3(ctx, fileOpt)
-	case constants.RemoteStorageTypeServer:
+	case opsconstants.RemoteStorageTypeServer:
 		return c.filseServer(ctx, fileOpt)
 	default:
 		err = errors.New("invalid storage type")
@@ -108,17 +108,17 @@ func (c *HostConnection) File(ctx context.Context, fileOpt option.FileOption) (o
 	return
 }
 
-func (c *HostConnection) fileS3(ctx context.Context, fileOpt option.FileOption) (output string, err error) {
-	if c.Host.Spec.Address == constants.LocalHostIP {
+func (c *HostConnection) fileS3(ctx context.Context, fileOpt opsoption.FileOption) (output string, err error) {
+	if c.Host.Spec.Address == opsconstants.LocalHostIP {
 		// use func to
-		return storage.S3File(fileOpt)
+		return opsstorage.S3File(fileOpt)
 	}
 	// use opscli to transfer file
 	cmd := ""
 	if fileOpt.IsUploadDirection() {
-		cmd = utils.ShellOpscliDownS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.AK, fileOpt.SK, fileOpt.LocalFile, fileOpt.RemoteFile)
+		cmd = opsutils.ShellOpscliDownS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.AK, fileOpt.SK, fileOpt.LocalFile, fileOpt.RemoteFile)
 	} else if fileOpt.IsDownloadDirection() {
-		cmd = utils.ShellOpscliUploadS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.AK, fileOpt.SK, fileOpt.LocalFile, fileOpt.RemoteFile)
+		cmd = opsutils.ShellOpscliUploadS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.AK, fileOpt.SK, fileOpt.LocalFile, fileOpt.RemoteFile)
 	}
 	if cmd != "" {
 		_, err = c.execScript(ctx, fileOpt.Sudo, cmd)
@@ -129,17 +129,17 @@ func (c *HostConnection) fileS3(ctx context.Context, fileOpt option.FileOption) 
 	return
 }
 
-func (c *HostConnection) filseServer(ctx context.Context, fileOpt option.FileOption) (output string, err error) {
-	if c.Host.Spec.Address == constants.LocalHostIP {
+func (c *HostConnection) filseServer(ctx context.Context, fileOpt opsoption.FileOption) (output string, err error) {
+	if c.Host.Spec.Address == opsconstants.LocalHostIP {
 		// use func to
-		return storage.ServerFile(fileOpt)
+		return opsstorage.ServerFile(fileOpt)
 	}
 	// use opscli to transfer file
 	cmd := ""
 	if fileOpt.IsUploadDirection() {
-		cmd = utils.ShellOpscliDownServer(fileOpt.Api, fileOpt.AesKey, fileOpt.LocalFile, fileOpt.RemoteFile)
+		cmd = opsutils.ShellOpscliDownServer(fileOpt.Api, fileOpt.AesKey, fileOpt.LocalFile, fileOpt.RemoteFile)
 	} else if fileOpt.IsDownloadDirection() {
-		cmd = utils.ShellOpscliUploadServer(fileOpt.Api, fileOpt.AesKey, fileOpt.LocalFile, fileOpt.RemoteFile)
+		cmd = opsutils.ShellOpscliUploadServer(fileOpt.Api, fileOpt.AesKey, fileOpt.LocalFile, fileOpt.RemoteFile)
 	}
 	if cmd != "" {
 		_, err = c.execScript(ctx, fileOpt.Sudo, cmd)
@@ -180,14 +180,14 @@ func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv
 		err = err1
 	}
 
-	diskTotal, err1 := c.getDiskTotal(ctx, sudo, constants.DefaultShellTimeoutSeconds)
+	diskTotal, err1 := c.getDiskTotal(ctx, sudo, opsconstants.DefaultShellTimeoutSeconds)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
 		err = err1
 	}
 
-	diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo, constants.DefaultShellTimeoutSeconds)
+	diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo, opsconstants.DefaultShellTimeoutSeconds)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
@@ -265,10 +265,10 @@ func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv
 		AcceleratorModel:  accelModel,
 		AcceleratorCount:  accelCount,
 		HeartTime:         &metav1.Time{Time: time.Now()},
-		HeartStatus:       opsv1.StatusSuccessed,
+		HeartStatus:       opsconstants.StatusSuccessed,
 	}
 	if !anyOneIsOk {
-		status.HeartStatus = opsv1.StatusFailed
+		status.HeartStatus = opsconstants.StatusFailed
 	}
 	return
 }
@@ -296,11 +296,11 @@ func (c *HostConnection) session() (*ssh.Session, error) {
 }
 
 func (c *HostConnection) connecting() (err error) {
-	password, err := utils.DecodingBase64ToString(c.Host.Spec.Password)
+	password, err := opsutils.DecodingBase64ToString(c.Host.Spec.Password)
 	if err != nil {
 		return err
 	}
-	privateKey, err := utils.DecodingBase64ToString(c.Host.Spec.PrivateKey)
+	privateKey, err := opsutils.DecodingBase64ToString(c.Host.Spec.PrivateKey)
 	if err != nil {
 		return err
 	}
@@ -353,9 +353,9 @@ func (c *HostConnection) execScript(ctx context.Context, sudo bool, cmd string) 
 }
 
 func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, executor, param, cmd string) (stdout string, err error) {
-	cmd = utils.BuildBase64CmdWithExecutor(sudo, cmd, executor)
+	cmd = opsutils.BuildBase64CmdWithExecutor(sudo, cmd, executor)
 	// run in localhost
-	if c.Host.Spec.Address == constants.LocalHostIP {
+	if c.Host.Spec.Address == opsconstants.LocalHostIP {
 		runner := exec.Command("bash", "-c", cmd)
 		if sudo {
 			runner = exec.Command("sudo", "bash", "-c", cmd)
@@ -432,19 +432,19 @@ END:
 }
 
 func (c *HostConnection) mv(ctx context.Context, sudo bool, src, dst string) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellMv(src, dst))
+	return c.execScript(ctx, sudo, opsutils.ShellMv(src, dst))
 }
 
 func (c *HostConnection) copy(ctx context.Context, sudo bool, src, dst string) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellCopy(src, dst))
+	return c.execScript(ctx, sudo, opsutils.ShellCopy(src, dst))
 }
 
 func (c *HostConnection) chown(ctx context.Context, sudo bool, idU, idG, src string) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellChown(idU, idG, src))
+	return c.execScript(ctx, sudo, opsutils.ShellChown(idU, idG, src))
 }
 
 func (c *HostConnection) rm(ctx context.Context, sudo bool, dst string) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellRm(dst))
+	return c.execScript(ctx, sudo, opsutils.ShellRm(dst))
 }
 
 func (c *HostConnection) cmdPull(ctx context.Context, sudo bool, src, dst string) (err error) {
@@ -457,7 +457,7 @@ func (c *HostConnection) cmdPull(ctx context.Context, sudo bool, src, dst string
 		return fmt.Errorf("open src file failed %v, src path: %s", err, src)
 	}
 	dstDir := filepath.Dir(dst)
-	if utils.IsExistsFile(dstDir) {
+	if opsutils.IsExistsFile(dstDir) {
 		err = os.MkdirAll(dstDir, os.ModePerm)
 		if err != nil {
 			return fmt.Errorf("create dst dir failed %v, dst dir: %s", err, dstDir)
@@ -477,7 +477,7 @@ func (c *HostConnection) cmdPull(ctx context.Context, sudo bool, src, dst string
 		}
 	}
 
-	dstmd5, err := utils.FileMD5(dst)
+	dstmd5, err := opsutils.FileMD5(dst)
 	if err != nil {
 		return
 	}
@@ -512,7 +512,7 @@ func (c *HostConnection) scpPull(ctx context.Context, sudo bool, src, dst string
 	if err != nil {
 		return err
 	}
-	dst = utils.GetAbsoluteFilePath(dst)
+	dst = opsutils.GetAbsoluteFilePath(dst)
 	dstFile, err := os.Create(dst)
 	if err != nil {
 		return
@@ -531,7 +531,7 @@ func (c *HostConnection) scpPull(ctx context.Context, sudo bool, src, dst string
 		return errors.New(stdout)
 	}
 
-	dstmd5, err := utils.FileMD5(dst)
+	dstmd5, err := opsutils.FileMD5(dst)
 	if err != nil {
 		return
 	}
@@ -546,10 +546,10 @@ func (c *HostConnection) scpPull(ctx context.Context, sudo bool, src, dst string
 func (c *HostConnection) scpPush(ctx context.Context, sudo bool, src, dst string) (err error) {
 	originDst := dst
 	dst = c.getTempfileName(ctx, dst)
-	if c.Host.Spec.Address == constants.LocalHostIP {
+	if c.Host.Spec.Address == opsconstants.LocalHostIP {
 		return errors.New("remote address is localhost")
 	}
-	srcmd5, err := utils.FileMD5(src)
+	srcmd5, err := opsutils.FileMD5(src)
 	if err != nil {
 		return err
 	}
@@ -557,7 +557,7 @@ func (c *HostConnection) scpPush(ctx context.Context, sudo bool, src, dst string
 	if err != nil {
 		return err
 	}
-	src = utils.GetAbsoluteFilePath(src)
+	src = opsutils.GetAbsoluteFilePath(src)
 	srcFile, err := os.Open(src)
 	err = c.scpclient.CopyFromFile(context.Background(), *srcFile, dst, "0655")
 
@@ -581,7 +581,7 @@ func (c *HostConnection) scpPush(ctx context.Context, sudo bool, src, dst string
 }
 
 func (c *HostConnection) fileMd5(ctx context.Context, sudo bool, filepath string) (md5 string, err error) {
-	filepath = utils.GetAbsoluteFilePath(filepath)
+	filepath = opsutils.GetAbsoluteFilePath(filepath)
 	cmd := fmt.Sprintf("md5sum %s | cut -d\" \" -f1", filepath)
 	if sudo {
 		cmd = fmt.Sprintf("sudo %s", cmd)
@@ -590,7 +590,7 @@ func (c *HostConnection) fileMd5(ctx context.Context, sudo bool, filepath string
 }
 
 func (c *HostConnection) makeDir(ctx context.Context, sudo bool, filepath string) (err error) {
-	_, err = c.execScript(ctx, sudo, utils.ShellMakeDir(utils.SplitDirPath(filepath)))
+	_, err = c.execScript(ctx, sudo, opsutils.ShellMakeDir(opsutils.SplitDirPath(filepath)))
 	return
 }
 
@@ -603,59 +603,59 @@ func (c *HostConnection) getIDG(ctx context.Context) (idg string, err error) {
 }
 
 func (c *HostConnection) getCPUTotal(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellCPUTotal())
+	return c.execScript(ctx, sudo, opsutils.ShellCPUTotal())
 }
 
 func (c *HostConnection) getCPULoad1(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellCPULoad1())
+	return c.execScript(ctx, sudo, opsutils.ShellCPULoad1())
 }
 
 func (c *HostConnection) getCPUUsagePercent(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellCPUUsagePercent())
+	return c.execScript(ctx, sudo, opsutils.ShellCPUUsagePercent())
 }
 
 func (c *HostConnection) getMemTotal(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellMemTotal())
+	return c.execScript(ctx, sudo, opsutils.ShellMemTotal())
 }
 
 func (c *HostConnection) getMemUsagePercent(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellMemUsagePercent())
+	return c.execScript(ctx, sudo, opsutils.ShellMemUsagePercent())
 }
 
 func (c *HostConnection) getHosname(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellHostname())
+	return c.execScript(ctx, sudo, opsutils.ShellHostname())
 }
 
 func (c *HostConnection) getDiskTotal(ctx context.Context, sudo bool, timeoutSeconds int) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellDiskTotal(timeoutSeconds))
+	return c.execScript(ctx, sudo, opsutils.ShellDiskTotal(timeoutSeconds))
 }
 
 func (c *HostConnection) getArch(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellArch())
+	return c.execScript(ctx, sudo, opsutils.ShellArch())
 }
 
 func (c *HostConnection) getDiskUsagePercent(ctx context.Context, sudo bool, timeoutSeconds int) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellDiskUsagePercent(timeoutSeconds))
+	return c.execScript(ctx, sudo, opsutils.ShellDiskUsagePercent(timeoutSeconds))
 }
 
 func (c *HostConnection) getKernelVersion(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellKernelVersion())
+	return c.execScript(ctx, sudo, opsutils.ShellKernelVersion())
 }
 
 func (c *HostConnection) getDistribution(ctx context.Context, sudo bool) (cpu string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellDistribution())
+	return c.execScript(ctx, sudo, opsutils.ShellDistribution())
 }
 
 func (c *HostConnection) getAcceleratorVendor(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellAcceleratorVendor())
+	return c.execScript(ctx, sudo, opsutils.ShellAcceleratorVendor())
 }
 
 func (c *HostConnection) getAcceleratorModel(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellAcceleratorModel())
+	return c.execScript(ctx, sudo, opsutils.ShellAcceleratorModel())
 }
 
 func (c *HostConnection) getAcceleratorCount(ctx context.Context, sudo bool) (stdout string, err error) {
-	return c.execScript(ctx, sudo, utils.ShellAcceleratorCount())
+	return c.execScript(ctx, sudo, opsutils.ShellAcceleratorCount())
 }
 
 func (c *HostConnection) getTempfileName(ctx context.Context, name string) string {

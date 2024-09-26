@@ -8,10 +8,10 @@ import (
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	"github.com/shaowenchen/ops/pkg/constants"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsopt "github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/utils"
+	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -33,10 +33,10 @@ func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 	kc = &KubeConnection{
 		Cluster: c,
 	}
-	if c.Name == constants.CurrentRuntime {
-		kc.RestConfig, err = utils.GetInClusterConfig()
+	if c.Name == opsconstants.CurrentRuntime {
+		kc.RestConfig, err = opsutils.GetInClusterConfig()
 		if err != nil {
-			kc.RestConfig, err = utils.GetRestConfig(constants.GetCurrentUserKubeConfigPath())
+			kc.RestConfig, err = opsutils.GetRestConfig(opsconstants.GetCurrentUserKubeConfigPath())
 			if err != nil {
 				return
 			}
@@ -45,11 +45,11 @@ func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 		return
 	}
 	// try config
-	config, err := utils.DecodingBase64ToString(c.Spec.Config)
+	config, err := opsutils.DecodingBase64ToString(c.Spec.Config)
 	if err != nil {
 		return
 	}
-	kc.RestConfig, err = utils.GetRestConfigByContent(config)
+	kc.RestConfig, err = opsutils.GetRestConfigByContent(config)
 	if err != nil {
 		return
 	}
@@ -59,9 +59,9 @@ func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 
 func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
 	kc = &KubeConnection{}
-	kc.RestConfig, err = utils.GetRestConfig(kubeconfigPath)
+	kc.RestConfig, err = opsutils.GetRestConfig(kubeconfigPath)
 	if err != nil {
-		kc.RestConfig, err = utils.GetInClusterConfig()
+		kc.RestConfig, err = opsutils.GetInClusterConfig()
 	}
 	if err != nil {
 		return
@@ -71,7 +71,7 @@ func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
 }
 
 func (kc *KubeConnection) BuildClients() (err error) {
-	kc.Client, err = utils.GetClientByRestconfig(kc.RestConfig)
+	kc.Client, err = opsutils.GetClientByRestconfig(kc.RestConfig)
 	if err != nil {
 		return
 	}
@@ -131,12 +131,12 @@ func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
 		Pod:              len(allPods.Items),
 		RunningPod:       len(allRunningPods.Items),
 		HeartTime:        &metav1.Time{Time: time.Now()},
-		HeartStatus:      opsv1.StatusSuccessed,
+		HeartStatus:      opsconstants.StatusSuccessed,
 		CertNotAfterDays: days,
 	}
 
 	if !anyOneIsOk {
-		status.HeartStatus = opsv1.StatusFailed
+		status.HeartStatus = opsconstants.StatusFailed
 	}
 	return
 }
@@ -171,11 +171,11 @@ func (kc *KubeConnection) GetAllRunningPods() (allPod *corev1.PodList, err error
 }
 
 func (kc *KubeConnection) GetExpiredDays() (days int, err error) {
-	return utils.GetCertNotAfterDays(kc.RestConfig)
+	return opsutils.GetCertNotAfterDays(kc.RestConfig)
 }
 
 func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt opsopt.ShellOption, kubeOpt opsopt.KubeOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, kubeOpt.OpsNamespace, fmt.Sprintf("ops-shell-%s-%d", time.Now().Format("2006-01-02-15-04-05"), rand.Intn(10000)))
+	namespacedName, err := opsutils.GetOrCreateNamespacedName(kc.Client, kubeOpt.OpsNamespace, fmt.Sprintf("ops-shell-%s-%d", time.Now().Format("2006-01-02-15-04-05"), rand.Intn(10000)))
 	if err != nil {
 		return
 	}
@@ -205,12 +205,12 @@ func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt opsopt.ShellOpti
 }
 
 func (kc *KubeConnection) FileNode(logger *opslog.Logger, node *corev1.Node, fileOpt opsopt.FileOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, constants.DefaultOpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
+	namespacedName, err := opsutils.GetOrCreateNamespacedName(kc.Client, opsconstants.DefaultOpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
 	}
 	pod := &corev1.Pod{}
-	if fileOpt.GetStorageType() == constants.RemoteStorageTypeS3 {
+	if fileOpt.GetStorageType() == opsconstants.RemoteStorageTypeS3 {
 		if fileOpt.IsUploadDirection() {
 			pod, err = RunFileOnNode(kc.Client, node, namespacedName, fileOpt)
 			if err != nil {

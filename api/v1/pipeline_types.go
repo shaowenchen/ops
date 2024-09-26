@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -71,7 +72,7 @@ func (obj *Pipeline) GetTTLSecondsAfterFinished() int {
 	if obj.Spec.TTlSecondsAfterFinished > 0 {
 		return obj.Spec.TTlSecondsAfterFinished
 	}
-	return DefaultTTLSecondsAfterFinished
+	return opsconstants.DefaultTTLSecondsAfterFinished
 }
 
 //+kubebuilder:object:root=true

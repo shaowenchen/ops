@@ -88,14 +88,10 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
-	go func() {
-		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
-			Cluster:    os.Getenv("CLUSTER"),
-			Controller: opsv1.ClusterKind,
-		}) != nil) {
-			fmt.Println("failed to push event to ops")
-		}
-	}()
+	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
+		Cluster: os.Getenv("CLUSTER"),
+		Kind:    opsconstants.KindCluster,
+	})
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Cluster{}).
 		WithOptions(controller.Options{
@@ -160,7 +156,7 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	kc, err := opskube.NewClusterConnection(c)
 	if err != nil {
 		logger.Error.Println(err, "failed to create cluster connection")
-		return r.commitStatus(logger, ctx, c, nil, opsv1.StatusFailed)
+		return r.commitStatus(logger, ctx, c, nil, opsconstants.StatusFailed)
 	}
 	status, err := kc.GetStatus()
 	if err != nil {
@@ -168,15 +164,11 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	}
 	err = r.commitStatus(logger, ctx, c, status, "")
 	// push event
-	go func() {
-		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectCluster).Publish(ctx, opsevent.EventCluster{
-			Cluster:       os.Getenv("CLUSTER"),
-			Server:        c.Spec.Server,
-			ClusterStatus: *status,
-		}) != nil) {
-			fmt.Println("failed to push event to cluster")
-		}
-	}()
+	go opsevent.FactoryController().Publish(ctx, opsevent.EventCluster{
+		Cluster: os.Getenv("CLUSTER"),
+		Server:  c.Spec.Server,
+		Status:  *status,
+	})
 	return
 }
 

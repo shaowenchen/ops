@@ -13,7 +13,7 @@ import (
 var GlobalConfig = &ConfigOptions{}
 
 type ConfigOptions struct {
-	Server ServerOptions
+	Server  ServerOptions
 	Copilot option.CopilotOption
 }
 

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -32,6 +33,7 @@ type TaskRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	Crontab   string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
+	Desc      string            `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Ref       string            `json:"ref,omitempty" yaml:"ref,omitempty"`
 }
@@ -74,8 +76,8 @@ func NewTaskRun(t *Task) TaskRun {
 	if t.UID != "" {
 		tr.OwnerReferences = []metav1.OwnerReference{
 			{
-				APIVersion: APIVersion,
-				Kind:       TaskKind,
+				APIVersion: opsconstants.APIVersion,
+				Kind:       opsconstants.KindTask,
 				Name:       t.Name,
 				UID:        t.UID,
 			},
@@ -91,8 +93,8 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 			GenerateName: fmt.Sprintf("%s-%s-", pr.Name, tRef.Ref),
 			OwnerReferences: []metav1.OwnerReference{
 				{
-					APIVersion: APIVersion,
-					Kind:       PipelineRunKind,
+					APIVersion: opsconstants.APIVersion,
+					Kind:       opsconstants.KindPipelineRun,
 					Name:       pr.Name,
 					UID:        pr.UID,
 				},

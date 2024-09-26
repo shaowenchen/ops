@@ -98,14 +98,14 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// add crontab
 	r.addCronTab(logger, ctx, pr)
 	// had run once, skip
-	if !(pr.Status.RunStatus == opsv1.StatusEmpty || pr.Status.RunStatus == opsv1.StatusRunning) {
+	if !(pr.Status.RunStatus == opsconstants.StatusEmpty || pr.Status.RunStatus == opsconstants.StatusRunning) {
 		return ctrl.Result{}, nil
 	}
 	// get pipeline
 	p := &opsv1.Pipeline{}
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: pr.Spec.Ref}, p)
 	if err != nil {
-		r.commitStatus(logger, ctx, pr, opsv1.StatusFailed, "", "", nil)
+		r.commitStatus(logger, ctx, pr, opsconstants.StatusFailed, "", "", nil)
 		return ctrl.Result{}, err
 	}
 
@@ -135,7 +135,7 @@ func (r *PipelineRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Co
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
 		logger.Info.Println(fmt.Sprintf("ticker pipelinerun %s", objRun.Name))
-		if objRun.Status.RunStatus == opsv1.StatusEmpty || objRun.Status.RunStatus == opsv1.StatusRunning {
+		if objRun.Status.RunStatus == opsconstants.StatusEmpty || objRun.Status.RunStatus == opsconstants.StatusRunning {
 			return
 		}
 		// clear pipelinerun status
@@ -166,17 +166,17 @@ func (r *PipelineRunReconciler) registerClearCron() {
 		return
 	}
 	r.clearCron = cron.New()
-	r.clearCron.AddFunc(opsv1.ClearCronTab, func() {
+	r.clearCron.AddFunc(opsconstants.ClearCronTab, func() {
 		objs := &opsv1.PipelineRunList{}
 		err := r.Client.List(context.Background(), objs)
 		if err != nil {
 			return
 		}
 		for _, obj := range objs.Items {
-			if obj.Status.RunStatus == opsv1.StatusRunning || obj.Status.RunStatus == opsv1.StatusEmpty {
+			if obj.Status.RunStatus == opsconstants.StatusRunning || obj.Status.RunStatus == opsconstants.StatusEmpty {
 				continue
 			}
-			if obj.GetObjectMeta().GetCreationTimestamp().Add(opsv1.DefaultTTLSecondsAfterFinished * time.Second).After(time.Now()) {
+			if obj.GetObjectMeta().GetCreationTimestamp().Add(opsconstants.DefaultTTLSecondsAfterFinished * time.Second).After(time.Now()) {
 				continue
 			}
 			r.Client.Delete(context.Background(), &obj)
@@ -197,8 +197,8 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		if err != nil {
 			logger.Error.Println(err)
 			runAlways = true
-			r.commitStatus(logger, ctx, pr, opsv1.StatusDataInValid, tRef.Name, tRef.Ref, &opsv1.TaskRunStatus{
-				RunStatus: opsv1.StatusDataInValid,
+			r.commitStatus(logger, ctx, pr, opsconstants.StatusDataInValid, tRef.Name, tRef.Ref, &opsv1.TaskRunStatus{
+				RunStatus: opsconstants.StatusDataInValid,
 			})
 			continue
 		}
@@ -207,7 +207,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		if err != nil {
 			logger.Error.Println(err)
 			runAlways = true
-			r.commitStatus(logger, ctx, pr, opsv1.StatusDataInValid, tRef.Name, tRef.Ref, nil)
+			r.commitStatus(logger, ctx, pr, opsconstants.StatusDataInValid, tRef.Name, tRef.Ref, nil)
 			continue
 		}
 		// run task and commit status
@@ -218,10 +218,10 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 				logger.Error.Println(err)
 				break
 			}
-			r.commitStatus(logger, ctx, pr, opsv1.StatusRunning, tRef.Name, trRunning.Spec.Ref, &trRunning.Status)
-			if trRunning.Status.RunStatus == opsv1.StatusRunning || trRunning.Status.RunStatus == opsv1.StatusEmpty {
+			r.commitStatus(logger, ctx, pr, opsconstants.StatusRunning, tRef.Name, trRunning.Spec.Ref, &trRunning.Status)
+			if trRunning.Status.RunStatus == opsconstants.StatusRunning || trRunning.Status.RunStatus == opsconstants.StatusEmpty {
 				continue
-			} else if trRunning.Status.RunStatus == opsv1.StatusSuccessed {
+			} else if trRunning.Status.RunStatus == opsconstants.StatusSuccessed {
 				break
 			} else {
 				runAlways = true
@@ -229,29 +229,25 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			}
 		}
 	}
-	finallyStatus := opsv1.StatusSuccessed
+	finallyStatus := opsconstants.StatusSuccessed
 	for _, status := range pr.Status.PipelineRunStatus {
-		if status.TaskRunStatus.RunStatus == opsv1.StatusFailed {
-			finallyStatus = opsv1.StatusFailed
+		if status.TaskRunStatus.RunStatus == opsconstants.StatusFailed {
+			finallyStatus = opsconstants.StatusFailed
 			break
-		} else if status.TaskRunStatus.RunStatus == opsv1.StatusDataInValid {
-			finallyStatus = opsv1.StatusDataInValid
+		} else if status.TaskRunStatus.RunStatus == opsconstants.StatusDataInValid {
+			finallyStatus = opsconstants.StatusDataInValid
 			break
 		}
 	}
 	r.commitStatus(logger, ctx, pr, finallyStatus, "", "", nil)
 	// push event
-	go func() {
-		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectPipelineRun).Publish(ctx, opsevent.EventPipelineRun{
-			Cluster:           os.Getenv("CLUSTER"),
-			Ref:               pr.Spec.Ref,
-			Desc:              pr.Spec.Desc,
-			Variables:         pr.Spec.Variables,
-			PipelineRunStatus: pr.Status,
-		}) != nil) {
-			fmt.Println("failed to push event for pipelinerun")
-		}
-	}()
+	go opsevent.FactoryPipelineRun().Publish(ctx, opsevent.EventPipelineRun{
+		Cluster:           os.Getenv("CLUSTER"),
+		Ref:               pr.Spec.Ref,
+		Desc:              pr.Spec.Desc,
+		Variables:         pr.Spec.Variables,
+		PipelineRunStatus: pr.Status,
+	})
 	return
 }
 
@@ -264,14 +260,10 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	// push event
-	go func() {
-		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
-			Cluster:    os.Getenv("CLUSTER"),
-			Controller: opsv1.PipelineRunKind,
-		}) != nil) {
-			fmt.Println("failed to publish event to ops")
-		}
-	}()
+	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
+		Cluster: os.Getenv("CLUSTER"),
+		Kind:    opsconstants.KindPipelineRun,
+	})
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&crdv1.PipelineRun{}).
 		WithEventFilter(

@@ -1,36 +1,49 @@
 package event
 
 import (
-	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
 
-type EventOps struct {
-	Cluster    string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
-	Controller string `json:"controller,omitempty" yaml:"controller,omitempty"`
+type EventController struct {
+	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Kind    string `json:"kind,omitempty" yaml:"kind,omitempty"`
 }
 
 type EventHost struct {
-	Cluster  string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
-	Address  string `json:"address,omitempty" yaml:"address,omitempty"`
-	Port     int    `json:"port,omitempty" yaml:"port,omitempty"`
-	Username string `json:"username,omitempty" yaml:"username,omitempty"`
-	opsv1.HostStatus
+	Cluster  string           `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Address  string           `json:"address,omitempty" yaml:"address,omitempty"`
+	Port     int              `json:"port,omitempty" yaml:"port,omitempty"`
+	Username string           `json:"username,omitempty" yaml:"username,omitempty"`
+	Status   opsv1.HostStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type EventCluster struct {
-	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
-	Server  string `json:"server,omitempty" yaml:"server,omitempty" `
-	opsv1.ClusterStatus
+	Cluster string              `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Server  string              `json:"server,omitempty" yaml:"server,omitempty" `
+	Status  opsv1.ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
+
+type EventTask struct {
+	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	opsv1.TaskSpec
+	Status opsv1.TaskStatus `json:"status,omitempty" yaml:"status,omitempty"`
+}
+
 type EventTaskRun struct {
 	Cluster   string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Ref       string            `json:"ref"`
 	Desc      string            `json:"desc"`
 	Variables map[string]string `json:"variables"`
 	opsv1.TaskRunStatus
+}
+
+type EventPipeline struct {
+	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	opsv1.PipelineSpec
+	Status opsv1.PipelineStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type EventPipelineRun struct {
@@ -44,22 +57,26 @@ type EventPipelineRun struct {
 func builderEvent(data interface{}) (cloudevents.Event, error) {
 	e := cloudevents.NewEvent()
 	e.SetID(uuid.New().String())
-	e.SetSource(opsv1.APIVersion)
+	e.SetSource(opsconstants.Source)
 
 	var eventType string
-	switch v := data.(type) {
-	case *EventOps, EventOps:
-		eventType = opsv1.OpsKind
+	switch data.(type) {
+	case *EventController, EventController:
+		eventType = opsconstants.KindController
 	case *EventHost, EventHost:
-		eventType = opsv1.TaskKind
+		eventType = opsconstants.KindHost
 	case *EventCluster, EventCluster:
-		eventType = opsv1.ClusterKind
+		eventType = opsconstants.KindCluster
+	case *EventTask, EventTask:
+		eventType = opsconstants.KindTask
 	case *EventTaskRun, EventTaskRun:
-		eventType = opsv1.TaskRunKind
+		eventType = opsconstants.KindTaskRun
+	case *EventPipeline, EventPipeline:
+		eventType = opsconstants.KindPipeline
 	case *EventPipelineRun, EventPipelineRun:
-		eventType = opsv1.PipelineRunKind
+		eventType = opsconstants.KindPipelineRun
 	default:
-		return e, fmt.Errorf("unsupported data type: %T", v)
+		eventType = opsconstants.KindDefault
 	}
 	e.SetType(eventType)
 	err := e.SetData(cloudevents.ApplicationJSON, data)

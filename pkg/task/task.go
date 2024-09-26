@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
@@ -16,10 +17,10 @@ import (
 
 func GetValidStatusError(status string, err error) string {
 	if err != nil {
-		return opsv1.StatusFailed
+		return opsconstants.StatusFailed
 	}
 	if status == "" {
-		return opsv1.StatusSuccessed
+		return opsconstants.StatusSuccessed
 	}
 	return status
 }

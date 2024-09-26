@@ -90,14 +90,10 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 // SetupWithManager sets up the controller with the Manager.
 func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
-	go func() {
-		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
-			Cluster:    os.Getenv("CLUSTER"),
-			Controller: opsv1.HostKind,
-		}) != nil) {
-			fmt.Println("failed to push event to ops")
-		}
-	}()
+	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
+		Cluster: os.Getenv("CLUSTER"),
+		Kind:    opsconstants.KindHost,
+	})
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Host{}).
 		WithOptions(controller.Options{
@@ -180,13 +176,13 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 		err = filledHostFromSecret(h, r.Client, h.Spec.SecretRef)
 		if err != nil {
 			logger.Error.Println(err, "failed to fill host secretRef")
-			return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)
+			return r.commitStatus(logger, ctx, h, nil, opsconstants.StatusFailed)
 		}
 	}
 	hc, err := opshost.NewHostConnBase64(h)
 	if err != nil {
 		logger.Error.Println(err, "failed to create host connection")
-		return r.commitStatus(logger, ctx, h, nil, opsv1.StatusFailed)
+		return r.commitStatus(logger, ctx, h, nil, opsconstants.StatusFailed)
 	}
 	status, err := hc.GetStatus(ctx, false)
 	if err != nil {
@@ -194,17 +190,13 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 	}
 	err = r.commitStatus(logger, ctx, h, status, "")
 	// push event
-	go func() {
-		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectHost).Publish(ctx, opsevent.EventHost{
-			Cluster:    os.Getenv("CLUSTER"),
-			Address:    h.Spec.Address,
-			Port:       h.Spec.Port,
-			Username:   h.Spec.Username,
-			HostStatus: *status,
-		}) != nil) {
-			logger.Error.Println(err, "failed to push event to host")
-		}
-	}()
+	go opsevent.FactoryHost().Publish(ctx, opsevent.EventHost{
+		Cluster:  os.Getenv("CLUSTER"),
+		Address:  h.Spec.Address,
+		Port:     h.Spec.Port,
+		Username: h.Spec.Username,
+		Status:   *status,
+	})
 	return
 }
 

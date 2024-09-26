@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -598,7 +599,7 @@ func CreateTaskRun(c *gin.Context) {
 				showError(c, err.Error())
 				return
 			}
-			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed || latest.Status.RunStatus == opsv1.StatusAborted || latest.Status.RunStatus == opsv1.StatusDataInValid {
+			if latest.Status.RunStatus == opsconstants.StatusSuccessed || latest.Status.RunStatus == opsconstants.StatusFailed || latest.Status.RunStatus == opsconstants.StatusAborted || latest.Status.RunStatus == opsconstants.StatusDataInValid {
 				showData(c, latest)
 				return
 			}
@@ -670,7 +671,7 @@ func CreatePipelineRun(c *gin.Context) {
 				showError(c, err.Error())
 				return
 			}
-			if latest.Status.RunStatus == opsv1.StatusSuccessed || latest.Status.RunStatus == opsv1.StatusFailed || latest.Status.RunStatus == opsv1.StatusAborted {
+			if latest.Status.RunStatus == opsconstants.StatusSuccessed || latest.Status.RunStatus == opsconstants.StatusFailed || latest.Status.RunStatus == opsconstants.StatusAborted {
 				showData(c, latest)
 				return
 			}

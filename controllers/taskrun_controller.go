@@ -102,16 +102,16 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	t := &opsv1.Task{}
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Spec.Ref}, t)
 	if err != nil {
-		r.commitStatus(logger, ctx, tr, opsv1.StatusDataInValid)
+		r.commitStatus(logger, ctx, tr, opsconstants.StatusDataInValid)
 		return ctrl.Result{}, err
 	}
 	// add crontab
 	r.addCronTab(logger, ctx, tr)
 	// check run status
-	if tr.Status.RunStatus != opsv1.StatusEmpty {
+	if tr.Status.RunStatus != opsconstants.StatusEmpty {
 		// abort running taskrun if restart or modified
-		if tr.Status.RunStatus == opsv1.StatusRunning {
-			r.commitStatus(logger, ctx, tr, opsv1.StatusAborted)
+		if tr.Status.RunStatus == opsconstants.StatusRunning {
+			r.commitStatus(logger, ctx, tr, opsconstants.StatusAborted)
 		}
 		return ctrl.Result{}, nil
 	}
@@ -144,7 +144,7 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
 		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.Name))
-		if objRun.Status.RunStatus == opsv1.StatusEmpty || objRun.Status.RunStatus == opsv1.StatusRunning {
+		if objRun.Status.RunStatus == opsconstants.StatusEmpty || objRun.Status.RunStatus == opsconstants.StatusRunning {
 			return
 		}
 		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
@@ -172,7 +172,7 @@ func (r *TaskRunReconciler) registerClearCron() {
 		return
 	}
 	r.clearCron = cron.New()
-	r.clearCron.AddFunc(opsv1.ClearCronTab, func() {
+	r.clearCron.AddFunc(opsconstants.ClearCronTab, func() {
 		objs := &opsv1.TaskRunList{}
 		err := r.Client.List(context.Background(), objs)
 		if err != nil {
@@ -182,10 +182,10 @@ func (r *TaskRunReconciler) registerClearCron() {
 			if obj.Spec.Crontab != "" {
 				continue
 			}
-			if obj.Status.RunStatus == opsv1.StatusRunning || obj.Status.RunStatus == opsv1.StatusEmpty {
+			if obj.Status.RunStatus == opsconstants.StatusRunning || obj.Status.RunStatus == opsconstants.StatusEmpty {
 				continue
 			}
-			if obj.GetObjectMeta().GetCreationTimestamp().Add(opsv1.DefaultTTLSecondsAfterFinished * time.Second).After(time.Now()) {
+			if obj.GetObjectMeta().GetCreationTimestamp().Add(opsconstants.DefaultTTLSecondsAfterFinished * time.Second).After(time.Now()) {
 				continue
 			}
 			r.Client.Delete(context.Background(), &obj)
@@ -198,7 +198,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	tr.Patch(t)
 	tr.Spec.Variables["random"] = uuid.New().String()
 	tr.Status.ClearNodeStatus()
-	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
+	r.commitStatus(logger, ctx, tr, opsconstants.StatusRunning)
 	if t.IsHostTypeRef() {
 		hs := []opsv1.Host{}
 		if t.Spec.Selector == nil {
@@ -206,7 +206,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: t.GetNameRef(tr.Spec.Variables)}, &h)
 			if err != nil {
 				logger.Error.Println(err)
-				r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+				r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 				return
 			}
 			// if hostname is empty, use localhost
@@ -219,10 +219,10 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			hs = r.getSelectorHosts(logger, ctx, t)
 		}
 		if len(hs) == 0 {
-			r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+			r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 			return
 		}
-		r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
+		r.commitStatus(logger, ctx, tr, opsconstants.StatusRunning)
 		for _, h := range hs {
 			// fill variables
 			extraVariables := tr.Spec.Variables
@@ -276,7 +276,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: nameRef}, c)
 			if err != nil {
 				logger.Error.Println(err)
-				r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+				r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 				return
 			}
 			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), nameRef))
@@ -286,25 +286,21 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		cliLogger.Flush()
 	}
 	// get taskrun status
-	finallyStatus := opsv1.StatusSuccessed
+	finallyStatus := opsconstants.StatusSuccessed
 	for _, node := range tr.Status.TaskRunNodeStatus {
-		if node.RunStatus != opsv1.StatusSuccessed {
-			finallyStatus = opsv1.StatusFailed
+		if node.RunStatus != opsconstants.StatusSuccessed {
+			finallyStatus = opsconstants.StatusFailed
 		}
 	}
 	r.commitStatus(logger, ctx, tr, finallyStatus)
 	// push event
-	go func() {
-		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectTaskRun).Publish(ctx, opsevent.EventTaskRun{
-			Cluster:       os.Getenv("CLUSTER"),
-			Ref:           tr.Spec.Ref,
-			Desc:          "",
-			Variables:     tr.Spec.Variables,
-			TaskRunStatus: tr.Status,
-		}) != nil) {
-			logger.Error.Println("failed to push event to taskrun")
-		}
-	}()
+	go opsevent.FactoryPipelineRun().Publish(ctx, opsevent.EventTaskRun{
+		Cluster:       os.Getenv("CLUSTER"),
+		Ref:           tr.Spec.Ref,
+		Desc:          tr.Spec.Desc,
+		Variables:     tr.Spec.Variables,
+		TaskRunStatus: tr.Status,
+	})
 	return
 }
 
@@ -322,16 +318,16 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, c *opsv1.Cluster, kubeOpt opsoption.KubeOption) (err error) {
 	kc, err := opskube.NewClusterConnection(c)
 	if err != nil {
-		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+		r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 		logger.Error.Println(err)
 		return err
 	}
 	nodes, err := opskube.GetNodes(ctx, logger, kc.Client, kubeOpt)
 	if err != nil || len(nodes) == 0 {
-		r.commitStatus(logger, ctx, tr, opsv1.StatusFailed)
+		r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 		return err
 	}
-	r.commitStatus(logger, ctx, tr, opsv1.StatusRunning)
+	r.commitStatus(logger, ctx, tr, opsconstants.StatusRunning)
 	for _, node := range nodes {
 		vars := tr.Spec.Variables
 		vars["hostname"] = node.Name
@@ -347,7 +343,7 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	if status != "" {
 		tr.Status.RunStatus = status
 	}
-	if tr.Status.RunStatus == opsv1.StatusRunning {
+	if tr.Status.RunStatus == opsconstants.StatusRunning {
 		tr.Status.StartTime = &metav1.Time{Time: time.Now()}
 	}
 
@@ -396,14 +392,10 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	// push event
-	go func() {
-		if (opsevent.NewEventBus().BuildWithSubject(opsevent.SubjectOps).Publish(context.TODO(), opsevent.EventOps{
-			Cluster:    os.Getenv("CLUSTER"),
-			Controller: opsv1.TaskRunKind,
-		}) != nil) {
-			fmt.Println("failed to publish event to ops")
-		}
-	}()
+	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
+		Cluster: os.Getenv("CLUSTER"),
+		Kind:    opsconstants.KindTaskRun,
+	})
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.TaskRun{}).
 		WithEventFilter(
