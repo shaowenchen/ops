@@ -175,7 +175,7 @@ func (kc *KubeConnection) GetExpiredDays() (days int, err error) {
 }
 
 func (kc *KubeConnection) ShellOnNode(logger *opslog.Logger, node *corev1.Node, shellOpt opsopt.ShellOption, kubeOpt opsopt.KubeOption) (stdout string, err error) {
-	namespacedName, err := opsutils.GetOrCreateNamespacedName(kc.Client, kubeOpt.OpsNamespace, fmt.Sprintf("ops-shell-%s-%d", time.Now().Format("2006-01-02-15-04-05"), rand.Intn(10000)))
+	namespacedName, err := opsutils.GetOrCreateNamespacedName(kc.Client, kubeOpt.ResNamespace, fmt.Sprintf("ops-shell-%s-%d", time.Now().Format("2006-01-02-15-04-05"), rand.Intn(10000)))
 	if err != nil {
 		return
 	}
@@ -205,7 +205,7 @@ func (kc *KubeConnection) Shell(logger *opslog.Logger, shellOpt opsopt.ShellOpti
 }
 
 func (kc *KubeConnection) FileNode(logger *opslog.Logger, node *corev1.Node, fileOpt opsopt.FileOption) (stdout string, err error) {
-	namespacedName, err := opsutils.GetOrCreateNamespacedName(kc.Client, opsconstants.DefaultOpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
+	namespacedName, err := opsutils.GetOrCreateNamespacedName(kc.Client, opsconstants.DefaultResNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		return
 	}

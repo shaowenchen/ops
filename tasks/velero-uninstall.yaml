@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: uninstall Velero
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   steps:
     - name: Uninstall Velero Server
       content: kubectl delete namespace/velero clusterrolebinding/velero & kubectl delete crds -l component=velero

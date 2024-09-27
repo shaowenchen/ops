@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: restart containerd
-  typeRef: cluster
+  resType: cluster
   steps:
     - name: restart-containerd
       content: |

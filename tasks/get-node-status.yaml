@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: get node status
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     node:
       display: node name

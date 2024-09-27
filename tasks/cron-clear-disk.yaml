@@ -7,7 +7,7 @@ spec:
   desc: cron to create clear disk
   selector:
     managed-by: ops
-  typeRef: host
+  resType: host
   steps:
     - name: before clear
       content: |

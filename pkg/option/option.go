@@ -18,7 +18,7 @@ type HostOption struct {
 
 type KubeOption struct {
 	Debug        bool
-	OpsNamespace string
+	ResNamespace string
 	NodeName     string
 	RuntimeImage string
 	All          bool

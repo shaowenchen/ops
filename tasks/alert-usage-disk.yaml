@@ -6,7 +6,7 @@ metadata:
 spec:
     desc: check npu cm in specified host
     nodeName: "anymaster"
-    typeRef: cluster
+    resType: cluster
     variables:
       cluster:
         default: default

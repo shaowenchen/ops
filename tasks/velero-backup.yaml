@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: backup Kubernetes Using Velero
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     cluster_name: 
       default: default

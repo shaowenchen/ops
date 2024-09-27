@@ -7,7 +7,7 @@ spec:
     desc: check gpu drop in specified host
     selector:
         alert-gpu: enabled
-    typeRef: host
+    resType: host
     variables:
         max:
             default: "1"

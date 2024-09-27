@@ -4,7 +4,7 @@ metadata:
   name: clear-pod
   namespace: ops-system
 spec:
-  typeRef: cluster
+  resType: cluster
   nodeName: anymaster
   desc: clear ops
   steps:

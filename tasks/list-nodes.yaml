@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: list all nodes in cluster
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   steps:
     - name: list nodes
       content: |

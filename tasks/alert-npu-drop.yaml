@@ -7,7 +7,7 @@ spec:
     desc: check npu drop in specified host
     selector:
       alert-npu: enabled
-    typeRef: host
+    resType: host
     variables:
       cluster: 
         default: default

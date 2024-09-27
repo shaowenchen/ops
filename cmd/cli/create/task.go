@@ -52,7 +52,7 @@ func Createtask(ctx context.Context, logger *log.Logger) (err error) {
 		t.Namespace = tClusterOpt.Namespace
 	}
 	if t.Namespace == "" {
-		t.Namespace = constants.DefaultOpsNamespace
+		t.Namespace = constants.DefaultResNamespace
 	}
 	err = kube.CreateTask(ctx, logger, restConfig, t, tTaskOpt.Clear)
 	if err != nil {
@@ -65,7 +65,7 @@ func Createtask(ctx context.Context, logger *log.Logger) (err error) {
 func init() {
 	taskCmd.Flags().StringVarP(&tVerbose, "verbose", "v", "", "")
 	taskCmd.Flags().StringVarP(&tClusterOpt.Kubeconfig, "kuebconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
-	taskCmd.Flags().StringVarP(&tClusterOpt.Namespace, "namespace", "", constants.DefaultOpsNamespace, "")
+	taskCmd.Flags().StringVarP(&tClusterOpt.Namespace, "namespace", "", constants.DefaultResNamespace, "")
 	taskCmd.Flags().StringVarP(&tClusterOpt.Name, "name", "", "", "")
 
 	taskCmd.Flags().BoolVarP(&tTaskOpt.Clear, "clear", "", false, "")

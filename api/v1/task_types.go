@@ -29,21 +29,17 @@ import (
 type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	TypeRef                 string            `json:"typeRef,omitempty" yaml:"typeRef,omitempty"`
-	NameRef                 string            `json:"nameRef,omitempty" yaml:"nameRef,omitempty"`
+	Desc                    string            `json:"desc,omitempty" yaml:"desc,omitempty"`
+	ResType                 string            `json:"resType,omitempty" yaml:"resType,omitempty"`
+	ResName                 string            `json:"resName,omitempty" yaml:"resName,omitempty"`
 	NodeName                string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
 	Variables               Variables         `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Steps                   []Step            `json:"steps,omitempty" yaml:"steps,omitempty"`
-	Name                    string            `json:"name,omitempty" yaml:"name,omitempty"`
-	Desc                    string            `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Selector                map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
 	All                     bool              `json:"all,omitempty" yaml:"all,omitempty"`
 	RuntimeImage            string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
 	TTlSecondsAfterFinished int               `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
 }
-
-const TypeRefHost = "host"
-const TypeRefCluster = "cluster"
 
 type Step struct {
 	When         string `json:"when,omitempty" yaml:"when,omitempty"`
@@ -57,8 +53,8 @@ type Step struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="TypeRef",type=string,JSONPath=`.spec.typeRef`
-// +kubebuilder:printcolumn:name="NameRef",type=string,JSONPath=`.spec.nameRef`
+// +kubebuilder:printcolumn:name="ResType",type=string,JSONPath=`.spec.resType`
+// +kubebuilder:printcolumn:name="ResName",type=string,JSONPath=`.spec.resName`
 // +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
 // +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
 // +kubebuilder:printcolumn:name="Selector",type=string,JSONPath=`.spec.selector`
@@ -89,12 +85,12 @@ func (obj *Task) GetUniqueKey() string {
 	}.String()
 }
 
-func (obj *Task) GetNameRef(variables map[string]string) string {
-	if len(obj.Spec.NameRef) > 0 {
-		return obj.Spec.NameRef
+func (obj *Task) GetResName(variables map[string]string) string {
+	if len(obj.Spec.ResName) > 0 {
+		return obj.Spec.ResName
 	}
-	if _, ok := variables["nameRef"]; ok {
-		return variables["nameRef"]
+	if _, ok := variables["resName"]; ok {
+		return variables["resName"]
 	}
 	return opsconstants.CurrentRuntime
 }
@@ -109,12 +105,12 @@ func (obj *Task) GetNodeName(variables map[string]string) string {
 	return ""
 }
 
-func (obj *Task) IsHostTypeRef() bool {
-	return obj.Spec.TypeRef == TypeRefHost
+func (obj *Task) IsHostResType() bool {
+	return obj.Spec.ResType == opsconstants.ResTypeHost
 }
 
-func (obj *Task) IsClusterTypeRef() bool {
-	return obj.Spec.TypeRef == TypeRefCluster || obj.Spec.NodeName == opsconstants.AnyMaster
+func (obj *Task) IsClusterResType() bool {
+	return obj.Spec.ResType == opsconstants.ResTypeCluster || obj.Spec.NodeName == opsconstants.AnyMaster
 }
 
 //+kubebuilder:object:root=true

@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: get clusterip details in cluster
-  typeRef: cluster
+  resType: cluster
   nodeName: anymaster
   variables:
     clusterip:

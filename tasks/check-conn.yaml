@@ -5,11 +5,12 @@ metadata:
   namespace: ops-system
 spec:
   desc: check connection to specified hosts
-  typeRef: cluster
+  resType: cluster
   variables:
     targets:
       display: target hosts
-      example: 1.1.1.1,2.2.2.2
+      examples:
+        - 1.1.1.1,2.2.2.2
   steps:
     - name: Check connection
       content: |

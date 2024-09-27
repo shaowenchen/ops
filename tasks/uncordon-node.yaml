@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: uncordon node in cluster
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     node:
       desc: node name

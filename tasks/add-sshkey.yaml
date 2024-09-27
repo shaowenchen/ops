@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: add ssh key to specified host
-  typeRef: cluster
+  resType: cluster
   variables:
     keycontent:
       display: SSH Key

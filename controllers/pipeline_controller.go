@@ -24,7 +24,6 @@ import (
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -53,12 +52,12 @@ type PipelineReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	// default to reconcile all namespace, if ACTIVE_NAMESPACE is set, only reconcile ACTIVE_NAMESPACE
-	actionNs := os.Getenv("ACTIVE_NAMESPACE")
+	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
-	if os.Getenv("DEBUG") == "true" {
+	if opsconstants.GetEnvDebug() {
 		logger.SetVerbose("debug").Build()
 	}
 

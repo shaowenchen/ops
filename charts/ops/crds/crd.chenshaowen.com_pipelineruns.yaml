@@ -51,13 +51,11 @@ spec:
             description: PipelineRunSpec defines the desired state of PipelineRun
             properties:
               crontab:
-                description: INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 type: string
               desc:
-                description: 'Important: Run "make" to regenerate code after modifying
-                  this file'
+                description: INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 type: string
-              ref:
+              pipelineRef:
                 type: string
               variables:
                 additionalProperties:

@@ -71,7 +71,7 @@ func CreateHost(ctx context.Context, logger *log.Logger, clusterOpt option.Clust
 func init() {
 	hostCmd.Flags().StringVarP(&hVerbose, "verbose", "v", "", "")
 	hostCmd.Flags().StringVarP(&hClusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
-	hostCmd.Flags().StringVarP(&hClusterOpt.Namespace, "namespace", "", constants.DefaultOpsNamespace, "")
+	hostCmd.Flags().StringVarP(&hClusterOpt.Namespace, "namespace", "", constants.DefaultResNamespace, "")
 	hostCmd.Flags().StringVarP(&hClusterOpt.Name, "name", "", "", "")
 	hostCmd.Flags().BoolVarP(&hClusterOpt.Clear, "clear", "", false, "")
 

@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: test iperf3 between two nodes
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     srcip:
       desc: ip address of source

@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: get npu status using npu-smi in specified host
-  typeRef: cluster
+  resType: cluster
   steps:
     - name: Check npu-smi
       content: command -v npu-smi

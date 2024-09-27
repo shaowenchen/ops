@@ -2,6 +2,7 @@ package file
 
 import (
 	"context"
+
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -94,5 +95,5 @@ func init() {
 
 	FileCmd.Flags().StringVarP(&fileOpt.NodeName, "nodename", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.RuntimeImage, "runtimeimage", "", constants.OpsCliRuntimeImage, "")
-	FileCmd.Flags().StringVarP(&fileOpt.OpsNamespace, "opsnamespace", "", constants.DefaultOpsNamespace, "ops work namespace")
+	FileCmd.Flags().StringVarP(&fileOpt.ResNamespace, "opsnamespace", "", constants.DefaultResNamespace, "ops work namespace")
 }

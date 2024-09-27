@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: get pod error logs in cluster
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     namespace:
       display: namespace

@@ -22,7 +22,7 @@ import (
 
 func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shellOpt option.ShellOption, kubeOpt option.KubeOption) (err error) {
 	logger.Info.Println("> Run shell on ", node.Name)
-	namespacedName, err := utils.GetOrCreateNamespacedName(client, kubeOpt.OpsNamespace, fmt.Sprintf("ops-shell-%s-%d", time.Now().Format("2006-01-02-15-04-05"), rand.Intn(10000)))
+	namespacedName, err := utils.GetOrCreateNamespacedName(client, kubeOpt.ResNamespace, fmt.Sprintf("ops-shell-%s-%d", time.Now().Format("2006-01-02-15-04-05"), rand.Intn(10000)))
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -40,7 +40,7 @@ func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shell
 }
 
 func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, fileOpt option.FileOption) (stdout string, err error) {
-	namespacedName, err := utils.GetOrCreateNamespacedName(client, fileOpt.OpsNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
+	namespacedName, err := utils.GetOrCreateNamespacedName(client, fileOpt.ResNamespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
 	}

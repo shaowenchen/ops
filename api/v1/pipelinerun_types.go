@@ -28,11 +28,10 @@ import (
 // PipelineRunSpec defines the desired state of PipelineRun
 type PipelineRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	Crontab string `json:"crontab,omitempty" yaml:"crontab,omitempty"`
-	// Important: Run "make" to regenerate code after modifying this file
-	Desc      string            `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Ref       string            `json:"ref,omitempty" yaml:"ref,omitempty"`
+	Desc        string            `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Crontab     string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
+	Variables   map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	PipelineRef string            `json:"pipelineRef,omitempty" yaml:"pipelineRef,omitempty"`
 }
 
 // PipelineRunStatus defines the observed state of PipelineRun
@@ -103,8 +102,8 @@ func NewPipelineRun(p *Pipeline) PipelineRun {
 			Namespace:    p.Namespace,
 		},
 		Spec: PipelineRunSpec{
-			Ref:       p.Name,
-			Variables: make(map[string]string),
+			PipelineRef: p.Name,
+			Variables:   make(map[string]string),
 		},
 	}
 	for k, v := range p.Spec.Variables {

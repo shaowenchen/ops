@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: retag image
-  typeRef: cluster
+  resType: cluster
   variables:
     source:
       display: source image

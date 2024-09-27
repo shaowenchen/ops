@@ -6,7 +6,7 @@ metadata:
 spec:
     desc: check node event alert specified keywords
     nodeName: anymaster
-    typeRef: cluster
+    resType: cluster
     variables:
         cluster:
             default: default

@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: check the pod existed and get pod namespace
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     podname:
       required: true

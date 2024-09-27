@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: clear exception pods in specified namespace within a Kubernetes cluster.
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     namespace:
       display: namespace

@@ -6,10 +6,10 @@ metadata:
 spec:
   desc: 重启、删除集群中的某一个 Pod
   variables:
-    typeRef:
+    resType:
       value: "cluster"
       required: true
-    nameRef:
+    resName:
       required: true
     nodeName:
       value: "anymaster"

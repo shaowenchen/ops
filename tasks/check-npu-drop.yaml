@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: check the npu card dropped in specified host
-  typeRef: cluster
+  resType: cluster
   variables:
     desired_npu_count: 
       default: "16"

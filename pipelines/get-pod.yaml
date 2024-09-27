@@ -6,13 +6,13 @@ metadata:
 spec:
   desc: 查看 Pod 信息、状态
   variables:
-    typeRef:
+    resType:
       value: "cluster"
       required: true
     nodeName:
       value: "anymaster"
       required: true
-    nameRef:
+    resName:
       required: true
     namespace:
       required: true

@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: install metrics server for Kubernetes
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     proxy: 
       default: https://ghp.ci/

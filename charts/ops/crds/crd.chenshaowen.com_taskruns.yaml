@@ -49,10 +49,12 @@ spec:
             description: TaskRunSpec defines the desired state of TaskRun
             properties:
               crontab:
+                type: string
+              desc:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file'
                 type: string
-              ref:
+              taskRef:
                 type: string
               variables:
                 additionalProperties:

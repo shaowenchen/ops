@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: check whitelist
-  typeRef: cluster
+  resType: cluster
   variables:
     white:
       required: true

@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: restart fabricmanager
-  typeRef: cluster
+  resType: cluster
   steps:
     - name: restart-fabricmanager
       content: |

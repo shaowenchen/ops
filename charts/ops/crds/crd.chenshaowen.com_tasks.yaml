@@ -16,11 +16,11 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.typeRef
-      name: TypeRef
+    - jsonPath: .spec.resType
+      name: ResType
       type: string
-    - jsonPath: .spec.nameRef
-      name: NameRef
+    - jsonPath: .spec.resName
+      name: ResName
       type: string
     - jsonPath: .spec.nodeName
       name: NodeName
@@ -53,12 +53,14 @@ spec:
               all:
                 type: boolean
               desc:
-                type: string
-              name:
-                type: string
-              nameRef:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
                 type: string
               nodeName:
+                type: string
+              resName:
+                type: string
+              resType:
                 type: string
               runtimeImage:
                 type: string
@@ -87,10 +89,6 @@ spec:
                 type: array
               ttlSecondsAfterFinished:
                 type: integer
-              typeRef:
-                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file'
-                type: string
               variables:
                 additionalProperties:
                   properties:
@@ -116,6 +114,9 @@ spec:
                       type: string
                   type: object
                 type: object
+            type: object
+          status:
+            description: TaskStatus defines the observed state of Task
             type: object
         type: object
     served: true

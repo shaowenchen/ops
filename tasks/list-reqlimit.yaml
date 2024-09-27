@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: list request and limit in cluster
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     namespace:
       required: true

@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
 import { usePipelineRunsStore } from '@/stores';
+import { ref } from 'vue';
 
 var dataList = ref([]);
 var currentPage = ref(1);
@@ -43,8 +43,8 @@ function view(item) {
         <el-table :data="dataList" border size="default">
             <el-table-column prop="metadata.namespace" label="Namespace" />
             <el-table-column prop="metadata.name" label="Name"/>
-            <el-table-column prop="spec.pipelineRef" label="PipelineRef" />
-            <el-table-column prop="spec.nameRef" label="NameRef" />
+            <el-table-column prop="spec.ref" label="Ref" />
+            <el-table-column prop="spec.resName" label="ResName" />
             <el-table-column prop="status.runStatus" label="Run Status" />
             <el-table-column prop="status.startTime" label="Start Time" />
             <el-table-column label="Actions">

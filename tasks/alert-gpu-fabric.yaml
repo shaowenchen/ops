@@ -7,7 +7,7 @@ spec:
   desc: check fabricmanager in specified host
   selector:
     alert-gpu: enabled
-  typeRef: host
+  resType: host
   variables:
     cluster:
       default: default

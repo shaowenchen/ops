@@ -4,7 +4,7 @@ metadata:
   name: collect-gpu-log
   namespace: ops-system
 spec:
-  typeRef: cluster
+  resType: cluster
   desc: run col_gpu_log.sh to collect gpu log and upload to s3
   runtimeImage: shaowenchen/ops-cli:latest
   variables:

@@ -4,7 +4,7 @@ metadata:
   name: push-file
   namespace: ops-system
 spec:
-  typeRef: cluster
+  resType: cluster
   desc: push local file to remote file example
   steps:
     - name: Push To Remote

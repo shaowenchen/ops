@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: add hpa for deployment in specified namespace within a Kubernetes cluster.
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     name:
       display: name

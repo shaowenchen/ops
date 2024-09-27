@@ -11,7 +11,7 @@ spec:
       default: ops-system
       required: true
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   steps:
     - name: list clusters
       content: kubectl get clusters.crd.chenshaowen.com -n ${namespace} -o custom-columns=NAME:.metadata.name,DESCRIPTION:.spec.desc

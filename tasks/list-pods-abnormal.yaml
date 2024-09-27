@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: list abnormal pods in cluster
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     namespace:
       desc: namespace

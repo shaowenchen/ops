@@ -8,10 +8,10 @@ spec:
   variables:
     nodeName:
       required: true
-    typeRef:
+    resType:
       value: "cluster"
       required: true
-    nameRef:
+    resName:
       required: true
     source:
       required: true

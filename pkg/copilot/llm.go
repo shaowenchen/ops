@@ -234,7 +234,7 @@ Again:
 	}
 
 	for k, v := range pipeline.Spec.Variables {
-		if k == "nameRef" {
+		if k == "resName" {
 			v.Enums = clusterEnums
 		}
 		if v.Value != "" {

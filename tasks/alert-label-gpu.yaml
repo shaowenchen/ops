@@ -5,7 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: label host alert for ops
-    typeRef: cluster
+    resType: cluster
     nodeName: anymaster
     steps:
         - name: auto-label

@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: restart deploy
-  typeRef: cluster
+  resType: cluster
   nodeName: anymaster
   variables:
     namespace:

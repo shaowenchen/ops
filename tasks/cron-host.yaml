@@ -7,7 +7,7 @@ spec:
     desc: cron to create host 
     selector:
         managed-by: ops
-    typeRef: host
+    resType: host
     steps:
         - name: add dragonfly docker for containerd
           content: |

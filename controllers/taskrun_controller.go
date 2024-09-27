@@ -72,12 +72,12 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// start clear cron
 	r.registerClearCron()
 	// only reconcile active namespace
-	actionNs := os.Getenv("ACTIVE_NAMESPACE")
+	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
-	if os.Getenv("DEBUG") == "true" {
+	if opsconstants.GetEnvDebug() {
 		logger.SetVerbose("debug").Build()
 	}
 	if r.crontabMap == nil {
@@ -100,7 +100,7 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	// get task
 	t := &opsv1.Task{}
-	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Spec.Ref}, t)
+	err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.Namespace, Name: tr.Spec.TaskRef}, t)
 	if err != nil {
 		r.commitStatus(logger, ctx, tr, opsconstants.StatusDataInValid)
 		return ctrl.Result{}, err
@@ -153,7 +153,7 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 			return
 		}
 		obj := &opsv1.Task{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.Ref}, obj)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.TaskRef}, obj)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -199,18 +199,18 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	tr.Spec.Variables["random"] = uuid.New().String()
 	tr.Status.ClearNodeStatus()
 	r.commitStatus(logger, ctx, tr, opsconstants.StatusRunning)
-	if t.IsHostTypeRef() {
+	if t.IsHostResType() {
 		hs := []opsv1.Host{}
 		if t.Spec.Selector == nil {
 			h := opsv1.Host{}
-			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: t.GetNameRef(tr.Spec.Variables)}, &h)
+			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: t.GetResName(tr.Spec.Variables)}, &h)
 			if err != nil {
 				logger.Error.Println(err)
 				r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 				return
 			}
 			// if hostname is empty, use localhost
-			if len(t.Spec.NameRef) > 0 && err != nil {
+			if len(t.Spec.ResName) > 0 && err != nil {
 				logger.Error.Println(err)
 				return
 			}
@@ -241,7 +241,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 					return
 				}
 			}
-			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.NameRef))
+			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.ResName))
 			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 			err = r.runTaskOnHost(cliLogger, ctx, t, tr, &h, extraVariables)
 			if err != nil {
@@ -249,12 +249,12 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			}
 			cliLogger.Flush()
 		}
-	} else if t.IsClusterTypeRef() {
-		nameRef := t.GetNameRef(tr.Spec.Variables)
+	} else if t.IsClusterResType() {
+		resName := t.GetResName(tr.Spec.Variables)
 		nodeName := t.GetNodeName(tr.Spec.Variables)
 		c := &opsv1.Cluster{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: nameRef,
+				Name: resName,
 			},
 		}
 		// task > env > default
@@ -270,16 +270,16 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			NodeName:     nodeName,
 			All:          t.Spec.All,
 			RuntimeImage: runtimeImage,
-			OpsNamespace: opsconstants.DefaultOpsNamespace,
+			ResNamespace: opsconstants.DefaultResNamespace,
 		}
-		if nameRef != opsconstants.CurrentRuntime {
-			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: nameRef}, c)
+		if resName != opsconstants.CurrentRuntime {
+			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: resName}, c)
 			if err != nil {
 				logger.Error.Println(err)
 				r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 				return
 			}
-			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), nameRef))
+			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), resName))
 		}
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 		r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
@@ -295,8 +295,8 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	r.commitStatus(logger, ctx, tr, finallyStatus)
 	// push event
 	go opsevent.FactoryTaskRun().Publish(ctx, opsevent.EventTaskRun{
-		Cluster:       os.Getenv("CLUSTER"),
-		Ref:           tr.Spec.Ref,
+		Cluster:       opsconstants.GetEnvCluster(),
+		Ref:           tr.Spec.TaskRef,
 		Desc:          tr.Spec.Desc,
 		Variables:     tr.Spec.Variables,
 		TaskRunStatus: tr.Status,
@@ -387,13 +387,13 @@ func (r *TaskRunReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.
 func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.TaskRun{}, ".spec.taskRef", func(rawObj client.Object) []string {
 		tr := rawObj.(*opsv1.TaskRun)
-		return []string{tr.Spec.Ref}
+		return []string{tr.Spec.TaskRef}
 	}); err != nil {
 		return err
 	}
 	// push event
 	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
-		Cluster: os.Getenv("CLUSTER"),
+		Cluster: opsconstants.GetEnvCluster(),
 		Kind:    opsconstants.KindTaskRun,
 	})
 	return ctrl.NewControllerManagedBy(mgr).

@@ -32,10 +32,10 @@ import (
 type TaskRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Crontab   string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Desc      string            `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Crontab   string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
 	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Ref       string            `json:"ref,omitempty" yaml:"ref,omitempty"`
+	TaskRef   string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 }
 
 func (obj *TaskRun) Patch(t *Task) {
@@ -68,7 +68,7 @@ func NewTaskRun(t *Task) TaskRun {
 			Namespace:    t.Namespace,
 		},
 		Spec: TaskRunSpec{
-			Ref:       t.ObjectMeta.GetName(),
+			TaskRef:   t.ObjectMeta.GetName(),
 			Variables: t.Spec.Variables.GetVariables(),
 		},
 	}
@@ -101,7 +101,7 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 			},
 		},
 		Spec: TaskRunSpec{
-			Ref:       t.ObjectMeta.GetName(),
+			TaskRef:   t.ObjectMeta.GetName(),
 			Variables: pr.Spec.Variables,
 		},
 	}

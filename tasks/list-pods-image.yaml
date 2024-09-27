@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: list pod image in cluster
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     namespace:
       required: true

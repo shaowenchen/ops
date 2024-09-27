@@ -1,6 +1,6 @@
 <script setup>
+import { useClustersStore, useHostsStore, useTaskRunsStore, useTasksStore } from "@/stores";
 import { ref } from "vue";
-import { useTasksStore, useTaskRunsStore, useHostsStore, useClustersStore } from "@/stores";
 
 var dataList = ref([]);
 var currentPage = ref(1);
@@ -26,8 +26,8 @@ var selectedItem = ref(null);
 async function confirm() {
     const store = useTaskRunsStore();
     const vars = {};
-    vars['typeRef'] = selectedItem.spec.typeRef;
-    vars['nameRef'] = selectedItem.spec.nameRef;
+    vars['resType'] = selectedItem.spec.resType;
+    vars['resName'] = selectedItem.spec.resName;
     await store.create(selectedItem.metadata.namespace, selectedItem.metadata.name, vars);
     dialogVisble.value = false;
 }
@@ -40,10 +40,10 @@ function close() {
 var hosts = ref([]);
 var clusters = ref([]);
 
-function getNameRefList() {
-    if (selectedItem.spec.typeRef === 'host') {
+function getResNameList() {
+    if (selectedItem.spec.resType === 'host') {
         return hosts.value.list
-    } else if (selectedItem.spec.typeRef === 'cluster') {
+    } else if (selectedItem.spec.resType === 'cluster') {
         return clusters.value.list
     }
     return []
@@ -80,17 +80,17 @@ function run(item) {
                     <input name="desc" type="text" disabled :value="selectedItem?.spec?.desc" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label>TypeRef</label>
-                    <el-select v-model="selectedItem.spec.typeRef" class="w-100" placeholder="Select">
+                    <label>ResType</label>
+                    <el-select v-model="selectedItem.spec.resType" class="w-100" placeholder="Select">
                         <el-option label="Host" value="host" />
                         <el-option label="Cluster" value="cluster" />
                     </el-select>
 
                 </div>
                 <div class="form-group">
-                    <label>NameRef</label>
-                    <el-select v-model="selectedItem.spec.nameRef" v-if="selectedItem.spec.typeRef">
-                        <el-option v-for="item in getNameRefList()" :key="item.metadata.name" :value="item.metadata.name" />
+                    <label>ResName</label>
+                    <el-select v-model="selectedItem.spec.resName" v-if="selectedItem.spec.resType">
+                        <el-option v-for="item in getResNameList()" :key="item.metadata.name" :value="item.metadata.name" />
                     </el-select>
                 </div>
             </div>
@@ -105,8 +105,8 @@ function run(item) {
             <el-table-column prop="metadata.namespace" label="Namespace" />
             <el-table-column prop="metadata.name" label="Name" />
             <el-table-column prop="spec.crontab" label="Crontab" />
-            <el-table-column prop="spec.typeRef" label="TypeRef" />
-            <el-table-column prop="spec.nameRef" label="NameRef" />
+            <el-table-column prop="spec.resType" label="ResType" />
+            <el-table-column prop="spec.resName" label="ResName" />
             <el-table-column prop="spec.nodeName" label="NodeName" />
             <el-table-column prop="status.startTime" label="Start Time" />
             <el-table-column prop="status.runStatus" label="Run Status" />

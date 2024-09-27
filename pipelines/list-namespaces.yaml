@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: 列出、查看所有的命名空间
   variables:
-    typeRef:
+    resType:
       value: "cluster"
       required: true
     nodeName:

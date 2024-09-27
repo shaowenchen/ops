@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: check the svc existed
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     svc:
       display: svc

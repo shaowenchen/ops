@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: get pod status
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     namespace:
       display: namespace

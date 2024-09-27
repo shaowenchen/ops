@@ -4,7 +4,7 @@ metadata:
   name: list-tasks
   namespace: ops-system
 spec:
-  typeRef: cluster
+  resType: cluster
   desc: list all tasks in cluster
   variables:
     namespace: 

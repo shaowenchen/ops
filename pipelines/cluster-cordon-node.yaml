@@ -9,10 +9,10 @@ spec:
     nodeName:
       value: "anymaster"
       required: true
-    typeRef:
+    resType:
       value: "cluster"
       required: true
-    nameRef:
+    resName:
       required: true
     node:
       required: true

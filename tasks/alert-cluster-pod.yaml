@@ -6,7 +6,7 @@ metadata:
 spec:
     desc: alert cluster pod
     nodeName: anymaster
-    typeRef: cluster
+    resType: cluster
     variables:
         max:
             default: "20"

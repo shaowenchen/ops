@@ -6,10 +6,10 @@ metadata:
 spec:
   desc: 深度、更多清理节点磁盘
   variables:
-    typeRef:
+    resType:
       value: "cluster"
       required: true
-    nameRef:
+    resName:
       required: true
     nodeName:
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"

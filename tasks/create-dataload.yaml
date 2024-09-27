@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: create dataload
-  typeRef: cluster
+  resType: cluster
   nodeName: anymaster
   variables:
     namespace:

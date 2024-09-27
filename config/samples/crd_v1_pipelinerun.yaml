@@ -10,8 +10,7 @@ metadata:
   name: pipelinerun-sample
   namespace: ops-system
 spec:
-  typeRef: cluster
-  nameRef: dev
-  pipelineRef: pipeline-sample
+  resType: cluster
+  resName: dev
   variables:
     namespace: kube-system

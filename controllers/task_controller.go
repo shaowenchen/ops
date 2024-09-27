@@ -18,7 +18,7 @@ package controllers
 
 import (
 	"context"
-	"os"
+
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/google/go-cmp/cmp"
@@ -55,12 +55,12 @@ type TaskReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	// default to reconcile all namespace, if ACTIVE_NAMESPACE is set, only reconcile ACTIVE_NAMESPACE
-	actionNs := os.Getenv("ACTIVE_NAMESPACE")
+	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
-	if os.Getenv("DEBUG") == "true" {
+	if opsconstants.GetEnvDebug() {
 		logger.SetVerbose("debug").Build()
 	}
 
@@ -70,9 +70,9 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	// validate typeRef
-	if t.Spec.TypeRef == "" && t.Spec.NodeName == constants.AnyMaster {
-		t.Spec.TypeRef = opsv1.TypeRefCluster
+	// validate resType
+	if t.Spec.ResType == "" && t.Spec.NodeName == constants.AnyMaster {
+		t.Spec.ResType = opsconstants.ResTypeCluster
 	}
 	//TODO: Validate spec
 	if err != nil {

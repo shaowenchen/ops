@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: drain node in cluster
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     node:
       display: node name

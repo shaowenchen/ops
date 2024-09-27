@@ -5,7 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: label host alert for gpu
-    typeRef: cluster
+    resType: cluster
     nodeName: anymaster
     steps:
         - name: auto-label

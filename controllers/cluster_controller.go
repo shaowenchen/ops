@@ -19,8 +19,10 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
+
+	"math/rand"
+	"sync"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -31,11 +33,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"math/rand"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sync"
 )
 
 // ClusterReconciler reconciles a Cluster object
@@ -60,12 +60,12 @@ type ClusterReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	actionNs := os.Getenv("ACTIVE_NAMESPACE")
+	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
-	if os.Getenv("DEBUG") == "true" {
+	if opsconstants.GetEnvDebug() {
 		logger.SetVerbose("debug").Build()
 	}
 	c := &opsv1.Cluster{}
@@ -89,7 +89,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
-		Cluster: os.Getenv("CLUSTER"),
+		Cluster: opsconstants.GetEnvCluster(),
 		Kind:    opsconstants.KindCluster,
 	})
 	return ctrl.NewControllerManagedBy(mgr).
@@ -165,7 +165,7 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	err = r.commitStatus(logger, ctx, c, status, "")
 	// push event
 	go opsevent.FactoryCluster().Publish(ctx, opsevent.EventCluster{
-		Cluster: os.Getenv("CLUSTER"),
+		Cluster: opsconstants.GetEnvCluster(),
 		Server:  c.Spec.Server,
 		Status:  *status,
 	})

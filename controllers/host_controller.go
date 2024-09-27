@@ -20,6 +20,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"math/rand"
+	"sync"
+	"time"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
@@ -30,13 +34,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"math/rand"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sync"
-	"time"
 )
 
 // HostReconciler reconciles a Host object
@@ -61,12 +61,12 @@ type HostReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	actionNs := os.Getenv("ACTIVE_NAMESPACE")
+	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
-	if os.Getenv("DEBUG") == "true" {
+	if opsconstants.GetEnvDebug() {
 		logger.SetVerbose("debug").Build()
 	}
 	h := &opsv1.Host{}
@@ -91,7 +91,7 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
-		Cluster: os.Getenv("CLUSTER"),
+		Cluster: opsconstants.GetEnvCluster(),
 		Kind:    opsconstants.KindHost,
 	})
 	return ctrl.NewControllerManagedBy(mgr).
@@ -191,7 +191,7 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 	err = r.commitStatus(logger, ctx, h, status, "")
 	// push event
 	go opsevent.FactoryHost().Publish(ctx, opsevent.EventHost{
-		Cluster:  os.Getenv("CLUSTER"),
+		Cluster:  opsconstants.GetEnvCluster(),
 		Address:  h.Spec.Address,
 		Port:     h.Spec.Port,
 		Username: h.Spec.Username,

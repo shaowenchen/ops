@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: install Velero Client && Server
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     velero_version: 
       default: v1.9.2

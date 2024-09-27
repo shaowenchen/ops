@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: list topK usage memory of pods in node
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     node: 
       desc: node name

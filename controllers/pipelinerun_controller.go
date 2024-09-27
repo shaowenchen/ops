@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -69,12 +68,12 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// start clear cron
 	r.registerClearCron()
 	// only reconcile active namespace
-	actionNs := os.Getenv("ACTIVE_NAMESPACE")
+	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
 	}
 	logger := opslog.NewLogger().SetStd().SetFlag().Build()
-	if os.Getenv("DEBUG") == "true" {
+	if opsconstants.GetEnvDebug() {
 		logger.SetVerbose("debug").Build()
 	}
 	if r.crontabMap == nil {
@@ -103,7 +102,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 	// get pipeline
 	p := &opsv1.Pipeline{}
-	err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: pr.Spec.Ref}, p)
+	err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: pr.Spec.PipelineRef}, p)
 	if err != nil {
 		r.commitStatus(logger, ctx, pr, opsconstants.StatusFailed, "", "", nil)
 		return ctrl.Result{}, err
@@ -147,7 +146,7 @@ func (r *PipelineRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Co
 			return
 		}
 		obj := &opsv1.Pipeline{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.Ref}, obj)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.PipelineRef}, obj)
 		if err != nil {
 			logger.Error.Println(err)
 			return
@@ -218,7 +217,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 				logger.Error.Println(err)
 				break
 			}
-			r.commitStatus(logger, ctx, pr, opsconstants.StatusRunning, tRef.Name, trRunning.Spec.Ref, &trRunning.Status)
+			r.commitStatus(logger, ctx, pr, opsconstants.StatusRunning, tRef.Name, trRunning.Spec.TaskRef, &trRunning.Status)
 			if trRunning.Status.RunStatus == opsconstants.StatusRunning || trRunning.Status.RunStatus == opsconstants.StatusEmpty {
 				continue
 			} else if trRunning.Status.RunStatus == opsconstants.StatusSuccessed {
@@ -242,8 +241,8 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 	r.commitStatus(logger, ctx, pr, finallyStatus, "", "", nil)
 	// push event
 	go opsevent.FactoryPipelineRun().Publish(ctx, opsevent.EventPipelineRun{
-		Cluster:           os.Getenv("CLUSTER"),
-		Ref:               pr.Spec.Ref,
+		Cluster:           opsconstants.GetEnvCluster(),
+		Ref:               pr.Spec.PipelineRef,
 		Desc:              pr.Spec.Desc,
 		Variables:         pr.Spec.Variables,
 		PipelineRunStatus: pr.Status,
@@ -255,13 +254,13 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.PipelineRun{}, ".spec.pipelineRef", func(rawObj client.Object) []string {
 		pr := rawObj.(*opsv1.PipelineRun)
-		return []string{pr.Spec.Ref}
+		return []string{pr.Spec.PipelineRef}
 	}); err != nil {
 		return err
 	}
 	// push event
 	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
-		Cluster: os.Getenv("CLUSTER"),
+		Cluster: opsconstants.GetEnvCluster(),
 		Kind:    opsconstants.KindPipelineRun,
 	})
 	return ctrl.NewControllerManagedBy(mgr).

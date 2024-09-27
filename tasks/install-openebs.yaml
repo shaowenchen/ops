@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: install openebs for Kubernetes
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     action: 
       default: apply

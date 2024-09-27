@@ -7,7 +7,7 @@ spec:
     desc: check gpu
     selector:
       alert-gpu: enabled
-    typeRef: host
+    resType: host
     variables:
       cluster:
         default: default

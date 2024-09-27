@@ -6,7 +6,7 @@ metadata:
 spec:
   desc: list topK usage memory of nodes in cluster
   nodeName: anymaster
-  typeRef: cluster
+  resType: cluster
   variables:
     topk: 
       default: "5"

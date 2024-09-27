@@ -5,7 +5,7 @@ import (
 )
 
 const AllNamespaces = "all"
-const DefaultOpsNamespace = "ops-system"
+const DefaultResNamespace = "ops-system"
 const DefaultNamespace = "default"
 
 const CurrentRuntime = "current"
