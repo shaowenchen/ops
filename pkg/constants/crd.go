@@ -10,7 +10,6 @@ const (
 	KindTaskRun     = "TaskRun"
 	KindPipeline    = "Pipeline"
 	KindPipelineRun = "PipelineRun"
-	KindDefault     = "Default"
 )
 
 const StatusSuccessed = "Successed"

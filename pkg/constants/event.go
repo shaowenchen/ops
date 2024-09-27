@@ -11,3 +11,9 @@ const SubjectTask = KindOps + "." + KindTask
 const SubjectTaskRun = KindOps + "." + KindTaskRun
 const SubjectPipeline = KindOps + "." + KindPipeline
 const SubjectPipelineRun = KindOps + "." + KindPipelineRun
+const SubjectWebhook = KindOps + "." + EventWebhook
+
+const (
+	EventWebhook = "Webhook"
+	EventUnknown = "Unknown"
+)

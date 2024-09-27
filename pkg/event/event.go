@@ -54,6 +54,11 @@ type EventPipelineRun struct {
 	opsv1.PipelineRunStatus
 }
 
+type EventWebhook struct {
+	Content    string `json:"content,omitempty" yaml:"content,omitempty"`
+	WebhookUrl string `json:"webhookUrl,omitempty" yaml:"webhookUrl,omitempty"`
+}
+
 func builderEvent(data interface{}) (cloudevents.Event, error) {
 	e := cloudevents.NewEvent()
 	e.SetID(uuid.New().String())
@@ -75,8 +80,10 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 		eventType = opsconstants.KindPipeline
 	case *EventPipelineRun, EventPipelineRun:
 		eventType = opsconstants.KindPipelineRun
+	case *EventWebhook, EventWebhook:
+		eventType = opsconstants.EventWebhook
 	default:
-		eventType = opsconstants.KindDefault
+		eventType = opsconstants.EventUnknown
 	}
 	e.SetType(eventType)
 	err := e.SetData(cloudevents.ApplicationJSON, data)

@@ -13,6 +13,8 @@ import (
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
 
+type Event cloudevents.Client
+
 type GlobalEventBusClients struct {
 	Mutex   sync.RWMutex
 	Clients map[string]*ProducerConsumerClient
@@ -88,7 +90,11 @@ func (bus *EventBus) WithSubject(subject string) *EventBus {
 	return bus
 }
 
-func (bus *EventBus) publishCloudEvent(ctx context.Context, event cloudevents.Event) error {
+func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
+	event, err := builderEvent(data)
+	if err != nil {
+		return err
+	}
 	// get client
 	client, err := CurrentEventBusClient.GetClient(bus.Server, bus.Subject)
 	if err != nil {
@@ -101,128 +107,10 @@ func (bus *EventBus) publishCloudEvent(ctx context.Context, event cloudevents.Ev
 	return nil
 }
 
-func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
-	event, err := builderEvent(data)
-	if err != nil {
-		return err
-	}
-	return bus.publishCloudEvent(ctx, event)
-}
-
-func (bus *EventBus) getCloudEvent(ctx context.Context) (*cloudevents.Event, error) {
-	var receivedEvent *cloudevents.Event
-	// get client
+func (bus *EventBus) Subscribe(ctx context.Context, fn interface{}) error {
 	client, err := CurrentEventBusClient.GetClient(bus.Server, bus.Subject)
 	if err != nil {
-		return nil, err
-	}
-	err = (*client.Consumer).StartReceiver(ctx, func(ctx context.Context, event cloudevents.Event) error {
-		receivedEvent = &event
-		println("received event: " + event.Type())
-		return nil
-	})
-	return receivedEvent, err
-}
-
-func (bus *EventBus) GetController(ctx context.Context) (*EventController, error) {
-	event, err := bus.getCloudEvent(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var data EventController
-	err = event.DataAs(&data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (bus *EventBus) GetHost(ctx context.Context) (*EventHost, error) {
-	event, err := bus.getCloudEvent(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var data EventHost
-	err = event.DataAs(&data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (bus *EventBus) GetCluster(ctx context.Context) (*EventCluster, error) {
-	event, err := bus.getCloudEvent(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var data EventCluster
-	err = event.DataAs(&data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (bus *EventBus) GetTask(ctx context.Context) (*EventTask, error) {
-	event, err := bus.getCloudEvent(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var data EventTask
-	err = event.DataAs(&data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (bus *EventBus) GetTaskRun(ctx context.Context) (*EventTaskRun, error) {
-	event, err := bus.getCloudEvent(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var data EventTaskRun
-	err = event.DataAs(&data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (bus *EventBus) GetPipeline(ctx context.Context) (*EventPipeline, error) {
-	event, err := bus.getCloudEvent(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var data EventPipeline
-	err = event.DataAs(&data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (bus *EventBus) GetPipelineRun(ctx context.Context) (*EventPipelineRun, error) {
-	event, err := bus.getCloudEvent(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var data EventPipelineRun
-	err = event.DataAs(&data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (bus *EventBus) Get(ctx context.Context, dataPointer interface{}) error {
-	event, err := bus.getCloudEvent(ctx)
-	if err != nil {
 		return err
 	}
-	err = event.DataAs(dataPointer)
-	if err != nil {
-		return err
-	}
-	return nil
+	return (*client.Consumer).StartReceiver(ctx, fn)
 }

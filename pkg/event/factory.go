@@ -32,6 +32,14 @@ func FactoryPipelineRun() *EventBus {
 	return (&EventBus{}).WithSubject(opsconstants.SubjectPipelineRun)
 }
 
+func FactoryWebhook() *EventBus {
+	return (&EventBus{}).WithSubject(opsconstants.SubjectWebhook)
+}
+
+func FactoryWithServer(server string) *EventBus {
+	return (&EventBus{}).WithServer(server)
+}
+
 func FactoryWithSubject(subject string) *EventBus {
 	return (&EventBus{}).WithSubject(subject)
 }
