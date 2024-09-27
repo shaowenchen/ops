@@ -6,19 +6,16 @@ metadata:
 spec:
   desc: 恢复集群中的某一个节点
   variables:
-    nodeName:
-      value: "anymaster"
-      required: true
     resType:
       value: "cluster"
       required: true
     resName:
       required: true
-    node:
+    nodeName:
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
       required: true
   tasks:
     - name: 检查节点是否存在
-      ref: check-node-existed
+      taskRef: check-node-existed
     - name: 恢复节点
-      ref: uncordon-node
+      taskRef: uncordon-node

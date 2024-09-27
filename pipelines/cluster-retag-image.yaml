@@ -21,7 +21,7 @@ spec:
       desc: 目标镜像名字
   tasks:
     - name: 白名单检测
-      ref: check-whitelist
+      taskRef: check-whitelist
     - name: retag image
-      ref: retag-image
+      taskRef: retag-image
 

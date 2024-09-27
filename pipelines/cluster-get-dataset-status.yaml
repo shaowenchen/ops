@@ -19,4 +19,4 @@ spec:
       desc: 数据集、存储名字
   tasks:
     - name: 查询数据集状态
-      ref: get-dataset-status
+      taskRef: get-dataset-status

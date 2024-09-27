@@ -192,11 +192,11 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		}
 		// create taskrun
 		t := &opsv1.Task{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: tRef.Ref}, t)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: tRef.TaskRef}, t)
 		if err != nil {
 			logger.Error.Println(err)
 			runAlways = true
-			r.commitStatus(logger, ctx, pr, opsconstants.StatusDataInValid, tRef.Name, tRef.Ref, &opsv1.TaskRunStatus{
+			r.commitStatus(logger, ctx, pr, opsconstants.StatusDataInValid, tRef.Name, tRef.TaskRef, &opsv1.TaskRunStatus{
 				RunStatus: opsconstants.StatusDataInValid,
 			})
 			continue
@@ -206,7 +206,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		if err != nil {
 			logger.Error.Println(err)
 			runAlways = true
-			r.commitStatus(logger, ctx, pr, opsconstants.StatusDataInValid, tRef.Name, tRef.Ref, nil)
+			r.commitStatus(logger, ctx, pr, opsconstants.StatusDataInValid, tRef.Name, tRef.TaskRef, nil)
 			continue
 		}
 		// run task and commit status

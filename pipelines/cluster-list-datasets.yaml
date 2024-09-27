@@ -16,4 +16,4 @@ spec:
       desc: 命名空间
   tasks:
     - name: 列出数据集
-      ref: list-datasets
+      taskRef: list-datasets

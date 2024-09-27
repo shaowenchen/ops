@@ -16,6 +16,6 @@ spec:
       required: true
   tasks:
     - name: 检查节点是否存在
-      ref: check-node-existed
+      taskRef: check-node-existed
     - name: 清理磁盘
-      ref: clear-disk-more
+      taskRef: clear-disk-more

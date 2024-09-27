@@ -22,4 +22,4 @@ spec:
       desc: 存储路径
   tasks:
     - name: 创建数据集预热任务
-      ref: create-dataload
+      taskRef: create-dataload

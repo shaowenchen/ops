@@ -17,4 +17,4 @@ spec:
       required: true
   tasks:
     - name: 列出所有集群
-      ref: list-clusters
+      taskRef: list-clusters

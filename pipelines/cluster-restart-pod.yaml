@@ -24,8 +24,8 @@ spec:
       required: true
   tasks:
     - name: 白名单检测
-      ref: check-whitelist
+      taskRef: check-whitelist
     - name: 检查 Pod 是否存在
-      ref: check-pod-existed
+      taskRef: check-pod-existed
     - name: 删除 Pod
-      ref: delete-pod
+      taskRef: delete-pod

@@ -26,4 +26,4 @@ spec:
         - text2image-prompt-extend-v1-66fbd9db6d-vnns2
   tasks:
     - name: get pod status
-      ref: get-pod
+      taskRef: get-pod

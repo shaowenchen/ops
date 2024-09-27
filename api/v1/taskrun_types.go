@@ -90,7 +90,7 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 	tr := &TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    pr.Namespace,
-			GenerateName: fmt.Sprintf("%s-%s-", pr.Name, tRef.Ref),
+			GenerateName: fmt.Sprintf("%s-%s-", pr.Name, tRef.TaskRef),
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: opsconstants.APIVersion,

@@ -50,16 +50,14 @@ spec:
                       type: boolean
                     name:
                       type: string
-                    ref:
-                      type: string
                     runAlways:
                       type: boolean
+                    taskRef:
+                      type: string
                     variables:
                       additionalProperties:
                         type: string
                       type: object
-                  required:
-                  - ref
                   type: object
                 type: array
               ttlSecondsAfterFinished:

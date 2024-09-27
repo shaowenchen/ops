@@ -6,19 +6,16 @@ metadata:
 spec:
   desc: 禁用集群中的某个节点
   variables:
-    nodeName:
-      value: "anymaster"
-      required: true
     resType:
       value: "cluster"
       required: true
     resName:
       required: true
-    node:
+    nodeName:
       required: true
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
   tasks:
     - name: 检查节点是否存在
-      ref: check-node-existed
+      taskRef: check-node-existed
     - name: 禁用节点
-      ref: cordon-node
+      taskRef: cordon-node
