@@ -1,6 +1,8 @@
 package event
 
 import (
+	"time"
+
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -63,7 +65,8 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	e := cloudevents.NewEvent()
 	e.SetID(uuid.New().String())
 	e.SetSource(opsconstants.Source)
-
+	e.SetSpecVersion(cloudevents.VersionV1)
+	e.SetTime(time.Now())
 	var eventType string
 	switch data.(type) {
 	case *EventController, EventController:
