@@ -1,5 +1,7 @@
 package constants
 
+import "strings"
+
 const Source = "https://github.com/shaowenchen/ops"
 
 const DefaultEventBusServer = "http://nats-headless:4222"
@@ -12,8 +14,18 @@ const SubjectTaskRun = KindOps + "." + KindTaskRun
 const SubjectPipeline = KindOps + "." + KindPipeline
 const SubjectPipelineRun = KindOps + "." + KindPipelineRun
 const SubjectWebhook = KindOps + "." + EventWebhook
+const SubjectInspection = KindOps + "." + EventInspection
 
 const (
-	EventWebhook = "Webhook"
-	EventUnknown = "Unknown"
+	EventInspection = "Inspection"
+	EventWebhook    = "Webhook"
+	EventUnknown    = "Unknown"
 )
+
+func IsInspectionEvent(event string) bool {
+	return strings.ToLower(event) == strings.ToLower(EventInspection)
+}
+
+func IsWebhookEvent(event string) bool {
+	return strings.ToLower(event) == strings.ToLower(EventWebhook)
+}

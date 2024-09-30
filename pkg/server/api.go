@@ -698,18 +698,41 @@ func getRuntimeClient(kubeconfigPath string) (client runtimeClient.Client, err e
 	return runtimeClient.New(restConfig, runtimeClient.Options{Scheme: scheme})
 }
 
-func PostEvent(c *gin.Context) {
+func CreateEvent(c *gin.Context) {
+	type Params struct {
+		Event string `uri:"event"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
 	bodyBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
-	event := opsevent.EventWebhook{}
-	err = json.Unmarshal(bodyBytes, &event)
-	if err != nil {
-		event.Content = string(bodyBytes)
+	if opsconstants.IsInspectionEvent(req.Event) {
+		event := opsevent.EventInspection{}
+		err = json.Unmarshal(bodyBytes, &event)
+		if err != nil {
+			showData(c, "fail to parse event")
+			return
+		}
+		go opsevent.FactoryInspection().Publish(context.TODO(), event)
+		showData(c, "success")
+		return
+	} else if opsconstants.IsWebhookEvent(req.Event) {
+		event := opsevent.EventWebhook{}
+		err = json.Unmarshal(bodyBytes, &event)
+		if err != nil {
+			showData(c, "fail to parse event")
+			return
+		}
+		go opsevent.FactoryWebhook().Publish(context.TODO(), event)
+		showData(c, "success")
+		return
 	}
-
-	go opsevent.FactoryWebhook().Publish(context.TODO(), event)
-	showData(c, "success")
+	showData(c, "unknown event")
 }

@@ -36,6 +36,10 @@ func FactoryWebhook() *EventBus {
 	return (&EventBus{}).WithSubject(opsconstants.SubjectWebhook)
 }
 
+func FactoryInspection() *EventBus {
+	return (&EventBus{}).WithSubject(opsconstants.SubjectInspection)
+}
+
 func FactoryWithServer(server string) *EventBus {
 	return (&EventBus{}).WithServer(server)
 }

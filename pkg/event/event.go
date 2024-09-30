@@ -61,6 +61,17 @@ type EventWebhook struct {
 	WebhookUrl string `json:"webhookUrl,omitempty" yaml:"webhookUrl,omitempty"`
 }
 
+type EventInspection struct {
+	Cluster     string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Host        string `json:"host,omitempty" yaml:"host,omitempty"`
+	Kind        string `json:"kind,omitempty" yaml:"kind,omitempty"`
+	Threshold   string `json:"threshold,omitempty" yaml:"threshold,omitempty"`
+	Operator    string `json:"operator,omitempty" yaml:"operator,omitempty"`
+	Value       string `json:"value,omitempty" yaml:"value,omitempty"`
+	Status      string `json:"status,omitempty" yaml:"status,omitempty"`
+	Reason      string `json:"reason,omitempty" yaml:"reason,omitempty"`
+}
+
 func builderEvent(data interface{}) (cloudevents.Event, error) {
 	e := cloudevents.NewEvent()
 	e.SetID(uuid.New().String())
@@ -85,6 +96,8 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 		eventType = opsconstants.KindPipelineRun
 	case *EventWebhook, EventWebhook:
 		eventType = opsconstants.EventWebhook
+	case *EventInspection, EventInspection:
+		eventType = opsconstants.EventInspection
 	default:
 		eventType = opsconstants.EventUnknown
 	}

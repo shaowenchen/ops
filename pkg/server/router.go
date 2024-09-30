@@ -50,7 +50,7 @@ func SetupRouter(r *gin.Engine) {
 func SetupRouteWithoutAuth(r *gin.Engine) {
 	v1Events := r.Group("/api/v1/events")
 	{
-		v1Events.POST("", PostEvent)
+		v1Events.POST("/:event", CreateEvent)
 	}
 }
 

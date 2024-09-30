@@ -7,12 +7,12 @@ spec:
     desc: alert cluster pod
     host: anymaster
     variables:
-        max:
+        threshold:
             default: "20"
         cluster:
             default: default
-        notifaction:
-            required: true
+        eventBus:
+            value: http://myops-server/api/v1/events/inspection
     steps:
         - name: alert cluster pod
           content: |
@@ -23,24 +23,23 @@ spec:
               import json
               from datetime import datetime
 
-              cluster = '${cluster}'
-              notifaction = '${notifaction}'
+              value = ''
+              reason = ''
 
-              error_message = ''
-              reason = '异常Pod数量超过阈值'
-              threshold = int("${max}")
-
-              def send(message):
+              def send(value, reason):
                   payload = {
-                      'msgtype': 'text',
-                      'text': {
-                          'content': message
-                      }
+                      'cluster': '${CLUSTER}',
+                      'host': '${hostname}',
+                      'kind': 'cluster-pod',
+                      'threshold': '${threshold}',
+                      'operator': '<',
+                      'value': value,
+                      'reason': '',
                   }
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  response = requests.request('POST', '${eventBus}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def get_pod_status():
@@ -68,18 +67,7 @@ spec:
                   
                   return abnormal_pods
 
-              try:
-                  pods = get_pod_status()
-                  if pods:
-                      abnormal_pods = count_abnormal_pods(pods)
-                      if len(abnormal_pods) > threshold:
-                          error_message += f"异常Pod数量: {len(abnormal_pods)}\n"
-                          for ns, pod, r in abnormal_pods:
-                              error_message += f"{ns}/{pod} {r}\n"
-              except Exception as e:
-                  if len(error_message) == 0:
-                      error_message = str(e)
-              finally:
-                  if len(abnormal_pods) > threshold:
-                      error_message = f'集群: {cluster} \n{error_message}异常判断: {reason}\n'
-                      send(error_message)
+              abnormal_pods = count_abnormal_pods(pods)
+              value = len(abnormal_pods)
+
+              send(value, reason)
