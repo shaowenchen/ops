@@ -128,8 +128,6 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				taskOption.Proxy = fieldValue
 			} else if fieldName == "verbose" || fieldName == "v" {
 				verbose = fieldValue
-			} else if fieldName == "all" {
-				kubeOpt.All = fieldValue == "true"
 			} else if fieldName == "nodename" {
 				kubeOpt.NodeName = fieldValue
 			} else if fieldName == "opsnamespace" {
@@ -172,7 +170,6 @@ func init() {
 	TaskCmd.Flags().StringVarP(&taskOpt.FilePath, "filepath", "", "", "")
 	TaskCmd.MarkFlagRequired("filepath")
 
-	TaskCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.Namespace, "opsnamespace", "", constants.DefaultNamespace, "ops work namespace")
 	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "runtime image")

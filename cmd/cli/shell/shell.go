@@ -76,7 +76,6 @@ func init() {
 	ShellCmd.Flags().StringVarP(&shellOpt.Content, "content", "", "", "")
 	ShellCmd.MarkFlagRequired("content")
 
-	ShellCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.Namespace, "opsnamespace", "", constants.DefaultNamespace, "ops work namespace")
 	ShellCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
