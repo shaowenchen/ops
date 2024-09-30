@@ -242,7 +242,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 	// push event
 	go opsevent.FactoryPipelineRun().Publish(ctx, opsevent.EventPipelineRun{
 		Cluster:           opsconstants.GetEnvCluster(),
-		Ref:               pr.Spec.PipelineRef,
+		PipelineRef:       pr.Spec.PipelineRef,
 		Desc:              pr.Spec.Desc,
 		Variables:         pr.Spec.Variables,
 		PipelineRunStatus: pr.Status,

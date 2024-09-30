@@ -227,7 +227,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	// push event
 	go opsevent.FactoryTaskRun().Publish(ctx, opsevent.EventTaskRun{
 		Cluster:       opsconstants.GetEnvCluster(),
-		Ref:           tr.Spec.TaskRef,
+		TaskRef:       tr.Spec.TaskRef,
 		Desc:          tr.Spec.Desc,
 		Variables:     tr.Spec.Variables,
 		TaskRunStatus: tr.Status,

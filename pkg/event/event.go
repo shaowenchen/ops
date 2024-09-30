@@ -36,7 +36,7 @@ type EventTask struct {
 
 type EventTaskRun struct {
 	Cluster   string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
-	Ref       string            `json:"ref"`
+	TaskRef   string            `json:"taskRef"`
 	Desc      string            `json:"desc"`
 	Variables map[string]string `json:"variables"`
 	opsv1.TaskRunStatus
@@ -49,10 +49,10 @@ type EventPipeline struct {
 }
 
 type EventPipelineRun struct {
-	Cluster   string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
-	Ref       string            `json:"ref"`
-	Desc      string            `json:"desc"`
-	Variables map[string]string `json:"variables"`
+	Cluster     string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	PipelineRef string            `json:"pipelineRef"`
+	Desc        string            `json:"desc"`
+	Variables   map[string]string `json:"variables"`
 	opsv1.PipelineRunStatus
 }
 

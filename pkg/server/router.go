@@ -47,6 +47,13 @@ func SetupRouter(r *gin.Engine) {
 	}
 }
 
+func SetupRouteWithoutAuth(r *gin.Engine) {
+	v1Events := r.Group("/api/v1/events")
+	{
+		v1Events.POST("", PostEvent)
+	}
+}
+
 func SetHealthzRouter(r *gin.Engine) {
 	root := r.Group("/")
 	{

@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -695,4 +696,20 @@ func getRuntimeClient(kubeconfigPath string) (client runtimeClient.Client, err e
 	}
 
 	return runtimeClient.New(restConfig, runtimeClient.Options{Scheme: scheme})
+}
+
+func PostEvent(c *gin.Context) {
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	event := opsevent.EventWebhook{}
+	err = json.Unmarshal(bodyBytes, &event)
+	if err != nil {
+		event.Content = string(bodyBytes)
+	}
+
+	go opsevent.FactoryWebhook().Publish(context.TODO(), event)
+	showData(c, "success")
 }

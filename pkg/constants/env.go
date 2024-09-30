@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	EnvDebugKey           = "DEBUG"
-	EnvClusterKey         = "CLUSTER"
-	EnvActiveNamespaceKey = "ACTIVE_NAMESPACE"
+	EnvDebugKey            = "DEBUG"
+	EnvClusterKey          = "CLUSTER"
+	EnvWebhookUrl          = "WEBHOOK_URL"
+	EnvActiveNamespaceKey  = "ACTIVE_NAMESPACE"
 	EnvDefaultRuntimeImage = "DEFAULT_RUNTIME_IMAGE"
 )
 
@@ -23,8 +24,10 @@ func GetEnvDebug() bool {
 func GetEnvCluster() string {
 	return os.Getenv(EnvClusterKey)
 }
+func GetEnvWebhookUrl() string {
+	return os.Getenv(EnvWebhookUrl)
+}
 
-
-func GetEnvDefaultRuntimeImage() string{
+func GetEnvDefaultRuntimeImage() string {
 	return os.Getenv(EnvDefaultRuntimeImage)
 }
