@@ -30,7 +30,7 @@ opscli 会从每行中正则匹配 ip 地址，作为目标地址。
 - 集群全部节点
 
 ```bash
--i ~/.kube/config --all
+-i ~/.kube/config --nodename all
 ```
 
 `-i` 默认值为 `~/.kube/config`。
@@ -78,7 +78,7 @@ node1 为节点名称。
 - 全部节点
 
 ```bash
-opscli shell --content "uname -a" --all
+opscli shell --content "uname -a" --nodename all
 ```
 
 - 指定节点
