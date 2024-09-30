@@ -20,12 +20,10 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -142,7 +140,7 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 		return
 	}
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
-		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBiasSeconds)) * time.Second)
+		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBias)) * time.Second)
 		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.Name))
 		if objRun.Status.RunStatus == opsconstants.StatusEmpty || objRun.Status.RunStatus == opsconstants.StatusRunning {
 			return
@@ -195,94 +193,26 @@ func (r *TaskRunReconciler) registerClearCron() {
 }
 
 func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (err error) {
-	tr.Patch(t)
-	tr.Spec.Variables["random"] = uuid.New().String()
 	tr.Status.ClearNodeStatus()
 	r.commitStatus(logger, ctx, tr, opsconstants.StatusRunning)
-	if t.IsHostResType() {
-		hs := []opsv1.Host{}
-		if t.Spec.Selector == nil {
-			h := opsv1.Host{}
-			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: t.GetResName(tr.Spec.Variables)}, &h)
-			if err != nil {
-				logger.Error.Println(err)
-				r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
-				return
-			}
-			// if hostname is empty, use localhost
-			if len(t.Spec.ResName) > 0 && err != nil {
-				logger.Error.Println(err)
-				return
-			}
-			hs = append(hs, h)
-		} else {
-			hs = r.getSelectorHosts(logger, ctx, t)
-		}
-		if len(hs) == 0 {
-			r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
-			return
-		}
-		r.commitStatus(logger, ctx, tr, opsconstants.StatusRunning)
-		for _, h := range hs {
-			// fill variables
-			extraVariables := tr.Spec.Variables
-			extraVariables["hostname"] = h.GetHostname()
 
-			// insert host labels
-			for k, v := range h.ObjectMeta.Labels {
-				extraVariables[k] = v
-			}
+	tr.MergeVariables(t)
+	cluster := r.getCluster(logger, ctx, t, tr)
+	hosts := r.getHosts(logger, ctx, t, tr)
 
-			// filled host
-			if h.Spec.SecretRef != "" {
-				err = filledHostFromSecret(&h, r.Client, h.Spec.SecretRef)
-				if err != nil {
-					logger.Error.Println("fill host secretRef error", err)
-					return
-				}
-			}
-			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.ResName))
+	if cluster.IsCurrentCluster() && len(hosts) > 0 {
+		for _, h := range hosts {
+			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.Host))
 			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-			err = r.runTaskOnHost(cliLogger, ctx, t, tr, &h, extraVariables)
+			err = r.runTaskOnHost(cliLogger, ctx, t, tr, &h)
 			if err != nil {
 				logger.Error.Println(err)
 			}
 			cliLogger.Flush()
 		}
-	} else if t.IsClusterResType() {
-		resName := t.GetResName(tr.Spec.Variables)
-		nodeName := t.GetNodeName(tr.Spec.Variables)
-		c := &opsv1.Cluster{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: resName,
-			},
-		}
-		// task > env > default
-		runtimeImage := t.Spec.RuntimeImage
-		if runtimeImage == "" {
-			runtimeImage = os.Getenv("DEFAULT_RUNTIME_IMAGE")
-		}
-		if runtimeImage == "" {
-			runtimeImage = opsconstants.DefaultRuntimeImage
-		}
-		kubeOpt := opsoption.KubeOption{
-			Debug:        strings.ToLower(os.Getenv("DEBUG")) == "true",
-			NodeName:     nodeName,
-			All:          t.Spec.All,
-			RuntimeImage: runtimeImage,
-			ResNamespace: opsconstants.DefaultResNamespace,
-		}
-		if resName != opsconstants.CurrentRuntime {
-			err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: resName}, c)
-			if err != nil {
-				logger.Error.Println(err)
-				r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
-				return
-			}
-			logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), resName))
-		}
+	} else {
 		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-		r.runTaskOnKube(cliLogger, ctx, t, tr, c, kubeOpt)
+		r.runTaskOnKube(cliLogger, ctx, t, tr, &cluster)
 		cliLogger.Flush()
 	}
 	// get taskrun status
@@ -304,7 +234,25 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	return
 }
 
-func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host, variables map[string]string) (err error) {
+func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host) (err error) {
+	// fill variables
+	variables := tr.Spec.Variables
+	variables["hostname"] = h.GetHostname()
+
+	// insert host labels
+	for k, v := range h.ObjectMeta.Labels {
+		variables[k] = v
+	}
+
+	// filled host
+	if h.Spec.SecretRef != "" {
+		err = filledHostFromSecret(h, r.Client, h.Spec.SecretRef)
+		if err != nil {
+			logger.Error.Println("fill host secretRef error", err)
+			return
+		}
+	}
+	// connecting
 	hc, err := opshost.NewHostConnBase64(h)
 	if err != nil {
 		return err
@@ -315,13 +263,31 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 	return err
 }
 
-func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, c *opsv1.Cluster, kubeOpt opsoption.KubeOption) (err error) {
-	kc, err := opskube.NewClusterConnection(c)
+func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, cluster *opsv1.Cluster) (err error) {
+	// connecting
+	kc, err := opskube.NewClusterConnection(cluster)
 	if err != nil {
 		r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 		logger.Error.Println(err)
 		return err
 	}
+	// build options
+	hostStr := tr.GetHost(t)
+	// task > env > default
+	runtimeImage := t.Spec.RuntimeImage
+	if runtimeImage == "" {
+		runtimeImage = opsconstants.GetEnvDefaultRuntimeImage()
+	}
+	if runtimeImage == "" {
+		runtimeImage = opsconstants.DefaultRuntimeImage
+	}
+	kubeOpt := opsoption.KubeOption{
+		Debug:        opsconstants.GetEnvDebug(),
+		NodeName:     hostStr,
+		RuntimeImage: runtimeImage,
+		Namespace:    opsconstants.DefaultNamespace,
+	}
+	// run
 	nodes, err := opskube.GetNodes(ctx, logger, kc.Client, kubeOpt)
 	if err != nil || len(nodes) == 0 {
 		r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
@@ -370,9 +336,51 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	return
 }
 
-func (r *TaskRunReconciler) getSelectorHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task) (hosts []opsv1.Host) {
+func (r *TaskRunReconciler) getCluster(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (cluster opsv1.Cluster) {
+	clusterStr := tr.GetCluster(t)
+	// default current cluster
+	if len(clusterStr) == 0 {
+		return opsv1.NewCurrentCluster()
+	}
+	// get cluster
+	cluster = opsv1.Cluster{}
+	err := r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: clusterStr}, &cluster)
+	if err != nil {
+		logger.Error.Println(err, "failed to get cluster")
+		return
+	}
+	return
+}
+
+func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (hosts []opsv1.Host) {
+	hostStr := tr.GetHost(t)
+	// empty host
+	if len(hostStr) == 0 {
+		return
+	}
+	// single host
+	if !strings.Contains(t.Spec.Host, "=") {
+		host := opsv1.Host{}
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: t.GetNamespace(), Name: hostStr}, &host)
+		if err != nil {
+			return
+		}
+		hosts = append(hosts, host)
+		return
+	}
+	// selector host, eg: az=cn-hangzhou
 	hostList := &opsv1.HostList{}
-	err := r.Client.List(ctx, hostList, client.MatchingLabels(t.Spec.Selector))
+	selector, err := metav1.ParseToLabelSelector(t.Spec.Host)
+	if err != nil {
+		logger.Error.Println(err, "failed to parse label selector")
+		return
+	}
+	labelMap, err := metav1.LabelSelectorAsMap(selector)
+	if err != nil {
+		logger.Error.Println(err, "failed to convert label selector to map")
+		return
+	}
+	err = r.Client.List(ctx, hostList, client.MatchingLabels(labelMap))
 	if err != nil {
 		logger.Error.Println(err, "failed to list hosts")
 		return

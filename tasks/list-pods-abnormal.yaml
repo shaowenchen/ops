@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: list abnormal pods in cluster
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     namespace:
       desc: namespace

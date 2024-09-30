@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: check host status
-  resType: cluster
-  nodeName: anymaster
+  host: anymaster
   variables:
     cluster: 
       default: default

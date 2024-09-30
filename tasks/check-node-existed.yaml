@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: check the node existed
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     node:
       display: node

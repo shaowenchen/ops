@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: install istio in Kubernetes
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     version: 
       default: "1.13.7"

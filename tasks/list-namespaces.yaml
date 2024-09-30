@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: list all namespaces in cluster
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   steps:
     - name: list namespaces
       content: |

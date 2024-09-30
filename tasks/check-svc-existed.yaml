@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: check the svc existed
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     svc:
       display: svc

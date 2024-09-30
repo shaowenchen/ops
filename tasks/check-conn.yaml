@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: check connection to specified hosts
-  resType: cluster
   variables:
     targets:
       display: target hosts

@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: cordon node in cluster
-  resType: cluster
-  nodeName: anymaster
+  host: anymaster
   variables:
     node:
       display: node name

@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: get gpu status using nvidia-smi in specified host
-  resType: cluster
   steps:
     - name: Check nvidia-smi
       content: command -v nvidia-smi

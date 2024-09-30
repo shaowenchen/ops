@@ -5,8 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: alert cluster pod
-    nodeName: anymaster
-    resType: cluster
+    host: anymaster
     variables:
         max:
             default: "20"

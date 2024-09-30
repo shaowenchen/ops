@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: restore Kubernetes Using Velero
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     velero_version:
       default: v1.9.2

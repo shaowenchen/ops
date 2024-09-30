@@ -9,6 +9,7 @@ const (
 	EnvDebugKey           = "DEBUG"
 	EnvClusterKey         = "CLUSTER"
 	EnvActiveNamespaceKey = "ACTIVE_NAMESPACE"
+	EnvDefaultRuntimeImage = "DEFAULT_RUNTIME_IMAGE"
 )
 
 func GetEnvActiveNamespace() string {
@@ -21,4 +22,9 @@ func GetEnvDebug() bool {
 
 func GetEnvCluster() string {
 	return os.Getenv(EnvClusterKey)
+}
+
+
+func GetEnvDefaultRuntimeImage() string{
+	return os.Getenv(EnvDefaultRuntimeImage)
 }

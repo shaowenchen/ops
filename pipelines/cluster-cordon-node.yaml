@@ -6,10 +6,10 @@ metadata:
 spec:
   desc: 禁用集群中的某个节点
   variables:
-    resType:
+    cluster:
       value: "cluster"
       required: true
-    resName:
+    host:
       required: true
     nodeName:
       required: true

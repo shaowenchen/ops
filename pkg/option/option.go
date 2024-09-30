@@ -18,10 +18,13 @@ type HostOption struct {
 
 type KubeOption struct {
 	Debug        bool
-	ResNamespace string
+	Namespace    string
 	NodeName     string
 	RuntimeImage string
-	All          bool
+}
+
+func (k *KubeOption) IsAllNodes() bool {
+	return strings.ToLower(k.NodeName) == "all"
 }
 
 type TaskOption struct {

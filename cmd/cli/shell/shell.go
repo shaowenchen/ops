@@ -78,7 +78,7 @@ func init() {
 
 	ShellCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
-	ShellCmd.Flags().StringVarP(&kubeOpt.ResNamespace, "opsnamespace", "", constants.DefaultResNamespace, "ops work namespace")
+	ShellCmd.Flags().StringVarP(&kubeOpt.Namespace, "opsnamespace", "", constants.DefaultNamespace, "ops work namespace")
 	ShellCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
 
 	ShellCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")

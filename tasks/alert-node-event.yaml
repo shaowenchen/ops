@@ -5,8 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: check node event alert specified keywords
-    nodeName: anymaster
-    resType: cluster
+    host: anymaster
     variables:
         cluster:
             default: default

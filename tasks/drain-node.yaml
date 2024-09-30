@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: drain node in cluster
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     node:
       display: node name

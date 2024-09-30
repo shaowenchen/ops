@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: test iperf3 between two nodes
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     srcip:
       desc: ip address of source

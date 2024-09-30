@@ -6,10 +6,10 @@ metadata:
 spec:
   desc: 恢复集群中的某一个节点
   variables:
-    resType:
+    cluster:
       value: "cluster"
       required: true
-    resName:
+    host:
       required: true
     nodeName:
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"

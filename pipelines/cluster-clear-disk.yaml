@@ -6,10 +6,10 @@ metadata:
 spec:
   desc: 清理节点磁盘
   variables:
-    resType:
+    cluster:
       value: "cluster"
       required: true
-    resName:
+    host:
       required: true
     nodeName:
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"

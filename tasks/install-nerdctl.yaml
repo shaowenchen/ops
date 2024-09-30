@@ -4,7 +4,6 @@ metadata:
   name: install-nerdctl
   namespace: ops-system
 spec:
-  resType: cluster
   desc: install nerdctl tool in specified host
   variables:
     proxy: 

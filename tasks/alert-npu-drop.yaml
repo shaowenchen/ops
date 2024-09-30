@@ -5,9 +5,7 @@ metadata:
   namespace: ops-system
 spec:
     desc: check npu drop in specified host
-    selector:
-      alert-npu: enabled
-    resType: host
+    host: "alert-npu=enabled"
     variables:
       cluster: 
         default: default

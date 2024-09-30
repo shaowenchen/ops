@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: install descheduler in Kubernetes 
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     proxy: 
       default: https://ghp.ci/

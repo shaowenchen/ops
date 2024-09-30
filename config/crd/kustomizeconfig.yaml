@@ -1,5 +1,5 @@
 # This file is for teaching kustomize how to substitute name and namespace reference in CRD
-resNameerence:
+hosterence:
 - kind: Service
   version: v1
   fieldSpecs:

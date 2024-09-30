@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: check the pod existed and get pod namespace
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     podname:
       required: true

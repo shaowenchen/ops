@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -77,6 +78,18 @@ func (c *Cluster) GetUniqueKey() string {
 		Namespace: c.Namespace,
 		Name:      c.Name,
 	}.String()
+}
+
+func (c *Cluster) IsCurrentCluster() bool {
+	return c.Name == opsconstants.CluterEmptyValue
+}
+
+func NewCurrentCluster() Cluster {
+	return Cluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: opsconstants.CluterEmptyValue,
+		},
+	}
 }
 
 func NewCluster(namespace, name, server, config, token string) *Cluster {

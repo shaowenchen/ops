@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: check the gpu card dropped in specified host
-  resType: cluster
   variables:
     desired_gpu_count: 
       default: "8"

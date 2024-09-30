@@ -29,7 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	"github.com/shaowenchen/ops/pkg/constants"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 )
@@ -69,10 +68,6 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 
 	if err != nil {
 		return ctrl.Result{}, err
-	}
-	// validate resType
-	if t.Spec.ResType == "" && t.Spec.NodeName == constants.AnyMaster {
-		t.Spec.ResType = opsconstants.ResTypeCluster
 	}
 	//TODO: Validate spec
 	if err != nil {

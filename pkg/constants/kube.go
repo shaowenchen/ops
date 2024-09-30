@@ -5,10 +5,10 @@ import (
 )
 
 const AllNamespaces = "all"
-const DefaultResNamespace = "ops-system"
+const OpsNamespace = "ops-system"
 const DefaultNamespace = "default"
 
-const CurrentRuntime = "current"
+const CluterEmptyValue = ""
 
 const LabelNodeRoleMaster = "node-role.kubernetes.io/master"
 const LabelNodeRoleControlPlane = "node-role.kubernetes.io/control-plane"
@@ -26,7 +26,7 @@ const OpsCliRuntimeImage = "registry.cn-hangzhou.aliyuncs.com/shaowenchen/opscli
 
 const SyncResourceStatusHeatSeconds = 60 * 5
 const SyncResourceRandomBiasSeconds = 60 * 2
-const SyncCronRandomBiasSeconds = 30
+const SyncCronRandomBias = 30
 
 const MaxResourceConcurrentReconciles = 1
 const MaxTaskrunConcurrentReconciles = 50

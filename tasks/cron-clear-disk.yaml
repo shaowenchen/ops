@@ -5,9 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: cron to create clear disk
-  selector:
-    managed-by: ops
-  resType: host
+  host: "managed-by=ops"
   steps:
     - name: before clear
       content: |

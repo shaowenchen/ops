@@ -133,7 +133,7 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 			} else if fieldName == "nodename" {
 				kubeOpt.NodeName = fieldValue
 			} else if fieldName == "opsnamespace" {
-				kubeOpt.ResNamespace = fieldValue
+				kubeOpt.Namespace = fieldValue
 			} else if fieldName == "runtimeimage" {
 				kubeOpt.RuntimeImage = fieldValue
 			} else if fieldName == "inventory" || fieldName == "i" {
@@ -174,7 +174,7 @@ func init() {
 
 	TaskCmd.Flags().BoolVarP(&kubeOpt.All, "all", "", false, "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
-	TaskCmd.Flags().StringVarP(&kubeOpt.ResNamespace, "opsnamespace", "", constants.DefaultResNamespace, "ops work namespace")
+	TaskCmd.Flags().StringVarP(&kubeOpt.Namespace, "opsnamespace", "", constants.DefaultNamespace, "ops work namespace")
 	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "runtime image")
 
 	TaskCmd.Flags().IntVarP(&hostOpt.Port, "port", "", 22, "")

@@ -4,8 +4,7 @@ metadata:
   name: clear-pod
   namespace: ops-system
 spec:
-  resType: cluster
-  nodeName: anymaster
+  host: anymaster
   desc: clear ops
   steps:
     - name: clear ops task pod

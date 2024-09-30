@@ -4,7 +4,6 @@ metadata:
   name: file-download
   namespace: ops-system
 spec:
-  resType: cluster
   desc: download file
   runtimeImage: shaowenchen/ops-cli 
   variables:

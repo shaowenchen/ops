@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: get fabric fatal logs
-  resType: cluster
   variables:
     topk: 
       default: "10"

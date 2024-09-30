@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: list request and limit in cluster
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     namespace:
       required: true

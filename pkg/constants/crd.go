@@ -12,8 +12,8 @@ const (
 	KindPipelineRun = "PipelineRun"
 )
 
-const ResTypeHost = "host"
-const ResTypeCluster = "cluster"
+const Host = "host"
+const Cluster = "cluster"
 
 const StatusSuccessed = "Successed"
 const StatusFailed = "Failed"

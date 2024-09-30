@@ -26,8 +26,8 @@ var selectedItem = ref(null);
 async function confirm() {
     const store = useTaskRunsStore();
     const vars = {};
-    vars['resType'] = selectedItem.spec.resType;
-    vars['resName'] = selectedItem.spec.resName;
+    vars['cluster'] = selectedItem.spec.cluster;
+    vars['host'] = selectedItem.spec.host;
     await store.create(selectedItem.metadata.namespace, selectedItem.metadata.name, vars);
     dialogVisble.value = false;
 }
@@ -40,10 +40,10 @@ function close() {
 var hosts = ref([]);
 var clusters = ref([]);
 
-function getResNameList() {
-    if (selectedItem.spec.resType === 'host') {
+function getHostList() {
+    if (selectedItem.spec.cluster === 'host') {
         return hosts.value.list
-    } else if (selectedItem.spec.resType === 'cluster') {
+    } else if (selectedItem.spec.cluster === 'cluster') {
         return clusters.value.list
     }
     return []
@@ -80,17 +80,17 @@ function run(item) {
                     <input name="desc" type="text" disabled :value="selectedItem?.spec?.desc" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label>ResType</label>
-                    <el-select v-model="selectedItem.spec.resType" class="w-100" placeholder="Select">
+                    <label>Cluster</label>
+                    <el-select v-model="selectedItem.spec.cluster" class="w-100" placeholder="Select">
                         <el-option label="Host" value="host" />
                         <el-option label="Cluster" value="cluster" />
                     </el-select>
 
                 </div>
                 <div class="form-group">
-                    <label>ResName</label>
-                    <el-select v-model="selectedItem.spec.resName" v-if="selectedItem.spec.resType">
-                        <el-option v-for="item in getResNameList()" :key="item.metadata.name" :value="item.metadata.name" />
+                    <label>Host</label>
+                    <el-select v-model="selectedItem.spec.host" v-if="selectedItem.spec.cluster">
+                        <el-option v-for="item in getHostList()" :key="item.metadata.name" :value="item.metadata.name" />
                     </el-select>
                 </div>
             </div>
@@ -105,8 +105,8 @@ function run(item) {
             <el-table-column prop="metadata.namespace" label="Namespace" />
             <el-table-column prop="metadata.name" label="Name" />
             <el-table-column prop="spec.crontab" label="Crontab" />
-            <el-table-column prop="spec.resType" label="ResType" />
-            <el-table-column prop="spec.resName" label="ResName" />
+            <el-table-column prop="spec.cluster" label="Cluster" />
+            <el-table-column prop="spec.host" label="Host" />
             <el-table-column prop="spec.nodeName" label="NodeName" />
             <el-table-column prop="status.startTime" label="Start Time" />
             <el-table-column prop="status.runStatus" label="Run Status" />

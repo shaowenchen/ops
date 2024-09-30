@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: run fio to test disk and get a report in specified path for specified host
-  resType: cluster
   variables:
     filename: 
       default: "/tmp/testfile"

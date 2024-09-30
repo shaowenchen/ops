@@ -6,10 +6,10 @@ metadata:
 spec:
   desc: 查看数据集的状态
   variables:
-    resType:
+    cluster:
       value: "cluster"
       required: true
-    resName:
+    host:
       required: true
     namespace:
       required: true

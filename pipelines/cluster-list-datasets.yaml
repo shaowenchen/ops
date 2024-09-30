@@ -6,10 +6,10 @@ metadata:
 spec:
   desc: 列出命名空间下的数据集
   variables:
-    resType:
+    cluster:
       value: "cluster"
       required: true
-    resName:
+    host:
       required: true
     namespace:
       required: true

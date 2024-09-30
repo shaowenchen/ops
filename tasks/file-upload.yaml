@@ -4,7 +4,6 @@ metadata:
   name: file-upload
   namespace: ops-system
 spec:
-  resType: cluster
   desc: upload file
   runtimeImage: shaowenchen/ops-cli 
   variables:

@@ -6,10 +6,10 @@ metadata:
 spec:
   desc: 预热数据集
   variables:
-    resType:
+    cluster:
       value: "cluster"
       required: true
-    resName:
+    host:
       required: true
     namespace:
       required: true

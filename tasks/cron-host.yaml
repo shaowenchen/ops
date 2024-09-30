@@ -5,9 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: cron to create host 
-    selector:
-        managed-by: ops
-    resType: host
+    host: "managed-by=ops"
     steps:
         - name: add dragonfly docker for containerd
           content: |

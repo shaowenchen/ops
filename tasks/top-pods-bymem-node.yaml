@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: list topK usage memory of pods in node
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     node: 
       desc: node name

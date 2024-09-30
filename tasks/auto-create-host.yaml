@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: auto create host
-  resType: cluster
-  nodeName: anymaster
+  host: anymaster
   steps:
     - name: create host
       content: |

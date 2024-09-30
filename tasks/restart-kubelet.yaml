@@ -5,7 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: restart kubelet
-  resType: cluster
   steps:
     - name: restart-kubelet
       content: |

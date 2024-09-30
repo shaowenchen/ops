@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: install grafana for Kubernetes
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   variables:
     namespace: 
       default: monitor

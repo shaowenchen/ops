@@ -29,35 +29,30 @@ import (
 type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Desc                    string            `json:"desc,omitempty" yaml:"desc,omitempty"`
-	ResType                 string            `json:"resType,omitempty" yaml:"resType,omitempty"`
-	ResName                 string            `json:"resName,omitempty" yaml:"resName,omitempty"`
-	NodeName                string            `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
-	Variables               Variables         `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Steps                   []Step            `json:"steps,omitempty" yaml:"steps,omitempty"`
-	Selector                map[string]string `json:"selector,omitempty" yaml:"selector,omitempty"`
-	All                     bool              `json:"all,omitempty" yaml:"all,omitempty"`
-	RuntimeImage            string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
-	TTlSecondsAfterFinished int               `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
+	Desc                    string    `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Cluster                 string    `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Host                    string    `json:"host,omitempty" yaml:"host,omitempty"`
+	Variables               Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Steps                   []Step    `json:"steps,omitempty" yaml:"steps,omitempty"`
+	RuntimeImage            string    `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
+	TTlSecondsAfterFinished int       `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
 }
 
 type Step struct {
-	When         string `json:"when,omitempty" yaml:"when,omitempty"`
-	Name         string `json:"name,omitempty" yaml:"name,omitempty"`
-	Content      string `json:"content,omitempty" yaml:"content,omitempty"`
-	LocalFile    string `json:"localfile,omitempty" yaml:"localfile,omitempty"`
-	RemoteFile   string `json:"remotefile,omitempty" yaml:"remotefile,omitempty"`
-	Direction    string `json:"direction,omitempty" yaml:"direction,omitempty"`
-	AllowFailure string `json:"allowfailure,omitempty" yaml:"allowfailure,omitempty"`
+	When           string `json:"when,omitempty" yaml:"when,omitempty"`
+	Name           string `json:"name,omitempty" yaml:"name,omitempty"`
+	Content        string `json:"content,omitempty" yaml:"content,omitempty"`
+	LocalFile      string `json:"localfile,omitempty" yaml:"localfile,omitempty"`
+	RemoteFile     string `json:"remotefile,omitempty" yaml:"remotefile,omitempty"`
+	Direction      string `json:"direction,omitempty" yaml:"direction,omitempty"`
+	AllowFailure   string `json:"allowfailure,omitempty" yaml:"allowfailure,omitempty"`
+	TimeOutSeconds int    `json:"timeoutSeconds,omitempty" yaml:"timeoutSeconds,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="ResType",type=string,JSONPath=`.spec.resType`
-// +kubebuilder:printcolumn:name="ResName",type=string,JSONPath=`.spec.resName`
-// +kubebuilder:printcolumn:name="NodeName",type=string,JSONPath=`.spec.nodeName`
-// +kubebuilder:printcolumn:name="All",type=boolean,JSONPath=`.spec.all`
-// +kubebuilder:printcolumn:name="Selector",type=string,JSONPath=`.spec.selector`
+// +kubebuilder:printcolumn:name="Cluster",type=string,JSONPath=`.spec.cluster`
+// +kubebuilder:printcolumn:name="Host",type=string,JSONPath=`.spec.host`
 type Task struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
@@ -83,34 +78,6 @@ func (obj *Task) GetUniqueKey() string {
 		Namespace: obj.Namespace,
 		Name:      obj.Name,
 	}.String()
-}
-
-func (obj *Task) GetResName(variables map[string]string) string {
-	if len(obj.Spec.ResName) > 0 {
-		return obj.Spec.ResName
-	}
-	if _, ok := variables["resName"]; ok {
-		return variables["resName"]
-	}
-	return opsconstants.CurrentRuntime
-}
-
-func (obj *Task) GetNodeName(variables map[string]string) string {
-	if len(obj.Spec.NodeName) > 0 {
-		return obj.Spec.NodeName
-	}
-	if _, ok := variables["nodeName"]; ok {
-		return variables["nodeName"]
-	}
-	return ""
-}
-
-func (obj *Task) IsHostResType() bool {
-	return obj.Spec.ResType == opsconstants.ResTypeHost
-}
-
-func (obj *Task) IsClusterResType() bool {
-	return obj.Spec.ResType == opsconstants.ResTypeCluster || obj.Spec.NodeName == opsconstants.AnyMaster
 }
 
 //+kubebuilder:object:root=true

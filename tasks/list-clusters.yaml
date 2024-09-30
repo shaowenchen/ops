@@ -10,8 +10,7 @@ spec:
       display: namespace
       default: ops-system
       required: true
-  nodeName: anymaster
-  resType: cluster
+  host: anymaster
   steps:
     - name: list clusters
       content: kubectl get clusters.crd.chenshaowen.com -n ${namespace} -o custom-columns=NAME:.metadata.name,DESCRIPTION:.spec.desc

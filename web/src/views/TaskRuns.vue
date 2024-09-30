@@ -44,7 +44,7 @@ function view(item) {
             <el-table-column prop="metadata.namespace" label="Namespace" />
             <el-table-column prop="metadata.name" label="Name"/>
             <el-table-column prop="spec.taskRef" label="TaskRef" />
-            <el-table-column prop="spec.resName" label="ResName" />
+            <el-table-column prop="spec.host" label="Host" />
             <el-table-column prop="spec.nodeName" label="NodeName" />
             <el-table-column prop="spec.all" label="All" />
             <el-table-column prop="metadata.creationTimestamp" label="Create Time" />

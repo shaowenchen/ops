@@ -38,7 +38,7 @@ type TaskRunSpec struct {
 	TaskRef   string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 }
 
-func (obj *TaskRun) Patch(t *Task) {
+func (obj *TaskRun) MergeVariables(t *Task) {
 	if obj.Spec.Variables == nil {
 		obj.Spec.Variables = make(map[string]string)
 	}
@@ -52,6 +52,26 @@ func (obj *TaskRun) Patch(t *Task) {
 			continue
 		}
 	}
+}
+
+func (obj *TaskRun) GetCluster(t *Task) string {
+	if t.Spec.Cluster != "" {
+		return t.Spec.Cluster
+	}
+	if _, ok := obj.Spec.Variables[opsconstants.Cluster]; ok {
+		return obj.Spec.Variables[opsconstants.Cluster]
+	}
+	return ""
+}
+
+func (obj *TaskRun) GetHost(t *Task) string {
+	if t.Spec.Host != "" {
+		return t.Spec.Host
+	}
+	if _, ok := obj.Spec.Variables[opsconstants.Host]; ok {
+		return obj.Spec.Variables[opsconstants.Host]
+	}
+	return ""
 }
 
 func (obj *TaskRun) GetUniqueKey() string {
@@ -152,7 +172,7 @@ func (tr *TaskRunStatus) ClearNodeStatus() {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Ref",type=string,JSONPath=`.spec.ref`
+// +kubebuilder:printcolumn:name="TaskRef",type=string,JSONPath=`.spec.taskRef`
 // +kubebuilder:printcolumn:name="Crontab",type=string,JSONPath=`.spec.crontab`
 // +kubebuilder:printcolumn:name="StartTime",type=date,JSONPath=`.status.startTime`
 // +kubebuilder:printcolumn:name="RunStatus",type=string,JSONPath=`.status.runStatus`

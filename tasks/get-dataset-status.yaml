@@ -5,8 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: get status for dataset
-  resType: cluster
-  nodeName: anymaster
+  host: anymaster
   variables:
     namespace:
       display: namespace

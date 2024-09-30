@@ -6,13 +6,13 @@ metadata:
 spec:
   desc: 列出、查看所有的集群
   variables:
-    resType:
+    cluster:
       value: "cluster"
       required: true
     nodeName:
       value: "anymaster"
       required: true
-    resName:
+    host:
       value: "ksyun-bj6-e"
       required: true
   tasks:

@@ -16,20 +16,11 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.resType
-      name: ResType
+    - jsonPath: .spec.cluster
+      name: Cluster
       type: string
-    - jsonPath: .spec.resName
-      name: ResName
-      type: string
-    - jsonPath: .spec.nodeName
-      name: NodeName
-      type: string
-    - jsonPath: .spec.all
-      name: All
-      type: boolean
-    - jsonPath: .spec.selector
-      name: Selector
+    - jsonPath: .spec.host
+      name: Host
       type: string
     name: v1
     schema:
@@ -50,24 +41,16 @@ spec:
           spec:
             description: TaskSpec defines the desired state of Task
             properties:
-              all:
-                type: boolean
+              cluster:
+                type: string
               desc:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file'
                 type: string
-              nodeName:
-                type: string
-              resName:
-                type: string
-              resType:
+              host:
                 type: string
               runtimeImage:
                 type: string
-              selector:
-                additionalProperties:
-                  type: string
-                type: object
               steps:
                 items:
                   properties:
@@ -83,6 +66,8 @@ spec:
                       type: string
                     remotefile:
                       type: string
+                    timeoutSeconds:
+                      type: integer
                     when:
                       type: string
                   type: object

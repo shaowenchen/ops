@@ -5,9 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: check gpu
-    selector:
-      alert-gpu: enabled
-    resType: host
+    host: "alert-gpu=enabled"
     variables:
       cluster:
         default: default
