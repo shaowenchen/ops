@@ -713,25 +713,25 @@ func CreateEvent(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	if opsconstants.IsInspectionEvent(req.Event) {
-		event := opsevent.EventInspection{}
+	if opsconstants.IsCheckEvent(req.Event) {
+		event := opsevent.EventCheck{}
 		err = json.Unmarshal(bodyBytes, &event)
 		if err != nil {
-			showData(c, "fail to parse event")
+			showError(c, "fail to parse event")
 			return
 		}
-		go opsevent.FactoryInspection().Publish(context.TODO(), event)
-		showData(c, "success")
+		go opsevent.FactoryCheck().Publish(context.TODO(), event)
+		showSuccess(c)
 		return
 	} else if opsconstants.IsWebhookEvent(req.Event) {
 		event := opsevent.EventWebhook{}
 		err = json.Unmarshal(bodyBytes, &event)
 		if err != nil {
-			showData(c, "fail to parse event")
+			showError(c, "fail to parse event")
 			return
 		}
 		go opsevent.FactoryWebhook().Publish(context.TODO(), event)
-		showData(c, "success")
+		showSuccess(c)
 		return
 	}
 	showData(c, "unknown event")

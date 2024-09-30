@@ -17,6 +17,7 @@ func main() {
 	r := gin.Default()
 	gin.SetMode(server.GlobalConfig.Server.RunMode)
 	server.SetupRouter(r)
+	server.SetupRouteWithoutAuth(r)
 	server.SetHealthzRouter(r)
 	web.SetupRouter(r)
 	r.Run(":80")

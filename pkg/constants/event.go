@@ -14,16 +14,16 @@ const SubjectTaskRun = KindOps + "." + KindTaskRun
 const SubjectPipeline = KindOps + "." + KindPipeline
 const SubjectPipelineRun = KindOps + "." + KindPipelineRun
 const SubjectWebhook = KindOps + "." + EventWebhook
-const SubjectInspection = KindOps + "." + EventInspection
+const SubjectCheck = KindOps + "." + EventCheck
 
 const (
-	EventInspection = "Inspection"
-	EventWebhook    = "Webhook"
-	EventUnknown    = "Unknown"
+	EventCheck   = "Check"
+	EventWebhook = "Webhook"
+	EventUnknown = "Unknown"
 )
 
-func IsInspectionEvent(event string) bool {
-	return strings.ToLower(event) == strings.ToLower(EventInspection)
+func IsCheckEvent(event string) bool {
+	return strings.ToLower(event) == strings.ToLower(EventCheck)
 }
 
 func IsWebhookEvent(event string) bool {
