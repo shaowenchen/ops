@@ -139,9 +139,10 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 	if ok {
 		return
 	}
+	logger.Info.Println(fmt.Sprintf("add ticker for taskrun %s", objRun.GetUniqueKey()))
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBias)) * time.Second)
-		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.Name))
+		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.GetUniqueKey()))
 		if objRun.Status.RunStatus == opsconstants.StatusEmpty || objRun.Status.RunStatus == opsconstants.StatusRunning {
 			return
 		}
