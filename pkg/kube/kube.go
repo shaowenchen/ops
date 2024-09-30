@@ -8,9 +8,8 @@ import (
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
-	"github.com/shaowenchen/ops/pkg/constants"
-	"github.com/shaowenchen/ops/pkg/log"
-	option "github.com/shaowenchen/ops/pkg/option"
+	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsoption "github.com/shaowenchen/ops/pkg/option"
 	"github.com/shaowenchen/ops/pkg/utils"
 	v1 "k8s.io/api/core/v1"
 
@@ -20,7 +19,7 @@ import (
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shellOpt option.ShellOption, kubeOpt option.KubeOption) (err error) {
+func Shell(logger *opslog.Logger, client *kubernetes.Clientset, node v1.Node, shellOpt opsoption.ShellOption, kubeOpt opsoption.KubeOption) (err error) {
 	logger.Info.Println("> Run shell on ", node.Name)
 	namespacedName, err := utils.GetOrCreateNamespacedName(client, kubeOpt.Namespace, fmt.Sprintf("ops-shell-%s-%d", time.Now().Format("2006-01-02-15-04-05"), rand.Intn(10000)))
 	if err != nil {
@@ -39,7 +38,7 @@ func Shell(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, shell
 	return
 }
 
-func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, fileOpt option.FileOption) (stdout string, err error) {
+func File(logger *opslog.Logger, client *kubernetes.Clientset, node v1.Node, fileOpt opsoption.FileOption) (stdout string, err error) {
 	namespacedName, err := utils.GetOrCreateNamespacedName(client, fileOpt.Namespace, fmt.Sprintf("ops-file-%s", time.Now().Format("2006-01-02-15-04-05")))
 	if err != nil {
 		logger.Error.Println(err)
@@ -54,7 +53,7 @@ func File(logger *log.Logger, client *kubernetes.Clientset, node v1.Node, fileOp
 	return
 }
 
-func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
+func GetPodLog(logger *opslog.Logger, ctx context.Context, debug bool, client *kubernetes.Clientset, pod *v1.Pod) (logs string, err error) {
 	defer func() {
 		if !debug {
 			client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
@@ -86,7 +85,7 @@ func GetPodLog(logger *log.Logger, ctx context.Context, debug bool, client *kube
 	return
 }
 
-func GetNodes(ctx context.Context, logger *log.Logger, client *kubernetes.Clientset, kubeOpt option.KubeOption) (nodeList []v1.Node, err error) {
+func GetNodes(ctx context.Context, logger *opslog.Logger, client *kubernetes.Clientset, kubeOpt opsoption.KubeOption) (nodeList []v1.Node, err error) {
 	nodes, err := utils.GetAllReadyNodesByClient(client)
 	if err != nil {
 		logger.Error.Println(err)
@@ -96,28 +95,46 @@ func GetNodes(ctx context.Context, logger *log.Logger, client *kubernetes.Client
 		nodeList = nodes.Items
 		return
 	}
+
+	masters := []v1.Node{}
+	wokers := []v1.Node{}
+
 	for _, node := range nodes.Items {
-		if len(kubeOpt.NodeName) == 0 && utils.IsMasterNode(&node) {
+		if kubeOpt.NodeName == node.Name {
 			nodeList = append(nodeList, node)
 			return
-		} else if kubeOpt.NodeName == constants.AnyMaster && utils.IsMasterNode(&node) {
-			nodeList = append(nodeList, node)
-		} else if kubeOpt.NodeName == node.Name {
-			nodeList = append(nodeList, node)
 		}
+		if utils.IsMasterNode(&node) {
+			masters = append(masters, node)
+		} else {
+			wokers = append(wokers, node)
+		}
+	}
+	if kubeOpt.IsAllMasters() {
+		nodeList = masters
+		return
+	} else if kubeOpt.IsAllWorkers() {
+		nodeList = wokers
+		return
+	}
+	// random select one
+	if kubeOpt.IsAnyMaster() {
+		nodeList = masters
+	} else if kubeOpt.IsAnyWorker() {
+		nodeList = wokers
+	} else if kubeOpt.IsAnyNode() {
+		nodeList = nodes.Items
 	}
 	if len(nodeList) == 0 {
 		err = errors.New("no node found")
+		return
 	}
-	// if anymaster, random a master to return
-	if kubeOpt.NodeName == constants.AnyMaster && len(nodeList) > 1 {
-		randomIndex := rand.Intn(len(nodeList))
-		nodeList = []v1.Node{nodeList[randomIndex]}
-	}
+	randomIndex := rand.Intn(len(nodeList))
+	nodeList = []v1.Node{nodeList[randomIndex]}
 	return
 }
 
-func GetOpsClient(ctx context.Context, logger *log.Logger, restConfig *rest.Config) (client runtimeClient.Client, err error) {
+func GetOpsClient(ctx context.Context, logger *opslog.Logger, restConfig *rest.Config) (client runtimeClient.Client, err error) {
 	scheme, err := opsv1.SchemeBuilder.Build()
 	if err != nil {
 		return

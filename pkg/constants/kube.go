@@ -48,4 +48,10 @@ func GetCurrentUserKubeConfigPath() string {
 	return filepath.Join(GetCurrentUserHomeDir(), ".kube", "config")
 }
 
+const AllNodes = "all"
+const AllMasters = "allmasters"
+const AllWorkers = "allworkers"
+
+const AnyNode = "anynode"
 const AnyMaster = "anymaster"
+const AnyWorker = "anyworker"

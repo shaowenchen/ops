@@ -3,7 +3,7 @@ package option
 import (
 	"strings"
 
-	"github.com/shaowenchen/ops/pkg/constants"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
 
 type HostOption struct {
@@ -24,7 +24,27 @@ type KubeOption struct {
 }
 
 func (k *KubeOption) IsAllNodes() bool {
-	return strings.ToLower(k.NodeName) == "all"
+	return strings.ToLower(k.NodeName) == opsconstants.AllNodes
+}
+
+func (k *KubeOption) IsAllMasters() bool {
+	return strings.ToLower(k.NodeName) == opsconstants.AllMasters
+}
+
+func (k *KubeOption) IsAllWorkers() bool {
+	return strings.ToLower(k.NodeName) == opsconstants.AllWorkers
+}
+
+func (k *KubeOption) IsAnyNode() bool {
+	return strings.ToLower(k.NodeName) == opsconstants.AnyNode
+}
+
+func (k *KubeOption) IsAnyMaster() bool {
+	return strings.ToLower(k.NodeName) == opsconstants.AnyMaster
+}
+
+func (k *KubeOption) IsAnyWorker() bool {
+	return strings.ToLower(k.NodeName) == opsconstants.AnyWorker
 }
 
 type TaskOption struct {
@@ -74,12 +94,12 @@ func (f *FileOption) GetStorageType() string {
 	}
 	remoteSplit := strings.Split(f.RemoteFile, "://")
 	if len(f.Api) != 0 {
-		f.StorageType = constants.RemoteStorageTypeServer
+		f.StorageType = opsconstants.RemoteStorageTypeServer
 	} else if remoteSplit[0] == "s3" {
-		f.StorageType = constants.RemoteStorageTypeS3
+		f.StorageType = opsconstants.RemoteStorageTypeS3
 		f.RemoteFile = remoteSplit[1]
 	} else {
-		f.StorageType = constants.RemoteStorageTypeImage
+		f.StorageType = opsconstants.RemoteStorageTypeImage
 		f.RuntimeImage = remoteSplit[0]
 		f.RemoteFile = remoteSplit[1]
 	}
