@@ -16,8 +16,8 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.ref
-      name: Ref
+    - jsonPath: .spec.pipelineRef
+      name: PipelineRef
       type: string
     - jsonPath: .spec.crontab
       name: Crontab
