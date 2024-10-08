@@ -72,6 +72,10 @@ type EventCheck struct {
 	Reason    string `json:"reason,omitempty" yaml:"reason,omitempty"`
 }
 
+func (e EventCheck) IsAlert() bool {
+	return e.Status == "alert"
+}
+
 func builderEvent(data interface{}) (cloudevents.Event, error) {
 	e := cloudevents.NewEvent()
 	e.SetID(uuid.New().String())

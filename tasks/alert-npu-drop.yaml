@@ -30,12 +30,15 @@ spec:
               reason = '掉卡'
               error_message = ''
 
-              def send(message):
+              def send(status, message):
                   payload = {
-                      'msgtype': 'text',
-                      'text': {
-                          'content': message
-                      }
+                      'cluster': cluster,
+                      'host': hostname,
+                      'kind': 'alert-npu-drop',
+                      'threshold': str(desired_card_count),
+                      'operator': '!=',
+                      'status': status,
+                      'reason': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
@@ -83,6 +86,7 @@ spec:
                       error_message = str(e)
               finally:
                   if len(error_message) > 0:
-                      print(error_message)
                       error_message = f'cluster: {cluster} \nnodename: {hostname} \n{error_message}reason: {reason}\n'
-                      send(error_message)
+                      send('alert', error_message)
+                  else:
+                      send('normal', error_message)

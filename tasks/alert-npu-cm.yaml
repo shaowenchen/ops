@@ -25,14 +25,15 @@ spec:
               notifaction = '${notifaction}'
 
               error_message = ''
-              reason = '设备注册异常'
+              reason = '设备注册'
 
-              def send(message):
+              def send(status, message):
                   payload = {
-                      'msgtype': 'text',
-                      'text': {
-                          'content': message
-                      }
+                      'cluster': cluster,
+                      'host': hostname,
+                      'kind': 'alert-npu-cm',
+                      'status': status,
+                      'reason': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
@@ -91,6 +92,7 @@ spec:
                       error_message = str(e)
               finally:
                   if len(error_message) > 0:
-                      print(error_message)
                       error_message = f'集群: {cluster} \n{error_message}异常判断: {reason}\n'
-                      send(error_message)
+                      send('alert', error_message)
+                  else:
+                      send('normal', error_message)

@@ -28,14 +28,17 @@ spec:
               notifaction = '${notifaction}'
               maxecc = int('${max}')
 
-              reason = 'ECC异常'
+              reason = 'ECC'
 
-              def send(message):
+              def send(status, message):
                   payload = {
-                      'msgtype': 'text',
-                      'text': {
-                          'content': message
-                      }
+                      'cluster': cluster,
+                      'host': hostname,
+                      'kind': 'alert-gpu-ecc',
+                      'threshold': str(maxecc),
+                      'operator': '==',
+                      'status': status,
+                      'reason': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
@@ -70,4 +73,6 @@ spec:
               finally:
                   if len(error_message) > 0:
                       error_message = f'集群: {cluster} \n节点: {hostname} \n{error_message}异常判断: {reason}\n'
-                      send(error_message)
+                      send('alert', error_message)
+                  else:
+                      send('normal', error_message)

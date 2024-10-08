@@ -5,8 +5,7 @@ metadata:
     namespace: ops-system
 spec:
     desc: alert cluster pod
-    nodeName: anymaster
-    typeRef: cluster
+    host: anymaster
     variables:
         max:
             default: "20"
@@ -31,12 +30,17 @@ spec:
               reason = '异常Pod数量超过阈值'
               threshold = int("${max}")
 
+              abnormal_pods = []
+
               def send(message):
                   payload = {
-                      'msgtype': 'text',
-                      'text': {
-                          'content': message
-                      }
+                      'cluster': cluster,
+                      'kind': 'alert-cluster-pod',
+                      'threshold': str(threshold),
+                      'operator': '>',
+                      'value': len(abnormal_pods),
+                      'status': 'alert',
+                      'reason': message
                   }
                   headers = {
                       'Content-Type': 'application/json'

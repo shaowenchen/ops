@@ -25,12 +25,13 @@ spec:
               notifaction = '${notifaction}'
               keywords = ['NodeNotReady']
 
-              def send(message):
+              def send(status, message):
                   payload = {
-                      'msgtype': 'text',
-                      'text': {
-                          'content': message
-                      }
+                      'cluster': cluster,
+                      'host': hostname,
+                      'kind': 'alert-node-event',
+                      'status': status,
+                      'reason': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
@@ -98,5 +99,6 @@ spec:
                   error_message = str(e)
               finally:
                   if len(error_message) > 0:
-                      print(error_message)
-                      send(f'{error_message}关键字: {", ".join(keywords)}\n')
+                      send('alert', f'{error_message}关键字: {", ".join(keywords)}\n')
+                  else:
+                      send('normal', '')

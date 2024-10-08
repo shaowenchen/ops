@@ -708,16 +708,11 @@ func CreateEvent(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	bodyBytes, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		showError(c, err.Error())
-		return
-	}
 	if opsconstants.IsCheckEvent(req.Event) {
 		event := opsevent.EventCheck{}
-		err = json.Unmarshal(bodyBytes, &event)
+		err := c.ShouldBind(&event)
 		if err != nil {
-			showError(c, "fail to parse event")
+			showError(c, "fail to parse event check " + err.Error())
 			return
 		}
 		go opsevent.FactoryCheck().Publish(context.TODO(), event)
@@ -725,9 +720,9 @@ func CreateEvent(c *gin.Context) {
 		return
 	} else if opsconstants.IsWebhookEvent(req.Event) {
 		event := opsevent.EventWebhook{}
-		err = json.Unmarshal(bodyBytes, &event)
+		err := c.ShouldBind(&event)
 		if err != nil {
-			showError(c, "fail to parse event")
+			showError(c, "fail to parse event webhook " + err.Error())
 			return
 		}
 		go opsevent.FactoryWebhook().Publish(context.TODO(), event)
