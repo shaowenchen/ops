@@ -1,15 +1,12 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Pipeline
 metadata:
-  name: cluster-retag-image
+  name: retag-image
   namespace: ops-system
 spec:
   desc: 转存、retag 容器镜像
   variables:
-    nodeName:
-      required: true
     cluster:
-      value: "cluster"
       required: true
     host:
       required: true

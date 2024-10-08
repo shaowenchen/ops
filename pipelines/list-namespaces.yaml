@@ -7,7 +7,6 @@ spec:
   desc: 列出、查看所有的命名空间
   variables:
     cluster:
-      value: "cluster"
       required: true
     nodeName:
       value: "anymaster"

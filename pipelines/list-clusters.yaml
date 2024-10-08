@@ -7,13 +7,10 @@ spec:
   desc: 列出、查看所有的集群
   variables:
     cluster:
-      value: "cluster"
-      required: true
-    nodeName:
-      value: "anymaster"
+      value: "ksyun-bj6-e"
       required: true
     host:
-      value: "ksyun-bj6-e"
+      value: "anymaster"
       required: true
   tasks:
     - name: 列出所有集群

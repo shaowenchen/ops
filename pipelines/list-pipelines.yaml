@@ -7,14 +7,12 @@ spec:
   desc: 查看、列出所有的流水线
   variables:
     cluster:
-      value: "cluster"
-      required: true
-    nodeName:
-      value: "anymaster"
-      required: true
-    host:
       value: "ksyun-bj6-e"
       required: true
+    host:
+      value: "anymaster"
+      required: true
+
   tasks:
     - name: 列出所有集群
       taskRef: list-pipelines

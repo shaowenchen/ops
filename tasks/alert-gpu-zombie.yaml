@@ -74,7 +74,7 @@ spec:
                       error_message = build_error_message(str(e))
               finally:
                   if len(error_message) > 0:
-                      error_message = f'集群: {cluster} \n节点: {hostname} \n{error_message}异常判断: {reason}\n'
+                      error_message = f'{error_message}{reason}'
                       send('alert', error_message)
                   else:
                       send('normal', error_message)

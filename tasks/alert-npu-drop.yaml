@@ -29,6 +29,7 @@ spec:
               card_id = ''
               reason = '掉卡'
               error_message = ''
+              card_count = 0
 
               def send(status, message):
                   payload = {
@@ -38,6 +39,7 @@ spec:
                       'threshold': str(desired_card_count),
                       'operator': '!=',
                       'status': status,
+                      'value': str(card_count),
                       'reason': message
                   }
                   headers = {
@@ -67,7 +69,6 @@ spec:
                       else:
                           error_message += build_error_message(line, card_count)
                   if card_count != desired_card_count:
-                      error_message += build_error_message('npu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
                       raise Exception(error_message)
                   # 3. lspci check, lspci |grep d80
                   output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
@@ -79,14 +80,13 @@ spec:
                       if 'Huawei' in line:
                           card_count += 1
                   if card_count != desired_card_count:
-                      error_message = build_error_message('npu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
                       raise Exception(error_message)
               except Exception as e:
                   if len(error_message) == 0:
                       error_message = str(e)
               finally:
                   if len(error_message) > 0:
-                      error_message = f'cluster: {cluster} \nnodename: {hostname} \n{error_message}reason: {reason}\n'
+                      error_message = f'{error_message}{reason}'
                       send('alert', error_message)
                   else:
                       send('normal', error_message)

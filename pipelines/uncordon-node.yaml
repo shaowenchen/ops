@@ -1,17 +1,14 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Pipeline
 metadata:
-  name: cluster-uncordon-node
+  name: uncordon-node
   namespace: ops-system
 spec:
   desc: 恢复集群中的某一个节点
   variables:
     cluster:
-      value: "cluster"
       required: true
     host:
-      required: true
-    nodeName:
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
       required: true
   tasks:

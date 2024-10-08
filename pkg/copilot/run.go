@@ -45,7 +45,9 @@ func RunPipeline(logger *log.Logger, chat func(string, string, *RoleContentList)
 		}
 		// merge extra variables
 		for k, v := range extraVariables {
-			variables[k] = v
+			if _, ok := pipeline.Spec.Variables[k]; ok {
+				variables[k] = v
+			}
 		}
 		prResult.Spec.Variables = variables
 	}

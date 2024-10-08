@@ -9,10 +9,8 @@ spec:
     cluster:
       value: "cluster"
       required: true
-    nodeName:
-      value: "anymaster"
-      required: true
     host:
+      value: "anymaster"
       required: true
     namespace:
       required: true

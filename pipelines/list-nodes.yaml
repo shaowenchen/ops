@@ -7,9 +7,9 @@ spec:
   desc: 查看、列出某个集群的所有节点
   variables:
     cluster:
-      value: "cluster"
       required: true
     host:
+      value: "anymaster"
       required: true
   tasks:
     - name: 列出集群的节点

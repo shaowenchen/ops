@@ -1,15 +1,15 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Pipeline
 metadata:
-  name: cluster-list-datasets
+  name: list-datasets
   namespace: ops-system
 spec:
   desc: 列出命名空间下的数据集
   variables:
     cluster:
-      value: "cluster"
       required: true
     host:
+      value: "anymaster"
       required: true
     namespace:
       required: true
