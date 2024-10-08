@@ -533,7 +533,7 @@ func ListPipelineRun(c *gin.Context) {
 func CreateTaskRun(c *gin.Context) {
 	type Params struct {
 		Namespace string            `uri:"namespace"`
-		Ref       string            `json:"ref"`
+		TaskRef   string            `json:"taskRef"`
 		Variables map[string]string `json:"variables"`
 	}
 	var req = Params{}
@@ -547,7 +547,7 @@ func CreateTaskRun(c *gin.Context) {
 		showError(c, "get body error "+err.Error())
 		return
 	}
-	if req.Ref == "" {
+	if req.TaskRef == "" {
 		showError(c, "ref is required")
 		return
 	}
@@ -560,7 +560,7 @@ func CreateTaskRun(c *gin.Context) {
 	task := &opsv1.Task{}
 	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 		Namespace: req.Namespace,
-		Name:      req.Ref,
+		Name:      req.TaskRef,
 	}, task)
 	if err != nil {
 		showError(c, err.Error())
@@ -614,9 +614,9 @@ func CreateTaskRun(c *gin.Context) {
 
 func CreatePipelineRun(c *gin.Context) {
 	type Params struct {
-		Namespace string            `uri:"namespace"`
-		Ref       string            `json:"Ref"`
-		Variables map[string]string `json:"variables"`
+		Namespace   string            `uri:"namespace"`
+		PipelineRef string            `json:"pipelineRef"`
+		Variables   map[string]string `json:"variables"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -638,7 +638,7 @@ func CreatePipelineRun(c *gin.Context) {
 	pipeline := &opsv1.Pipeline{}
 	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 		Namespace: req.Namespace,
-		Name:      req.Ref,
+		Name:      req.PipelineRef,
 	}, pipeline)
 	if err != nil {
 		showError(c, err.Error())
@@ -712,7 +712,7 @@ func CreateEvent(c *gin.Context) {
 		event := opsevent.EventCheck{}
 		err := c.ShouldBind(&event)
 		if err != nil {
-			showError(c, "fail to parse event check " + err.Error())
+			showError(c, "fail to parse event check "+err.Error())
 			return
 		}
 		go opsevent.FactoryCheck().Publish(context.TODO(), event)
@@ -722,7 +722,7 @@ func CreateEvent(c *gin.Context) {
 		event := opsevent.EventWebhook{}
 		err := c.ShouldBind(&event)
 		if err != nil {
-			showError(c, "fail to parse event webhook " + err.Error())
+			showError(c, "fail to parse event webhook "+err.Error())
 			return
 		}
 		go opsevent.FactoryWebhook().Publish(context.TODO(), event)
