@@ -12,3 +12,4 @@
   - [Host](content/opscontroller-host.md)
   - [Cluster](content/opscontroller-cluster.md)
   - [Task](content/opscontroller-task.md)
+- [Nats](content/nats.md)
