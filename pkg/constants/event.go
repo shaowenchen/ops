@@ -4,7 +4,7 @@ import "strings"
 
 const Source = "https://github.com/shaowenchen/ops"
 
-const DefaultEventBusServer = "http://nats-headless:4222"
+const DefaultEventBusServer = "http://nats-headless.ops-system.svc:4222"
 
 const SubjectController = KindOps + "." + KindController
 const SubjectHost = KindOps + "." + KindHost
