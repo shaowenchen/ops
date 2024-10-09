@@ -6,7 +6,7 @@ import (
 )
 
 func (e EventHost) GetUsageDiskTemplate(t time.Time) string {
-	return fmt.Sprintf("cluster: %s\nhost: %s\ndisk usage: %s\ntime: %s\n", e.Cluster, e.Status.Hostname, e.Status.DiskUsagePercent, t.Format("2006-01-02 15:04:05 MST"))
+	return fmt.Sprintf("cluster: %s\nhost: %s\ndisk usage: %s\ntime: %s\n", e.Cluster, e.Status.Hostname, e.Status.DiskUsagePercent, t.Local().Format("2006-01-02 15:04:05"))
 }
 
 func (e EventCheck) GetAlertTemplate(t time.Time) string {
@@ -36,7 +36,7 @@ func (e EventCheck) GetAlertTemplate(t time.Time) string {
 		result += fmt.Sprintf("reason: %s\n", e.Reason)
 	}
 
-	result += fmt.Sprintf("time: %s\n", t.Format("2006-01-02 15:04:05 MST"))
+	result += fmt.Sprintf("time: %s\n", t.Local().Format("2006-01-02 15:04:05"))
 
 	return result
 }
