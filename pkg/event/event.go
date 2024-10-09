@@ -58,6 +58,7 @@ type EventPipelineRun struct {
 
 type EventWebhook struct {
 	Content    string `json:"content,omitempty" yaml:"content,omitempty"`
+	Source     string `json:"source,omitempty" yaml:"source,omitempty"`
 	WebhookUrl string `json:"webhookUrl,omitempty" yaml:"webhookUrl,omitempty"`
 }
 
