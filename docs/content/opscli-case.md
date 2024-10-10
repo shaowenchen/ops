@@ -78,13 +78,6 @@ kubectl -n ops-system create secret generic host-secret --from-file=privatekey=/
 kubectl apply -f ~/.ops/tasks/
 ```
 
-- 配置环境变量
-
-```bash
-export cluster=
-export notifaction=https://xz.wps.cn/api/v1/webhook/send?key=
-```
-
 - 自动发现主机
 
 ```bash
@@ -96,10 +89,7 @@ metadata:
   namespace: ops-system
 spec:
   crontab: 40 * * * *
-  ref: auto-create-host
-  variables:
-    cluster: ${cluster}
-    notifaction: ${notifaction}
+  taskRef: auto-create-host
 EOF
 ```
 
@@ -114,11 +104,7 @@ metadata:
   namespace: ops-system
 spec:
   crontab: 40 * * * *
-  ref: alert-label-gpu
-  variables:
-    cluster: ${cluster}
-    notifaction: ${notifaction}
-EOF
+  taskRef: alert-label-gpu
 ```
 
 - GPU 掉卡巡检
@@ -132,10 +118,7 @@ metadata:
   namespace: ops-system
 spec:
   crontab: 40 * * * *
-  ref: alert-gpu-drop
-  variables:
-    cluster: ${cluster}
-    notifaction: ${notifaction}
+  taskRef: alert-gpu-drop
 EOF
 ```
 
@@ -150,10 +133,7 @@ metadata:
   namespace: ops-system
 spec:
   crontab: 40 * * * *
-  ref: alert-gpu-ecc
-  variables:
-    cluster: ${cluster}
-    notifaction: ${notifaction}
+  taskRef: alert-gpu-ecc
 EOF
 ```
 
@@ -168,10 +148,7 @@ metadata:
   namespace: ops-system
 spec:
   crontab: 40 * * * *
-  ref: alert-gpu-fabric
-  variables:
-    cluster: ${cluster}
-    notifaction: ${notifaction}
+  taskRef: alert-gpu-fabric
 EOF
 ```
 
@@ -186,48 +163,7 @@ metadata:
   namespace: ops-system
 spec:
   crontab: 40 * * * *
-  ref: alert-gpu-zombie
-  variables:
-    cluster: ${cluster}
-    notifaction: ${notifaction}
-EOF
-```
-
-- 磁盘使用率巡检
-
-```bash
-kubectl apply -f - <<EOF
-apiVersion: crd.chenshaowen.com/v1
-kind: TaskRun
-metadata:
-  name: alert-usage-disk
-  namespace: ops-system
-spec:
-  crontab: 40 * * * *
-  ref: alert-usage-disk
-  variables:
-    cluster: ${cluster}
-    notifaction: ${notifaction}
-    usage: "80"
-EOF
-```
-
-- 内存使用率巡检
-
-```bash
-kubectl apply -f - <<EOF
-apiVersion: crd.chenshaowen.com/v1
-kind: TaskRun
-metadata:
-  name: alert-usage-mem
-  namespace: ops-system
-spec:
-  crontab: 40 * * * *
-  ref: alert-usage-mem
-  variables:
-    cluster: ${cluster}
-    notifaction: ${notifaction}
-    usage: "80"
+  taskRef: alert-gpu-zombie
 EOF
 ```
 
@@ -238,10 +174,10 @@ kubectl apply -f - <<EOF
 apiVersion: crd.chenshaowen.com/v1
 kind: TaskRun
 metadata:
-  name: alert-usage-mem
+  name: clear-disk
   namespace: ops-system
 spec:
   crontab: 0 1 * * *
-  ref: alert-usage-mem
+  taskRef: clear-disk
 EOF
 ```

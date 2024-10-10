@@ -24,9 +24,9 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 	usePython := false
 	needBash := false
 	lines := strings.Split(shell, "\n")
-	if len(lines) > 1 && strings.Contains(lines[0], "python") {
+	if len(lines) > 0 && strings.Contains(lines[0], "python") {
 		usePython = true
-	} else if len(lines) > 1 && !strings.Contains(lines[0], "#!/bin/bash") {
+	} else if len(lines) > 0 && !strings.Contains(lines[0], "#!/bin/bash") {
 		needBash = true
 	}
 	if needBash {
