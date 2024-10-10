@@ -314,8 +314,8 @@ func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.
 			logger.Error.Println(err, "update pipelinerun taskrun status error")
 			return
 		}
-		logger.Info.Println("conflict detected, retrying...", err)
-		time.Sleep(1 * time.Second)
+		logger.Info.Println("try commit times ", retries+1, "conflict detected, retrying...", err)
+		time.Sleep(3 * time.Second)
 	}
 	logger.Error.Println("update pipelinerun taskrun status failed after retries", err)
 	return
