@@ -1,0 +1,26 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: delete-kas-job
+  namespace: ops-system
+spec:
+  desc: 删除指定的 KAS Job
+  variables:
+    cluster:
+      required: true
+    host:
+      value: "anymaster"
+      required: true
+    taskId:
+      required: true
+      examples: ["21780"]
+      regex: "^[0-9]*$"
+    white:
+      required: true
+    whitelist:
+      required: true
+  tasks:
+    - name: 白名单检测
+      taskRef: check-whitelist
+    - name: 删除相关的 Pod
+      taskRef: delete-kas-job
