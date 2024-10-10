@@ -14,6 +14,8 @@ spec:
         (nerdctl --namespace k8s.io images -q 2>/dev/null || docker images -q 2>/dev/null) | xargs -r -I {} sh -c 'nerdctl --namespace k8s.io rmi {} 2>/dev/null || docker rmi {} -f 2>/dev/null || true'
     - name: clear image
       content: (nerdctl --namespace k8s.io image prune -f 2>/dev/null || docker image prune -a -f 2>/dev/null || true) | grep "Untagged" || true
+    - name: clear none image
+      content: (nerdctl --namespace k8s.io images -q 2>/dev/null || docker images -q 2>/dev/null) | xargs -r -I {} sh -c 'nerdctl --namespace k8s.io rmi {} 2>/dev/null || docker rmi {} -f 2>/dev/null || true'
     - name: clear container
       content: nerdctl --namespace k8s.io container prune -f 2>/dev/null || docker container prune -a -f 2>/dev/null || true
     - name: clear network
@@ -26,9 +28,9 @@ spec:
       content: find /data/run -type f -name "*.log" -size +50M -exec sh -c 'for file do echo "cleaned $file" >&2; echo "" > "$file"; done' sh {} + 2>/dev/null || true
     - name: clear jfs cache
       content: |
-        find /*/jfs*/*/raw/chunks -maxdepth 5 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
-        find /*/jfs*/*/*/raw/chunks -maxdepth 5 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
-        find /var/lib/jfs/cache*/raw/chunks -maxdepth 5 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
+        find /data*/jfs*/*/raw/chunks -maxdepth 3 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
+        find /data*/jfs*/*/*/raw/chunks -maxdepth 3 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
+        find /var/lib/jfs/cache*/raw/chunks -maxdepth 3 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
     - name: after clear
       content: |
         timeout 5 df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/
