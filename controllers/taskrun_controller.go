@@ -286,7 +286,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		Debug:        opsconstants.GetEnvDebug(),
 		NodeName:     hostStr,
 		RuntimeImage: runtimeImage,
-		Namespace:    opsconstants.DefaultNamespace,
+		Namespace:    opsconstants.OpsNamespace,
 	}
 	// run
 	nodes, err := opskube.GetNodes(ctx, logger, kc.Client, kubeOpt)

@@ -95,5 +95,5 @@ func init() {
 
 	FileCmd.Flags().StringVarP(&fileOpt.NodeName, "nodename", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.RuntimeImage, "runtimeimage", "", constants.OpsCliRuntimeImage, "")
-	FileCmd.Flags().StringVarP(&fileOpt.Namespace, "opsnamespace", "", constants.DefaultNamespace, "ops work namespace")
+	FileCmd.Flags().StringVarP(&fileOpt.Namespace, "opsnamespace", "", constants.OpsNamespace, "ops work namespace")
 }

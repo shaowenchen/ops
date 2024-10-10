@@ -59,7 +59,7 @@ func CreateCluster(ctx context.Context, logger *log.Logger, clusterOpt option.Cl
 func init() {
 	clusterCmd.Flags().StringVarP(&cInventory, "inventory", "i", "", "")
 	clusterCmd.Flags().StringVarP(&cVerbose, "verbose", "v", "", "")
-	clusterCmd.Flags().StringVarP(&cClusterOpt.Namespace, "namespace", "", constants.DefaultNamespace, "")
+	clusterCmd.Flags().StringVarP(&cClusterOpt.Namespace, "namespace", "", constants.OpsNamespace, "")
 	clusterCmd.Flags().StringVarP(&cClusterOpt.Name, "name", "", "", "")
 	clusterCmd.MarkFlagRequired("name")
 	clusterCmd.Flags().StringVarP(&cClusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
