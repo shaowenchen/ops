@@ -36,7 +36,7 @@ func GetParametersPrompt(pipeline opsv1.Pipeline, clusters []opsv1.Cluster) stri
 	}
 	for k, _ := range pipeline.Spec.Variables {
 		vt := pipeline.Spec.Variables[k]
-		if k == "host" {
+		if k == "cluster" {
 			vt.Enums = clusterEnum
 		}
 		vStr, _ := json.Marshal(vt)
