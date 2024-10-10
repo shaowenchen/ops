@@ -26,6 +26,7 @@ spec:
       content: find /data/run -type f -name "*.log" -size +50M -exec sh -c 'for file do echo "cleaned $file" >&2; echo "" > "$file"; done' sh {} +
     - name: clear jfs cache
       content: |
+        find /data/jfs/*/raw/chunks -maxdepth 7 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
         find /data/jfs/cache2/ -maxdepth 7 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
         find /var/lib/jfs/cache/ -maxdepth 7 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
         find /var/lib/jfs/cache2/ -maxdepth 7 -type d -ctime +7 -exec rm -rf {} + 2>/dev/null || true
