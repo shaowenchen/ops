@@ -11,11 +11,9 @@ spec:
         timeout 5 df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/
     - name: delete image
       content: |
-        (nerdctl --namespace k8s.io images -q 2>/dev/null || docker images -q 2>/dev/null) | xargs -r -I {} sh -c 'nerdctl --namespace k8s.io rmi {} 2>/dev/null || docker rmi {} -f 2>/dev/null || true'
+        (nerdctl --namespace k8s.io images -q 2>/dev/null || docker images -q 2>/dev/null) | xargs -r -I {} sh -c 'nerdctl --namespace k8s.io rmi {} 2>/dev/null || docker rmi {} 2>/dev/null || true'
     - name: clear image
       content: (nerdctl --namespace k8s.io image prune -f 2>/dev/null || docker image prune -a -f 2>/dev/null || true) | grep "Untagged" || true
-    - name: clear none image
-      content: (nerdctl --namespace k8s.io images -q 2>/dev/null || docker images -q 2>/dev/null) | xargs -r -I {} sh -c 'nerdctl --namespace k8s.io rmi {} 2>/dev/null || docker rmi {} -f 2>/dev/null || true'
     - name: clear container
       content: nerdctl --namespace k8s.io container prune -f 2>/dev/null || docker container prune -a -f 2>/dev/null || true
     - name: clear network
