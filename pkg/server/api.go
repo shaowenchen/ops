@@ -389,7 +389,22 @@ func ListTask(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	showData(c, paginator[opsv1.Task](taskList.Items, req.PageSize, req.Page))
+	newTaskList := make([]opsv1.Task, 0)
+	// search
+	if req.Search != "" {
+		for i := range taskList.Items {
+			searchField := []string{taskList.Items[i].Name, taskList.Items[i].Spec.Desc}
+			for j := range searchField {
+				if opsutils.Contains(searchField[j], req.Search) {
+					newTaskList = append(newTaskList, taskList.Items[i])
+					break
+				}
+			}
+		}
+	} else {
+		newTaskList = taskList.Items
+	}
+	showData(c, paginator[opsv1.Task](newTaskList, req.PageSize, req.Page))
 }
 
 func ListPipeline(c *gin.Context) {
@@ -426,6 +441,21 @@ func ListPipeline(c *gin.Context) {
 	}
 	if err != nil {
 		return
+	}
+	newPipelineList := make([]opsv1.Pipeline, 0)
+	// search
+	if req.Search != "" {
+		for i := range pipelineList.Items {
+			searchField := []string{pipelineList.Items[i].Name, pipelineList.Items[i].Spec.Desc}
+			for j := range searchField {
+				if opsutils.Contains(searchField[j], req.Search) {
+					newPipelineList = append(newPipelineList, pipelineList.Items[i])
+					break
+				}
+			}
+		}
+	} else {
+		newPipelineList = pipelineList.Items
 	}
 	showData(c, paginator[opsv1.Pipeline](pipelineList.Items, req.PageSize, req.Page))
 }
@@ -491,7 +521,6 @@ func ListTaskRun(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
-		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -521,6 +550,7 @@ func ListTaskRun(c *gin.Context) {
 	if err != nil {
 		return
 	}
+
 	sort.Slice(taskRunList.Items, func(i, j int) bool {
 		return taskRunList.Items[i].ObjectMeta.CreationTimestamp.Time.After(taskRunList.Items[j].ObjectMeta.CreationTimestamp.Time)
 	})
@@ -533,7 +563,6 @@ func ListPipelineRun(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
-		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,

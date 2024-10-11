@@ -8,9 +8,9 @@ export const useClustersStore = defineStore({
     alert: null,
   }),
   actions: {
-    async list(namespace, page_size = 10, page = 1) {
+    async list(namespace, page_size = 10, page = 1, searchQuery = "") {
       const res = await fetchWrapper.get(
-        `/api/v1/namespaces/${namespace}/clusters?page_size=${page_size}&page=${page}`
+        `/api/v1/namespaces/${namespace}/clusters?page_size=${page_size}&page=${page}&search=${searchQuery}`
       );
       return res.data;
     },

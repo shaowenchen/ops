@@ -1,18 +1,36 @@
 <script setup>
 import { useClustersStore, useHostsStore, useTaskRunsStore, useTasksStore } from "@/stores";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
+var searchQuery = ref("");
+var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'spec.cluster', 'spec.host']);
+
 async function loadData() {
     const store = useTasksStore();
-    var res = await store.list("all", pageSize.value, currentPage.value);
-    dataList.value = res.list
-    total.value = res.total
+    var res = await store.list("all", pageSize.value, currentPage.value, searchQuery.value);
+    dataList.value = res.list;
+    total.value = res.total;
 }
+
+const filteredDataList = computed(() => {
+    if (!searchQuery.value) {
+        return dataList.value;
+    }
+    return dataList.value.filter(item => {
+        return Object.values(item.metadata).some(value => 
+            value.toString().toLowerCase().includes(searchQuery.value.toLowerCase())
+        ) || Object.values(item.spec).some(value => 
+            value.toString().toLowerCase().includes(searchQuery.value.toLowerCase())
+        );
+    });
+});
+
 loadData();
+
 function onPaginationChange() {
     loadData();
 }
@@ -33,7 +51,7 @@ async function confirm() {
 }
 
 function close() {
-    selectedItem = null;
+    selectedItem.value = null;
     dialogVisble.value = false;
 }
 
@@ -42,11 +60,11 @@ var clusters = ref([]);
 
 function getHostList() {
     if (selectedItem.spec.cluster === 'host') {
-        return hosts.value.list
+        return hosts.value.list;
     } else if (selectedItem.spec.cluster === 'cluster') {
-        return clusters.value.list
+        return clusters.value.list;
     }
-    return []
+    return [];
 }
 
 async function open() {
@@ -57,13 +75,38 @@ async function open() {
 }
 
 function run(item) {
-    selectedItem = item;
+    selectedItem.value = item;
     dialogVisble.value = true;
 }
+
+const allFields = [
+    { value: 'metadata.namespace', label: 'Namespace' },
+    { value: 'metadata.name', label: 'Name' },
+    { value: 'spec.desc', label: 'Desc' },
+    { value: 'spec.cluster', label: 'Cluster' },
+    { value: 'spec.host', label: 'Host' },
+];
+
 </script>
 
 <template>
     <div class="container">
+        <el-input
+            v-model="searchQuery"
+            placeholder="Search..."
+            class="search-input"
+            clearable
+        />
+
+        <el-select v-model="selectedFields" multiple placeholder="Select columns to display">
+            <el-option
+                v-for="field in allFields"
+                :key="field.value"
+                :label="field.label"
+                :value="field.value"
+            />
+        </el-select>
+
         <el-dialog title="Create TaskRun" v-model="dialogVisble" width="30%" :before-close="close" @open="open">
             <div class="card-body">
                 <div class="form-group">
@@ -82,10 +125,9 @@ function run(item) {
                 <div class="form-group">
                     <label>Cluster</label>
                     <el-select v-model="selectedItem.spec.cluster" class="w-100" placeholder="Select">
-                        <el-option label="Host" value="host" />
                         <el-option label="Cluster" value="cluster" />
+                        <el-option label="Host" value="host" />
                     </el-select>
-
                 </div>
                 <div class="form-group">
                     <label>Host</label>
@@ -101,21 +143,16 @@ function run(item) {
                 </span>
             </template>
         </el-dialog>
-        <el-table :data="dataList" border size="default">
-            <el-table-column prop="metadata.namespace" label="Namespace" />
-            <el-table-column prop="metadata.name" label="Name" />
-            <el-table-column prop="spec.crontab" label="Crontab" />
-            <el-table-column prop="spec.cluster" label="Cluster" />
-            <el-table-column prop="spec.host" label="Host" />
-            <el-table-column prop="spec.nodeName" label="NodeName" />
-            <el-table-column prop="status.startTime" label="Start Time" />
-            <el-table-column prop="status.runStatus" label="Run Status" />
+
+        <el-table :data="filteredDataList" border size="default">
+            <el-table-column v-for="field in selectedFields" :key="field" :prop="field" :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)" />
             <el-table-column label="Actions">
                 <template #default="scope">
                     <el-button type="primary" @click="run(scope.row)">Run</el-button>
                 </template>
             </el-table-column>
         </el-table>
+
         <el-pagination @current-change="onPaginationChange" @size-change="onPageSizeChange"
             v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30]"
             layout="total, sizes, prev, pager, next" :total="total">
@@ -124,7 +161,7 @@ function run(item) {
 </template>
 
 <style scoped>
-.contaner {
+.container {
     margin-left: 7em;
 }
 
@@ -142,5 +179,10 @@ function run(item) {
 .input {
     flex: 1;
     margin-left: 10px;
+}
+
+.search-input {
+    margin-bottom: 1em;
+    width: 300px;
 }
 </style>

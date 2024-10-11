@@ -32,3 +32,4 @@ docs/_book
 web/node_modules
 web/dist
 web/yarn.lock
+web/vite.config.js

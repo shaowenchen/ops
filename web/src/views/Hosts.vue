@@ -6,8 +6,8 @@ var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
-var searchQuery = ref(''); // 搜索框内容
-var selectedFields = ref(['metadata.namespace', 'metadata.name', 'status.hostname', 'status.acceleratorVendor','status.heartStatus']); // 默认展示的字段
+var searchQuery = ref('');
+var selectedFields = ref(['metadata.namespace', 'metadata.name', 'status.hostname', 'status.acceleratorVendor','status.heartStatus']);
 
 async function loadData() {
     const store = useHostsStore();
