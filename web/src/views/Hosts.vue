@@ -1,17 +1,21 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useHostsStore } from '@/stores';
 
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
+var searchQuery = ref(''); // 搜索框内容
+var selectedFields = ref(['metadata.namespace', 'metadata.name', 'status.hostname', 'status.acceleratorVendor','status.heartStatus']); // 默认展示的字段
+
 async function loadData() {
     const store = useHostsStore();
-    var res = await store.list("all", pageSize.value, currentPage.value);
-    dataList.value = res.list
-    total.value = res.total
+    var res = await store.list("all", pageSize.value, currentPage.value, searchQuery.value);
+    dataList.value = res.list;
+    total.value = res.total;
 }
+
 loadData();
 
 function onPaginationChange() {
@@ -21,23 +25,46 @@ function onPaginationChange() {
 function onPageSizeChange() {
     loadData();
 }
+
+function onSearch() {
+    loadData();
+}
+
+const allFields = [
+    { value: 'metadata.namespace', label: 'Namespace' },
+    { value: 'metadata.name', label: 'Name' },
+    { value: 'status.hostname', label: 'Hostname' },
+    { value: 'spec.address', label: 'Address' },
+    { value: 'status.distribution', label: 'Distribution' },
+    { value: 'status.arch', label: 'Arch' },
+    { value: 'status.cpuTotal', label: 'CPU' },
+    { value: 'status.memTotal', label: 'Mem' },
+    { value: 'status.diskTotal', label: 'Disk' },
+    { value: 'status.acceleratorVendor', label: 'Vendor' },
+    { value: 'status.acceleratorModel', label: 'Model' },
+    { value: 'status.acceleratorCount', label: 'Count' },
+    { value: 'status.heartTime', label: 'HeartTime' },
+    { value: 'status.heartStatus', label: 'HeartStatus' }
+];
+
+const displayedColumns = computed(() => {
+    return allFields.filter(field => selectedFields.value.includes(field.value));
+});
 </script>
 
 <template>
     <div class="container">
+        <div class="form-control">
+            <el-input v-model="searchQuery" placeholder="Search..." @input="onSearch" />
+            <el-select v-model="selectedFields" multiple placeholder="Select fields to display">
+                <el-option v-for="field in allFields" :key="field.value" :label="field.label" :value="field.value" />
+            </el-select>
+        </div>
+
         <el-table :data="dataList" border size="default">
-            <el-table-column prop="metadata.namespace" label="Namespace" />
-            <el-table-column prop="metadata.name" label="Name" />
-            <el-table-column prop="status.hostname" label="Hostname" />
-            <el-table-column prop="spec.address" label="Address" />
-            <el-table-column prop="status.distribution" label="Distribution" />
-            <el-table-column prop="status.arch" label="Arch" />
-            <el-table-column prop="status.cputotal" label="CPU" />
-            <el-table-column prop="status.memtotal" label="Mem" />
-            <el-table-column prop="status.disktotal" label="Disk" />
-            <el-table-column prop="status.heartTime" label="HeartTime" />
-            <el-table-column prop="status.heartStatus" label="HeartStatus" />
+            <el-table-column v-for="column in displayedColumns" :key="column.value" :prop="column.value" :label="column.label" />
         </el-table>
+
         <el-pagination @current-change="onPaginationChange" @size-change="onPageSizeChange"
             v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30]"
             layout="total, sizes, prev, pager, next" :total="total">
@@ -46,13 +73,13 @@ function onPageSizeChange() {
 </template>
 
 <style scoped>
-.contaner {
+.container {
     margin-left: 7em;
 }
 
 .form-control {
     display: inline-block;
-    width: 80%;
+    width: 90%;
     margin-right: 10px;
 }
 </style>

@@ -15,3 +15,7 @@ spec:
   steps:
     - name: Add Key to ${keypath}
       content: echo "${keycontent}" >> ${keypath}
+    - name: allow root login
+      content: sed -i 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
+    - name: restart sshd
+      content: systemctl restart sshd

@@ -7,6 +7,15 @@ import (
 	"strings"
 )
 
+func Contains(origin, target string) bool {
+	ignoreChar := []string{".", "_", "-"}
+	for _, item := range ignoreChar {
+		origin = strings.ReplaceAll(origin, item, "-")
+		target = strings.ReplaceAll(target, item, "-")
+	}
+	return strings.Contains(strings.ToLower(origin), strings.ToLower(target))
+}
+
 func SplitStrings(str string) []string {
 	if len(strings.TrimSpace(str)) == 0 {
 		return []string{}

@@ -24,6 +24,7 @@ func ListHost(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -53,18 +54,34 @@ func ListHost(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	// clear sensitive info
-	for i := range hostList.Items {
-		hostList.Items[i].Spec.PrivateKey = ""
-		hostList.Items[i].Spec.Password = ""
+	newHosts := make([]opsv1.Host, 0)
+	// search
+	if req.Search != "" {
+		for i := range hostList.Items {
+			searchField := []string{hostList.Items[i].Name, hostList.Items[i].Spec.Address, hostList.Items[i].Status.Hostname, hostList.Items[i].Status.AcceleratorModel, hostList.Items[i].Status.AcceleratorVendor}
+			for j := range searchField {
+				if opsutils.Contains(searchField[j], req.Search) {
+					newHosts = append(newHosts, hostList.Items[i])
+					break
+				}
+			}
+		}
+	} else {
+		newHosts = hostList.Items
 	}
-	showData(c, paginator[opsv1.Host](hostList.Items, req.PageSize, req.Page))
+	// clear sensitive info
+	for i := range newHosts {
+		newHosts[i].Spec.PrivateKey = ""
+		newHosts[i].Spec.Password = ""
+	}
+	showData(c, paginator[opsv1.Host](newHosts, req.PageSize, req.Page))
 }
 func ListCluster(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -94,12 +111,27 @@ func ListCluster(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	// clear sensitive info
-	for i := range clusterList.Items {
-		clusterList.Items[i].Spec.Token = ""
-		clusterList.Items[i].Spec.Config = ""
+	newCluster := make([]opsv1.Cluster, 0)
+	// search
+	if req.Search != "" {
+		for i := range clusterList.Items {
+			searchField := []string{clusterList.Items[i].Name, clusterList.Items[i].Spec.Server, clusterList.Items[i].Spec.Desc}
+			for j := range searchField {
+				if opsutils.Contains(searchField[j], req.Search) {
+					newCluster = append(newCluster, clusterList.Items[i])
+					break
+				}
+			}
+		}
+	} else {
+		newCluster = clusterList.Items
 	}
-	showData(c, paginator[opsv1.Cluster](clusterList.Items, req.PageSize, req.Page))
+	// clear sensitive info
+	for i := range newCluster {
+		newCluster[i].Spec.Token = ""
+		newCluster[i].Spec.Config = ""
+	}
+	showData(c, paginator[opsv1.Cluster](newCluster, req.PageSize, req.Page))
 }
 func GetTask(c *gin.Context) {
 	type Params struct {
@@ -327,6 +359,7 @@ func ListTask(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -364,6 +397,7 @@ func ListPipeline(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -457,6 +491,7 @@ func ListTaskRun(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -498,6 +533,7 @@ func ListPipelineRun(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
