@@ -337,6 +337,7 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		latestTr.Status = tr.Status
 		err = r.Client.Status().Update(ctx, latestTr)
 		if err == nil {
+			//need to improve
 			time.Sleep(3 * time.Second)
 			return
 		}

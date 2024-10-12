@@ -13,21 +13,41 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: aliyun/acr-login@v1
+        with:
+          login-server: https://registry.cn-hangzhou.aliyuncs.com
+          username: "${{ secrets.ACR_USERNAME }}"
+          password: "${{ secrets.ACR_PASSWORD }}"
+
       - name: Build and push Controller
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: shaowenchen/ops-controller-manager:latest
+          tags: docker.io/shaowenchen/ops-controller-manager:latest
           file: Dockerfile
+      - name: Push ops-controller-manager to aliyun
+        run: |
+          docker tag docker.io/shaowenchen/ops-controller-manager:latest registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-controller-manager:latest
+          docker push registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-controller-manager:latest
+
       - name: Build and push Server
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: shaowenchen/ops-server:latest
+          tags: docker.io/shaowenchen/ops-server:latest
           file: Dockerfile-Server
+      - name: Push ops-server to aliyun
+        run: |
+          docker tag docker.io/shaowenchen/ops-server:latest registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-server:latest
+          docker push registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-server:latest
+
       - name: Build and push Cli
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: shaowenchen/ops-cli:latest
+          tags: docker.io/shaowenchen/ops-cli:latest
           file: Dockerfile-Cli
+      - name: Push ops-cli to aliyun
+        run: |
+          docker tag docker.io/shaowenchen/ops-cli:latest registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-cli:latest
+          docker push registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-cli:latest

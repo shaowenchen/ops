@@ -14,6 +14,7 @@ import (
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -70,6 +71,19 @@ func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
 	return
 }
 
+func (kc *KubeConnection) CreatePipelineRun(pr *opsv1.PipelineRun) (err error) {
+	existingPR := &opsv1.PipelineRun{}
+	err = (*kc.OpsClient).Get(context.TODO(), types.NamespacedName{Name: pr.Name, Namespace: pr.Namespace}, existingPR)
+	if err == nil {
+		return nil
+	}
+	return (*kc.OpsClient).Create(context.TODO(), pr.Copy())
+}
+
+func (kc *KubeConnection) GetPipelineRun(pr *opsv1.PipelineRun) (err error) {
+	return (*kc.OpsClient).Get(context.TODO(), types.NamespacedName{Name: pr.Name, Namespace: pr.Namespace}, pr)
+}
+
 func (kc *KubeConnection) GetHost(namespace, hostname string) (host *opsv1.Host, err error) {
 	hostList := &opsv1.HostList{}
 	err = (*kc.OpsClient).List(context.TODO(), hostList, runtimeClient.InNamespace(namespace))
@@ -104,6 +118,10 @@ func (kc *KubeConnection) BuildClients() (err error) {
 	}
 	// try others
 	return
+}
+
+func (kc *KubeConnection) GetUID() (uid string, err error) {
+	return opsutils.GetClusterUID(*kc.OpsClient)
 }
 
 func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
@@ -143,6 +161,13 @@ func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
 		err = err1
 	}
 
+	uid, err1 := kc.GetUID()
+	if err1 == nil {
+		anyOneIsOk = true
+	} else {
+		err = err1
+	}
+
 	status = &opsv1.ClusterStatus{
 		Version:          version,
 		Node:             len(nodes.Items),
@@ -151,6 +176,7 @@ func (kc *KubeConnection) GetStatus() (status *opsv1.ClusterStatus, err error) {
 		HeartTime:        &metav1.Time{Time: time.Now()},
 		HeartStatus:      opsconstants.StatusSuccessed,
 		CertNotAfterDays: days,
+		UID:              uid,
 	}
 
 	if !anyOneIsOk {

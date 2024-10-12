@@ -28,7 +28,9 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
+	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -94,6 +96,49 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// if is others cluster, send and just sync status
+	cluster := r.isOtherCluster(pr)
+	if cluster != nil {
+		// send pr
+		logger.Info.Printf("send pr %s to cluster %s", pr.Name, cluster.Name)
+		kc, err := opskube.NewClusterConnection(cluster)
+		if err != nil {
+			logger.Error.Println(err, "failed to create cluster connection")
+			return ctrl.Result{}, err
+		}
+		pr.SetCurrentCluster()
+		err = kc.CreatePipelineRun(pr)
+		if err != nil {
+			logger.Error.Println(err, "failed to create pr")
+			return ctrl.Result{}, err
+		}
+		go func() {
+			othersPr := &opsv1.PipelineRun{}
+			for {
+				time.Sleep(3 * time.Second)
+				err = kc.GetPipelineRun(othersPr)
+				if err != nil {
+					logger.Error.Println(err, "failed to get pr")
+					return
+				}
+				currentPR := &opsv1.PipelineRun{}
+				err = r.Client.Get(ctx, req.NamespacedName, currentPR)
+				if err != nil {
+					logger.Error.Println(err, "failed to get pr")
+					return
+				}
+				currentPR.Status = othersPr.Status
+				err = r.Client.Status().Update(ctx, currentPR)
+				if err == nil && opsconstants.IsFinishedStatus(pr.Status.RunStatus) {
+					break
+				}
+			}
+			// send event
+			err = opsevent.FactoryPipelineRun().Publish(ctx, pr)
+		}()
+		return ctrl.Result{}, nil
+	}
+	// else is this cluster
 	// add crontab
 	r.addCronTab(logger, ctx, pr)
 	// had run once, skip
@@ -110,7 +155,32 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	// run
 	err = r.run(logger, ctx, p, pr)
+	// send event
+	err = opsevent.FactoryPipelineRun().Publish(ctx, pr)
 	return ctrl.Result{}, err
+}
+
+func (r *PipelineRunReconciler) isOtherCluster(pr *opsv1.PipelineRun) *opsv1.Cluster {
+	cluster := pr.GetCluster()
+	if cluster == "" {
+		return nil
+	}
+	// judge cluster uid
+	currentUID, err := opsutils.GetClusterUID(r.Client)
+	if err != nil {
+		return nil
+	}
+	clusterList := &opsv1.ClusterList{}
+	err = r.Client.List(context.TODO(), clusterList)
+	if err != nil {
+		return nil
+	}
+	for _, item := range clusterList.Items {
+		if item.Name == cluster || item.Status.UID == currentUID {
+			return &item
+		}
+	}
+	return nil
 }
 
 func (r *PipelineRunReconciler) deleteCronTab(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {

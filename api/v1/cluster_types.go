@@ -37,6 +37,7 @@ type ClusterSpec struct {
 type ClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	UID              string       `json:"uid,omitempty" yaml:"uid,omitempty"`
 	Version          string       `json:"version,omitempty" yaml:"version,omitempty"`
 	Node             int          `json:"node,omitempty" yaml:"node,omitempty"`
 	Pod              int          `json:"pod,omitempty" yaml:"pod,omitempty"`

@@ -84,10 +84,12 @@ spec:
                 type: integer
               runningPod:
                 type: integer
-              version:
+              uid:
                 description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
                   of cluster Important: Run "make" to regenerate code after modifying
                   this file'
+                type: string
+              version:
                 type: string
             type: object
         type: object

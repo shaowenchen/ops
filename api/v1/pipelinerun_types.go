@@ -92,6 +92,34 @@ func (obj *PipelineRun) GetUniqueKey() string {
 	}.String()
 }
 
+func (obj *PipelineRun) GetCluster() string {
+	if obj.Spec.Variables == nil {
+		return ""
+	}
+	return obj.Spec.Variables[opsconstants.Cluster]
+}
+
+func (obj *PipelineRun) SetCurrentCluster() {
+	if obj.Spec.Variables == nil {
+		return
+	}
+	obj.Spec.Variables[opsconstants.Cluster] = ""
+}
+
+func (obj *PipelineRun) Copy() *PipelineRun {
+	return &PipelineRun{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: obj.GetObjectMeta().GetGenerateName(),
+			Name:         obj.GetObjectMeta().GetName(),
+			Namespace:    obj.GetObjectMeta().GetNamespace(),
+			Labels:       obj.GetObjectMeta().GetLabels(),
+			Annotations:  obj.GetObjectMeta().GetAnnotations(),
+		},
+		Spec:   obj.Spec,
+		Status: obj.Status,
+	}
+}
+
 func NewPipelineRun(p *Pipeline) PipelineRun {
 	if p == nil {
 		return PipelineRun{}

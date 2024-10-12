@@ -22,6 +22,15 @@ import (
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+func GetClusterUID(k8sClient runtimeClient.Client) (string, error) {
+	kubeSystemNamespace := &corev1.Namespace{}
+	err := k8sClient.Get(context.TODO(), runtimeClient.ObjectKey{Name: "kube-system"}, kubeSystemNamespace)
+	if err != nil {
+		return "", err
+	}
+	return string(kubeSystemNamespace.UID), nil
+}
+
 func GetRestConfigByContent(kubeconfig string) (*rest.Config, error) {
 	restConfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(kubeconfig))
 	return restConfig, err

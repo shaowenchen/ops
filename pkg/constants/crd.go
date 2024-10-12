@@ -22,6 +22,10 @@ const StatusAborted = "Aborted"
 const StatusDataInValid = "DataInValid"
 const StatusEmpty = ""
 
+func IsFinishedStatus(status string) bool {
+	return status == StatusSuccessed || status == StatusFailed || status == StatusAborted || status == StatusDataInValid
+}
+
 const (
 	LabelCronKey                   = "ops/cron"
 	LabelCronTaskValue             = "task"
