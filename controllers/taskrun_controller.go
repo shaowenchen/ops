@@ -205,7 +205,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		for _, h := range hosts {
 			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.Host))
 			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-			err = r.runTaskOnHost(cliLogger, ctx, t, tr, &h)
+			err = r.runTaskOnHost(cliLogger, ctx, r.Client, t, tr, &h)
 			if err != nil {
 				logger.Error.Println(err)
 			}
@@ -235,7 +235,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	return
 }
 
-func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host) (err error) {
+func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, client client.Client, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host) (err error) {
 	// fill variables
 	variables := tr.Spec.Variables
 	variables["hostname"] = h.GetHostname()
@@ -247,7 +247,7 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 
 	// filled host
 	if h.Spec.SecretRef != "" {
-		err = filledHostFromSecret(h, r.Client, h.Spec.SecretRef)
+		err = filledHostFromSecret(h, client, h.Spec.SecretRef)
 		if err != nil {
 			logger.Error.Println("fill host secretRef error", err)
 			return
@@ -272,6 +272,13 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		logger.Error.Println(err)
 		return err
 	}
+	// if find host in cluster, and can connect
+	host, _ := kc.GetHost(opsconstants.OpsNamespace, tr.GetHost(t))
+	if host != nil {
+		logger.Info.Println("use host credentials to run cluster task " + tr.Name)
+		return r.runTaskOnHost(logger, ctx, *kc.OpsClient, t, tr, host)
+	}
+	// else use pod to run task
 	// build options
 	hostStr := tr.GetHost(t)
 	// task > env > default

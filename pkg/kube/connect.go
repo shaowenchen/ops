@@ -70,6 +70,21 @@ func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
 	return
 }
 
+func (kc *KubeConnection) GetHost(namespace, hostname string) (host *opsv1.Host, err error) {
+	hostList := &opsv1.HostList{}
+	err = (*kc.OpsClient).List(context.TODO(), hostList, runtimeClient.InNamespace(namespace))
+	if err != nil {
+		return
+	}
+	for i := range hostList.Items {
+		if hostList.Items[i].Name == hostname || hostList.Items[i].Status.Hostname == hostname {
+			host = &hostList.Items[i]
+			return
+		}
+	}
+	return
+}
+
 func (kc *KubeConnection) BuildClients() (err error) {
 	kc.Client, err = opsutils.GetClientByRestconfig(kc.RestConfig)
 	if err != nil {
@@ -79,7 +94,10 @@ func (kc *KubeConnection) BuildClients() (err error) {
 	if err != nil {
 		return
 	}
-
+	err = corev1.AddToScheme(scheme)
+	if err != nil {
+		return
+	}
 	opsClient, err := runtimeClient.New(kc.RestConfig, runtimeClient.Options{Scheme: scheme})
 	if err == nil {
 		kc.OpsClient = &opsClient
