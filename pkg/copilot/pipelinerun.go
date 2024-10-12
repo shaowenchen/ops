@@ -10,6 +10,7 @@ import (
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 )
 
@@ -66,10 +67,10 @@ func (m *PipelineRunsManager) PrintMarkdownPipelineRuns(pr *opsv1.PipelineRun) (
 		var b strings.Builder
 		for _, nodeRunStatus := range t.TaskRunStatus.TaskRunNodeStatus {
 			for _, step := range nodeRunStatus.TaskRunStep {
-				b.WriteString(fmt.Sprintf("- Step: %s\n", step.StepName))
-				if step.StepOutput == "" {
-					step.StepOutput = "no output or not found"
+				if step.StepOutput == "" || step.StepOutput == opsconstants.NoOutput {
+					continue
 				}
+				b.WriteString(fmt.Sprintf("- Step: %s\n", step.StepName))
 				step.StepOutput = strings.ReplaceAll(step.StepOutput, "\n", "\n\n")
 				b.WriteString(fmt.Sprintf("- Output:\n\n%s\n", step.StepOutput))
 			}

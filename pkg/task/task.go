@@ -164,7 +164,7 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 		if err != nil {
 			output = err.Error()
 		} else {
-			output = "no output"
+			output = opsconstants.NoOutput
 		}
 	}
 	return
