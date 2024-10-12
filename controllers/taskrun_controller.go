@@ -201,10 +201,10 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	cluster := r.getCluster(logger, ctx, t, tr)
 	hosts := r.getHosts(logger, ctx, t, tr)
 
+	cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 	if cluster.IsCurrentCluster() && len(hosts) > 0 {
 		for _, h := range hosts {
 			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.Host))
-			cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 			err = r.runTaskOnHost(cliLogger, ctx, r.Client, t, tr, &h)
 			if err != nil {
 				logger.Error.Println(err)
@@ -212,8 +212,10 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			cliLogger.Flush()
 		}
 	} else {
-		cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-		r.runTaskOnKube(cliLogger, ctx, t, tr, &cluster)
+		err = r.runTaskOnKube(cliLogger, ctx, t, tr, &cluster)
+		if err != nil {
+			logger.Error.Println(err)
+		}
 		cliLogger.Flush()
 	}
 	// get taskrun status
@@ -335,6 +337,7 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		latestTr.Status = tr.Status
 		err = r.Client.Status().Update(ctx, latestTr)
 		if err == nil {
+			time.Sleep(3 * time.Second)
 			return
 		}
 		if !apierrors.IsConflict(err) {
