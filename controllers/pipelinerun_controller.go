@@ -292,8 +292,8 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, pr *opsv1.PipelineRun, prstatus string, taskName, taskRef string, trStatus *opsv1.TaskRunStatus) (err error) {
-	latestPr := &opsv1.PipelineRun{}
 	for retries := 0; retries < CommitStatusMaxRetries; retries++ {
+		latestPr := &opsv1.PipelineRun{}
 		err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.GetNamespace(), Name: pr.GetName()}, latestPr)
 		if err != nil {
 			logger.Error.Println(err)

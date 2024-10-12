@@ -328,6 +328,10 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 			logger.Error.Println(err)
 			return
 		}
+		// merge status
+		if tr.Status.TaskRunNodeStatus != nil {
+			latestTr.Status.TaskRunNodeStatus = tr.Status.TaskRunNodeStatus
+		}
 		latestTr.Status = tr.Status
 		err = r.Client.Status().Update(ctx, latestTr)
 		if err == nil {
