@@ -96,6 +96,9 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	if opsconstants.IsFinishedStatus(pr.Status.RunStatus) {
+		return ctrl.Result{}, nil
+	}
 	// if is others cluster, send and just sync status
 	cluster := r.isOtherCluster(pr)
 	if cluster != nil {
@@ -112,26 +115,36 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			logger.Error.Println(err, "failed to create pr")
 			return ctrl.Result{}, err
 		}
+		MaxTimes := 60 / 3 * 30
 		go func() {
-			othersPr := &opsv1.PipelineRun{}
-			for {
+			for retries := 0; retries < MaxTimes; retries++ {
 				time.Sleep(3 * time.Second)
+				logger.Info.Printf("get others pr %s status, times %d", pr.Name, retries)
+				othersPr := &opsv1.PipelineRun{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: pr.Namespace,
+						Name:      pr.Name,
+					},
+				}
 				err = kc.GetPipelineRun(othersPr)
 				if err != nil {
-					logger.Error.Println(err, "failed to get pr")
+					logger.Error.Println(err, "failed to get others pr")
 					return
+				} else if !opsconstants.IsFinishedStatus(othersPr.Status.RunStatus) {
+					continue
 				}
 				currentPR := &opsv1.PipelineRun{}
 				err = r.Client.Get(ctx, req.NamespacedName, currentPR)
 				if err != nil {
-					logger.Error.Println(err, "failed to get pr")
+					logger.Error.Println(err, "failed to get current pr")
 					return
 				}
 				currentPR.Status = othersPr.Status
 				err = r.Client.Status().Update(ctx, currentPR)
-				if err == nil && opsconstants.IsFinishedStatus(pr.Status.RunStatus) {
-					break
+				if err != nil {
+					logger.Error.Println(err, "failed to update current pr")
 				}
+				return
 			}
 			// send event
 			err = opsevent.FactoryPipelineRun().Publish(ctx, pr)
@@ -176,7 +189,7 @@ func (r *PipelineRunReconciler) isOtherCluster(pr *opsv1.PipelineRun) *opsv1.Clu
 		return nil
 	}
 	for _, item := range clusterList.Items {
-		if item.Name == cluster || item.Status.UID == currentUID {
+		if currentUID != item.Status.UID && item.Name == cluster {
 			return &item
 		}
 	}
