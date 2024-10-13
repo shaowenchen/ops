@@ -115,6 +115,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			logger.Error.Println(err, "failed to create pr")
 			return ctrl.Result{}, err
 		}
+		r.commitStatus(logger, ctx, pr, opsconstants.StatusDispatched, "", "", nil)
 		MaxTimes := 60 / 3 * 30
 		go func() {
 			for retries := 0; retries < MaxTimes; retries++ {

@@ -20,6 +20,7 @@ const StatusFailed = "Failed"
 const StatusRunning = "Running"
 const StatusAborted = "Aborted"
 const StatusDataInValid = "DataInValid"
+const StatusDispatched = "Dispatched"
 const StatusEmpty = ""
 
 func IsFinishedStatus(status string) bool {
