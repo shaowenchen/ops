@@ -9,18 +9,20 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: docker/login-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: aliyun/acr-login@v1
+      - name: Login to ACR
+        uses: docker/login-action@v3
         with:
-          login-server: https://registry.cn-hangzhou.aliyuncs.com
+          registry: https://registry.cn-hangzhou.aliyuncs.com
           username: "${{ secrets.ACR_USERNAME }}"
           password: "${{ secrets.ACR_PASSWORD }}"
 
       - name: Build and push Controller
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           push: true
           tags: docker.io/shaowenchen/ops-controller-manager:latest
@@ -31,7 +33,7 @@ jobs:
           docker push registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-controller-manager:latest
 
       - name: Build and push Server
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           push: true
           tags: docker.io/shaowenchen/ops-server:latest
@@ -42,7 +44,7 @@ jobs:
           docker push registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-server:latest
 
       - name: Build and push Cli
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           push: true
           tags: docker.io/shaowenchen/ops-cli:latest
