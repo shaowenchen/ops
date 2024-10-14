@@ -80,6 +80,19 @@ func (obj *Task) GetUniqueKey() string {
 	}.String()
 }
 
+func (obj *Task) CopyWithOutVersion() *Task {
+	return &Task{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: obj.GetObjectMeta().GetGenerateName(),
+			Name:         obj.GetObjectMeta().GetName(),
+			Namespace:    obj.GetObjectMeta().GetNamespace(),
+			Labels:       obj.GetObjectMeta().GetLabels(),
+			Annotations:  obj.GetObjectMeta().GetAnnotations(),
+		},
+		Spec: obj.Spec,
+	}
+}
+
 //+kubebuilder:object:root=true
 
 // TaskList contains a list of Task

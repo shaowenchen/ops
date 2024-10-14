@@ -21,6 +21,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -64,16 +65,41 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 	obj := &opsv1.Pipeline{}
 	err = r.Client.Get(ctx, req.NamespacedName, obj)
 
-	//if delete, stop ticker
 	if apierrors.IsNotFound(err) {
+		obj.Namespace = req.Namespace
+		obj.Name = req.Name
+		r.syncResource(logger, ctx, true, obj)
 		return ctrl.Result{}, nil
 	}
-
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	r.syncResource(logger, ctx, false, obj)
 
 	return ctrl.Result{}, nil
+}
+
+func (r *PipelineReconciler) syncResource(logger *opslog.Logger, ctx context.Context, isDeleted bool, obj *opsv1.Pipeline) {
+	logger.Info.Println("Syncing "+obj.GetUniqueKey()+" pipelines, isDeleted: ", isDeleted)
+
+	clusterList := &opsv1.ClusterList{}
+	err := r.List(ctx, clusterList, &client.ListOptions{})
+	if err != nil {
+		logger.Error.Println(err, "failed to list clusters")
+		return
+	}
+
+	for _, c := range clusterList.Items {
+		objs := []opsv1.Pipeline{*obj}
+		kc, err := opskube.NewClusterConnection(&c)
+		if err != nil {
+			logger.Error.Println(err, "failed to create cluster connection")
+		}
+		err = kc.SyncPipelines(isDeleted, objs)
+		if err != nil {
+			logger.Error.Println(err, "failed to sync pipelines")
+		}
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

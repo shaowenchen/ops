@@ -75,6 +75,19 @@ func (obj *Pipeline) GetTTLSecondsAfterFinished() int {
 	return opsconstants.DefaultTTLSecondsAfterFinished
 }
 
+func (obj *Pipeline) CopyWithOutVersion() *Pipeline {
+	return &Pipeline{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: obj.GetObjectMeta().GetGenerateName(),
+			Name:         obj.GetObjectMeta().GetName(),
+			Namespace:    obj.GetObjectMeta().GetNamespace(),
+			Labels:       obj.GetObjectMeta().GetLabels(),
+			Annotations:  obj.GetObjectMeta().GetAnnotations(),
+		},
+		Spec: obj.Spec,
+	}
+}
+
 //+kubebuilder:object:root=true
 
 // PipelineList contains a list of Pipeline

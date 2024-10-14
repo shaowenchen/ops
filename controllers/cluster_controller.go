@@ -81,22 +81,41 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	}
 	// add timeticker
 	r.addTimeTicker(logger, ctx, c)
-
+	// sync tasks and pipelines
+	r.syncResource(logger, ctx, c)
 	return ctrl.Result{}, nil
 }
 
-// SetupWithManager sets up the controller with the Manager.
-func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	// push event
-	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
-		Cluster: opsconstants.GetEnvCluster(),
-		Kind:    opsconstants.KindCluster,
-	})
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&opsv1.Cluster{}).
-		WithOptions(controller.Options{
-			MaxConcurrentReconciles: opsconstants.MaxResourceConcurrentReconciles}).
-		Complete(r)
+func (r *ClusterReconciler) syncResource(logger *opslog.Logger, ctx context.Context, c *opsv1.Cluster) {
+	kc, err := opskube.NewClusterConnection(c)
+	if err != nil {
+		logger.Error.Println(err, "failed to create cluster connection")
+		return
+	}
+	// sync tasks
+	taskList := &opsv1.TaskList{}
+	err = r.List(ctx, taskList, &client.ListOptions{Namespace: c.Namespace})
+	if err != nil {
+		logger.Error.Println(err, "failed to list tasks")
+		return
+	}
+	err = kc.SyncTasks(false, taskList.Items)
+	if err != nil {
+		logger.Error.Println(err, "failed to sync tasks")
+		return
+	}
+	// sync pipelines
+	pipelineList := &opsv1.PipelineList{}
+	err = r.List(ctx, pipelineList, &client.ListOptions{Namespace: c.Namespace})
+	if err != nil {
+		logger.Error.Println(err, "failed to list pipelines")
+		return
+	}
+	err = kc.SyncPipelines(false, pipelineList.Items)
+	if err != nil {
+		logger.Error.Println(err, "failed to sync pipelines")
+		return
+	}
 }
 
 func (r *ClusterReconciler) deleteCluster(ctx context.Context, namespacedName types.NamespacedName) error {
@@ -191,4 +210,18 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		logger.Error.Println(err, "update cluster status error")
 	}
 	return
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// push event
+	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
+		Cluster: opsconstants.GetEnvCluster(),
+		Kind:    opsconstants.KindCluster,
+	})
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&opsv1.Cluster{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: opsconstants.MaxResourceConcurrentReconciles}).
+		Complete(r)
 }

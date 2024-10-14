@@ -22,6 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/google/go-cmp/cmp"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -30,6 +31,7 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 )
 
@@ -63,18 +65,44 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		logger.SetVerbose("debug").Build()
 	}
 
-	t := &opsv1.Task{}
-	err = r.Client.Get(ctx, req.NamespacedName, t)
+	obj := &opsv1.Task{}
+	err = r.Client.Get(ctx, req.NamespacedName, obj)
 
-	if err != nil {
-		return ctrl.Result{}, err
+	if k8serrors.IsNotFound(err) {
+		obj.Namespace = req.Namespace
+		obj.Name = req.Name
+		r.syncResource(logger, ctx, true, obj)
+		return ctrl.Result{}, nil
 	}
-	//TODO: Validate spec
 	if err != nil {
 		logger.Error.Println(err)
 	}
+	r.syncResource(logger, ctx, false, obj)
 
 	return ctrl.Result{}, nil
+}
+
+func (r *TaskReconciler) syncResource(logger *opslog.Logger, ctx context.Context, isDeleted bool, obj *opsv1.Task) {
+	logger.Info.Println("Syncing "+obj.GetUniqueKey()+" tasks, isDeleted: ", isDeleted)
+
+	clusterList := &opsv1.ClusterList{}
+	err := r.Client.List(ctx, clusterList, &client.ListOptions{})
+	if err != nil {
+		logger.Error.Println(err, "failed to list clusters")
+		return
+	}
+
+	for _, c := range clusterList.Items {
+		objs := []opsv1.Task{*obj}
+		kc, err := opskube.NewClusterConnection(&c)
+		if err != nil {
+			logger.Error.Println(err, "failed to create cluster connection")
+		}
+		err = kc.SyncTasks(isDeleted, objs)
+		if err != nil {
+			logger.Error.Println(err, "failed to sync pipelines")
+		}
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

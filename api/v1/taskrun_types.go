@@ -81,6 +81,19 @@ func (obj *TaskRun) GetUniqueKey() string {
 	}.String()
 }
 
+func (obj *TaskRun) CopyWithOutVersion() *TaskRun {
+	return &TaskRun{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: obj.GetObjectMeta().GetGenerateName(),
+			Name:         obj.GetObjectMeta().GetName(),
+			Namespace:    obj.GetObjectMeta().GetNamespace(),
+			Labels:       obj.GetObjectMeta().GetLabels(),
+			Annotations:  obj.GetObjectMeta().GetAnnotations(),
+		},
+		Spec: obj.Spec,
+	}
+}
+
 func NewTaskRun(t *Task) TaskRun {
 	tr := TaskRun{
 		ObjectMeta: metav1.ObjectMeta{

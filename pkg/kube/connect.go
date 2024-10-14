@@ -4,20 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
-	"time"
-
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsopt "github.com/shaowenchen/ops/pkg/option"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"math/rand"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
+	"time"
 )
 
 type KubeConnection struct {
@@ -71,13 +71,55 @@ func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
 	return
 }
 
+func (kc *KubeConnection) SyncTasks(isDeleted bool, objs []opsv1.Task) (err error) {
+	for _, t := range objs {
+		copyObj := (&t).CopyWithOutVersion()
+		if isDeleted {
+			err = (*kc.OpsClient).Delete(context.TODO(), copyObj)
+			if err != nil {
+				return
+			}
+		} else {
+			err = (*kc.OpsClient).Create(context.TODO(), copyObj)
+			if k8serrors.IsAlreadyExists(err) {
+				err = (*kc.OpsClient).Update(context.TODO(), copyObj)
+				if err != nil {
+					return
+				}
+			}
+		}
+	}
+	return
+}
+
+func (kc *KubeConnection) SyncPipelines(isDeleted bool, objs []opsv1.Pipeline) (err error) {
+	for _, t := range objs {
+		copyObj := (&t).CopyWithOutVersion()
+		if isDeleted {
+			err = (*kc.OpsClient).Delete(context.TODO(), copyObj)
+			if err != nil {
+				return
+			}
+		} else {
+			err = (*kc.OpsClient).Create(context.TODO(), copyObj)
+			if k8serrors.IsAlreadyExists(err) {
+				err = (*kc.OpsClient).Update(context.TODO(), copyObj)
+				if err != nil {
+					return
+				}
+			}
+		}
+	}
+	return
+}
+
 func (kc *KubeConnection) CreatePipelineRun(pr *opsv1.PipelineRun) (err error) {
 	existingPR := &opsv1.PipelineRun{}
 	err = (*kc.OpsClient).Get(context.TODO(), types.NamespacedName{Name: pr.Name, Namespace: pr.Namespace}, existingPR)
 	if err == nil {
 		return nil
 	}
-	return (*kc.OpsClient).Create(context.TODO(), pr.Copy())
+	return (*kc.OpsClient).Create(context.TODO(), pr.CopyWithOutVersion())
 }
 
 func (kc *KubeConnection) GetPipelineRun(pr *opsv1.PipelineRun) (err error) {

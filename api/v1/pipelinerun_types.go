@@ -106,7 +106,7 @@ func (obj *PipelineRun) SetCurrentCluster() {
 	obj.Spec.Variables[opsconstants.Cluster] = ""
 }
 
-func (obj *PipelineRun) Copy() *PipelineRun {
+func (obj *PipelineRun) CopyWithOutVersion() *PipelineRun {
 	return &PipelineRun{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: obj.GetObjectMeta().GetGenerateName(),
