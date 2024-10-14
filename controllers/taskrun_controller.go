@@ -33,6 +33,8 @@ import (
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsoption "github.com/shaowenchen/ops/pkg/option"
 	opstask "github.com/shaowenchen/ops/pkg/task"
+	opsutils "github.com/shaowenchen/ops/pkg/utils"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -373,6 +375,36 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 	// empty host
 	if len(hostStr) == 0 {
 		return
+	}
+	// anymaster
+	if opsconstants.IsAnyKubeNode(hostStr) {
+		nodes := &corev1.NodeList{}
+		err := r.Client.List(ctx, nodes)
+		if err != nil {
+			logger.Error.Println(err, "failed to list nodes")
+		}
+		hosts := &opsv1.HostList{}
+		err = r.Client.List(ctx, hosts)
+		if err != nil {
+			logger.Error.Println(err, "failed to list hosts")
+		}
+		logger.Info.Println("any master: ", len(nodes.Items), len(hosts.Items))
+		// find node
+		masterNode := corev1.Node{}
+		for _, node := range nodes.Items {
+			if opsutils.IsMasterNode(&node) {
+				masterNode = node
+				break
+			}
+		}
+		logger.Info.Println(masterNode.Name)
+		// find host
+		for _, host := range hosts.Items {
+			if host.Spec.Address == opsutils.GetNodeInternalIp(&masterNode) {
+				return []opsv1.Host{host}
+			}
+		}
+
 	}
 	// single host
 	if !strings.Contains(t.Spec.Host, "=") {

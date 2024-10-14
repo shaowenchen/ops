@@ -54,3 +54,7 @@ const AllWorkers = "allworkers"
 const AnyNode = "anynode"
 const AnyMaster = "anymaster"
 const AnyWorker = "anyworker"
+
+func IsAnyKubeNode(nodeName string) bool {
+	return nodeName == AnyNode || nodeName == AnyMaster || nodeName == AnyWorker
+}
