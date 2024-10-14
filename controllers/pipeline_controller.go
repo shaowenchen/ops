@@ -80,7 +80,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 }
 
 func (r *PipelineReconciler) syncResource(logger *opslog.Logger, ctx context.Context, isDeleted bool, obj *opsv1.Pipeline) {
-	logger.Info.Println("Syncing "+obj.GetUniqueKey()+" pipelines")
+	logger.Info.Println("Syncing " + obj.GetUniqueKey() + " pipelines")
 
 	clusterList := &opsv1.ClusterList{}
 	err := r.List(ctx, clusterList, &client.ListOptions{})
