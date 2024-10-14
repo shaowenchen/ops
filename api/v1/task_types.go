@@ -93,6 +93,11 @@ func (obj *Task) CopyWithOutVersion() *Task {
 	}
 }
 
+func (obj *Task) MergeVersion(merge *Task) *Task {
+	obj.ObjectMeta.ResourceVersion = merge.ObjectMeta.ResourceVersion
+	return obj
+}
+
 //+kubebuilder:object:root=true
 
 // TaskList contains a list of Task

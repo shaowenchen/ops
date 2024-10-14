@@ -83,7 +83,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 }
 
 func (r *TaskReconciler) syncResource(logger *opslog.Logger, ctx context.Context, isDeleted bool, obj *opsv1.Task) {
-	logger.Info.Println("Syncing "+obj.GetUniqueKey()+" tasks, isDeleted: ", isDeleted)
+	logger.Info.Println("Syncing " + obj.GetUniqueKey() + " tasks")
 
 	clusterList := &opsv1.ClusterList{}
 	err := r.Client.List(ctx, clusterList, &client.ListOptions{})

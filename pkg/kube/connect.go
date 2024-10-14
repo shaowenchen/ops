@@ -82,9 +82,10 @@ func (kc *KubeConnection) SyncTasks(isDeleted bool, objs []opsv1.Task) (err erro
 		} else {
 			err = (*kc.OpsClient).Create(context.TODO(), copyObj)
 			if k8serrors.IsAlreadyExists(err) {
-				err = (*kc.OpsClient).Update(context.TODO(), copyObj)
+				otherObj := &opsv1.Task{}
+				err = (*kc.OpsClient).Get(context.TODO(), types.NamespacedName{Name: copyObj.Name, Namespace: copyObj.Namespace}, otherObj)
 				if err != nil {
-					return
+					(*kc.OpsClient).Update(context.TODO(), copyObj.MergeVersion(otherObj))
 				}
 			}
 		}
@@ -103,9 +104,11 @@ func (kc *KubeConnection) SyncPipelines(isDeleted bool, objs []opsv1.Pipeline) (
 		} else {
 			err = (*kc.OpsClient).Create(context.TODO(), copyObj)
 			if k8serrors.IsAlreadyExists(err) {
+				otherObj := &opsv1.Pipeline{}
+				err = (*kc.OpsClient).Get(context.TODO(), types.NamespacedName{Name: copyObj.Name, Namespace: copyObj.Namespace}, otherObj)
 				err = (*kc.OpsClient).Update(context.TODO(), copyObj)
 				if err != nil {
-					return
+					(*kc.OpsClient).Update(context.TODO(), copyObj.MergeVersion(otherObj))
 				}
 			}
 		}

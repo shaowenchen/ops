@@ -88,6 +88,11 @@ func (obj *Pipeline) CopyWithOutVersion() *Pipeline {
 	}
 }
 
+func (obj *Pipeline) MergeVersion(merge *Pipeline) *Pipeline {
+	obj.ObjectMeta.ResourceVersion = merge.ObjectMeta.ResourceVersion
+	return obj
+}
+
 //+kubebuilder:object:root=true
 
 // PipelineList contains a list of Pipeline
