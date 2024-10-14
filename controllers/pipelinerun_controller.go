@@ -103,7 +103,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	cluster := r.isOtherCluster(pr)
 	if cluster != nil {
 		// send pr
-		logger.Info.Printf("send pr %s to cluster %s", pr.Name, cluster.Name)
+		logger.Info.Printf("Send PipelineRun %s to cluster %s", pr.Name, cluster.Name)
 		kc, err := opskube.NewClusterConnection(cluster)
 		if err != nil {
 			logger.Error.Println(err, "failed to create cluster connection")
@@ -120,7 +120,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		go func() {
 			for retries := 0; retries < MaxTimes; retries++ {
 				time.Sleep(3 * time.Second)
-				logger.Info.Printf("get others pr %s status, times %d", pr.Name, retries)
+				logger.Info.Printf("check pipelinerun %s status, times %d", pr.Name, retries)
 				othersPr := &opsv1.PipelineRun{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: pr.Namespace,

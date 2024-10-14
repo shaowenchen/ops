@@ -83,7 +83,7 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 }
 
 func (r *TaskReconciler) syncResource(logger *opslog.Logger, ctx context.Context, isDeleted bool, obj *opsv1.Task) {
-	logger.Info.Println("Syncing " + obj.GetUniqueKey() + " tasks")
+	logger.Info.Println("sync task " + obj.GetUniqueKey())
 
 	clusterList := &opsv1.ClusterList{}
 	err := r.Client.List(ctx, clusterList, &client.ListOptions{})
@@ -100,7 +100,7 @@ func (r *TaskReconciler) syncResource(logger *opslog.Logger, ctx context.Context
 		}
 		err = kc.SyncTasks(isDeleted, objs)
 		if err != nil {
-			logger.Error.Println(err, "failed to sync pipelines")
+			logger.Error.Println(err, "failed to sync tasks")
 		}
 	}
 }

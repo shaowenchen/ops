@@ -113,7 +113,7 @@ func (r *ClusterReconciler) syncResource(logger *opslog.Logger, ctx context.Cont
 	}
 	err = kc.SyncPipelines(false, pipelineList.Items)
 	if err != nil {
-		logger.Error.Println(err, "failed to sync pipelines")
+		logger.Error.Println(err, "failed to sync all pipelines")
 		return
 	}
 }

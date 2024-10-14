@@ -1,0 +1,19 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: search-clusterip
+  namespace: ops-system
+spec:
+  desc: 查看、搜索集群的 IP
+  variables:
+    cluster:
+      value: "cluster"
+      required: true
+
+    clusterip:
+      required: true
+      examples:
+        - 10.244.11.12
+  tasks:
+    - name: search clusterip
+      taskRef: search-clusterip

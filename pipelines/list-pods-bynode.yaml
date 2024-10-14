@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: list-pod-bynode
+  namespace: ops-system
+spec:
+  desc: 列出集群中的某一个 Node 上的所有 Pod
+  variables:
+    cluster:
+      required: true
+    host:
+      value: "anymaster"
+      required: true
+    node:
+  tasks:
+    - name: list pods
+      taskRef: list-pods-bynode
