@@ -29,6 +29,7 @@ spec:
               notifaction = '${notifaction}'
               url = '${url}'
               code = int('${code}')
+              hostname = '${hostname}'
               message = ''
 
               def send(status, message):
