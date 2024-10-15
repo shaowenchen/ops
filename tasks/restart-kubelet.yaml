@@ -9,10 +9,10 @@ spec:
     - name: restart-kubelet
       content: |
         systemctl restart kubelet
-    - name: check-kubelet-status
+    - name: check-status
       content: |
         systemctl is-active kubelet
-    - name: check-kubelet-activeEnterTimestamp
+    - name: check-activeTime
       content: |
         systemctl show kubelet -p ActiveEnterTimestamp
 
