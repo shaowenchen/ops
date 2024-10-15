@@ -201,7 +201,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 
 	tr.MergeVariables(t)
 	cluster := r.getCluster(logger, ctx, t, tr)
-	hosts := r.getHosts(logger, ctx, t, tr)
+	hosts := r.getAValiableHosts(logger, ctx, t, tr)
 
 	cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 	if cluster.IsCurrentCluster() && len(hosts) > 0 {
@@ -366,6 +366,16 @@ func (r *TaskRunReconciler) getCluster(logger *opslog.Logger, ctx context.Contex
 	if err != nil {
 		logger.Error.Println(err, "failed to get cluster")
 		return
+	}
+	return
+}
+
+func (r *TaskRunReconciler) getAValiableHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (hosts []opsv1.Host) {
+	selectHosts := r.getHosts(logger, ctx, t, tr)
+	for _, host := range selectHosts {
+		if host.Status.HeartStatus == opsconstants.StatusSuccessed {
+			hosts = append(hosts, host)
+		}
 	}
 	return
 }
