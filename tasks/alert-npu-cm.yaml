@@ -22,6 +22,7 @@ spec:
               notifaction = '${notifaction}'
 
               error_message = ''
+              hostname = '${hostname}'
               reason = '设备注册'
 
               def send(status, message):
