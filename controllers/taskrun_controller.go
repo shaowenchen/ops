@@ -201,7 +201,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 
 	tr.MergeVariables(t)
 	cluster := r.getCluster(logger, ctx, t, tr)
-	hosts := r.getAValiableHosts(logger, ctx, t, tr)
+	hosts := r.getAvaliableHosts(logger, ctx, t, tr)
 
 	cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 	if cluster.IsCurrentCluster() && len(hosts) > 0 {
@@ -370,7 +370,7 @@ func (r *TaskRunReconciler) getCluster(logger *opslog.Logger, ctx context.Contex
 	return
 }
 
-func (r *TaskRunReconciler) getAValiableHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (hosts []opsv1.Host) {
+func (r *TaskRunReconciler) getAvaliableHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (hosts []opsv1.Host) {
 	selectHosts := r.getHosts(logger, ctx, t, tr)
 	for _, host := range selectHosts {
 		if host.Status.HeartStatus == opsconstants.StatusSuccessed {
@@ -400,23 +400,23 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 		}
 		logger.Info.Println("any: ", len(nodes.Items), len(hosts.Items))
 		// find node
-		targetNode := corev1.Node{}
+		targetNode := &corev1.Node{}
 		for _, node := range nodes.Items {
 			if opsutils.IsMasterNode(&node) && opsconstants.IsAnyMaster(hostStr) {
-				targetNode = node
-				break
+				targetNode = &node
 			} else if !opsutils.IsMasterNode(&node) && opsconstants.IsAnyWorker(hostStr) {
-				targetNode = node
-				break
-			} else {
-				targetNode = node
+				targetNode = &node
+			} else if opsconstants.IsAnyNode(hostStr) {
+				targetNode = &node
+			}
+			if targetNode != nil {
 				break
 			}
 		}
 		logger.Info.Println(targetNode.Name)
 		// find host
 		for _, host := range hosts.Items {
-			if host.Spec.Address == opsutils.GetNodeInternalIp(&targetNode) {
+			if host.Spec.Address == opsutils.GetNodeInternalIp(targetNode) {
 				return []opsv1.Host{host}
 			}
 		}

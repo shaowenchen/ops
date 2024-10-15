@@ -1,0 +1,75 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alert-dataset-notready
+    namespace: ops-system
+spec:
+    desc: check dataset
+    host: anymaster
+    variables:
+        notifaction:
+            required: true
+    steps:
+        - name: alert-dataset-notbound
+          content: |
+              #!/usr/bin/python
+              import subprocess
+              import requests
+              import json
+              import time
+              from datetime import datetime, timedelta
+
+              notifaction = '${notifaction}'
+              message = ''
+
+              def send(status, message):
+                  payload = {
+                      'kind': 'alert-dataset-notready',
+                      'status': status,
+                      'message': message
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.post(notifaction, headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              try:
+                  cmd = "kubectl get dataset -A -o wide"
+                  result = subprocess.check_output(cmd, shell=True).decode('utf-8')
+                  current_time = datetime.now()
+                  lines = result.split('\n')
+                  
+                  for line in lines:
+                      fields = line.split()
+                      namespace = fields[0]
+                      name = fields[1]
+                      phase = fields[-2]
+                      age_str = fields[-1]
+
+                      if phase == 'Bound':
+                          continue
+                      
+                      if 'd' in age_str:
+                          age_days = int(age_str.split('d')[0])
+                          age_time = current_time - timedelta(days=age_days)
+                      elif 'h' in age_str:
+                          age_hours = int(age_str.split('h')[0])
+                          age_time = current_time - timedelta(hours=age_hours)
+                      elif 'm' in age_str:
+                          age_minutes = int(age_str.split('m')[0])
+                          age_time = current_time - timedelta(minutes=age_minutes)
+                      else:
+                          continue 
+                      if (current_time - age_time).total_seconds() > 300:
+                          message = message + f"\n{namespace}/{name} {phase} {age_str}"
+
+              except Exception as e:
+                  if len(message) == 0:
+                      message = str(e)
+
+              finally:
+                  if len(message) > 0:
+                      send('alert', message)
+                  else:
+                      send('normal', '')
