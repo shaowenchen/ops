@@ -59,14 +59,14 @@ func IsAnyKubeNode(nodeName string) bool {
 	return nodeName == AnyNode || nodeName == AnyMaster || nodeName == AnyWorker
 }
 
-func IsAnyNode (nodeName string) bool {
+func IsAnyNode(nodeName string) bool {
 	return nodeName == AnyNode
 }
 
-func IsAnyMaster (nodeName string) bool {
+func IsAnyMaster(nodeName string) bool {
 	return nodeName == AnyMaster
 }
 
-func IsAnyWorker (nodeName string) bool {
+func IsAnyWorker(nodeName string) bool {
 	return nodeName == AnyWorker
 }
