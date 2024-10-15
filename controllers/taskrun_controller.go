@@ -386,10 +386,10 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 	if len(hostStr) == 0 {
 		return
 	}
-	// anymaster
+	// anynode
 	if opsconstants.IsAnyKubeNode(hostStr) {
 		nodes := &corev1.NodeList{}
-		err := r.Client.List(ctx, nodes)
+		nodes, err := opsutils.GetAllReadyNodesByReconcileClient(r.Client)
 		if err != nil {
 			logger.Error.Println(err, "failed to list nodes")
 		}
@@ -398,19 +398,25 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 		if err != nil {
 			logger.Error.Println(err, "failed to list hosts")
 		}
-		logger.Info.Println("any master: ", len(nodes.Items), len(hosts.Items))
+		logger.Info.Println("any: ", len(nodes.Items), len(hosts.Items))
 		// find node
-		masterNode := corev1.Node{}
+		targetNode := corev1.Node{}
 		for _, node := range nodes.Items {
-			if opsutils.IsMasterNode(&node) {
-				masterNode = node
+			if opsutils.IsMasterNode(&node) && opsconstants.IsAnyMaster(hostStr) {
+				targetNode = node
+				break
+			} else if !opsutils.IsMasterNode(&node) && opsconstants.IsAnyWorker(hostStr) {
+				targetNode = node
+				break
+			} else {
+				targetNode = node
 				break
 			}
 		}
-		logger.Info.Println(masterNode.Name)
+		logger.Info.Println(targetNode.Name)
 		// find host
 		for _, host := range hosts.Items {
-			if host.Spec.Address == opsutils.GetNodeInternalIp(&masterNode) {
+			if host.Spec.Address == opsutils.GetNodeInternalIp(&targetNode) {
 				return []opsv1.Host{host}
 			}
 		}

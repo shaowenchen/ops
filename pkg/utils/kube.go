@@ -191,8 +191,27 @@ func GetAllNodesByClient(client *kubernetes.Clientset) (nodes *corev1.NodeList, 
 	return client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 }
 
+func GetAllNodesByReconcileClient(client runtimeClient.Client) (nodes *corev1.NodeList, err error) {
+	nodes = &corev1.NodeList{}
+	err = client.List(context.TODO(), nodes)
+	return
+}
+
 func GetAllReadyNodesByClient(client *kubernetes.Clientset) (nodes *corev1.NodeList, err error) {
 	nodes, err = GetAllNodesByClient(client)
+	if err != nil {
+		return
+	}
+	for i, node := range nodes.Items {
+		if !IsNodeReady(&node) {
+			nodes.Items = append(nodes.Items[:i], nodes.Items[i+1:]...)
+		}
+	}
+	return
+}
+
+func GetAllReadyNodesByReconcileClient(client runtimeClient.Client) (nodes *corev1.NodeList, err error) {
+	nodes, err = GetAllNodesByReconcileClient(client)
 	if err != nil {
 		return
 	}
