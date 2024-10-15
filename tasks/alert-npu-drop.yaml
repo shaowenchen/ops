@@ -40,7 +40,7 @@ spec:
                       'operator': '!=',
                       'status': status,
                       'value': str(card_count),
-                      'reason': message
+                      'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'

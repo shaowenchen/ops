@@ -1,0 +1,65 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alert-http-status
+    namespace: ops-system
+spec:
+    desc: check http status
+    host: anynode
+    variables:
+        cluster:
+            default: default
+        notifaction:
+            required: true
+        url:
+            required: true
+        code:
+            default: "200"
+    steps:
+        - name: alert-network
+          content: |
+              #!/usr/bin/python
+              import os
+              import subprocess
+              import requests
+              import json
+              from datetime import datetime
+
+              cluster = '${cluster}'
+              notifaction = '${notifaction}'
+              url = '${url}'
+              code = int('${code}')
+              message = ''
+
+              def send(status, message):
+                  payload = {
+                      'cluster': cluster,
+                      'host': hostname,
+                      'kind': 'alert-http-status',
+                      'threshold': str(code),
+                      'operator': '!=',
+                      'status': status,
+                      'message': message
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.post(notifaction, headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              try:
+                  response = requests.get(url)
+                  actual_status = response.status_code
+
+                  if actual_status != code:
+                      message = f"{url} 期望HTTP状态: {code}, 实际状态: {actual_status}"
+
+              except Exception as e:
+                  if len(message) == 0:
+                      message = str(e)
+
+              finally:
+                  if len(message) > 0:
+                      send('alert', message)
+                  else:
+                      send('normal', '')

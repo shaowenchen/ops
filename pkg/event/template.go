@@ -38,7 +38,7 @@ func (e EventCheck) GetAlertMessage(t time.Time) string {
 	appendField("operator", e.Operator)
 	appendField("value", e.Value)
 	appendField("status", e.Status)
-	appendField("reason", e.Reason)
+	appendField("message", e.Message)
 	result.WriteString(fmt.Sprintf("time: %s\n", t.Local().Format("2006-01-02 15:04:05")))
 	return result.String()
 }

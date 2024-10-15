@@ -31,7 +31,7 @@ spec:
                       'host': hostname,
                       'kind': 'alert-node-event',
                       'status': status,
-                      'reason': message
+                      'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'

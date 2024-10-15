@@ -70,7 +70,7 @@ type EventCheck struct {
 	Operator  string `json:"operator,omitempty" yaml:"operator,omitempty"`
 	Value     string `json:"value,omitempty" yaml:"value,omitempty"`
 	Status    string `json:"status,omitempty" yaml:"status,omitempty"`
-	Reason    string `json:"reason,omitempty" yaml:"reason,omitempty"`
+	Message   string `json:"message,omitempty" yaml:"message,omitempty"`
 }
 
 func (e EventCheck) IsAlert() bool {

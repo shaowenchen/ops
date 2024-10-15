@@ -38,7 +38,7 @@ spec:
                       'threshold': str(maxecc),
                       'operator': '==',
                       'status': status,
-                      'reason': message
+                      'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'

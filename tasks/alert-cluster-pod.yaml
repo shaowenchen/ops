@@ -40,7 +40,7 @@ spec:
                       'operator': '>',
                       'value': len(abnormal_pods),
                       'status': 'alert',
-                      'reason': message
+                      'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'

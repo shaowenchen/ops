@@ -33,7 +33,7 @@ spec:
                       'host': hostname,
                       'kind': 'alert-npu-cm',
                       'status': status,
-                      'reason': message
+                      'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'

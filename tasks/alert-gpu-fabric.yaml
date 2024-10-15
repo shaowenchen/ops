@@ -37,7 +37,7 @@ spec:
                 'threshold': str(max),
                 'operator': '>',
                 'status': status,
-                'reason': message
+                'message': message
             }
             headers = {
                 'Content-Type': 'application/json'
