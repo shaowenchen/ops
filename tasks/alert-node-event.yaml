@@ -7,8 +7,6 @@ spec:
     desc: check node event alert specified keywords
     host: anymaster
     variables:
-        cluster:
-            default: default
         notifaction:
             required: true
     steps:
@@ -21,13 +19,11 @@ spec:
               from datetime import datetime
               from datetime import timedelta
 
-              cluster = '${cluster}'
               notifaction = '${notifaction}'
               keywords = ['NodeNotReady']
 
               def send(status, message):
                   payload = {
-                      'cluster': cluster,
                       'host': hostname,
                       'kind': 'alert-node-event',
                       'status': status,

@@ -7,8 +7,6 @@ spec:
     desc: check http status
     host: anynode
     variables:
-        cluster:
-            default: default
         notifaction:
             required: true
         url:
@@ -25,7 +23,6 @@ spec:
               import json
               from datetime import datetime
 
-              cluster = '${cluster}'
               notifaction = '${notifaction}'
               url = '${url}'
               code = int('${code}')
@@ -34,7 +31,6 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'cluster': cluster,
                       'host': hostname,
                       'kind': 'alert-http-status',
                       'threshold': str(code),
@@ -53,7 +49,7 @@ spec:
                   actual_status = response.status_code
 
                   if actual_status != code:
-                      message = f"{url} 期望HTTP状态: {code}, 实际状态: {actual_status}"
+                      message = f"{url} http status is {actual_status}, expected {code}"
 
               except Exception as e:
                   if len(message) == 0:

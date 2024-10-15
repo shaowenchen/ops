@@ -7,8 +7,6 @@ spec:
     desc: check gpu
     host: "alert-gpu=enabled"
     variables:
-      cluster:
-        default: default
       notifaction:
         required: true
     steps:
@@ -22,7 +20,6 @@ spec:
               import time
               from datetime import datetime
 
-              cluster = '${cluster}'
               hostname = '${hostname}'
               notifaction = '${notifaction}'
               error_message = ''
@@ -32,7 +29,6 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'cluster': cluster,
                       'host': hostname,
                       'kind': 'alert-gpu-zombie',
                       'status': status,

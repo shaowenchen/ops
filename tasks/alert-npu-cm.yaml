@@ -7,8 +7,6 @@ spec:
     desc: check npu cm in specified host
     host: anymaster
     variables:
-      cluster: 
-        default: default
       notifaction: 
         required: true
     steps:
@@ -21,7 +19,6 @@ spec:
               import json
               from datetime import datetime
 
-              cluster = '${cluster}'
               notifaction = '${notifaction}'
 
               error_message = ''
@@ -29,7 +26,6 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'cluster': cluster,
                       'host': hostname,
                       'kind': 'alert-npu-cm',
                       'status': status,

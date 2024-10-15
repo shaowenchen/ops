@@ -9,8 +9,6 @@ spec:
     variables:
         max:
             default: "20"
-        cluster:
-            default: default
         notifaction:
             required: true
     steps:
@@ -23,9 +21,7 @@ spec:
               import json
               from datetime import datetime
 
-              cluster = '${cluster}'
               notifaction = '${notifaction}'
-
               error_message = ''
               reason = '异常Pod数量超过阈值'
               threshold = int("${max}")
@@ -34,7 +30,6 @@ spec:
 
               def send(message):
                   payload = {
-                      'cluster': cluster,
                       'kind': 'alert-cluster-pod',
                       'threshold': str(threshold),
                       'operator': '>',

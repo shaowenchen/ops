@@ -7,8 +7,6 @@ spec:
     desc: check npu drop in specified host
     host: "alert-npu=enabled"
     variables:
-      cluster: 
-        default: default
       notifaction: 
         required: true
     steps:
@@ -21,7 +19,6 @@ spec:
               import json
               from datetime import datetime
 
-              cluster = '${cluster}'
               hostname = '${hostname}'
               notifaction = '${notifaction}'
               desired_card_count = int('${card-num}')
@@ -33,7 +30,6 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'cluster': cluster,
                       'host': hostname,
                       'kind': 'alert-npu-drop',
                       'threshold': str(desired_card_count),

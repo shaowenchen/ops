@@ -9,8 +9,6 @@ spec:
     variables:
         max:
             default: "1"
-        cluster:
-            default: default
         notifaction:
             required: true
     steps:
@@ -23,7 +21,6 @@ spec:
               import json
               from datetime import datetime
 
-              cluster = '${cluster}'
               hostname = '${hostname}'
               notifaction = '${notifaction}'
               maxecc = int('${max}')
@@ -32,7 +29,6 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'cluster': cluster,
                       'host': hostname,
                       'kind': 'alert-gpu-ecc',
                       'threshold': str(maxecc),

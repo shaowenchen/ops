@@ -767,6 +767,7 @@ func CreateEvent(c *gin.Context) {
 	type Params struct {
 		Event string `uri:"event"`
 	}
+	cluster := opsconstants.GetEnvCluster()
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
 	if err != nil {
@@ -779,6 +780,9 @@ func CreateEvent(c *gin.Context) {
 		if err != nil {
 			showError(c, "fail to parse event check "+err.Error())
 			return
+		}
+		if len(cluster) > 0 {
+			event.Cluster = cluster
 		}
 		go opsevent.FactoryCheck().Publish(context.TODO(), event)
 		showSuccess(c)
