@@ -441,7 +441,7 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 		}
 		logger.Info.Println("any: ", len(nodes.Items), len(hosts.Items))
 		// find node
-		targetNode := &corev1.Node{}
+		var targetNode *corev1.Node
 		for _, node := range nodes.Items {
 			if opsutils.IsMasterNode(&node) && opsconstants.IsAnyMaster(hostStr) {
 				targetNode = &node
