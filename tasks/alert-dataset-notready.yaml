@@ -38,7 +38,7 @@ spec:
                   
                   for line in lines:
                       fields = line.split()
-                      if len(fields) < 5:
+                      if len(fields) < 2:
                           print(line)
                           continue
                       namespace = fields[0]
@@ -48,12 +48,13 @@ spec:
                       
                       skip = False
                       for field in fields:
-                          if field == "Bound":
+                          if field == 'Bound':
                               skip = True
                               break
                       if skip:
                           continue
                       
+                      age_time = current_time
                       if 'd' in age_str:
                           age_days = int(age_str.split('d')[0])
                           age_time = current_time - timedelta(days=age_days)
@@ -63,8 +64,6 @@ spec:
                       elif 'm' in age_str:
                           age_minutes = int(age_str.split('m')[0])
                           age_time = current_time - timedelta(minutes=age_minutes)
-                      else:
-                          continue 
                       if (current_time - age_time).total_seconds() > 300:
                           message = message + f"\n{namespace}/{name} {phase} {age_str}"
 

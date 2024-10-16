@@ -38,10 +38,10 @@ spec:
 
               def build_message(message, card_id=''):
                   if card_id == '':
-                      return f'异常信息: {message}\n'
+                      return f'{message}'
                   if message == '':
                       return ''
-                  return f'异常位置: {card_id}\n异常信息: {message}\n'
+                  return f'GPU: {card_id}, {message}'
 
               try:
                   # 1. check nvidia-smi exists /usr/bin/nvidia-sm
@@ -62,7 +62,7 @@ spec:
                       elif len(line) > 0:
                           message += build_message(line, index)
                   if card_count != threshold:
-                      message += build_message('gpu count mismatch: %d (desired %d)' % (card_count, threshold))
+                      message += build_message('card count mismatch: %d (desired %d)' % (card_count, threshold))
                       raise Exception(message)
                   # 3. lspci check
                   output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
@@ -75,7 +75,7 @@ spec:
                       elif len(line) > 0:
                           message += build_message(line, index)
                   if card_count != threshold:
-                      message += build_message('gpu count mismatch: %d (desired %d)' % (card_count, threshold))
+                      message += build_message('card count mismatch: %d (desired %d)' % (card_count, threshold))
                       raise Exception(message)
               except Exception as e:
                   if len(message) == 0:
