@@ -6,9 +6,6 @@ metadata:
 spec:
     desc: check npu drop in specified host
     host: "alert-npu=enabled"
-    variables:
-      notifaction: 
-        required: true
     steps:
         - name: alert-npu-drop
           content: |
@@ -19,20 +16,16 @@ spec:
               import json
               from datetime import datetime
 
-              hostname = '${hostname}'
-              notifaction = '${notifaction}'
-              desired_card_count = int('${card-num}')
-
+              threshold = int('${card-num}')
               card_id = ''
-              reason = '掉卡'
-              error_message = ''
+              message = ''
               card_count = 0
 
               def send(status, message):
                   payload = {
-                      'host': hostname,
-                      'kind': 'alert-npu-drop',
-                      'threshold': str(desired_card_count),
+                      'host': '${HOSTNAME}',
+                      'kind': '${TASK_NAME}',
+                      'threshold': str(threshold),
                       'operator': '!=',
                       'status': status,
                       'value': str(card_count),
@@ -41,10 +34,10 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
-              def build_error_message(message, card_id=''):
+              def build_message(message, card_id=''):
                   if card_id == '':
                       return f'{message}\n'
                   return f'异常位置: {card_id}\n异常信息: {message}\n'
@@ -52,7 +45,7 @@ spec:
               try:
                   # 1. check npu-smi exists /usr/local/bin/npu-smi
                   if not os.path.exists('/usr/local/bin/npu-smi'):
-                      raise Exception(build_error_message('找不到 npu-smi 命令'))
+                      raise Exception(build_message('找不到 npu-smi 命令'))
                   # 2. check count from npu-smi
                   # npu-smi info |grep 910
                   output = subprocess.run(['/usr/local/bin/npu-smi', 'info'], universal_newlines=True, stdout=subprocess.PIPE).stdout
@@ -63,26 +56,25 @@ spec:
                       if 'OK' in line:
                           card_count += 1
                       else:
-                          error_message += build_error_message(line, card_count)
+                          message += build_message(line, card_count)
                   if card_count != desired_card_count:
-                      raise Exception(error_message)
+                      raise Exception(message)
                   # 3. lspci check, lspci |grep d80
                   output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
                   card_count = 0
-                  error_message = ''
+                  message = ''
                   lines = [line for line in output.split('\n') if 'd80' in line]
                   for _, line in enumerate(lines):
                       line = line.strip()
                       if 'Huawei' in line:
                           card_count += 1
                   if card_count != desired_card_count:
-                      raise Exception(error_message)
+                      raise Exception(message)
               except Exception as e:
-                  if len(error_message) == 0:
-                      error_message = str(e)
+                  if len(message) == 0:
+                      message = str(e)
               finally:
-                  if len(error_message) > 0:
-                      error_message = f'{error_message}{reason}'
-                      send('alert', error_message)
+                  if len(message) > 0:
+                      send('alert', message)
                   else:
-                      send('normal', error_message)
+                      send('normal', message)

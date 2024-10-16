@@ -7,11 +7,9 @@ spec:
     desc: check http status
     host: anynode
     variables:
-        notifaction:
-            required: true
         url:
             required: true
-        code:
+        threshold:
             default: "200"
     steps:
         - name: alert-network
@@ -23,17 +21,15 @@ spec:
               import json
               from datetime import datetime
 
-              notifaction = '${notifaction}'
               url = '${url}'
-              code = int('${code}')
-              hostname = '${hostname}'
+              threshold = int('${threshold}')
               message = ''
 
               def send(status, message):
                   payload = {
-                      'host': hostname,
-                      'kind': 'alert-http-status',
-                      'threshold': str(code),
+                      'host': '${HOSTNAME}',
+                      'kind': '${TASK_NAME}',
+                      'threshold': str(threshold),
                       'operator': '!=',
                       'status': status,
                       'message': message
@@ -41,7 +37,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post(notifaction, headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               try:

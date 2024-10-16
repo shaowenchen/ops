@@ -223,6 +223,17 @@ func GetAllReadyNodesByReconcileClient(client runtimeClient.Client) (nodes *core
 	return
 }
 
+func GetAnyReadyNodesByReconcileClient(client runtimeClient.Client) (node *corev1.Node, err error) {
+	nodes, err := GetAllReadyNodesByReconcileClient(client)
+	if err != nil {
+		return
+	}
+	if len(nodes.Items) > 0 {
+		node = &nodes.Items[0]
+	}
+	return
+}
+
 func GetNodeByClient(client *kubernetes.Clientset, nodeName string) (node *corev1.Node, err error) {
 	return client.CoreV1().Nodes().Get(context.TODO(), nodeName, metav1.GetOptions{})
 }

@@ -7,8 +7,8 @@ spec:
   desc: check fabricmanager in specified host
   host: "alert-gpu=enabled"
   variables:
-    notifaction:
-      required: true
+    threshold:
+      default: "3"
   steps:
     - name: alert-fabric
       content: |
@@ -19,18 +19,14 @@ spec:
         import json
         from datetime import datetime, timedelta
 
-        hostname = '${hostname}'
-        notifaction = '${notifaction}'
-
-        max = 3
-        reason = 'fabricmanager异常'
-        error_message = ''
+        threshold = int('${threshold}')
+        message = ''
 
         def send(status, message):
             payload = {
-                'host': hostname,
-                'kind': 'alert-gpu-fabric',
-                'threshold': str(max),
+                'host': '${HOSTNAME}',
+                'kind': '${TASK_NAME}',
+                'threshold': str(threshold),
                 'operator': '>',
                 'status': status,
                 'message': message
@@ -38,7 +34,7 @@ spec:
             headers = {
                 'Content-Type': 'application/json'
             }
-            response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+            response = requests.post('${EVENTBUS_ADDRESS}', headers=headers, data=json.dumps(payload))
             print(response.text)
 
         def is_fabricmanager_installed():
@@ -64,8 +60,8 @@ spec:
                 print('fabricmanager服务未安装')
                 exit(0)
             if not check_fabricmanager_status():
-                error_message += 'status is not running\n'
-                raise Exception(error_message)
+                message += 'status is not running\n'
+                raise Exception(message)
 
             log_file = '/var/log/fabricmanager.log'
             if not os.path.exists(log_file):
@@ -84,20 +80,19 @@ spec:
                         log_time = datetime.strptime(timestamp_str, '%b %d %Y %H:%M:%S')
                         if log_time >= one_hour_ago:
                             count += 1
-                            if count > max:
+                            if count > threshold:
                                 break
                             error_logs.append(line.strip())
 
             if error_logs:
-                error_message += '错误日志:\n' + '\n'.join(error_logs) + '\n'
-                raise Exception(error_message)
+                message += '错误日志:\n' + '\n'.join(error_logs) + '\n'
+                raise Exception(message)
 
         except Exception as e:
-            if len(error_message) == 0:
-                error_message = str(e)
+            if len(message) == 0:
+                message = str(e)
         finally:
-            if len(error_message) > 0:
-                error_message = f'{error_message}{reason}'
-                send('alert', error_message)
+            if len(message) > 0:
+                send('alert', message)
             else:
-                send('normal', error_message)
+                send('normal', message)

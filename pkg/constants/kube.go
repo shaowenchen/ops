@@ -18,6 +18,9 @@ const LabelOpsTaskKey = "ops"
 
 const LabelOpsTaskValue = "task"
 
+const LabelOpsServerKey = "app.kubernetes.io/name"
+const LabelOpsServerValue = "ops"
+
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
 const DefaultRuntimeImage = "ac2-registry.cn-hangzhou.cr.aliyuncs.com/ac2/base:ubuntu22.04"

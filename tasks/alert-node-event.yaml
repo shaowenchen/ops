@@ -6,9 +6,6 @@ metadata:
 spec:
     desc: check node event alert specified keywords
     host: anymaster
-    variables:
-        notifaction:
-            required: true
     steps:
         - name: alert-node-event
           content: |
@@ -19,20 +16,19 @@ spec:
               from datetime import datetime
               from datetime import timedelta
 
-              notifaction = '${notifaction}'
               keywords = ['NodeNotReady']
 
               def send(status, message):
                   payload = {
-                      'host': hostname,
-                      'kind': 'alert-node-event',
+                      'host': '${HOSTNAME}',
+                      'kind': '${TASK_NAME}',
                       'status': status,
                       'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def get_node_events_and_info(node_name):
@@ -53,7 +49,7 @@ spec:
 
               def parse_events(describe_output):
                   events_section = False
-                  error_message = ''
+                  message = ''
                   node_info = ''
 
                   for line in describe_output.splitlines():
@@ -69,9 +65,9 @@ spec:
 
                       if events_section and line.strip() and not line.startswith("Events:") and is_target_time(line):
                           if any(keyword.lower() in line.lower() for keyword in keywords):
-                              error_message += f"{line.strip()}\n"
+                              message += f"{line.strip()}\n"
 
-                  return node_info, error_message
+                  return node_info, message
 
               def get_schedulable_nodes():
                   cmd = ["kubectl", "get", "nodes", "-o", "jsonpath={.items[*].metadata.name}"]
@@ -83,18 +79,18 @@ spec:
 
               try:
                   schedulable_nodes = get_schedulable_nodes()
-                  error_message = ''
+                  message = ''
                   for node_name in schedulable_nodes:
                       describe_output = get_node_events_and_info(node_name)
                       if describe_output:
                           node_info, event_errors = parse_events(describe_output)
                           if event_errors:
-                              error_message += f'\nEvents:\n{event_errors}'
+                              message += f'\nEvents:\n{event_errors}'
 
               except Exception as e:
-                  error_message = str(e)
+                  message = str(e)
               finally:
-                  if len(error_message) > 0:
-                      send('alert', f'{error_message}关键字: {", ".join(keywords)}')
+                  if len(message) > 0:
+                      send('alert', f'{message}关键字: {", ".join(keywords)}')
                   else:
                       send('normal', '')

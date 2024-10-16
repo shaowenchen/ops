@@ -82,8 +82,8 @@ func (bus *EventBus) WithSubject(subject string) *EventBus {
 		bus = &EventBus{}
 	}
 	bus.Subject = strings.ToLower(subject)
-	if os.Getenv("EVENTBUS_SERVER") != "" {
-		bus.Server = os.Getenv("EVENTBUS_SERVER")
+	if os.Getenv("EVENTBUS_ADDRESS") != "" {
+		bus.Server = os.Getenv("EVENTBUS_ADDRESS")
 	} else {
 		bus.Server = opsconstants.DefaultEventBusServer
 	}

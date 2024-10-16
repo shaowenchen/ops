@@ -6,9 +6,6 @@ metadata:
 spec:
     desc: check npu cm in specified host
     host: anymaster
-    variables:
-      notifaction: 
-        required: true
     steps:
         - name: alert-npu-cm
           content: |
@@ -19,23 +16,19 @@ spec:
               import json
               from datetime import datetime
 
-              notifaction = '${notifaction}'
-
-              error_message = ''
-              hostname = '${hostname}'
-              reason = '设备注册'
+              message = ''
 
               def send(status, message):
                   payload = {
-                      'host': hostname,
-                      'kind': 'alert-npu-cm',
+                      'host': '${HOSTNAME}',
+                      'kind': '${TASK_NAME}',
                       'status': status,
                       'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def get_config_maps(namespace="kube-system"):
@@ -67,7 +60,7 @@ spec:
                   return schedulable_nodes
 
               def check_device_status(config_maps):
-                  global error_message
+                  global message
                   schedulable_nodes = get_schedulable_nodes()
                   for item in config_maps.get("items", []):
                       cm_name = item.get("metadata", {}).get("name")
@@ -79,17 +72,16 @@ spec:
                               if value and is_json(value) and len(json.loads(value)) > 0 and "Fault" in key:
                                   device = cm_name.split("deviceinfo-")[-1]
                                   if device in schedulable_nodes:
-                                      error_message += f"Nodename: {device}, Status: {value}\n"
+                                      message += f"Nodename: {device}, Status: {value}\n"
               try:
                   config_maps = get_config_maps()
                   if config_maps:
                       check_device_status(config_maps)
               except Exception as e:
-                  if len(error_message) == 0:
-                      error_message = str(e)
+                  if len(message) == 0:
+                      message = str(e)
               finally:
-                  if len(error_message) > 0:
-                      error_message = f'\n{error_message}{reason}'
-                      send('alert', error_message)
+                  if len(message) > 0:
+                      send('alert', message)
                   else:
-                      send('normal', error_message)
+                      send('normal', message)

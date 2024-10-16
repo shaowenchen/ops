@@ -6,9 +6,6 @@ metadata:
 spec:
     desc: check gpu drop in specified host
     host: "alert-gpu=enabled"
-    variables:
-        notifaction:
-            required: true
     steps:
         - name: alert-card-drop
           content: |
@@ -19,19 +16,16 @@ spec:
               import json
               from datetime import datetime
 
-              hostname = '${hostname}'
-              notifaction = '${notifaction}'
-              desired_card_count = int('${card-num}')
+              threshold = int('${card-num}')
 
               card_id = ''
-              reason = '掉卡'
-              error_message = ''
+              message = ''
 
               def send(status, message):
                   payload = {
-                      'host': hostname,
-                      'kind': 'alert-gpu-drop',
-                      'threshold': str(desired_card_count),
+                      'host': '${HOSTNAME}',
+                      'kind': '${TASK_NAME}',
+                      'threshold': str(threshold),
                       'operator': '!=',
                       'status': status,
                       'message': message
@@ -39,10 +33,10 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
-              def build_error_message(message, card_id=''):
+              def build_message(message, card_id=''):
                   if card_id == '':
                       return f'异常信息: {message}\n'
                   if message == '':
@@ -52,7 +46,7 @@ spec:
               try:
                   # 1. check nvidia-smi exists /usr/bin/nvidia-sm
                   if not os.path.exists('/usr/bin/nvidia-smi'):
-                      raise Exception(build_error_message('找不到 nvidia-smi 命令'))
+                      raise Exception(build_message('找不到 nvidia-smi 命令'))
                   # 2. check count from nvidia-smi
                   output = ''
                   try:
@@ -66,10 +60,10 @@ spec:
                       if line.startswith('GPU'):
                           card_count += 1
                       elif len(line) > 0:
-                          error_message += build_error_message(line, index)
-                  if card_count != desired_card_count:
-                      error_message += build_error_message('gpu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
-                      raise Exception(error_message)
+                          message += build_message(line, index)
+                  if card_count != threshold:
+                      message += build_message('gpu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
+                      raise Exception(message)
                   # 3. lspci check
                   output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
                   card_count = 0
@@ -79,16 +73,15 @@ spec:
                       if 'NVIDIA' in line:
                           card_count += 1
                       elif len(line) > 0:
-                          error_message += build_error_message(line, index)
-                  if card_count != desired_card_count:
-                      error_message += build_error_message('gpu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
-                      raise Exception(error_message)
+                          message += build_message(line, index)
+                  if card_count != threshold:
+                      message += build_message('gpu count mismatch: %d (desired %d)' % (card_count, desired_card_count))
+                      raise Exception(message)
               except Exception as e:
-                  if len(error_message) == 0:
-                      error_message = str(e)
+                  if len(message) == 0:
+                      message = str(e)
               finally:
-                  if len(error_message) > 0:
-                      error_message = f'{error_message}{reason}'
-                      send('alert', error_message)
+                  if len(message) > 0:
+                      send('alert', message)
                   else:
                       send('normal', '')

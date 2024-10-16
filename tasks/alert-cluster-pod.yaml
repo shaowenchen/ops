@@ -7,10 +7,8 @@ spec:
     desc: alert cluster pod
     host: anymaster
     variables:
-        max:
+        threshold:
             default: "20"
-        notifaction:
-            required: true
     steps:
         - name: alert cluster pod
           content: |
@@ -21,26 +19,24 @@ spec:
               import json
               from datetime import datetime
 
-              notifaction = '${notifaction}'
-              error_message = ''
-              reason = '异常Pod数量超过阈值'
-              threshold = int("${max}")
+              message = ''
+              threshold = int("${threshold}")
 
               abnormal_pods = []
 
-              def send(message):
+              def send(status, message):
                   payload = {
-                      'kind': 'alert-cluster-pod',
+                      'kind': '${TASK_NAME}',
                       'threshold': str(threshold),
                       'operator': '>',
                       'value': len(abnormal_pods),
-                      'status': 'alert',
+                      'status': status,
                       'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.request('POST', notifaction, headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def get_pod_status():
@@ -73,13 +69,14 @@ spec:
                   if pods:
                       abnormal_pods = count_abnormal_pods(pods)
                       if len(abnormal_pods) > threshold:
-                          error_message += f"异常Pod数量: {len(abnormal_pods)}\n"
+                          message += f"异常Pod数量: {len(abnormal_pods)}\n"
                           for ns, pod, r in abnormal_pods:
-                              error_message += f"{ns}/{pod} {r}\n"
+                              message += f"{ns}/{pod} {r}\n"
               except Exception as e:
-                  if len(error_message) == 0:
-                      error_message = str(e)
+                  if len(message) == 0:
+                      message = str(e)
               finally:
-                  if len(abnormal_pods) > threshold:
-                      error_message = f'{error_message}{reason}'
-                      send(error_message)
+                  if len(message) > 0:
+                      send('alert', message)
+                  else:
+                      send('normal', '')

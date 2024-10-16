@@ -6,9 +6,6 @@ metadata:
 spec:
     desc: check dataset
     host: anymaster
-    variables:
-        notifaction:
-            required: true
     steps:
         - name: alert-dataset-notready
           content: |
@@ -19,19 +16,18 @@ spec:
               import time
               from datetime import datetime, timedelta
 
-              notifaction = '${notifaction}'
               message = ''
 
               def send(status, message):
                   payload = {
-                      'kind': 'alert-dataset-notready',
+                      'kind': '${TASK_NAME}',
                       'status': status,
                       'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post(notifaction, headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               try:
