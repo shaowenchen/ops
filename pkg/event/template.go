@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+func (e EventHost) GetDiskUsageAlertMessageWithAction(t time.Time, action string) string {
+	return e.GetDiskUsageAlertMessage(t) + fmt.Sprintf("action: %s  \n", action)
+}
+
 func (e EventHost) GetDiskUsageAlertMessage(t time.Time) string {
 	var result strings.Builder
 	appendField := func(label, value string) {
@@ -20,6 +24,10 @@ func (e EventHost) GetDiskUsageAlertMessage(t time.Time) string {
 	appendField("action", "clean disk")
 	result.WriteString(fmt.Sprintf("time: %s  \n", t.Local().Format("2006-01-02 15:04:05")))
 	return result.String()
+}
+
+func (e EventCheck) GetAlertMessageWithAction(t time.Time, action string) string {
+	return e.GetAlertMessage(t) + fmt.Sprintf("action: %s  \n", action)
 }
 
 func (e EventCheck) GetAlertMessage(t time.Time) string {

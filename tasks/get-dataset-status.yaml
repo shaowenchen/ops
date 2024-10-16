@@ -17,9 +17,15 @@ spec:
     - name: get dataset status
       content: |
         kubectl -n ${namespace} get dataset ${dataset}
-    - name: get dataload status
+    - name: get runtime status
       content: |
-        kubectl -n ${namespace} get dataload | sed -n '1p;/${dataset}/p'
-    - name: get dataload pod status
+        kubectl -n ${namespace} get juicefsruntimes.data.fluid.io ${dataset}
+    - name: get pvc status
       content: |
-        kubectl -n ${namespace} get pod -l targetDataset=${dataset}
+        kubectl -n ${namespace} get pvc ${dataset}
+    - name: get worker pod status
+      content: |
+        kubectl -n ${namespace} get pod -l fluid.io/dataset=${namespace}-${dataset},role=juicefs-worker -o wide
+    - name: get fuse pod status
+      content: |
+        kubectl -n ${namespace} get pod -l fluid.io/dataset=${namespace}-${dataset},role=juicefs-fuse -o wide
