@@ -75,6 +75,12 @@ fi
 
 mv "$OPSTEMPDIR/tasks" ${OPSDIR}
 
+if [ -d "${OPSDIR}taskruns" ]; then
+  mv ${OPSDIR}taskruns ${OPSDIR}.taskruns_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+fi
+
+mv "$OPSTEMPDIR/taskruns" ${OPSDIR}
+
 if [ -d "${OPSDIR}pipelines" ]; then
   mv ${OPSDIR}pipelines ${OPSDIR}.pipelines_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi

@@ -1,0 +1,11 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-ks3-http-status
+  namespace: ops-system
+spec:
+  crontab: "*/5 * * * *"
+  taskRef: alert-http-status
+  variables:
+    url: http://ks3-cn-beijing-internal.ksyuncs.com
+    threshold: "403"

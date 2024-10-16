@@ -1,0 +1,10 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-gpu-ecc
+  namespace: ops-system
+spec:
+  crontab: "30 * * * *"
+  taskRef: alert-gpu-ecc
+  variables:
+    threshold: "1"

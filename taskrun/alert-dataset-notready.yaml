@@ -1,0 +1,8 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-dataset-notready
+  namespace: ops-system
+spec:
+  crontab: "*/5 * * * *"
+  taskRef: alert-dataset-notready

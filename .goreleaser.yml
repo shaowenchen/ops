@@ -23,6 +23,7 @@ archives:
 - name_template: "opscli-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
   files:
     - tasks/*
+    - taskruns/*
     - pipelines/*
 changelog:
   skip: true
