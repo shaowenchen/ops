@@ -1,0 +1,10 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-juicefs-worker-pod-status
+  namespace: ops-system
+spec:
+  crontab: "*/5 * * * *"
+  taskRef: alert-pod-status
+  variables:
+    labels: "role=juicefs-worker"
