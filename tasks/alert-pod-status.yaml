@@ -7,9 +7,10 @@ spec:
     desc: check dataset
     host: anymaster
     variables:
-        selector:
+        labels:
             required: true
-            example: "role=juicefs-worker"
+            examples:
+                - "role=juicefs-worker"
     steps:
         - name: alert-dataset-notready
           content: |
@@ -21,7 +22,7 @@ spec:
               from datetime import datetime, timedelta
 
               message = ''
-              selector = "${selector}"
+              labels = "${labels}"
 
               def send(status, message):
                   payload = {
@@ -37,7 +38,7 @@ spec:
 
               def get_pods():
                   try:
-                      cmd = "kubectl get pod -A -o wide -l " + selector
+                      cmd = "kubectl get pod -A -o wide -l " + labels
                       result = subprocess.check_output(cmd, shell=True).decode('utf-8')
                       return result
                   except:
