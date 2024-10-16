@@ -1,0 +1,81 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alert-pod-status
+    namespace: ops-system
+spec:
+    desc: check dataset
+    host: anymaster
+    variables:
+        selector:
+            required: true
+            example: "role=juicefs-worker"
+    steps:
+        - name: alert-dataset-notready
+          content: |
+              #!/usr/bin/python
+              import subprocess
+              import requests
+              import json
+              import re
+              from datetime import datetime, timedelta
+
+              message = ''
+              selector = "${selector}"
+
+              def send(status, message):
+                  payload = {
+                      'kind': '${TASK_NAME}',
+                      'status': status,
+                      'message': message
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/check', headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              def get_pods():
+                  try:
+                      cmd = "kubectl get pod -A -o wide -l " + selector
+                      result = subprocess.check_output(cmd, shell=True).decode('utf-8')
+                      return result
+                  except:
+                      return
+
+              def parse_age(age_str, current_time):
+                  age_time = current_time
+                  if 'd' in age_str:
+                      age_days = int(age_str.split('d')[0])
+                      age_time = current_time - timedelta(days=age_days)
+                  elif 'h' in age_str:
+                      age_hours = int(age_str.split('h')[0])
+                      age_time = current_time - timedelta(hours=age_hours)
+                  elif 'm' in age_str:
+                      age_minutes = int(age_str.split('m')[0])
+                      age_time = current_time - timedelta(minutes=age_minutes)
+                  return age_time
+
+              pod_data = get_pods()
+              if pod_data:
+                  lines = pod_data.split('\n')
+                  current_time = datetime.now()
+                  
+                  for line in lines[1:]:
+                      fields = line.split()
+                      if len(fields) < 5:
+                          continue
+                      namespace = fields[0]
+                      pod_name = fields[1]
+                      status = fields[3]
+                      age_str = fields[5] 
+
+                      pod_age = parse_age(age_str, current_time)
+                      if (current_time - pod_age).total_seconds() > 300:
+                          if status != 'Running':
+                              message += f"\nPod {namespace}/{pod_name} {status} {age_str}"
+
+                  if message:
+                      send('alert', message)
+                  else:
+                      send('normal', 'All pods are in Running state and younger than 5 minutes.')

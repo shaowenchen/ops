@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-    name: alert-cluster-pod
+    name: alert-pod-count-abnormal
     namespace: ops-system
 spec:
     desc: alert cluster pod
@@ -10,7 +10,7 @@ spec:
         threshold:
             default: "20"
     steps:
-        - name: alert cluster pod
+        - name: alert abnormal pod counts
           content: |
               #!/usr/bin/python
               import os
@@ -69,7 +69,7 @@ spec:
                   if pods:
                       abnormal_pods = count_abnormal_pods(pods)
                       if len(abnormal_pods) > threshold:
-                          message += f"异常Pod数量: {len(abnormal_pods)}\n"
+                          message += f"abnormal pod counts: {len(abnormal_pods)}\n"
                           for ns, pod, r in abnormal_pods:
                               message += f"{ns}/{pod} {r}\n"
               except Exception as e:
