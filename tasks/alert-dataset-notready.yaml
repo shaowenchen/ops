@@ -31,13 +31,16 @@ spec:
                   print(response.text)
 
               try:
-                  cmd = "kubectl get dataset -A -o wide"
+                  cmd = "kubectl get dataset -A"
                   result = subprocess.check_output(cmd, shell=True).decode('utf-8')
                   current_time = datetime.now()
                   lines = result.split('\n')
                   
                   for line in lines:
                       fields = line.split()
+                      if len(fields) < 5:
+                          print(line)
+                          continue
                       namespace = fields[0]
                       name = fields[1]
                       phase = fields[-2]

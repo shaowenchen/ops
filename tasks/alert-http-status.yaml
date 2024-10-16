@@ -44,8 +44,8 @@ spec:
                   response = requests.get(url)
                   actual_status = response.status_code
 
-                  if actual_status != code:
-                      message = f"{url} http status is {actual_status}, expected {code}"
+                  if actual_status != threshold:
+                      message = f"{url} http status is {actual_status}, expected {threshold}"
 
               except Exception as e:
                   if len(message) == 0:

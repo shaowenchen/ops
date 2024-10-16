@@ -57,7 +57,7 @@ spec:
                           card_count += 1
                       else:
                           message += build_message(line, card_count)
-                  if card_count != desired_card_count:
+                  if card_count != threshold:
                       raise Exception(message)
                   # 3. lspci check, lspci |grep d80
                   output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
@@ -68,7 +68,7 @@ spec:
                       line = line.strip()
                       if 'Huawei' in line:
                           card_count += 1
-                  if card_count != desired_card_count:
+                  if card_count != threshold:
                       raise Exception(message)
               except Exception as e:
                   if len(message) == 0:
