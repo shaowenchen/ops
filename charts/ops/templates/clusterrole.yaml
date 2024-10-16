@@ -179,6 +179,7 @@ rules:
   resources:
   - events
   - nodes
+  - services
   - pods
   - pods/status
   - pods/log
