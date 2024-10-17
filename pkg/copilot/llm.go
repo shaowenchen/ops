@@ -142,7 +142,7 @@ func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, inpu
 	return
 }
 
-func ChatIntention(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func([]opsv1.Pipeline) string, pipelines []opsv1.Pipeline, history *RoleContentList, input string, maxTryTimes int) (output string, pipeline opsv1.Pipeline, pr *opsv1.PipelineRun, err error) {
+func ChatIntention(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func([]opsv1.Pipeline) string, pipelines []opsv1.Pipeline, history *RoleContentList, input string, maxTryTimes int) (output string, pipeline string, err error) {
 Again:
 	system := buildSystem(pipelines)
 	output, err = chat(input, system, history)
@@ -179,9 +179,7 @@ Again:
 	}
 	for _, p := range pipelines {
 		if p.Name == available {
-			pipeline = p
-			prT := opsv1.NewPipelineRun(&p)
-			pr = &prT
+			pipeline = p.Name
 			return
 		}
 	}
@@ -192,9 +190,9 @@ Again:
 	return
 }
 
-func ChatParameters(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func(opsv1.Pipeline, []opsv1.Cluster) string, pipelines []opsv1.Pipeline, clusters []opsv1.Cluster, history *RoleContentList, pipeline opsv1.Pipeline, pr *opsv1.PipelineRun, input string, maxTryTimes int) (output string, err error) {
+func ChatParameters(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func(opsv1.Pipeline, []opsv1.Cluster) string, pipelines []opsv1.Pipeline, clusters []opsv1.Cluster, history *RoleContentList, pipeline *opsv1.Pipeline, input string, maxTryTimes int) (output string, variables map[string]string, err error) {
 Again:
-	system := buildSystem(pipeline, clusters)
+	system := buildSystem(*pipeline, clusters)
 	output, err = chat(input, system, history)
 	if err != nil {
 		logger.Error.Printf("llm chatParameters error: %v\n", err)
@@ -233,15 +231,17 @@ Again:
 		}
 	}
 
+	variables = make(map[string]string)
+
 	for k, v := range pipeline.Spec.Variables {
 		if k == "cluster" {
 			v.Enums = clusterEnums
 		}
 		if v.Value != "" {
-			pr.Spec.Variables[k] = v.Value
+			variables[k] = v.Value
 		} else if _, ok := outputVars[k]; ok {
 			outV := outputVars[k]
-			pr.Spec.Variables[k] = ""
+			variables[k] = ""
 			if len(v.Enums) > 0 {
 				found := false
 				for _, enum := range v.Enums {
@@ -251,13 +251,13 @@ Again:
 					}
 				}
 				if found {
-					pr.Spec.Variables[k] = outV
+					variables[k] = outV
 				}
 			} else {
-				pr.Spec.Variables[k] = outV
+				variables[k] = outV
 			}
 		} else {
-			pr.Spec.Variables[k] = ""
+			variables[k] = ""
 		}
 	}
 	return

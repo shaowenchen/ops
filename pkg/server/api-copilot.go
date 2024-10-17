@@ -33,7 +33,7 @@ func PostCopilot(c *gin.Context) {
 	logger := opslog.NewLogger().SetVerbose("debug").SetStd().SetFlag().Build()
 	pipelinerunsManager, _ := opscopilot.NewPipelineRunsManager(GlobalConfig.Copilot.OpsServer, GlobalConfig.Copilot.OpsToken, "ops-system")
 	prHistory := opscopilot.RoleContentList{}
-	pr, exitCode, err := opscopilot.RunPipeline(logger, chat, &prHistory, pipelinerunsManager, input, nil)
+	pr, exitCode, err := opscopilot.RunPipeline(logger, false, chat, &prHistory, pipelinerunsManager, input, nil)
 
 	var output string
 	if exitCode == opscopilot.ExitCodeIntentionEmpty {

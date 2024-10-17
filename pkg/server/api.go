@@ -764,7 +764,7 @@ func CreatePipelineRun(c *gin.Context) {
 		pipelinerun.Spec.Variables = req.Variables
 	}
 
-	err = client.Create(context.TODO(), &pipelinerun)
+	err = client.Create(context.TODO(), pipelinerun)
 	if err != nil {
 		showError(c, err.Error())
 		return

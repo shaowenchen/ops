@@ -8,6 +8,13 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 )
 
+func GetIntentionParametersPrompt(clusters []opsv1.Cluster, pipelines []opsv1.Pipeline) string {
+	return `{
+	"pipeline": "",
+	"variables": {}
+	}`
+}
+
 func GetIntentionPrompt(pipelines []opsv1.Pipeline) string {
 	if len(pipelines) == 0 {
 		return ""

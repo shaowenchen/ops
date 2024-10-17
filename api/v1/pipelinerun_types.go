@@ -120,9 +120,9 @@ func (obj *PipelineRun) CopyWithOutVersion() *PipelineRun {
 	}
 }
 
-func NewPipelineRun(p *Pipeline) PipelineRun {
+func NewPipelineRun(p *Pipeline) *PipelineRun {
 	if p == nil {
-		return PipelineRun{}
+		return &PipelineRun{}
 	}
 	pr := PipelineRun{
 		ObjectMeta: metav1.ObjectMeta{
@@ -149,7 +149,7 @@ func NewPipelineRun(p *Pipeline) PipelineRun {
 		}
 	}
 	// validate
-	return pr
+	return &pr
 }
 
 //+kubebuilder:object:root=true

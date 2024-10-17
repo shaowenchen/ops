@@ -30,6 +30,5 @@ func IsWebhookEvent(event string) bool {
 	return strings.ToLower(event) == strings.ToLower(EventWebhook)
 }
 
-
 const ActionClearDisk = "clean disk"
 const ActionGetDataSetStatus = "get dataset status"
