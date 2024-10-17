@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sashabaranov/go-openai"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
@@ -19,7 +20,7 @@ import (
 func Healthz(c *gin.Context) {
 	c.JSON(http.StatusOK, "OK")
 }
-func ListHost(c *gin.Context) {
+func ListHosts(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
@@ -76,7 +77,7 @@ func ListHost(c *gin.Context) {
 	}
 	showData(c, paginator[opsv1.Host](newHosts, req.PageSize, req.Page))
 }
-func ListCluster(c *gin.Context) {
+func ListClusters(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
@@ -354,7 +355,7 @@ func DeletePipeline(c *gin.Context) {
 	return
 }
 
-func ListTask(c *gin.Context) {
+func ListTasks(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
@@ -407,7 +408,7 @@ func ListTask(c *gin.Context) {
 	showData(c, paginator[opsv1.Task](newTaskList, req.PageSize, req.Page))
 }
 
-func ListPipeline(c *gin.Context) {
+func ListPipelines(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
@@ -457,7 +458,55 @@ func ListPipeline(c *gin.Context) {
 	} else {
 		newPipelineList = pipelineList.Items
 	}
-	showData(c, paginator[opsv1.Pipeline](pipelineList.Items, req.PageSize, req.Page))
+	showData(c, paginator[opsv1.Pipeline](newPipelineList, req.PageSize, req.Page))
+}
+
+func ListPipelineTools(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
+	}
+	var req = Params{
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	pipelineList := &opsv1.PipelineList{}
+	if req.Namespace == "all" {
+		err = client.List(context.TODO(), pipelineList)
+	} else {
+		err = client.List(context.TODO(), pipelineList, runtimeClient.InNamespace(req.Namespace))
+	}
+	if err != nil {
+		return
+	}
+	// get clusters
+	clusters := opsv1.ClusterList{}
+	err = client.List(context.TODO(), &clusters)
+	if err != nil {
+		return
+	}
+	// build tools
+	objs := []openai.Tool{}
+	for _, pipeline := range pipelineList.Items {
+		objs = append(objs, pipeline.GetTool(clusters.Items))
+	}
+	showData(c, paginator[openai.Tool](objs, req.PageSize, req.Page))
 }
 
 func GetTaskRun(c *gin.Context) {
@@ -558,7 +607,7 @@ func ListTaskRun(c *gin.Context) {
 	showData(c, paginator[opsv1.TaskRun](taskRunList.Items, req.PageSize, req.Page))
 }
 
-func ListPipelineRun(c *gin.Context) {
+func ListPipelineRuns(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`

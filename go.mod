@@ -5,13 +5,16 @@ go 1.19
 require (
 	github.com/aws/aws-sdk-go v1.44.131
 	github.com/bramvdbogaerde/go-scp v1.2.0
+	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.15.2
+	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/gin-gonic/gin v1.8.1
 	github.com/google/go-cmp v0.5.9
+	github.com/google/uuid v1.4.0
 	github.com/onsi/ginkgo/v2 v2.6.0
 	github.com/onsi/gomega v1.24.1
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/sashabaranov/go-openai v1.23.0
+	github.com/sashabaranov/go-openai v1.32.2
 	github.com/spf13/cobra v1.6.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -28,8 +31,6 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.15.2 // indirect
-	github.com/cloudevents/sdk-go/v2 v2.15.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful/v3 v3.10.1 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
@@ -49,7 +50,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.4.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect

@@ -308,10 +308,11 @@ github.com/sagikazarmark/locafero
 # github.com/sagikazarmark/slog-shim v0.1.0
 ## explicit; go 1.20
 github.com/sagikazarmark/slog-shim
-# github.com/sashabaranov/go-openai v1.23.0
+# github.com/sashabaranov/go-openai v1.32.2
 ## explicit; go 1.18
 github.com/sashabaranov/go-openai
 github.com/sashabaranov/go-openai/internal
+github.com/sashabaranov/go-openai/jsonschema
 # github.com/sourcegraph/conc v0.3.0
 ## explicit; go 1.19
 github.com/sourcegraph/conc
