@@ -28,4 +28,4 @@ spec:
         kubectl -n ${namespace} get pod -l fluid.io/dataset=${namespace}-${dataset},role=juicefs-worker -o wide
     - name: get fuse pod status
       content: |
-        kubectl -n ${namespace} get pod -l fluid.io/dataset=${namespace}-${dataset},role=juicefs-fuse -o wide
+        kubectl -n ${namespace} get pod -l release=${dataset},role=juicefs-fuse -o wide
