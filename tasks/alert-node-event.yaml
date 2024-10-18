@@ -16,7 +16,7 @@ spec:
               from datetime import datetime
               from datetime import timedelta
 
-              keywords = ['NodeNotReady']
+              keywords = ['NodeNotReady', 'InvalidDiskCapacity']
 
               def send(status, message):
                   payload = {
