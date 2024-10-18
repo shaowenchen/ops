@@ -13,65 +13,73 @@ spec:
               import subprocess
               import requests
               import json
-              from datetime import datetime
-              from datetime import timedelta
 
-              keywords = ['NodeNotReady', 'InvalidDiskCapacity']
+              cluster = "${CLUSTER}"
+              hostname = "${HOSTNAME}"
+              keywords = ["NodeNotReady"]
+              message = ""
 
               def send(status, message):
                   payload = {
-                      'host': '${HOSTNAME}',
-                      'kind': '${TASK_NAME}',
-                      'status': status,
-                      'message': message
+                      "cluster": cluster,
+                      "hostname": hostname,
+                      "kind": "alert-node-event",
+                      "status": status,
+                      "message": message,
                   }
-                  headers = {
-                      'Content-Type': 'application/json'
-                  }
+                  headers = {"Content-Type": "application/json"}
                   response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/check', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
-              def get_node_events_and_info(node_name):
-                  cmd = ["kubectl", "describe", "node", node_name]
-                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-                  if result.returncode != 0:
-                      print(f"Error fetching node events: {result.stderr}")
-                      return None
-                  return result.stdout
 
               def is_target_time(event_line):
                   parts = event_line.split()
                   if len(parts) > 2:
                       time_str = parts[2]
                       if "h" not in time_str:
-                          return True
+                          if "m" in time_str:
+                              mins = int(time_str.split("m")[0])
+                              if mins < 5:
+                                  return True
+                          else:
+                              return True
                   return False
 
               def parse_events(describe_output):
-                  events_section = False
-                  message = ''
-                  node_info = ''
+                  messageList = []
+                  seen_keywords = set()
 
-                  for line in describe_output.splitlines():
-                      if line.startswith("Name:"):
-                          node_info += f"{line}\n"
-                      elif line.startswith("Conditions:") or line.startswith("Addresses:"):
-                          node_info += f"{line}\n"
-                      elif any(section in line for section in ["Ready", "MemoryPressure", "DiskPressure", "PIDPressure"]):
-                          node_info += f"{line.strip()}\n"
-
+                  describe_output_lines = describe_output.splitlines()
+                  len_describe = len(describe_output_lines)
+                  for i in range(len_describe):
+                      line = describe_output_lines[len_describe - i - 1]
                       if line.startswith("Events:"):
-                          events_section = True
+                          break
 
-                      if events_section and line.strip() and not line.startswith("Events:") and is_target_time(line):
-                          if any(keyword.lower() in line.lower() for keyword in keywords):
-                              message += f"{line.strip()}\n"
+                      if line.strip() and is_target_time(line):
+                          for keyword in keywords:
+                              if keyword.lower() in line.lower() and keyword not in seen_keywords:
+                                  messageList.append(line.strip())
+                                  seen_keywords.add(keyword)
+                                  break
 
-                  return node_info, message
+                  return '\n'.join(messageList)
+
+              def get_node_events_and_info(node_name):
+                  cmd = ["kubectl", "describe", "node", node_name]
+                  result = subprocess.run(
+                      cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                  )
+                  if result.returncode != 0:
+                      print(f"Error fetching node {node_name}: {result.stderr}")
+                      return None
+                  return result.stdout
 
               def get_schedulable_nodes():
                   cmd = ["kubectl", "get", "nodes", "-o", "jsonpath={.items[*].metadata.name}"]
-                  result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                  result = subprocess.run(
+                      cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                  )
                   if result.returncode != 0:
                       print(f"Error fetching nodes: {result.stderr}")
                       return []
@@ -79,18 +87,13 @@ spec:
 
               try:
                   schedulable_nodes = get_schedulable_nodes()
-                  message = ''
                   for node_name in schedulable_nodes:
                       describe_output = get_node_events_and_info(node_name)
                       if describe_output:
-                          node_info, event_errors = parse_events(describe_output)
+                          event_errors = parse_events(describe_output)
                           if event_errors:
-                              message += f'\nEvents:\n{event_errors}'
+                              send("alert", f"\n {node_name}: \n{event_errors}")
 
               except Exception as e:
                   message = str(e)
-              finally:
-                  if len(message) > 0:
-                      send('alert', f'{message}关键字: {", ".join(keywords)}')
-                  else:
-                      send('normal', '')
+                  send("alert", message)
