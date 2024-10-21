@@ -5,8 +5,10 @@ import { useAlertStore } from '@/stores/alert.store';
 import { router } from '@/router'
 
 var token = ref([]);
+var isDisabled = ref(false);
 
 function save() {
+    isDisabled.value = true;
     const store = useLoginStore();
     store.save(token.value);
     token.value = "";
@@ -20,6 +22,7 @@ function save() {
     } else {
         store.clear();
     }
+    isDisabled.value = false;
 }
 
 </script>
@@ -27,7 +30,7 @@ function save() {
 <template>
     <div class="container">
         <el-input class="token" v-model="token" placeholder="Please input token"></el-input>
-        <el-button type="primary" @click="save">Save</el-button>
+        <el-button type="primary" @click="save" :disabled="isDisabled">Save</el-button>
     </div>
 </template>
 

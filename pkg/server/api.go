@@ -3,17 +3,18 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"net/http"
+	"sort"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
-	"io"
-	"net/http"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
-	"sort"
-	"time"
 )
 
 func Healthz(c *gin.Context) {
@@ -851,4 +852,56 @@ func CreateEvent(c *gin.Context) {
 
 func LoginCheck(c *gin.Context) {
 	showSuccess(c)
+}
+
+func GetSummary(c *gin.Context) {
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	clusterList := &opsv1.ClusterList{}
+	err = client.List(context.TODO(), clusterList)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	hostList := &opsv1.HostList{}
+	err = client.List(context.TODO(), hostList)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	pipelineList := &opsv1.PipelineList{}
+	err = client.List(context.TODO(), pipelineList)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	pipelinerunList := &opsv1.PipelineRunList{}
+	err = client.List(context.TODO(), pipelinerunList)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	taskList := &opsv1.TaskList{}
+	err = client.List(context.TODO(), taskList)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	taskrunList := &opsv1.TaskRunList{}
+	err = client.List(context.TODO(), taskrunList)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, gin.H{
+		"clusters":     len(clusterList.Items),
+		"hosts":        len(hostList.Items),
+		"pipelines":    len(pipelineList.Items),
+		"pipelineruns": len(pipelinerunList.Items),
+		"tasks":        len(taskList.Items),
+		"taskruns":     len(taskrunList.Items),
+	})
 }

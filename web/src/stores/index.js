@@ -7,3 +7,4 @@ export * from "./pipelines.store";
 export * from "./pipelineruns.store";
 export * from "./login.store";
 export * from "./copilot.store";
+export * from "./summary.store";

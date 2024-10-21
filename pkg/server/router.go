@@ -50,6 +50,10 @@ func SetupRouter(r *gin.Engine) {
 	{
 		v1Login.GET("/check", LoginCheck)
 	}
+	v1Summary := r.Group("/api/v1/summary").Use(AuthMiddleware())
+	{
+		v1Summary.GET("", GetSummary)
+	}
 }
 
 func SetupRouteWithoutAuth(r *gin.Engine) {
