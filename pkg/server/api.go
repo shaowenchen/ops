@@ -13,7 +13,6 @@ import (
 	"net/http"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -851,26 +850,5 @@ func CreateEvent(c *gin.Context) {
 }
 
 func LoginCheck(c *gin.Context) {
-	if GlobalConfig.Server.Token == "" {
-		showLoginCheck(c, false)
-		return
-	}
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		showLoginCheck(c, false)
-		return
-	}
-
-	headerParts := strings.SplitN(authHeader, " ", 2)
-	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		showLoginCheck(c, false)
-		return
-	}
-
-	if headerParts[1] != GlobalConfig.Server.Token {
-		showLoginCheck(c, false)
-		return
-	}
-
 	showSuccess(c)
 }
