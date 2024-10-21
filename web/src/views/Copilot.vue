@@ -2,6 +2,10 @@
 import { ref } from "vue";
 import { marked } from 'marked';
 import { useCopilotStore } from "@/stores";
+import { useLoginStore } from "@/stores";
+
+var loginStore = useLoginStore();
+loginStore.check();
 
 var messageList = ref([]);
 var currentMessage = ref("");
@@ -39,6 +43,7 @@ async function sendMessage() {
     isSending.value = false;
   }
 }
+
 </script>
 
 <template>

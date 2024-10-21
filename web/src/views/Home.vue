@@ -1,4 +1,8 @@
 <script setup>
+import { useLoginStore } from "@/stores";
+
+var loginStore = useLoginStore();
+loginStore.check();
 </script>
 <template>
     <div class="contaner">

@@ -1,14 +1,25 @@
 <script setup>
 import { ref } from 'vue';
 import { useLoginStore } from '@/stores';
+import { useAlertStore } from '@/stores/alert.store';
 import { router } from '@/router'
 
 var token = ref([]);
 
 function save() {
     const store = useLoginStore();
-    store.save(token);
-    router.push("/");
+    store.save(token.value);
+    token.value = "";
+    if (store.check()) {
+        useAlertStore().success("Login success");
+        setTimeout(() => {
+            useAlertStore().clear();
+            router.push("/");
+        }, 1500);
+
+    } else {
+        store.clear();
+    }
 }
 
 </script>

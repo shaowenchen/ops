@@ -9,6 +9,7 @@
     },
     "dependencies": {
         "element-plus": "^2.5.5",
+        "js-cookie": "^3.0.5",
         "marked": "^14.1.2",
         "pinia": "^2.0.13",
         "vee-validate": "^4.5.11",
