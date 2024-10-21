@@ -16,8 +16,6 @@ spec:
               import time
               from datetime import datetime, timedelta
 
-              message = ''
-
               def send(status, message):
                   payload = {
                       'kind': '${TASK_NAME}',
@@ -65,14 +63,8 @@ spec:
                           age_minutes = int(age_str.split('m')[0])
                           age_time = current_time - timedelta(minutes=age_minutes)
                       if (current_time - age_time).total_seconds() > 300:
-                          message = message + f"\n{namespace}/{name} {phase} {age_str}"
+                          message = f"\n  namespace: {namespace}\n  dataset: {name}\n  status: {phase} {age_str}"
+                          send('alert', message)
 
               except Exception as e:
-                  if len(message) == 0:
-                      message = str(e)
-
-              finally:
-                  if len(message) > 0:
-                      send('alert', message)
-                  else:
-                      send('normal', '')
+                  send('alert', str(e))
