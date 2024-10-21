@@ -59,6 +59,17 @@ func showData(c *gin.Context, data interface{}) {
 	})
 }
 
+func showLoginCheck(c *gin.Context, isLogin bool) {
+	type DataStruct struct {
+		IsLogin bool `json:"is_login"`
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "",
+		"data":    DataStruct{IsLogin: isLogin},
+	})
+}
+
 func showSuccess(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    0,

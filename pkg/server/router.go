@@ -46,16 +46,16 @@ func SetupRouter(r *gin.Engine) {
 	{
 		v1Copilot.POST("", PostCopilot)
 	}
-	v1Login := r.Group("/api/v1/login").Use(AuthMiddleware())
-	{
-		v1Login.GET("/check", LoginCheck)
-	}
 }
 
 func SetupRouteWithoutAuth(r *gin.Engine) {
 	v1Events := r.Group("/api/v1/events")
 	{
 		v1Events.POST("/:event", CreateEvent)
+	}
+	v1Login := r.Group("/api/v1/login")
+	{
+		v1Login.GET("/check", LoginCheck)
 	}
 }
 

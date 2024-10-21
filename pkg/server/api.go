@@ -3,18 +3,18 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"io"
-	"net/http"
-	"sort"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
+	"io"
+	"net/http"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sort"
+	"strings"
+	"time"
 )
 
 func Healthz(c *gin.Context) {
@@ -851,5 +851,26 @@ func CreateEvent(c *gin.Context) {
 }
 
 func LoginCheck(c *gin.Context) {
+	if GlobalConfig.Server.Token == "" {
+		showLoginCheck(c, false)
+		return
+	}
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		showLoginCheck(c, false)
+		return
+	}
+
+	headerParts := strings.SplitN(authHeader, " ", 2)
+	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+		showLoginCheck(c, false)
+		return
+	}
+
+	if headerParts[1] != GlobalConfig.Server.Token {
+		showLoginCheck(c, false)
+		return
+	}
+
 	showSuccess(c)
 }
