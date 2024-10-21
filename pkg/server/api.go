@@ -849,3 +849,7 @@ func CreateEvent(c *gin.Context) {
 	}
 	showData(c, "unknown event")
 }
+
+func LoginCheck(c *gin.Context) {
+	showSuccess(c)
+}
