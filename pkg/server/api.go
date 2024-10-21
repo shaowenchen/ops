@@ -13,13 +13,31 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
+	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
+	corev1 "k8s.io/api/core/v1"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// @Summary Health Check
+// @Tags Health
+// @Accept json
+// @Produce json
+// @Success 200
+// @Router /healthz [get]
 func Healthz(c *gin.Context) {
 	c.JSON(http.StatusOK, "OK")
 }
+
+// @Summary List Hosts
+// @Tags Hosts
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/hosts [get]
 func ListHosts(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -77,6 +95,16 @@ func ListHosts(c *gin.Context) {
 	}
 	showData(c, paginator[opsv1.Host](newHosts, req.PageSize, req.Page))
 }
+
+// @Summary List Clusters
+// @Tags Clusters
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/clusters [get]
 func ListClusters(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -134,6 +162,130 @@ func ListClusters(c *gin.Context) {
 	}
 	showData(c, paginator[opsv1.Cluster](newCluster, req.PageSize, req.Page))
 }
+
+// @Summary Get Cluster
+// @Tags Clusters
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param cluster path string true "cluster"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/clusters/{cluster} [get]
+func GetCluster(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Cluster   string `uri:"cluster"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	cluster := &opsv1.Cluster{}
+	if req.Namespace == "all" {
+		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+			Name: req.Cluster,
+		}, cluster)
+	} else {
+		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+			Namespace: req.Namespace,
+			Name:      req.Cluster,
+		}, cluster)
+	}
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// hide sensitive info
+	cluster.Spec.Token = ""
+	cluster.Spec.Config = ""
+	showData(c, cluster)
+}
+
+// @Summary Get Cluster Nodes
+// @Tags Clusters
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param cluster path string true "cluster"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/clusters/{cluster}/nodes [get]
+func GetClusterNodes(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Cluster   string `uri:"cluster"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
+	}
+	var req = Params{
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	cluster := &opsv1.Cluster{}
+	if req.Namespace == "all" {
+		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+			Name: req.Cluster,
+		}, cluster)
+	} else {
+		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+			Namespace: req.Namespace,
+			Name:      req.Cluster,
+		}, cluster)
+	}
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	kc, err := opskube.NewClusterConnection(cluster)
+	objs, err := kc.GetNodes()
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	newObjs := make([]corev1.Node, 0)
+	// search
+	if req.Search != "" {
+		for i := range objs.Items {
+			searchField := []string{objs.Items[i].Name, opsutils.GetNodeInternalIp(&objs.Items[i])}
+			for j := range searchField {
+				if opsutils.Contains(searchField[j], req.Search) {
+					newObjs = append(newObjs, objs.Items[i])
+					break
+				}
+			}
+		}
+	} else {
+		newObjs = objs.Items
+	}
+
+	showData(c, paginator[corev1.Node](newObjs, req.PageSize, req.Page))
+}
+
+// @Summary Get Task
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param task path string true "task"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/tasks/{task} [get]
 func GetTask(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -163,6 +315,14 @@ func GetTask(c *gin.Context) {
 	return
 }
 
+// @Summary Get Pipeline
+// @Tags Pipelines
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param pipeline path string true "pipeline"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelines/{pipeline} [get]
 func GetPipeline(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -191,6 +351,14 @@ func GetPipeline(c *gin.Context) {
 	showData(c, pipeline)
 }
 
+// @Summary Create Task
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param task body opsv1.Task true "task"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/tasks [post]
 func CreateTask(c *gin.Context) {
 	dataBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -215,6 +383,14 @@ func CreateTask(c *gin.Context) {
 	showSuccess(c)
 }
 
+// @Summary Create Pipeline
+// @Tags Pipelines
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param pipeline body opsv1.Pipeline true "pipeline"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelines [post]
 func CreatePipeline(c *gin.Context) {
 	dataBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -239,6 +415,14 @@ func CreatePipeline(c *gin.Context) {
 	showSuccess(c)
 }
 
+// @Summary Update Task
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param task body opsv1.Task true "task"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/tasks [put]
 func PutTask(c *gin.Context) {
 	dataBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -263,6 +447,14 @@ func PutTask(c *gin.Context) {
 	showSuccess(c)
 }
 
+// @Summary Update Pipeline
+// @Tags Pipelines
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param pipeline body opsv1.Pipeline true "pipeline"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelines [put]
 func PutPipeline(c *gin.Context) {
 	dataBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -287,6 +479,14 @@ func PutPipeline(c *gin.Context) {
 	showSuccess(c)
 }
 
+// @Summary Delete Task
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param task path string true "task"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/tasks/{task} [delete]
 func DeleteTask(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -321,6 +521,14 @@ func DeleteTask(c *gin.Context) {
 	return
 }
 
+// @Summary Delete Pipeline
+// @Tags Pipelines
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param pipeline path string true "pipeline"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelines/{pipeline} [delete]
 func DeletePipeline(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -355,6 +563,16 @@ func DeletePipeline(c *gin.Context) {
 	return
 }
 
+// @Summary List Tasks
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Param search query string false "search"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/tasks [get]
 func ListTasks(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -408,6 +626,16 @@ func ListTasks(c *gin.Context) {
 	showData(c, paginator[opsv1.Task](newTaskList, req.PageSize, req.Page))
 }
 
+// @Summary List Pipelines
+// @Tags Pipelines
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Param search query string false "search"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelines [get]
 func ListPipelines(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -461,6 +689,15 @@ func ListPipelines(c *gin.Context) {
 	showData(c, paginator[opsv1.Pipeline](newPipelineList, req.PageSize, req.Page))
 }
 
+// @Summary List Pipeline Tools
+// @Tags Pipeline Tools
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelinetools [get]
 func ListPipelineTools(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -509,6 +746,14 @@ func ListPipelineTools(c *gin.Context) {
 	showData(c, paginator[openai.Tool](objs, req.PageSize, req.Page))
 }
 
+// @Summary Get TaskRun
+// @Tags TaskRun
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param taskrun path string true "taskrun"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/taskruns/{taskrun} [get]
 func GetTaskRun(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -537,6 +782,14 @@ func GetTaskRun(c *gin.Context) {
 	showData(c, taskRun)
 }
 
+// @Summary Get PipelineRun
+// @Tags PipelineRun
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param pipelinerun path string true "pipelinerun"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelineruns/{pipelinerun} [get]
 func GetPipelineRun(c *gin.Context) {
 	type Params struct {
 		Namespace   string `uri:"namespace"`
@@ -565,6 +818,15 @@ func GetPipelineRun(c *gin.Context) {
 	showData(c, pipelineRun)
 }
 
+// @Summary List TaskRun
+// @Tags TaskRun
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/taskruns [get]
 func ListTaskRun(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -607,6 +869,15 @@ func ListTaskRun(c *gin.Context) {
 	showData(c, paginator[opsv1.TaskRun](taskRunList.Items, req.PageSize, req.Page))
 }
 
+// @Summary List PipelineRun
+// @Tags PipelineRun
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelineruns [get]
 func ListPipelineRuns(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
@@ -644,6 +915,15 @@ func ListPipelineRuns(c *gin.Context) {
 	showData(c, paginator[opsv1.PipelineRun](pipelineRunList.Items, req.PageSize, req.Page))
 }
 
+// @Summary Create TaskRun
+// @Tags TaskRun
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param taskRef body string true "taskRef"
+// @Param variables body map[string]string true "variables"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/taskruns [post]
 func CreateTaskRun(c *gin.Context) {
 	type Params struct {
 		Namespace string            `uri:"namespace"`
@@ -726,6 +1006,15 @@ func CreateTaskRun(c *gin.Context) {
 	}
 }
 
+// @Summary Create PipelineRun
+// @Tags PipelineRun
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param pipelineRef body string true "pipelineRef"
+// @Param variables body map[string]string true "variables"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelineruns [post]
 func CreatePipelineRun(c *gin.Context) {
 	type Params struct {
 		Namespace   string            `uri:"namespace"`
@@ -798,20 +1087,13 @@ func CreatePipelineRun(c *gin.Context) {
 	}
 }
 
-func getRuntimeClient(kubeconfigPath string) (client runtimeClient.Client, err error) {
-	scheme, err := opsv1.SchemeBuilder.Build()
-	if err != nil {
-		return
-	}
-	restConfig, err := opsutils.GetRestConfig(kubeconfigPath)
-
-	if err != nil {
-		return
-	}
-
-	return runtimeClient.New(restConfig, runtimeClient.Options{Scheme: scheme})
-}
-
+// @Summary Create Event
+// @Tags Event
+// @Accept json
+// @Produce json
+// @Param event path string true "event"
+// @Success 200
+// @Router /api/v1/events/{event} [post]
 func CreateEvent(c *gin.Context) {
 	type Params struct {
 		Event string `uri:"event"`
@@ -850,10 +1132,22 @@ func CreateEvent(c *gin.Context) {
 	showData(c, "unknown event")
 }
 
+// @Summary Login Check
+// @Tags Login
+// @Accept json
+// @Produce json
+// @Success 200
+// @Router /api/v1/login [get]
 func LoginCheck(c *gin.Context) {
 	showSuccess(c)
 }
 
+// @Summary Get Summary
+// @Tags Summary
+// @Accept json
+// @Produce json
+// @Success 200
+// @Router /api/v1/summary [get]
 func GetSummary(c *gin.Context) {
 	client, err := getRuntimeClient("")
 	if err != nil {
@@ -904,4 +1198,17 @@ func GetSummary(c *gin.Context) {
 		"tasks":        len(taskList.Items),
 		"taskruns":     len(taskrunList.Items),
 	})
+}
+func getRuntimeClient(kubeconfigPath string) (client runtimeClient.Client, err error) {
+	scheme, err := opsv1.SchemeBuilder.Build()
+	if err != nil {
+		return
+	}
+	restConfig, err := opsutils.GetRestConfig(kubeconfigPath)
+
+	if err != nil {
+		return
+	}
+
+	return runtimeClient.New(restConfig, runtimeClient.Options{Scheme: scheme})
 }

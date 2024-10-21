@@ -2,6 +2,9 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/shaowenchen/ops/swagger"
 )
 
 func SetupRouter(r *gin.Engine) {
@@ -12,6 +15,8 @@ func SetupRouter(r *gin.Engine) {
 	v1Clusters := r.Group("/api/v1/namespaces/:namespace/clusters").Use(AuthMiddleware())
 	{
 		v1Clusters.GET("", ListClusters)
+		v1Clusters.GET(":cluster", GetCluster)
+		v1Clusters.GET(":cluster/nodes", GetClusterNodes)
 	}
 	v1Tasks := r.Group("/api/v1/namespaces/:namespace/tasks").Use(AuthMiddleware())
 	{
@@ -61,6 +66,7 @@ func SetupRouteWithoutAuth(r *gin.Engine) {
 	{
 		v1Events.POST("/:event", CreateEvent)
 	}
+	r.GET("/api/v1/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }
 
 func SetHealthzRouter(r *gin.Engine) {

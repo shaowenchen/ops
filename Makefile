@@ -42,6 +42,9 @@ help: ## Display this help.
 
 ##@ Development
 
+swagger-docs:
+	swag init --parseDependency --parseInternal -g ./cmd/server/main.go -o swagger
+
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
@@ -68,7 +71,7 @@ test: manifests generate fmt vet envtest ## Run tests.
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/ops-controller-manager main.go
 
-build-server:
+build-server: swagger-docs
 	go build -o bin/ops-server cmd/server/main.go
 
 build-web:
