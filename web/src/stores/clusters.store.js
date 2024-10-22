@@ -14,5 +14,17 @@ export const useClustersStore = defineStore({
       );
       return res.data;
     },
+    async listNodes(
+      namespace,
+      cluster,
+      page_size = 10,
+      page = 1,
+      searchQuery = ""
+    ) {
+      const res = await fetchWrapper.get(
+        `/api/v1/namespaces/${namespace}/clusters/${cluster}/nodes?page_size=${page_size}&page=${page}&search=${searchQuery}`
+      );
+      return res.data;
+    },
   },
 });

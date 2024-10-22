@@ -233,22 +233,21 @@ func GetClusterNodes(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
 	client, err := getRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
 	cluster := &opsv1.Cluster{}
-	if req.Namespace == "all" {
-		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
-			Name: req.Cluster,
-		}, cluster)
-	} else {
-		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
-			Namespace: req.Namespace,
-			Name:      req.Cluster,
-		}, cluster)
-	}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Cluster,
+	}, cluster)
 	if err != nil {
 		showError(c, err.Error())
 		return

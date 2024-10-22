@@ -1,18 +1,19 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { useClustersStore } from '@/stores';
-import { router } from '../router';
 
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
 var searchQuery = ref("");
-var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'status.version', 'status.node', 'status.certNotAfterDays', 'status.heartTime']);
+var selectedFields = ref(['metadata.name']);
 
+const { cluster } = useRoute().params;
 async function loadData() {
     const store = useClustersStore();
-    var res = await store.list("all", pageSize.value, currentPage.value, searchQuery.value);
+    var res = await store.listNodes("ops-system", cluster, pageSize.value, currentPage.value, searchQuery.value);
     dataList.value = res.list;
     total.value = res.total;
 }
@@ -32,22 +33,9 @@ function onPageSizeChange() {
     loadData();
 }
 
-function run(item) {
-    router.push({ name: 'cluster-details', params: { cluster: item.metadata.name } });
-}
-
 const allFields = [
-    { value: 'metadata.namespace', label: 'Namespace' },
     { value: 'metadata.name', label: 'Name' },
-    { value: 'spec.desc', label: 'Desc' },
-    { value: 'spec.server', label: 'Server' },
-    { value: 'status.version', label: 'Version' },
-    { value: 'status.node', label: 'Node' },
-    { value: 'status.runningPod', label: 'RunningPod' },
-    { value: 'status.pod', label: 'Pod' },
-    { value: 'status.certNotAfterDays', label: 'CertNotAfterDays' },
-    { value: 'status.heartTime', label: 'HeartTime' },
-    { value: 'status.heartStatus', label: 'HeartStatus' }
+    { value: 'status.conditions', label: 'Conditions' },
 ];
 const displayedColumns = computed(() => {
     return allFields.filter(field => selectedFields.value.includes(field.value));
@@ -63,13 +51,7 @@ const displayedColumns = computed(() => {
             </el-select>
         </div>
         <el-table :data="dataList" border size="default">
-            <el-table-column v-for="column in displayedColumns" :key="column.value" :prop="column.value"
-                :label="column.label" />
-            <el-table-column label="Actions">
-                <template #default="scope">
-                    <el-button type="primary" @click="run(scope.row)">Detail</el-button>
-                </template>
-            </el-table-column>
+            <el-table-column v-for="column in displayedColumns" :key="column.value" :prop="column.value" :label="column.label" />
         </el-table>
 
         <el-pagination @current-change="onPaginationChange" @size-change="onPageSizeChange"
