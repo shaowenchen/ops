@@ -43,12 +43,6 @@ help: ## Display this help.
 ##@ Development
 
 swagger-docs:
-	if ! command -v swag &> /dev/null; then \
-		echo "swag installing"; \
-		go get github.com/swaggo/gin-swagger; \
-	else \
-		echo "swag installed"; \
-	fi; \
 	swag init --parseDependency --parseInternal -g ./cmd/server/main.go -o swagger
 
 .PHONY: manifests
