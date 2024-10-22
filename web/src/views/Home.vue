@@ -1,5 +1,11 @@
+<script setup>
+import { useLoginStore } from "@/stores";
+
+var loginStore = useLoginStore();
+loginStore.check();
+</script>
 <template>
-    
+
     <el-row :gutter="12" class="container" v-if="summaryData">
         <el-col :span="8">
             <el-card shadow="hover" class="card">

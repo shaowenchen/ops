@@ -12,7 +12,7 @@
                     </router-link>
                 </el-menu-item>
                 <el-menu-item>
-                    <a href="https://github.com/shaowenchen/ops/issues" target="_blank" class="nav-link">
+                    <a href="https://github.com/shaowenchen/ops/issues/new" target="_blank" class="nav-link">
                         <i class="el-icon-question"></i>
                         <span>Help</span>
                     </a>
