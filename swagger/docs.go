@@ -43,7 +43,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/login": {
+        "/api/v1/login/check": {
             "get": {
                 "consumes": [
                     "application/json"

@@ -1137,7 +1137,7 @@ func CreateEvent(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200
-// @Router /api/v1/login [get]
+// @Router /api/v1/login/check [get]
 func LoginCheck(c *gin.Context) {
 	showSuccess(c)
 }

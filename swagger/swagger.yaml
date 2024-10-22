@@ -457,7 +457,7 @@ paths:
       summary: Create Event
       tags:
       - Event
-  /api/v1/login:
+  /api/v1/login/check:
     get:
       consumes:
       - application/json

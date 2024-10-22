@@ -83,21 +83,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			showNotAuthorized(c, "empty Authorization")
-			c.Abort()
-			return
-		}
-
-		headerParts := strings.SplitN(authHeader, " ", 2)
-		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			showNotAuthorized(c, "invalid Authorization")
-			c.Abort()
-			return
-		}
-
-		if headerParts[1] != GlobalConfig.Server.Token {
+		if GetToken(c) != GlobalConfig.Server.Token {
 			showNotAuthorized(c, "invalid token")
 			c.Abort()
 			return
@@ -105,4 +91,18 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func GetToken(c *gin.Context) string {
+	// try get from header
+	authHeader := c.GetHeader("Authorization")
+	if authHeader != "" {
+		headerParts := strings.SplitN(authHeader, " ", 2)
+		if len(headerParts) == 2 && headerParts[0] == "Bearer" {
+			return headerParts[1]
+		}
+	}
+	// try get from cookie
+	token, _ := c.Cookie("token")
+	return token
 }
