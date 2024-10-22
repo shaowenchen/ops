@@ -19,7 +19,7 @@ spec:
         kubectl -n ${namespace} get dataset ${dataset}
     - name: get runtime status
       content: |
-        kubectl -n ${namespace} get juicefsruntimes.data.fluid.io ${dataset}
+        kubectl -n ${namespace} get juicefsruntimes.data.fluid.io ${dataset} || kubectl -n ${namespace} get jindoruntimes.data.fluid.io ${dataset} || true
     - name: get pvc status
       content: |
         kubectl -n ${namespace} get pvc ${dataset}
