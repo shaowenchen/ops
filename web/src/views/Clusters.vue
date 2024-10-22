@@ -69,10 +69,6 @@ const displayedColumns = computed(() => {
 </template>
 
 <style scoped>
-.container {
-    margin-left: 7em;
-}
-
 .form-control {
     display: inline-block;
     width: 90%;

@@ -7,11 +7,10 @@ import { router } from '@/router'
 var token = ref([]);
 var isDisabled = ref(false);
 
-function save() {
+async function save() {
     isDisabled.value = true;
     const store = useLoginStore();
     store.save(token.value);
-    token.value = "";
     if (store.check()) {
         useAlertStore().success("Login success");
         setTimeout(() => {
@@ -28,9 +27,9 @@ function save() {
 </script>
 
 <template>
-    <div class="container">
+    <div class="container" :hidden="isDisabled">
         <el-input class="token" v-model="token" placeholder="Please input token"></el-input>
-        <el-button type="primary" @click="save" :disabled="isDisabled">Save</el-button>
+        <el-button type="primary" @click="save">Save</el-button>
     </div>
 </template>
 
@@ -41,7 +40,6 @@ function save() {
     align-items: center;
     justify-content: center;
     height: 100vh;
-    margin-left: 7em;
 }
 
 .container .token {

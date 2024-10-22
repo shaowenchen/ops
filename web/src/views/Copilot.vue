@@ -41,9 +41,16 @@ async function sendMessage() {
     });
   } finally {
     isSending.value = false;
+    scrollToBottom(); // 发送消息后滚动到底部
   }
 }
 
+function scrollToBottom() {
+  const chatBox = document.querySelector(".chat-box");
+  if (chatBox) {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+}
 </script>
 
 <template>
@@ -60,29 +67,30 @@ async function sendMessage() {
       <el-input v-model="currentMessage" placeholder="输入消息..." class="input-box" @keyup.enter="sendMessage"
         :disabled="isSending">
       </el-input>
-      <el-button type="primary" @click="sendMessage" :disabled="isSending"> Send
-      </el-button>
+      <el-button type="primary" @click="sendMessage" :disabled="isSending">Send</el-button>
     </div>
   </div>
 </template>
 
 <style scoped>
 .container {
-  margin-left: 7em;
   border: 1px solid #ccc;
-  padding: 10px;
   border-radius: 10px;
   background-color: #f9f9f9;
-  max-width: 500px; /* 限制容器的最大宽度 */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 600px;
+  margin-top: 50px;
 }
 
 .chat-box {
   flex-grow: 1;
   overflow-y: auto;
-  margin-bottom: 10px;
   padding-right: 10px;
-  max-height: 400px; /* 设置最大高度以防止过多内容溢出 */
+  display: flex;
+  flex-direction: column; /* 正常显示消息顺序 */
 }
 
 .message {
@@ -100,10 +108,10 @@ async function sendMessage() {
 .user-message p,
 .bot-message p {
   display: inline-block;
-  padding: 10px 15px; /* 增加左右内边距 */
-  border-radius: 15px; /* 加大圆角 */
+  padding: 10px 15px;
+  border-radius: 15px;
   max-width: 70%;
-  word-wrap: break-word; /* 允许长单词换行 */
+  word-wrap: break-word;
 }
 
 .user-message p {
@@ -127,23 +135,24 @@ async function sendMessage() {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-top: 10px; /* 增加顶部内边距以分隔输入框 */
+  padding-top: 10px;
 }
 
 .input-box {
   flex-grow: 1;
-  border-radius: 20px; /* 圆角 */
-  border: 1px solid #ccc; /* 边框颜色 */
-  transition: border-color 0.3s; /* 平滑过渡 */
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s;
+  width: 100%;
 }
 
 .input-box:focus {
-  border-color: #007bff; /* 聚焦时的边框颜色 */
-  outline: none; /* 去除默认轮廓 */
+  border-color: #007bff;
+  outline: none;
 }
 
 .send-button {
   white-space: nowrap;
-  border-radius: 20px; /* 圆角 */
+  border-radius: 20px;
 }
 </style>

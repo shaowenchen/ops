@@ -11,3 +11,7 @@
 .app-container {
   display: flex;
 }
+
+.container {
+  margin-left: 0.5em;
+}

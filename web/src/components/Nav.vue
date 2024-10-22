@@ -1,56 +1,77 @@
-<script setup>
-
-</script>
-
 <template>
-    <nav class="bg-light sidebar">
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <router-link to="/" class="nav-link">Home</router-link>
-            </li>
-            <li class="nav-item">
-                <router-link to="/copilot" class="nav-link">Copilot</router-link>
-            </li>
-            <li class="nav-item">
-                <router-link to="/hosts" class="nav-link">Hosts</router-link>
-            </li>
-            <li class="nav-item">
-                <router-link to="/clusters" class="nav-link">Clusters</router-link>
-            </li>
-            <li class="nav-item">
-                <router-link to="/tasks" class="nav-link">Tasks</router-link>
-            </li>
-            <li class="nav-item">
-                <router-link to="/taskruns" class="nav-link">TaskRuns</router-link>
-            </li>
-            <li class="nav-item">
-                <router-link to="/pipelines" class="nav-link">Pipelines</router-link>
-            </li>
-            <li class="nav-item">
-                <router-link to="/pipelineruns" class="nav-link">PipelineRuns</router-link>
-            </li>
-            <li class="nav-item">
-                <router-link to="/logout" class="nav-link">Logout</router-link>
-            </li>
-        </ul>
-    </nav>
+    <div>
+        <el-col :span="4">
+            <el-menu :default-active="$route.path" router mode="vertical" class="custom-menu" background-color="#333"
+                text-color="#fff" active-text-color="#ffd04b" :default-openeds="['/']" @open="handleOpen"
+                @close="handleClose">
+
+                <el-menu-item v-for="(item, i) in navList" :key="i" :index="item.path">
+                    <router-link :to="item.path" class="nav-link" exact-active-class="active">
+                        <i :class="item.icon"></i>
+                        <span>{{ item.navItem }}</span>
+                    </router-link>
+                </el-menu-item>
+
+            </el-menu>
+        </el-col>
+    </div>
 </template>
 
+
+<script>
+export default {
+    data() {
+        return {
+            navList: [
+                { navItem: 'Home', path: '/', icon: 'el-icon-house' },
+                { navItem: 'Copilot', path: '/copilot', icon: 'el-icon-s-custom' },
+                { navItem: 'Hosts', path: '/hosts', icon: 'el-icon-s-platform' },
+                { navItem: 'Clusters', path: '/clusters', icon: 'el-icon-s-help' },
+                { navItem: 'Tasks', path: '/tasks', icon: 'el-icon-s-check' },
+                { navItem: 'TaskRuns', path: '/taskruns', icon: 'el-icon-s-operation' },
+                { navItem: 'Pipelines', path: '/pipelines', icon: 'el-icon-s-promotion' },
+                { navItem: 'PipelineRuns', path: '/pipelineruns', icon: 'el-icon-s-tools' },
+                { navItem: 'Logout', path: '/logout', icon: 'el-icon-s-release' }
+            ]
+        };
+    },
+    methods: {
+        handleOpen() {
+            // Handle open action
+        },
+        handleClose() {
+            // Handle close action
+        }
+    }
+};
+</script>
+
 <style scoped>
-.sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 100;
-    width: 7em;
-    padding: 48px 0 0;
-    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+.custom-menu {
+    min-height: 100vh;
+    min-width: 10em;
+    border-right: 1px solid #ddd;
+    background-color: #333;
 }
-.bg-light {
-    background-color: #000000 !important;
-}
+
 .nav-link {
-    color: #fff !important;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.nav-link:hover {
+    color: #ffd04b;
+}
+
+.el-menu-item:hover {
+    background-color: #444;
+}
+
+/* 添加激活状态下的样式 */
+.active {
+    color: #ffd04b;
+    font-weight: bold;
 }
 </style>

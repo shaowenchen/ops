@@ -161,10 +161,6 @@ const allFields = [
 </template>
 
 <style scoped>
-.container {
-    margin-left: 7em;
-}
-
 .form-item {
     display: flex;
     align-items: center;

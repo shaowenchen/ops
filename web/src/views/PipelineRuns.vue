@@ -67,10 +67,6 @@ function formatObject(row, column, cellValue) {
 </template>
 
 <style scoped>
-.container {
-    margin-left: 7em;
-}
-
 .search-input {
     margin-bottom: 1em;
     width: 300px;
