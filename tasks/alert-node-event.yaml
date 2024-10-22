@@ -92,7 +92,7 @@ spec:
                       if describe_output:
                           event_errors = parse_events(describe_output)
                           if event_errors:
-                              send("alert", f"\n {node_name}: \n{event_errors}")
+                              send("alert", f"<br> > host: {node_name} <br> > events: {event_errors}")
 
               except Exception as e:
                   message = str(e)
