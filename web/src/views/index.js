@@ -6,4 +6,5 @@ export { default as TaskRuns } from './TaskRuns.vue';
 export { default as Pipelines } from './Pipelines.vue';
 export { default as PipelineRuns } from './PipelineRuns.vue';
 export { default as Login } from './Login.vue';
+export { default as Logout } from './Logout.vue';
 export { default as Copilot } from './Copilot.vue'

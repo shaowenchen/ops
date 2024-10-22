@@ -29,6 +29,9 @@
             <li class="nav-item">
                 <router-link to="/pipelineruns" class="nav-link">PipelineRuns</router-link>
             </li>
+            <li class="nav-item">
+                <router-link to="/logout" class="nav-link">Logout</router-link>
+            </li>
         </ul>
     </nav>
 </template>

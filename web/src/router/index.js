@@ -1,6 +1,17 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import { Home, Hosts, Clusters, Tasks, TaskRuns, Pipelines, PipelineRuns, Login, Copilot} from "@/views";
+import {
+  Home,
+  Hosts,
+  Clusters,
+  Tasks,
+  TaskRuns,
+  Pipelines,
+  PipelineRuns,
+  Login,
+  Logout,
+  Copilot,
+} from "@/views";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -14,6 +25,7 @@ export const router = createRouter({
     { path: "/pipelines", component: Pipelines, name: "pipelines" },
     { path: "/pipelineruns", component: PipelineRuns, name: "pipelineruns" },
     { path: "/login", component: Login, name: "login" },
+    { path: "/logout", component: Logout, name: "logout" },
     { path: "/copilot", component: Copilot, name: "copilot" },
   ],
 });
