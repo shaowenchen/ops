@@ -2,13 +2,14 @@
 import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useClustersStore } from '@/stores';
+import { formatMemory } from '@/utils/cluster';
 
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
 var searchQuery = ref("");
-var selectedFields = ref(['metadata.name']);
+var selectedFields = ref(['Name', 'IP', 'CPU', 'Memory', 'Pods']);
 
 const { cluster } = useRoute().params;
 async function loadData() {
@@ -35,11 +36,31 @@ function onPageSizeChange() {
 
 const allFields = [
     { value: 'metadata.name', label: 'Name' },
-    { value: 'status.conditions', label: 'Conditions' },
+    { value: 'status.addresses', label: 'IP' },
+    { value: 'status.capacity.cpu', label: 'CPU' },
+    { value: 'status.capacity.memory', label: 'Memory' },
+    { value: 'status.capacity.pods', label: 'Pods' },
 ];
-const displayedColumns = computed(() => {
-    return allFields.filter(field => selectedFields.value.includes(field.value));
-});
+
+function ipFormatter(row) {
+    if (row.status && row.status.addresses) {
+        const internalIP = row.status.addresses.find(addr => addr.type === 'InternalIP');
+        return internalIP ? internalIP.address : 'N/A';
+    }
+    return 'N/A';
+}
+
+function capacityFormatter(row, type) {
+    if (row.status && row.status.capacity) {
+        const value = row.status.capacity[type];
+        if (type === 'memory') {
+            return formatMemory(value);
+        }
+        return value || 'N/A';
+    }
+    return 'N/A';
+}
+
 </script>
 
 <template>
@@ -50,8 +71,19 @@ const displayedColumns = computed(() => {
                 <el-option v-for="field in allFields" :key="field.value" :label="field.label" :value="field.value" />
             </el-select>
         </div>
+
         <el-table :data="dataList" border size="default">
-            <el-table-column v-for="column in displayedColumns" :key="column.value" :prop="column.value" :label="column.label" />
+            <el-table-column v-if="selectedFields.includes('Name')" prop="metadata.name" label="Name" />
+
+            <el-table-column v-if="selectedFields.includes('IP')" label="IP" :formatter="ipFormatter" />
+
+            <el-table-column v-if="selectedFields.includes('CPU')" label="CPU"
+                :formatter="(row) => capacityFormatter(row, 'cpu')" />
+
+            <el-table-column v-if="selectedFields.includes('Memory')" label="Memory"
+                :formatter="(row) => capacityFormatter(row, 'memory')" />
+            <el-table-column v-if="selectedFields.includes('Pods')" label="Pods"
+                :formatter="(row) => capacityFormatter(row, 'pods')" />
         </el-table>
 
         <el-pagination @current-change="onPaginationChange" @size-change="onPageSizeChange"
