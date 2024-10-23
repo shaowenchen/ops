@@ -11,7 +11,7 @@ spec:
       content: |
         pgrep -af "sshd: root@notty" | while read -r line; do
             pid=$(echo "$line" | awk '{print $1}')
-            if [[ -n "$pid" ]]; then
+            if [ -n "$pid" ]; then
                 echo "终止进程: $pid"
                 kill "$pid"
             fi
