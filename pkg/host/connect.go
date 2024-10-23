@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	scp "github.com/bramvdbogaerde/go-scp"
@@ -26,11 +27,30 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type HostConnectionCache struct {
+	cache map[string]*HostConnection
+	Mutex *sync.RWMutex
+}
+
+func (c *HostConnectionCache) Get(key string) *HostConnection {
+	c.Mutex.RLock()
+	defer c.Mutex.RUnlock()
+	return c.cache[key]
+}
+
+func (c *HostConnectionCache) Set(key string, value *HostConnection) {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+	c.cache[key] = value
+}
+
 type HostConnection struct {
 	Host      *opsv1.Host
-	scpclient scp.Client
+	scpclient *scp.Client
 	sshclient *ssh.Client
 }
+
+var hcCache = HostConnectionCache{cache: make(map[string]*HostConnection), Mutex: &sync.RWMutex{}}
 
 func NewHostConnBase64(h *opsv1.Host) (hc *HostConnection, err error) {
 	if h == nil {
@@ -46,10 +66,15 @@ func NewHostConnBase64(h *opsv1.Host) (hc *HostConnection, err error) {
 	if h.Spec.Address == opsconstants.LocalHostIP {
 		return hc, nil
 	}
-	// remote host
-	if err := hc.connecting(); err != nil {
-		return hc, err
+	key := fmt.Sprintf("%s:%d", h.Spec.Address, h.Spec.Port)
+	if hc := hcCache.Get(key); hc != nil {
+		return hc, nil
 	}
+	err = hc.connecting()
+	if err != nil {
+		return nil, err
+	}
+	hcCache.Set(key, hc)
 	return
 }
 
@@ -321,6 +346,7 @@ func (c *HostConnection) connecting() (err error) {
 		Timeout:         time.Duration(c.Host.Spec.TimeOutSeconds) * time.Second,
 		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Config:          ssh.Config{},
 	}
 
 	endpointBehindBastion := net.JoinHostPort(c.Host.Spec.Address, strconv.Itoa(c.Host.Spec.Port))
@@ -329,11 +355,21 @@ func (c *HostConnection) connecting() (err error) {
 	if err != nil {
 		return errors.Wrapf(err, "client.Dial failed %s", c.Host.Spec.Address)
 	}
-	c.scpclient, err = scp.NewClientBySSH(c.sshclient)
+	client, err := scp.NewClientBySSH(c.sshclient)
+	c.scpclient = &client
 	if err != nil {
 		return errors.Wrapf(err, "scp.NewClient failed")
 	}
 	return nil
+}
+
+func (c *HostConnection) close() {
+	if c.sshclient != nil {
+		c.sshclient.Close()
+	}
+	if c.scpclient != nil {
+		c.scpclient.Close()
+	}
 }
 
 func (c *HostConnection) execSh(ctx context.Context, sudo bool, cmd string) (stdout string, err error) {

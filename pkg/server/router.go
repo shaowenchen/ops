@@ -2,9 +2,9 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	_ "github.com/shaowenchen/ops/swagger"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "github.com/shaowenchen/ops/swagger"
 )
 
 func SetupRouter(r *gin.Engine) {
