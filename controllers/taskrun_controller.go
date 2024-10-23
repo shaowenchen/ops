@@ -202,11 +202,10 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	r.commitStatus(logger, ctx, tr, opsconstants.StatusRunning)
 
 	tr.MergeVariables(t)
-	cluster := r.getCluster(logger, ctx, t, tr)
 	hosts := r.getAvaliableHosts(logger, ctx, t, tr)
 
 	cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-	if cluster.IsCurrentCluster() && len(hosts) > 0 {
+	if len(hosts) > 0 {
 		for _, h := range hosts {
 			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.Host))
 			err = r.runTaskOnHost(cliLogger, ctx, r.Client, t, tr, &h)
@@ -216,6 +215,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 			cliLogger.Flush()
 		}
 	} else {
+		cluster := opsv1.NewCurrentCluster()
 		err = r.runTaskOnKube(cliLogger, ctx, t, tr, &cluster)
 		if err != nil {
 			logger.Error.Println(err)
@@ -392,22 +392,6 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		time.Sleep(3 * time.Second)
 	}
 	logger.Error.Println("update taskrun status failed after retries", err)
-	return
-}
-
-func (r *TaskRunReconciler) getCluster(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (cluster opsv1.Cluster) {
-	clusterStr := tr.GetCluster(t)
-	// default current cluster
-	if len(clusterStr) == 0 {
-		return opsv1.NewCurrentCluster()
-	}
-	// get cluster
-	cluster = opsv1.Cluster{}
-	err := r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: clusterStr}, &cluster)
-	if err != nil {
-		logger.Error.Println(err, "failed to get cluster")
-		return
-	}
 	return
 }
 

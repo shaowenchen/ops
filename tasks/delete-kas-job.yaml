@@ -7,17 +7,17 @@ spec:
   desc: delete job under kas-job
   host: anymaster
   variables:
-    taskId:
-      display: taskId
+    task:
+      display: task
       regex: "^[0-9]*$"
       required: true
   steps:
     - name: list pod about job
       content: |
-        kubectl get pod -n kas-job -l job_name=kas-job-${taskId}
+        kubectl get pod -n kas-job -l job_name=kas-job-${task}
     - name: delete pod about job
       content: |
-        kubectl delete pod -n kas-job -l job_name=kas-job-${taskId}
+        kubectl delete pod -n kas-job -l job_name=kas-job-${task}
     - name: list pod about job
       content: |
-        kubectl get pod -n kas-job -l job_name=kas-job-${taskId}
+        kubectl get pod -n kas-job -l job_name=kas-job-${task}

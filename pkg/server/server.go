@@ -103,6 +103,6 @@ func GetToken(c *gin.Context) string {
 		}
 	}
 	// try get from cookie
-	token, _ := c.Cookie("token")
+	token, _ := c.Cookie("opstoken")
 	return token
 }

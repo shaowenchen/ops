@@ -30,7 +30,6 @@ type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	Desc                    string    `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Cluster                 string    `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Host                    string    `json:"host,omitempty" yaml:"host,omitempty"`
 	Variables               Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Steps                   []Step    `json:"steps,omitempty" yaml:"steps,omitempty"`
@@ -51,7 +50,6 @@ type Step struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Cluster",type=string,JSONPath=`.spec.cluster`
 // +kubebuilder:printcolumn:name="Host",type=string,JSONPath=`.spec.host`
 type Task struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`

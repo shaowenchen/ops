@@ -7,7 +7,7 @@ export const useLoginStore = defineStore({
   state: () => ({}),
   actions: {
     async save(token) {
-      Cookies.set("token", token, { expires: 7 });
+      Cookies.set("opstoken", token, { expires: 7 });
       if (this.check()) {
         return true;
       } else {
@@ -16,10 +16,10 @@ export const useLoginStore = defineStore({
       }
     },
     get() {
-      return Cookies.get("token");
+      return Cookies.get("opstoken");
     },
     clear() {
-      Cookies.remove("token");
+      Cookies.remove("opstoken");
     },
     async check() {
       const resp = await fetchWrapper.get(`/api/v1/login/check`);

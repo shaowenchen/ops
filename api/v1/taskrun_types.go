@@ -54,16 +54,6 @@ func (obj *TaskRun) MergeVariables(t *Task) {
 	}
 }
 
-func (obj *TaskRun) GetCluster(t *Task) string {
-	if t.Spec.Cluster != "" {
-		return t.Spec.Cluster
-	}
-	if _, ok := obj.Spec.Variables[opsconstants.Cluster]; ok {
-		return obj.Spec.Variables[opsconstants.Cluster]
-	}
-	return ""
-}
-
 func (obj *TaskRun) GetHost(t *Task) string {
 	if t.Spec.Host != "" {
 		return t.Spec.Host

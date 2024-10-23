@@ -8,10 +8,7 @@ spec:
   variables:
     cluster:
       required: true
-    host:
-      value: "anymaster"
-      required: true
-    taskId:
+    task:
       required: true
       examples: ["21780"]
       regex: "^[0-9]*$"
