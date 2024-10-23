@@ -5,6 +5,4 @@ metadata:
   namespace: ops-system
 spec:
   crontab: "30 * * * *"
-  taskRef: clear-sshd
-  variables:
-    host: "managed-by=ops"
+  taskRef: clear-sshd 

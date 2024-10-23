@@ -5,6 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: clear sshd
+  host: managed-by=ops
   steps:
     - name: clear sshd notty process
       content: |
