@@ -1,0 +1,26 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: get-deployment-bysvc
+  namespace: ops-system
+spec:
+  desc: get svc deployment
+  host: anymaster
+  variables:
+    svc:
+      display: svc
+      required: true
+    namespace:
+      display: namespace
+      required: true
+  steps:
+    - name: get svc deployment
+      content: |
+        APP_SELECTOR=$(kubectl get svc ${svc} -n ${namespace} -o jsonpath='{.spec.selector.app}')
+
+        if [ -z "$APP_SELECTOR" ]; then
+          echo "cannot find app selector"
+          exit 1
+        fi
+
+        kubectl get deployments -n ${namespace} -l app=${APP_SELECTOR}

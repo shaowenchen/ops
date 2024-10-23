@@ -1,0 +1,26 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: get-deployment-bypod
+  namespace: ops-system
+spec:
+  desc: get pod deployment
+  host: anymaster
+  variables:
+    namespace:
+      display: namespace
+      required: true
+    podname:
+      display: pod name
+      required: true
+  steps:
+    - name: get pod deployment
+      content: |
+        APP_SELECTOR=$(kubectl get pod ${podname} -n ${namespace} -o jsonpath='{.spec.selector.app}')
+
+        if [ -z "$APP_SELECTOR" ]; then
+          echo "cannot find app selector"
+          exit 1
+        fi
+
+        kubectl get deployments -n ${namespace} -l app=${APP_SELECTOR}
