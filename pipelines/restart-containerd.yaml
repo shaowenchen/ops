@@ -1,0 +1,22 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: restart-containerd
+  namespace: ops-system
+spec:
+  desc: 重启 containerd
+  variables:
+    cluster:
+      required: true
+    node:
+      required: true
+      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
+    white:
+      required: true
+    whitelist:
+      required: true
+  tasks:
+    - name: 白名单检测
+      taskRef: check-whitelist
+    - name: 重启 containerd
+      taskRef: restart-containerd

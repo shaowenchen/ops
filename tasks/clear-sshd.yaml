@@ -1,0 +1,17 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: clear-sshd
+  namespace: ops-system
+spec:
+  desc: clear sshd
+  steps:
+    - name: clear sshd notty process
+      content: |
+        pgrep -af "sshd: root@notty" | while read -r line; do
+            pid=$(echo "$line" | awk '{print $1}')
+            if [[ -n "$pid" ]]; then
+                echo "终止进程: $pid"
+                kill "$pid"
+            fi
+        done
