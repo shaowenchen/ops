@@ -7,9 +7,9 @@ spec:
   desc: uncordon node in cluster
   host: anymaster
   variables:
-    node:
+    host:
       desc: node name
       required: true
   steps:
     - name: uncordon node
-      content: kubectl uncordon ${node}
+      content: kubectl uncordon ${host}

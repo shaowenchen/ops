@@ -32,3 +32,4 @@ func IsWebhookEvent(event string) bool {
 
 const ActionClearDisk = "clean disk"
 const ActionGetDataSetStatus = "get dataset status"
+const ActionGetNodeStatus = "get node status"
