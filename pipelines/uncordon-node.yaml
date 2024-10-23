@@ -8,7 +8,7 @@ spec:
   variables:
     cluster:
       required: true
-    host:
+    node:
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
       required: true
   tasks:

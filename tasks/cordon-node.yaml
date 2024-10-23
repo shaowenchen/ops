@@ -7,9 +7,9 @@ spec:
   desc: cordon node in cluster
   host: anymaster
   variables:
-    host:
+    node:
       display: node name
       required: true
   steps:
     - name: cordon node
-      content: kubectl cordon ${host}
+      content: kubectl cordon ${node}

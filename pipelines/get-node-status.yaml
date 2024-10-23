@@ -8,9 +8,9 @@ spec:
   variables:
     cluster:
       required: true
-    host:
+    node:
       required: true
-      desc: host
+      desc: 节点名
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
   tasks:
     - name: 查询节点状态
