@@ -1,0 +1,28 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: inspect-error-pod
+  namespace: ops-system
+spec:
+  desc: pod 处于异常状态时，用来查看 pod 的错误日志和错误事件
+  variables:
+    cluster:
+      required: true
+    host:
+      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
+      required: true
+    podname:
+      required: true
+      regex: "[A-Za-z0-9-]+"
+    namespace:
+      required: true
+      regex: "[A-Za-z0-9-]+"
+  tasks:
+    - name: 检查 Pod 是否存在
+      taskRef: check-pod-existed
+    - name: 获取 Deployment
+      taskRef: get-deployment-bypod
+    - name: 查看 Pod 错误日志
+      taskRef: get-pod-error-logs-byname
+    - name: 查看 Pod 的错误事件
+      taskRef: list-error-events-bypod

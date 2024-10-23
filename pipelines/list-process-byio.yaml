@@ -1,0 +1,18 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: list-process-byio
+  namespace: ops-system
+spec:
+  desc: 获取占用 IO 的进程
+  variables:
+    cluster:
+      required: true
+    host:
+      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
+      required: true
+  tasks:
+    - name: 检查节点是否存在
+      taskRef: check-node-existed
+    - name: 获取占用 IO 的进程
+      taskRef: list-process-byio
