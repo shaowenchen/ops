@@ -66,6 +66,20 @@ type Cluster struct {
 	Status ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
+func (c *Cluster) ClearSensitiveInfo() {
+	if c == nil {
+		return
+	}
+	c.Spec.Token = ""
+	c.Spec.Config = ""
+	if c.ObjectMeta.Annotations != nil {
+		if _, ok := c.ObjectMeta.Annotations["kubectl.kubernetes.io/last-applied-configuration"]; ok {
+			delete(c.ObjectMeta.Annotations, "kubectl.kubernetes.io/last-applied-configuration")
+		}
+	}
+	c.ObjectMeta.ManagedFields = nil
+}
+
 func (c *Cluster) GetSpec() *ClusterSpec {
 	return &c.Spec
 }

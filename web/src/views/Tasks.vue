@@ -7,7 +7,7 @@ var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
 var searchQuery = ref("");
-var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'spec.cluster', 'spec.host']);
+var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'spec.host']);
 
 async function loadData() {
     const store = useTasksStore();
@@ -44,7 +44,6 @@ var selectedItem = ref(null);
 async function confirm() {
     const store = useTaskRunsStore();
     const vars = {};
-    vars['cluster'] = selectedItem.spec.cluster;
     vars['host'] = selectedItem.spec.host;
     await store.create(selectedItem.metadata.namespace, selectedItem.metadata.name, vars);
     dialogVisble.value = false;
@@ -83,7 +82,6 @@ const allFields = [
     { value: 'metadata.namespace', label: 'Namespace' },
     { value: 'metadata.name', label: 'Name' },
     { value: 'spec.desc', label: 'Desc' },
-    { value: 'spec.cluster', label: 'Cluster' },
     { value: 'spec.host', label: 'Host' },
 ];
 
@@ -125,7 +123,6 @@ const allFields = [
                 <div class="form-group">
                     <label>Cluster</label>
                     <el-select v-model="selectedItem.spec.cluster" class="w-100" placeholder="Select">
-                        <el-option label="Cluster" value="cluster" />
                         <el-option label="Host" value="host" />
                     </el-select>
                 </div>

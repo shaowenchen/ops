@@ -157,8 +157,7 @@ func ListClusters(c *gin.Context) {
 	}
 	// clear sensitive info
 	for i := range newCluster {
-		newCluster[i].Spec.Token = ""
-		newCluster[i].Spec.Config = ""
+		newCluster[i].ClearSensitiveInfo()
 	}
 	showData(c, paginator[opsv1.Cluster](newCluster, req.PageSize, req.Page))
 }
@@ -203,8 +202,7 @@ func GetCluster(c *gin.Context) {
 		return
 	}
 	// hide sensitive info
-	cluster.Spec.Token = ""
-	cluster.Spec.Config = ""
+	cluster.ClearSensitiveInfo()
 	showData(c, cluster)
 }
 
