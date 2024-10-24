@@ -7,10 +7,10 @@ spec:
   desc: check the node existed
   host: anymaster
   variables:
-    node:
-      display: node
+    host:
+      display: host
       required: true
   steps:
     - name: Check node existed
       content: |
-        found="false"; if [ -z "$node" ]; then echo "node is existed"; else if kubectl get node ${node} &>/dev/null; then echo "Node ${node} is existed"; found="true"; else echo "Node ${node} is not existed"; fi; fi
+        found="false"; if [ -z "$node" ]; then echo "node is existed"; else if kubectl get node ${host} &>/dev/null; then echo "Node ${host} is existed"; found="true"; else echo "Node ${host} is not existed"; fi; fi

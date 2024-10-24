@@ -7,15 +7,13 @@ spec:
   desc: drain node in cluster
   host: anymaster
   variables:
-    node:
-      display: node name
+    host:
+      display: host name
       required: true
   steps:
     - name: Cordon Node
-      content: kubectl cordon ${node}
+      content: kubectl cordon ${host}
     - name: Drain Node
-      content: kubectl drain ${node} --ignore-daemonsets
-    - name: Show Node on Kubernetes
-      content: kubectl get node
+      content: kubectl drain ${host} --ignore-daemonsets
     - name: Show Pod on Node
-      content: kubectl get pod -A |grep ${node}
+      content: kubectl get pod -A |grep ${host}

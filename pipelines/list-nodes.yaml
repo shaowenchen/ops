@@ -8,9 +8,6 @@ spec:
   variables:
     cluster:
       required: true
-    host:
-      value: "anymaster"
-      required: true
   tasks:
     - name: 列出集群的节点
       taskRef: list-nodes

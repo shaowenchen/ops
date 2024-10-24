@@ -9,9 +9,8 @@ spec:
     cluster:
       required: true
     host:
-      value: "anymaster"
       required: true
-    node:
+      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
   tasks:
     - name: list pods
       taskRef: list-pods-bynode

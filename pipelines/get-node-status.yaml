@@ -8,7 +8,7 @@ spec:
   variables:
     cluster:
       required: true
-    node:
+    host:
       required: true
       desc: 节点名
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"

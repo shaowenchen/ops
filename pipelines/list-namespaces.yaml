@@ -8,9 +8,6 @@ spec:
   variables:
     cluster:
       required: true
-    nodeName:
-      value: "anymaster"
-      required: true
   tasks:
     - name: 列出所有命名空间
       taskRef: list-namespaces

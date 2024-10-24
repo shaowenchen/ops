@@ -7,9 +7,9 @@ spec:
   desc: get node details in cluster
   host: anymaster
   variables:
-    node:
+    host:
       required: true
   steps:
     - name: get node details
-      content: kubectl describe node ${node}
+      content: kubectl describe node ${host}
 

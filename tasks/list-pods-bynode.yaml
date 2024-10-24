@@ -7,8 +7,8 @@ spec:
   desc: list pods in special node
   host: anymaster
   variables:
-    nodeName:
+    host:
       required: true
   steps:
     - name: list pods
-      content: kubectl get pods -A --field-selector spec.nodeName=${nodeName} -o custom-columns="NAME:.metadata.name,AGE:.metadata.creationTimestamp,STATUS:.status.phase" --sort-by=.metadata.creationTimestamp
+      content: kubectl get pods -A --field-selector spec.nodeName=${host} -o custom-columns="NAME:.metadata.name,AGE:.metadata.creationTimestamp,STATUS:.status.phase" --sort-by=.metadata.creationTimestamp

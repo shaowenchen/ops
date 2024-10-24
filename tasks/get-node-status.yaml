@@ -7,12 +7,12 @@ spec:
   desc: get node status
   host: anymaster
   variables:
-    node:
+    host:
       display: node name
       required: true
   steps:
     - name: get node status
-      content: kubectl get nodes ${node} -o wide
+      content: kubectl get nodes ${host} -o wide
     - name: get usage
-      content: kubectl top nodes ${node}
+      content: kubectl top nodes ${host}
 
