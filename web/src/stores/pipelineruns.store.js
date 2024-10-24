@@ -31,8 +31,8 @@ export const usePipelineRunsStore = defineStore({
       const res = await fetchWrapper.post(
         `/api/v1/namespaces/${namespace}/pipelineruns`,
         {
-          ref: ref,
-          vars: vars,
+          pipelineRef: ref,
+          variables: vars,
         }
       );
       if (res.code == 0) {

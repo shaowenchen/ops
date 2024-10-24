@@ -15,21 +15,21 @@ async function save() {
         useAlertStore().success("Login success");
         setTimeout(() => {
             useAlertStore().clear();
-            router.push("/");
+            router.push("/clusters");
         }, 1500);
-
     } else {
+        useAlertStore().error("Login failed");
         store.clear();
+        isDisabled.value = false;
     }
-    isDisabled.value = false;
 }
 
 </script>
 
 <template>
-    <div class="container" :hidden="isDisabled">
+    <div class="container" v-show="!isDisabled">
         <el-input class="token" v-model="token" placeholder="Please input token"></el-input>
-        <el-button type="primary" @click="save">Save</el-button>
+        <el-button type="primary" @click="save" :disabled="isDisabled">Save</el-button>
     </div>
 </template>
 

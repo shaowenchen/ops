@@ -1,6 +1,7 @@
 <script setup>
-import { useClustersStore, useHostsStore, useTaskRunsStore, useTasksStore } from "@/stores";
+import { useHostsStore, useTaskRunsStore, useTasksStore } from "@/stores";
 import { ref, computed } from "vue";
+import { proxyVariablesToJsonObject } from "@/utils/common";
 
 var dataList = ref([]);
 var currentPage = ref(1);
@@ -21,9 +22,9 @@ const filteredDataList = computed(() => {
         return dataList.value;
     }
     return dataList.value.filter(item => {
-        return Object.values(item.metadata).some(value => 
+        return Object.values(item.metadata).some(value =>
             value.toString().toLowerCase().includes(searchQuery.value.toLowerCase())
-        ) || Object.values(item.spec).some(value => 
+        ) || Object.values(item.spec).some(value =>
             value.toString().toLowerCase().includes(searchQuery.value.toLowerCase())
         );
     });
@@ -43,9 +44,8 @@ var dialogVisble = ref(false);
 var selectedItem = ref(null);
 async function confirm() {
     const store = useTaskRunsStore();
-    const vars = {};
-    vars['host'] = selectedItem.spec.host;
-    await store.create(selectedItem.metadata.namespace, selectedItem.metadata.name, vars);
+    var vars = proxyVariablesToJsonObject(selectedItem.value.spec.variables);
+    await store.create(selectedItem.value.metadata.namespace, selectedItem.value.metadata.name, vars);
     dialogVisble.value = false;
 }
 
@@ -55,22 +55,14 @@ function close() {
 }
 
 var hosts = ref([]);
-var clusters = ref([]);
 
 function getHostList() {
-    if (selectedItem.spec.cluster === 'host') {
-        return hosts.value.list;
-    } else if (selectedItem.spec.cluster === 'cluster') {
-        return clusters.value.list;
-    }
-    return [];
+    return hosts.value.list;
 }
 
 async function open() {
     const hostStore = useHostsStore();
-    hosts.value = await hostStore.list("all", 999, 1);
-    const clusterStore = useClustersStore();
-    clusters.value = await clusterStore.list("all", 999, 1);
+    hosts = await hostStore.list("all", 999, 1);
 }
 
 function run(item) {
@@ -89,20 +81,10 @@ const allFields = [
 
 <template>
     <div class="container">
-        <el-input
-            v-model="searchQuery"
-            placeholder="Search..."
-            class="search-input"
-            clearable
-        />
+        <el-input v-model="searchQuery" placeholder="Search..." class="search-input" clearable />
 
         <el-select v-model="selectedFields" multiple placeholder="Select columns to display">
-            <el-option
-                v-for="field in allFields"
-                :key="field.value"
-                :label="field.label"
-                :value="field.value"
-            />
+            <el-option v-for="field in allFields" :key="field.value" :label="field.label" :value="field.value" />
         </el-select>
 
         <el-dialog title="Create TaskRun" v-model="dialogVisble" width="30%" :before-close="close" @open="open">
@@ -114,23 +96,26 @@ const allFields = [
                 </div>
                 <div class="form-group">
                     <label>Name</label>
-                    <input name="name" type="text" disabled :value="selectedItem?.metadata?.name" class="form-control" />
+                    <input name="name" type="text" disabled :value="selectedItem?.metadata?.name"
+                        class="form-control" />
                 </div>
                 <div class="form-group">
                     <label>Description</label>
                     <input name="desc" type="text" disabled :value="selectedItem?.spec?.desc" class="form-control" />
                 </div>
-                <div class="form-group">
-                    <label>Cluster</label>
-                    <el-select v-model="selectedItem.spec.cluster" class="w-100" placeholder="Select">
-                        <el-option label="Host" value="host" />
+                <div class="form-group" v-if="selectedItem.spec.host != 'anymaster'">
+                    <label>Host</label>
+                    <el-select v-model="selectedItem.spec.host">
+                        <el-option v-for="item in getHostList()" :key="item.metadata.name"
+                            :value="item.status.hostname" />
                     </el-select>
                 </div>
-                <div class="form-group">
-                    <label>Host</label>
-                    <el-select v-model="selectedItem.spec.host" v-if="selectedItem.spec.cluster">
-                        <el-option v-for="item in getHostList()" :key="item.metadata.name" :value="item.metadata.name" />
-                    </el-select>
+                <div class="form-group" v-if="selectedItem.spec.variables">
+                    <label>Variables</label>
+                    <div class="form-item" v-for="(value, key) in selectedItem.spec.variables" :key="key">
+                        <label>{{ key }}:</label>
+                        <input type="text" v-model="value.default" class="form-control" />
+                    </div>
                 </div>
             </div>
             <template #footer>
@@ -142,7 +127,8 @@ const allFields = [
         </el-dialog>
 
         <el-table :data="filteredDataList" border size="default">
-            <el-table-column v-for="field in selectedFields" :key="field" :prop="field" :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)" />
+            <el-table-column v-for="field in selectedFields" :key="field" :prop="field"
+                :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)" />
             <el-table-column label="Actions">
                 <template #default="scope">
                     <el-button type="primary" @click="run(scope.row)">Run</el-button>
@@ -162,6 +148,12 @@ const allFields = [
     display: flex;
     align-items: center;
     margin-bottom: 20px;
+}
+
+.form-item label {
+    width: 40%;
+    text-align: right;
+    margin-right: 10px;
 }
 
 .label {
