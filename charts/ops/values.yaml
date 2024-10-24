@@ -83,6 +83,7 @@ autoscaling:
 
 nodeSelector:
   kubernetes.io/arch: amd64
+
 tolerations: []
 
 affinity: {}
