@@ -10,13 +10,13 @@ spec:
     namespace:
       display: namespace
       required: true
-    podname:
+    pod:
       display: pod name
       required: true
   steps:
     - name: get pod deployment
       content: |
-        APP_SELECTOR=$(kubectl get pod ${podname} -n ${namespace} -o jsonpath='{.spec.selector.app}')
+        APP_SELECTOR=$(kubectl get pod ${pod} -n ${namespace} -o jsonpath='{.metadata.labels.app}')
 
         if [ -z "$APP_SELECTOR" ]; then
           echo "cannot find app selector"

@@ -10,10 +10,10 @@ spec:
     namespace:
       display: namespace
       required: true
-    podname:
+    pod:
       display: pod name
       required: true
   steps:
     - name: delete pod
       content: |
-        kubectl delete pod -n ${namespace} ${podname}
+        kubectl delete pod -n ${namespace} ${pod}

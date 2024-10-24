@@ -9,15 +9,12 @@ spec:
     cluster:
       value: "cluster"
       required: true
-    host:
-      value: "anymaster"
-      required: true
     namespace:
       required: true
       examples:
         - ai-app
         - ai-test
-    podname:
+    pod:
       required: true
       examples:
         - ubuntu-8474647969-qszcj

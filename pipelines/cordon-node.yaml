@@ -12,7 +12,9 @@ spec:
       required: true
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
   tasks:
-    - name: 检查节点是否存在
-      taskRef: check-node-existed
+    - name: 查看节点
+      taskRef: get-node
     - name: 禁用节点
       taskRef: cordon-node
+    - name: 查看节点
+      taskRef: get-node

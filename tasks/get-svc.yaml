@@ -1,18 +1,19 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: inspect-pod
+  name: get-svc
   namespace: ops-system
 spec:
-  desc: get pod details in cluster
+  desc: get svc
   host: anymaster
   variables:
     namespace:
       display: namespace
       required: true
-    pod:
-      display: pod name
+    svc:
+      display: svc name
       required: true
   steps:
-    - name: get pod details info
-      content: kubectl describe pod ${pod} -n ${namespace}
+    - name: get svc
+      content: |
+        kubectl get svc ${svc} -n ${namespace}

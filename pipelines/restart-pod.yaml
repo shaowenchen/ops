@@ -11,8 +11,8 @@ spec:
     host:
       value: "anymaster"
       required: true
-    podname:
-      desc: "For example, `pod: doc-translate-ec-long-v1-64cf8d5478-5zsvk or name: doc-translate-ec-long-v1-64cf8d5478-5zsvk`, where doc-translate-ec-long-v1-64cf8d5478-5zsvk is podname"
+    pod:
+      desc: "For example, `pod: doc-translate-ec-long-v1-64cf8d5478-5zsvk or name: doc-translate-ec-long-v1-64cf8d5478-5zsvk`, where doc-translate-ec-long-v1-64cf8d5478-5zsvk is pod"
       value: ""
       required: true
     white:
@@ -22,7 +22,7 @@ spec:
   tasks:
     - name: 白名单检测
       taskRef: check-whitelist
-    - name: 检查 Pod 是否存在
-      taskRef: check-pod-existed
+    - name: 获取 Pod
+      taskRef: get-pod
     - name: 删除 Pod
       taskRef: delete-pod

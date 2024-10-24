@@ -1,18 +1,19 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: inspect-pod
+  name: get-deployment
   namespace: ops-system
 spec:
-  desc: get pod details in cluster
+  desc: get deployment
   host: anymaster
   variables:
     namespace:
       display: namespace
       required: true
-    pod:
-      display: pod name
+    deployment:
+      display: deployment
       required: true
   steps:
-    - name: get pod details info
-      content: kubectl describe pod ${pod} -n ${namespace}
+    - name: get deployment
+      content: |
+        kubectl get deployment ${deployment} -n ${namespace}

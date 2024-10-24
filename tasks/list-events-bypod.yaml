@@ -10,11 +10,11 @@ spec:
     namespace:
       display: namespace
       required: true
-    podname:
+    pod:
       display: pod name
       required: true
     topk:
       default: "10"
   steps:
     - name: list pod events
-      content: kubectl get events -n ${namespace} |grep ${podname} | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}
+      content: kubectl get events -n ${namespace} |grep ${pod} | awk '{$1=$2=$3=$4=""; print $0}' | head -n ${topk}

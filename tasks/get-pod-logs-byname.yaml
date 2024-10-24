@@ -10,11 +10,11 @@ spec:
     namespace:
       display: namespace
       required: true
-    podname:
+    pod:
       display: pod name
       required: true
     topk: 
       default: "20"
   steps:
     - name: get pod topk logs
-      content: kubectl logs --tail=${topk} -n ${namespace} ${podname} | exit 0
+      content: kubectl logs --tail=${topk} -n ${namespace} ${pod} | exit 0

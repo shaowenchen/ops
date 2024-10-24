@@ -7,7 +7,7 @@ spec:
   desc: restart or delete pod in cluster
   host: anymaster
   variables:
-    podname:
+    pod:
       display: pod name
       required: true
     namespace:
@@ -16,4 +16,4 @@ spec:
   steps:
     - name: delete pod
       content: |
-        kubectl delete pod --grace-period=0 --force -n ${namespace} ${podname}
+        kubectl delete pod --grace-period=0 --force -n ${namespace} ${pod}

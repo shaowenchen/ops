@@ -10,9 +10,9 @@ spec:
     namespace:
       display: namespace
       required: true
-    podname:
+    pod:
       display: pod name
       required: true
   steps:
     - name: get pod status
-      content: kubectl get pod ${podname} -n ${namespace}
+      content: kubectl get pod ${pod} -n ${namespace}

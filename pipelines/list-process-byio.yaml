@@ -12,7 +12,7 @@ spec:
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
       required: true
   tasks:
-    - name: 检查节点是否存在
-      taskRef: check-node-existed
+    - name: 查看节点
+      taskRef: get-node
     - name: 获取占用 IO 的进程
       taskRef: list-process-byio

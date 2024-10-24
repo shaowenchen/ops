@@ -15,8 +15,8 @@ spec:
       required: true
       regex: "[A-Za-z0-9-]+"
   tasks:
-    - name: 检查 svc 是否存在
-      taskRef: check-svc-existed
+    - name: 获取 svc
+      taskRef: get-svc
     - name: 获取 Deployment
       taskRef: get-deployment-bysvc
     - name: 查看 svc 错误日志

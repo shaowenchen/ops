@@ -10,11 +10,11 @@ spec:
     namespace:
       display: namespace
       required: true
-    podname:
-      display: podname
+    pod:
+      display: pod
       required: true
     topk:
       default: "50"
   steps:
     - name: get pod topk error logs
-      content: kubectl logs --tail=${topk} -n ${namespace} ${podname} | grep -iE 'err|warn' | exit 0
+      content: kubectl logs --tail=${topk} -n ${namespace} ${pod} | grep -iE 'err|warn' | exit 0

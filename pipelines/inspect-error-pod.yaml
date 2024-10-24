@@ -11,15 +11,15 @@ spec:
     host:
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
       required: true
-    podname:
+    pod:
       required: true
       regex: "[A-Za-z0-9-]+"
     namespace:
       required: true
       regex: "[A-Za-z0-9-]+"
   tasks:
-    - name: 检查 Pod 是否存在
-      taskRef: check-pod-existed
+    - name: 获取 Pod
+      taskRef: get-pod
     - name: 获取 Deployment
       taskRef: get-deployment-bypod
     - name: 查看 Pod 错误日志
