@@ -4,14 +4,23 @@ import { useRoute } from 'vue-router';
 import { useClustersStore } from '@/stores';
 import { formatMemory } from '@/utils/cluster';
 
+const { cluster } = useRoute().params;
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
 var searchQuery = ref("");
+const allFields = [
+    { value: 'metadata.name', label: 'Name' },
+    { value: 'status.addresses', label: 'IP' },
+    { value: 'status.capacity.cpu', label: 'CPU' },
+    { value: 'status.capacity.memory', label: 'Memory' },
+    { value: 'status.capacity.pods', label: 'Pods' },
+];
 var selectedFields = ref(['Name', 'IP', 'CPU', 'Memory', 'Pods']);
 
-const { cluster } = useRoute().params;
+loadData();
+
 async function loadData() {
     const store = useClustersStore();
     var res = await store.listNodes("ops-system", cluster, pageSize.value, currentPage.value, searchQuery.value);
@@ -19,12 +28,6 @@ async function loadData() {
     total.value = res.total;
 }
 
-watch(searchQuery, () => {
-    currentPage.value = 1;
-    loadData();
-});
-
-loadData();
 
 function onPaginationChange() {
     loadData();
@@ -33,14 +36,6 @@ function onPaginationChange() {
 function onPageSizeChange() {
     loadData();
 }
-
-const allFields = [
-    { value: 'metadata.name', label: 'Name' },
-    { value: 'status.addresses', label: 'IP' },
-    { value: 'status.capacity.cpu', label: 'CPU' },
-    { value: 'status.capacity.memory', label: 'Memory' },
-    { value: 'status.capacity.pods', label: 'Pods' },
-];
 
 function ipFormatter(row) {
     if (row.status && row.status.addresses) {
@@ -66,7 +61,7 @@ function capacityFormatter(row, type) {
 <template>
     <div class="container">
         <div class="form-control">
-            <el-input v-model="searchQuery" placeholder="Search..." @input="onSearch" />
+            <el-input v-model="searchQuery" placeholder="Search..." @input="loadData" />
             <el-select v-model="selectedFields" multiple placeholder="Select fields to display">
                 <el-option v-for="field in allFields" :key="field.value" :label="field.label" :value="field.value" />
             </el-select>

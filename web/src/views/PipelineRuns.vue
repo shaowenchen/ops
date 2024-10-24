@@ -1,18 +1,24 @@
 <script setup>
-import { usePipelineRunsStore } from '@/stores';
 import { ref } from 'vue';
+import { usePipelineRunsStore } from '@/stores';
+import { formatObject } from '@/utils/common';
 
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
+var dialogVisible = ref(false);
+var selectedItem = ref(null);
+var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.pipelineRef', 'spec.variables', 'status.runStatus', 'status.startTime']);
+
+loadData();
+
 async function loadData() {
     const store = usePipelineRunsStore();
     var res = await store.list("all", pageSize.value, currentPage.value);
     dataList.value = res.list
     total.value = res.total
 }
-loadData();
 
 function onPaginationChange() {
     loadData();
@@ -22,18 +28,9 @@ function onPageSizeChange() {
     loadData();
 }
 
-var dialogVisible = ref(false);
-var selectedItem = ref(null);
 function view(item) {
     dialogVisible.value = true;
     selectedItem.value = item;
-}
-
-function formatObject(row, column, cellValue) {
-    if (typeof cellValue === 'object') {
-        return JSON.stringify(cellValue, null, 4);
-    }
-    return cellValue;
 }
 </script>
 
@@ -47,12 +44,12 @@ function formatObject(row, column, cellValue) {
             </div>
         </el-dialog>
         <el-table :data="dataList" border size="default">
-            <el-table-column prop="metadata.namespace" label="Namespace" />
-            <el-table-column prop="metadata.name" label="Name" />
-            <el-table-column prop="spec.pipelineRef" label="PipelineRef" />
-            <el-table-column prop="spec.variables" label="Variables" :formatter="formatObject"/>
-            <el-table-column prop="status.runStatus" label="Run Status" />
-            <el-table-column prop="status.startTime" label="Start Time" />
+            <el-table-column v-for="field in selectedFields" :key="field" :prop="field"
+                :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)">
+                <template #default="{ row }">
+                    <span v-html="formatObject(row, field)"></span>
+                </template>
+            </el-table-column>
             <el-table-column label="Actions">
                 <template #default="scope">
                     <el-button type="primary" @click="view(scope.row)">View</el-button>
@@ -74,5 +71,32 @@ function formatObject(row, column, cellValue) {
 
 .column-select {
     margin-bottom: 1em;
+}
+
+.formatted-variables {
+    white-space: normal;
+}
+
+.kv-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+}
+
+.kv-pair {
+    display: block;
+    padding: 4px 8px;
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    border: 1px solid #1565c0;
+    width: fit-content;
+}
+
+:deep(.el-table .cell) {
+    white-space: normal;
 }
 </style>

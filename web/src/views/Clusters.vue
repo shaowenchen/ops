@@ -8,6 +8,19 @@ var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
 var searchQuery = ref("");
+const allFields = [
+    { value: 'metadata.namespace', label: 'Namespace' },
+    { value: 'metadata.name', label: 'Name' },
+    { value: 'spec.desc', label: 'Desc' },
+    { value: 'spec.server', label: 'Server' },
+    { value: 'status.version', label: 'Version' },
+    { value: 'status.node', label: 'Node' },
+    { value: 'status.runningPod', label: 'RunningPod' },
+    { value: 'status.pod', label: 'Pod' },
+    { value: 'status.certNotAfterDays', label: 'CertNotAfterDays' },
+    { value: 'status.heartTime', label: 'HeartTime' },
+    { value: 'status.heartStatus', label: 'HeartStatus' }
+];
 var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'status.version', 'status.node', 'status.certNotAfterDays', 'status.heartTime']);
 
 async function loadData() {
@@ -16,11 +29,6 @@ async function loadData() {
     dataList.value = res.list;
     total.value = res.total;
 }
-
-watch(searchQuery, () => {
-    currentPage.value = 1;
-    loadData();
-});
 
 loadData();
 
@@ -36,19 +44,6 @@ function run(item) {
     router.push({ name: 'cluster-details', params: { cluster: item.metadata.name } });
 }
 
-const allFields = [
-    { value: 'metadata.namespace', label: 'Namespace' },
-    { value: 'metadata.name', label: 'Name' },
-    { value: 'spec.desc', label: 'Desc' },
-    { value: 'spec.server', label: 'Server' },
-    { value: 'status.version', label: 'Version' },
-    { value: 'status.node', label: 'Node' },
-    { value: 'status.runningPod', label: 'RunningPod' },
-    { value: 'status.pod', label: 'Pod' },
-    { value: 'status.certNotAfterDays', label: 'CertNotAfterDays' },
-    { value: 'status.heartTime', label: 'HeartTime' },
-    { value: 'status.heartStatus', label: 'HeartStatus' }
-];
 const displayedColumns = computed(() => {
     return allFields.filter(field => selectedFields.value.includes(field.value));
 });
@@ -57,7 +52,7 @@ const displayedColumns = computed(() => {
 <template>
     <div class="container">
         <div class="form-control">
-            <el-input v-model="searchQuery" placeholder="Search..." @input="onSearch" />
+            <el-input v-model="searchQuery" placeholder="Search..." @input="loadData" />
             <el-select v-model="selectedFields" multiple placeholder="Select fields to display">
                 <el-option v-for="field in allFields" :key="field.value" :label="field.label" :value="field.value" />
             </el-select>

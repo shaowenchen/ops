@@ -1,17 +1,21 @@
 <script setup>
 import { useTaskRunsStore } from '@/stores';
 import { ref } from 'vue';
+import { formatObject } from '@/utils/common';
 
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
+var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.taskRef', 'spec.variables', 'status.runStatus', 'status.startTime']);
+
 async function loadData() {
     const store = useTaskRunsStore();
     var res = await store.list("all", pageSize.value, currentPage.value);
     dataList.value = res.list
     total.value = res.total
 }
+
 loadData();
 
 function onPaginationChange() {
@@ -24,18 +28,11 @@ function onPageSizeChange() {
 
 var dialogVisible = ref(false);
 var selectedItem = ref(null);
+
 function view(item) {
     dialogVisible.value = true;
     selectedItem.value = item;
 }
-
-function formatObject(row, column, cellValue) {
-    if (typeof cellValue === 'object') {
-        return JSON.stringify(cellValue, null, 4);
-    }
-    return cellValue;
-}
-
 </script>
 
 <template>
@@ -48,13 +45,12 @@ function formatObject(row, column, cellValue) {
             </div>
         </el-dialog>
         <el-table :data="dataList" border size="default">
-            <el-table-column prop="metadata.namespace" label="Namespace" />
-            <el-table-column prop="metadata.name" label="Name" />
-            <el-table-column prop="spec.taskRef" label="TaskRef" />
-            <el-table-column prop="spec.crontab" label="Crontab" />
-            <el-table-column prop="spec.variables" label="Variables" :formatter="formatObject" />
-            <el-table-column prop="status.runStatus" label="Run Status" />
-            <el-table-column prop="status.startTime" label="Start Time" />
+            <el-table-column v-for="field in selectedFields" :key="field" :prop="field"
+                :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)">
+                <template #default="{ row }">
+                    <span v-html="formatObject(row, field)"></span>
+                </template>
+            </el-table-column>
             <el-table-column label="Actions">
                 <template #default="scope">
                     <el-button type="primary" @click="view(scope.row)">View</el-button>

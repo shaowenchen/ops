@@ -1,13 +1,21 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { usePipelinesStore, useClustersStore, usePipelineRunsStore, useHostsStore } from "@/stores";
-import { proxyVariablesToJsonObject } from "@/utils/common";
+import { ref, computed } from "vue";
+import { usePipelinesStore, useClustersStore, usePipelineRunsStore } from "@/stores";
+import { proxyVariablesToJsonObject, formatObject } from "@/utils/common";
 
+const clusterStore = useClustersStore();
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
 var searchQuery = ref("");
+var allFields = [
+    { value: 'metadata.namespace', label: 'Namespace' },
+    { value: 'metadata.name', label: 'Name' },
+    { value: 'spec.desc', label: 'Desc' },
+    { value: 'spec.variables', label: 'Variables' },
+    { value: 'spec.tasks', label: 'Tasks' },
+];
 var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'spec.variables', 'spec.tasks']);
 var dialogVisble = ref(false);
 var selectedItem = ref(null);
@@ -15,7 +23,8 @@ var clusters = ref([]);
 var hosts = ref([]);
 var cluster = ref(null);
 var host = ref(null);
-const clusterStore = useClustersStore();
+
+loadData();
 
 async function loadData() {
     const store = usePipelinesStore();
@@ -37,23 +46,12 @@ const filteredDataList = computed(() => {
     });
 });
 
-onMounted(() => {
-    loadData();
-});
-
 function onPaginationChange() {
     loadData();
 }
 
 function onPageSizeChange() {
     loadData();
-}
-
-function formatObject(row, column, cellValue) {
-    if (typeof cellValue === 'object') {
-        return JSON.stringify(cellValue, null, 4);
-    }
-    return cellValue;
 }
 
 async function open() {
@@ -69,19 +67,11 @@ function run(item) {
 async function onClusterChange() {
     var resp = await clusterStore.listNodes("ops-system", cluster.value, 999, 1);
     hosts.value = resp.list;
+    host.value = null;
 }
-
-const allFields = [
-    { value: 'metadata.namespace', label: 'Namespace' },
-    { value: 'metadata.name', label: 'Name' },
-    { value: 'spec.desc', label: 'Desc' },
-    { value: 'spec.variables', label: 'Variables' },
-    { value: 'spec.tasks', label: 'Tasks' },
-];
 
 function close() {
     dialogVisble.value = false;
-    selectedItem.value = null;
 }
 
 async function confirm() {
@@ -118,20 +108,36 @@ async function confirm() {
                     <label>Description</label>
                     <input name="desc" type="text" disabled :value="selectedItem?.spec?.desc" class="form-control" />
                 </div>
-                <div class="form-group">
+                <div class="form-group" v-if="'cluster' in selectedItem.spec.variables">
                     <label>Cluster</label>
                     <el-select v-model="cluster" @change="onClusterChange">
                         <el-option v-for="item in clusters" :key="item.metadata.name" :label="item.metadata.name"
                             :value="item.metadata.name" />
                     </el-select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" v-if="'host' in selectedItem.spec.variables">
                     <label>Host</label>
                     <el-select v-model="host">
                         <el-option v-for="item in hosts" :key="item.metadata.name" :label="item.metadata.name"
                             :value="item.metadata.name" />
                     </el-select>
                 </div>
+                <div class="form-group" v-if="selectedItem.spec.variables">
+                    <label>Variables</label>
+                    <div
+                        v-if="Object.entries(selectedItem.spec.variables).filter(([k, v]) => k !== 'host' && k !== 'cluster').length > 0">
+                        <div class="form-item"
+                            v-for="([key, value]) in Object.entries(selectedItem.spec.variables).filter(([k, v]) => k !== 'host' && k !== 'cluster')"
+                            :key="key">
+                            <label>{{ key }}:</label>
+                            <input type="text" v-model="value.default" class="form-control" />
+                        </div>
+                    </div>
+                    <div v-else>
+                        none
+                    </div>
+                </div>
+
             </div>
             <template #footer>
                 <span class="dialog-footer">
@@ -143,8 +149,11 @@ async function confirm() {
 
         <el-table :data="filteredDataList" border size="default">
             <el-table-column v-for="field in selectedFields" :key="field" :prop="field"
-                :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)"
-                :formatter="field.includes('spec') ? formatObject : null" />
+                :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)" >
+                <template #default="{ row }">
+                    <span v-html="formatObject(row, field)"></span>
+                </template>
+            </el-table-column>
             <el-table-column label="Actions">
                 <template #default="scope">
                     <el-button type="primary" @click="run(scope.row)">Run</el-button>
