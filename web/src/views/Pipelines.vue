@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from "vue";
-import { usePipelinesStore } from "@/stores";
+import { ref, computed, onMounted } from "vue";
+import { usePipelinesStore, useClustersStore, usePipelineRunsStore, useHostsStore } from "@/stores";
+import { proxyVariablesToJsonObject } from "@/utils/common";
 
 var dataList = ref([]);
 var currentPage = ref(1);
@@ -8,6 +9,14 @@ var pageSize = ref(10);
 var total = ref(0);
 var searchQuery = ref("");
 var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'spec.variables', 'spec.tasks']);
+var dialogVisble = ref(false);
+var selectedItem = ref(null);
+var clusters = ref([]);
+var hosts = ref([]);
+var cluster = ref(null);
+var host = ref(null);
+const clusterStore = useClustersStore();
+
 async function loadData() {
     const store = usePipelinesStore();
     var res = await store.list("all", pageSize.value, currentPage.value);
@@ -28,7 +37,9 @@ const filteredDataList = computed(() => {
     });
 });
 
-loadData();
+onMounted(() => {
+    loadData();
+});
 
 function onPaginationChange() {
     loadData();
@@ -46,10 +57,8 @@ function formatObject(row, column, cellValue) {
 }
 
 async function open() {
-    const hostStore = useHostsStore();
-    hosts.value = await hostStore.list("all", 999, 1);
-    const clusterStore = useClustersStore();
-    clusters.value = await clusterStore.list("all", 999, 1);
+    var resp = await clusterStore.list("all", 999, 1);
+    clusters.value = resp.list;
 }
 
 function run(item) {
@@ -57,15 +66,9 @@ function run(item) {
     dialogVisble.value = true;
 }
 
-var dialogVisble = ref(false);
-var selectedItem = ref(null);
-async function confirm() {
-    const store = useTaskRunsStore();
-    const vars = {};
-    vars['cluster'] = selectedItem.spec.cluster;
-    vars['host'] = selectedItem.spec.host;
-    await store.create(selectedItem.metadata.namespace, selectedItem.metadata.name, vars);
-    dialogVisble.value = false;
+async function onClusterChange() {
+    var resp = await clusterStore.listNodes("ops-system", cluster.value, 999, 1);
+    hosts.value = resp.list;
 }
 
 const allFields = [
@@ -76,6 +79,19 @@ const allFields = [
     { value: 'spec.tasks', label: 'Tasks' },
 ];
 
+function close() {
+    dialogVisble.value = false;
+    selectedItem.value = null;
+}
+
+async function confirm() {
+    const store = usePipelineRunsStore();
+    var vars = proxyVariablesToJsonObject(selectedItem.value.spec.variables);
+    vars['cluster'] = cluster.value;
+    vars['host'] = host.value;
+    await store.create(selectedItem.value.metadata.namespace, selectedItem.value.metadata.name, vars);
+    dialogVisble.value = false;
+}
 </script>
 
 <template>
@@ -104,15 +120,15 @@ const allFields = [
                 </div>
                 <div class="form-group">
                     <label>Cluster</label>
-                    <el-select v-model="selectedItem.spec.cluster" class="w-100" placeholder="Select">
-                        <el-option label="Cluster" value="cluster" />
-                        <el-option label="Host" value="host" />
+                    <el-select v-model="cluster" @change="onClusterChange">
+                        <el-option v-for="item in clusters" :key="item.metadata.name" :label="item.metadata.name"
+                            :value="item.metadata.name" />
                     </el-select>
                 </div>
                 <div class="form-group">
                     <label>Host</label>
-                    <el-select v-model="selectedItem.spec.host" v-if="selectedItem.spec.cluster">
-                        <el-option v-for="item in getHostList()" :key="item.metadata.name"
+                    <el-select v-model="host">
+                        <el-option v-for="item in hosts" :key="item.metadata.name" :label="item.metadata.name"
                             :value="item.metadata.name" />
                     </el-select>
                 </div>
