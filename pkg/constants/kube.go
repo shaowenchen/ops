@@ -23,7 +23,7 @@ const LabelOpsServerValue = "ops"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
-const DefaultRuntimeImage = "ac2-registry.cn-hangzhou.cr.aliyuncs.com/ac2/base:ubuntu22.04"
+const DefaultRuntimeImage = "registry.cn-hangzhou.aliyuncs.com/shaowenchen/ubuntu:22.04"
 const OpsCliRuntimeImage = "registry.cn-hangzhou.aliyuncs.com/shaowenchen/opscli:latest"
 
 const SyncResourceStatusHeatSeconds = 60 * 5
