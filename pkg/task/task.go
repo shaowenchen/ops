@@ -152,12 +152,17 @@ func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task,
 }
 
 func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
+	mode := opsconstants.ModeHost
+	if strings.Contains(step.Content, "/host") {
+		mode = opsconstants.ModeContainer
+	}
 	output, err = kc.ShellOnNode(
 		logger,
 		node,
 		option.ShellOption{
 			Sudo:    taksOpt.Sudo,
 			Content: step.Content,
+			Mode:    mode,
 		},
 		kubeOpt)
 	if len(output) == 0 {
