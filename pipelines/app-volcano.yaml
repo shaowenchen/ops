@@ -1,0 +1,19 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: app-volcano
+spec:
+  desc: 安装、卸载 volcano 组件
+  variables:
+    cluster:
+      required: true
+    volcano-scheduler-image:
+      required: true
+    volcano-controller-image:
+      required: true
+    action:
+      required: true
+      default: apply
+  tasks:
+    - name: npu-exporter
+      taskRef: app-npu-exporter

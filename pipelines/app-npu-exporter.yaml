@@ -1,0 +1,19 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: app-npu-exporter
+  namespace: ops-system
+spec:
+  desc: 安装、卸载 npu-exporter 组件
+  variables:
+    cluster:
+      required: true
+    npu-exporter-image:
+      required: true
+    action:
+      required: true
+      default: apply
+  tasks:
+    - name: npu-exporter
+      taskRef: app-npu-exporter
+
