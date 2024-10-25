@@ -20,4 +20,4 @@ spec:
         export ARGO_EVENTS_IMAGE=${argo-events-image}
 
         export KUBECONFIG=/host/root/.kube/config
-        envsubst < /host/ascend/argo-events-v1.8.0.yaml | kubectl ${action} -f -
+        envsubst < /ascend/argo-events-v1.8.0.yaml | kubectl ${action} -f -

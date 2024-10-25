@@ -25,4 +25,4 @@ spec:
         export ARGO_WORKFLOWS_IMAGE=${argo-workflows-image}
 
         export KUBECONFIG=/host/root/.kube/config
-        envsubst < /host/ascend/argo-workflows-v3.5.5.yaml | kubectl ${action} -f -
+        envsubst < /ascend/argo-workflows-v3.5.5.yaml | kubectl ${action} -f -

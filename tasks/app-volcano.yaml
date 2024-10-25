@@ -25,4 +25,4 @@ spec:
         export VOLCANO_CONTROLLER_IMAGE=${volcano-controller-image}
         
         export KUBECONFIG=/host/root/.kube/config
-        envsubst < /host/ascend/volcano-v1.7.0.yaml | kubectl ${action} -f -
+        envsubst < /ascend/volcano-v1.7.0.yaml | kubectl ${action} -f -

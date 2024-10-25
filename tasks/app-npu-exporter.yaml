@@ -20,4 +20,4 @@ spec:
         export NPU_EXPORTER_IMAGE=${npu-exporter-image}
 
         export KUBECONFIG=/host/root/.kube/config
-        envsubst < /host/ascend/npu-exporter-v5.0.RC3.yaml | kubectl ${action} -f -
+        envsubst < /ascend/npu-exporter-v5.0.RC3.yaml | kubectl ${action} -f -
