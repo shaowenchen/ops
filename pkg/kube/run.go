@@ -37,12 +37,13 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 		})
 	}
 	automountSA := false
-
+	pull := corev1.PullIfNotPresent
 	cmdArg := []string{}
 	shellBase64 := utils.EncodingStringToBase64(shell)
 	// mode
 	if mode == constants.ModeContainer {
 		cmdArg = []string{"-c", "echo " + shellBase64 + " | base64 -d | bash"}
+		pull = corev1.PullAlways
 	} else {
 		cmdArg = []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"}
 	}
@@ -72,7 +73,7 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 						SecurityContext: &corev1.SecurityContext{
 							Privileged: &priviBool,
 						},
-						ImagePullPolicy: corev1.PullIfNotPresent,
+						ImagePullPolicy: pull,
 						VolumeMounts: []v1.VolumeMount{
 							{
 								Name:      "data",
