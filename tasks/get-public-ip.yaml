@@ -8,4 +8,4 @@ spec:
   steps:
     - name: get public ip
       content: |
-        curl ifconfig.me
+        curl -s ifconfig.me
