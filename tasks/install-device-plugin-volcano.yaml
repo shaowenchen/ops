@@ -1,0 +1,25 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: install-device-plugin-volcano
+  namespace: ops-system
+spec:
+  desc: install device plugin for volcano
+  runtimeImage: registry.cn-hangzhou.aliyuncs.com/shaowenchen/hubimage:latest
+  host: anymaster
+  variables:
+    device-plugin-volcano-image:
+      desc: device plugin volcano image
+      required: true
+  steps:
+    - name: Check exist
+      content: |
+        if [ $(kubectl get pod -A | grep -c device-plugin) -gt 2 ]; then
+          exit 1
+        fi
+    - name: install
+      content: |
+        export DEVICE_PLUGIN_VOLCANO_IMAGE=${device-plugin-volcano-image}
+
+        export KUBECONFIG=/host/root/.kube/config
+        kubectl apply -f /host/ascend/npu-exporter-v5.0.RC3.yaml

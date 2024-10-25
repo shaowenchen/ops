@@ -1,0 +1,25 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: install-npu-exporter
+  namespace: ops-system
+spec:
+  desc: install npu-exporter
+  runtimeImage: registry.cn-hangzhou.aliyuncs.com/shaowenchen/hubimage:latest
+  host: anymaster
+  variables:
+    npu-exporter-image:
+      desc: npu-exporter image
+      required: true
+  steps:
+    - name: Check exist
+      content: |
+        if [ $(kubectl get pod -A | grep -c npu-exporter) -gt 2 ]; then
+          exit 1
+        fi
+    - name: install
+      content: |
+        export NPU_EXPORTER_IMAGE=${npu-exporter-image}
+
+        export KUBECONFIG=/host/root/.kube/config
+        kubectl apply -f /host/ascend/npu-exporter-v5.0.RC3.yaml
