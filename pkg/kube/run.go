@@ -16,7 +16,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, shell string) (pod *corev1.Pod, err error) {
+func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, image string, mode string, shell string) (pod *corev1.Pod, err error) {
 	if image == "" {
 		image = constants.DefaultRuntimeImage
 	}
@@ -26,7 +26,6 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 	if len(lines) > 0 && strings.Contains(lines[0], "python") {
 		usePython = true
 	}
-	shellBase64 := utils.EncodingStringToBase64(shell)
 	priviBool := true
 	tolerations := []v1.Toleration{}
 	for _, taint := range node.Spec.Taints {
@@ -39,12 +38,18 @@ func RunShellOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName 
 	}
 	automountSA := false
 
-	// is incluster or not
-	hostFlag := true
-	cmdArg := []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"}
+	cmdArg := []string{}
+	shellBase64 := utils.EncodingStringToBase64(shell)
+	// mode
+	if mode == constants.ModeContainer {
+		cmdArg = []string{"-c", "echo " + shellBase64 + " | base64 -d | bash"}
+	} else {
+		cmdArg = []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"}
+	}
 	if usePython {
 		cmdArg[1] = cmdArg[1] + " -- python3 /dev/stdin"
 	}
+	hostFlag := true
 	pod, err = client.CoreV1().Pods(namespacedName.Namespace).Create(
 		context.TODO(),
 		&corev1.Pod{

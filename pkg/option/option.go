@@ -56,6 +56,7 @@ type TaskOption struct {
 }
 
 type ShellOption struct {
+	Mode     string
 	Content string
 	Sudo    bool
 }

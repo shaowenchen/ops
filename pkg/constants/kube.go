@@ -50,6 +50,9 @@ func GetCurrentUserKubeConfigPath() string {
 	return filepath.Join(GetCurrentUserHomeDir(), ".kube", "config")
 }
 
+const ModeHost = "host"
+const ModeContainer = "container"
+
 const AllNodes = "all"
 const AllMasters = "allmasters"
 const AllWorkers = "allworkers"

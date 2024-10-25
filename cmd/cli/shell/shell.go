@@ -74,6 +74,7 @@ func init() {
 
 	ShellCmd.Flags().BoolVarP(&shellOpt.Sudo, "sudo", "", false, "")
 	ShellCmd.Flags().StringVarP(&shellOpt.Content, "content", "", "", "")
+	ShellCmd.Flags().StringVarP(&shellOpt.Mode, "mode", "", constants.ModeHost, "run in host or container")
 	ShellCmd.MarkFlagRequired("content")
 
 	ShellCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
