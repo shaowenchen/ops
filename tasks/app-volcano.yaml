@@ -11,9 +11,11 @@ spec:
     volcano-scheduler-image:
       desc: volcano scheduler image
       required: true
+      default: registry.cn-hangzhou.aliyuncs.com/opshub/vc-scheduler:v1.7.0
     volcano-controller-image:
       desc: volcano controller image
       required: true
+      default: registry.cn-hangzhou.aliyuncs.com/opshub/vc-controller-manager:v1.7.0
     action:
       default: apply
   steps:

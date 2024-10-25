@@ -11,6 +11,7 @@ spec:
     npu-exporter-image:
       desc: npu-exporter image
       required: true
+      default: registry.cn-hangzhou.aliyuncs.com/opshub/npu-exporter:v5.0-arm64
     action:
       default: apply
   steps:

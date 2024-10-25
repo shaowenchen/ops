@@ -11,6 +11,7 @@ spec:
     device-plugin-volcano-image:
       desc: device plugin volcano image
       required: true
+      default: "registry.cn-hangzhou.aliyuncs.com/opshub/ascend-k8sdeviceplugin:v5.0-arm64"
     action:
       default: apply
   steps:

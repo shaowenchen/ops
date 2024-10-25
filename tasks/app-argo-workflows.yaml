@@ -11,9 +11,11 @@ spec:
     argo-cli-image:
       desc: argo cli image
       required: true
+      default: registry.cn-hangzhou.aliyuncs.com/opshub/argocli:v3.5.5
     argo-workflows-image:
       desc: argo workflows image
       required: true
+      default: registry.cn-hangzhou.aliyuncs.com/opshub/argo-workflow-controller:v3.5.5
     action:
       default: apply
   steps:
