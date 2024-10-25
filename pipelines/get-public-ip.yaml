@@ -1,0 +1,15 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: get-public-ip
+  namespace: ops-system
+spec:
+  desc: 获取出口、公网 IP
+  variables:
+    cluster:
+      required: true
+    host:
+      required: true
+  tasks:
+    - name: get public ip
+      taskRef: get-public-ip

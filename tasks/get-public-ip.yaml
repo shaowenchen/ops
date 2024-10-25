@@ -1,0 +1,11 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: get-public-ip
+  namespace: ops-system
+spec:
+  desc: get public ip
+  steps:
+    - name: get public ip
+      content: |
+        curl ifconfig.me
