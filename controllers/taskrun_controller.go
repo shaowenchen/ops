@@ -408,6 +408,9 @@ func (r *TaskRunReconciler) getAvaliableHosts(logger *opslog.Logger, ctx context
 }
 
 func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context, t *opsv1.Task, tr *opsv1.TaskRun) (hosts []opsv1.Host) {
+	if t.Spec.RuntimeImage != "" {
+		return
+	}
 	hostStr := tr.GetHost(t)
 	// empty host
 	if len(hostStr) == 0 {
