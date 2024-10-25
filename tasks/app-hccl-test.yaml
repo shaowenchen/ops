@@ -19,4 +19,4 @@ spec:
         export HCCL_TEST_IMAGE=${hccl-test-image}
 
         export KUBECONFIG=/host/root/.kube/config
-        kubectl ${action} -f /host/ascend/hccl-test.yaml
+        envsubst < /host/ascend/hccl-test.yaml | kubectl ${action} -f -

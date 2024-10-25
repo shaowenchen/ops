@@ -1,0 +1,19 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: app-argo-workflows
+spec:
+  desc: 安装、卸载 argo workflows 组件
+  variables:
+    cluster:
+      required: true
+    argo-cli-image:
+      required: true
+    argo-workflows-image:
+      required: true
+    action:
+      required: true
+      default: apply
+  tasks:
+    - name: argo-workflows
+      taskRef: app-argo-workflows

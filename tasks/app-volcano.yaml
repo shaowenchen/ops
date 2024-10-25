@@ -21,5 +21,6 @@ spec:
       content: |
         export VOLCANO_SCHEDULER_IMAGE=${volcano-scheduler-image}
         export VOLCANO_CONTROLLER_IMAGE=${volcano-controller-image}
+        
         export KUBECONFIG=/host/root/.kube/config
-        kubectl ${action} -f /host/ascend/volcano-v1.7.0.yaml
+        envsubst < /host/ascend/volcano-v1.7.0.yaml | kubectl ${action} -f -
