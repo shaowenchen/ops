@@ -10,7 +10,7 @@ spec:
   variables:
     argo-events-image:
       desc: argo events image
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/argo-events:v1.8.0
+      default: registry.cn-hangzhou.aliyuncs.com/opshub/argoproj-argo-events:v1.8.0
       required: true
     action:
       default: apply
