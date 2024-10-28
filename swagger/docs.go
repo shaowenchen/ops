@@ -299,6 +299,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/namespaces/{namespace}/pipelineruns/sync": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PipelineRun"
+                ],
+                "summary": "Create PipelineRun Sync",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "pipelineRef",
+                        "name": "pipelineRef",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "variables",
+                        "name": "variables",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/namespaces/{namespace}/pipelineruns/{pipelinerun}": {
             "get": {
                 "consumes": [
@@ -608,6 +657,55 @@ const docTemplate = `{
                     "TaskRun"
                 ],
                 "summary": "Create TaskRun",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "taskRef",
+                        "name": "taskRef",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "variables",
+                        "name": "variables",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/namespaces/{namespace}/taskruns/sync": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TaskRun"
+                ],
+                "summary": "Create TaskRun Sync",
                 "parameters": [
                     {
                         "type": "string",

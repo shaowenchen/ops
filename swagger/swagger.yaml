@@ -645,6 +645,38 @@ paths:
       summary: Get PipelineRun
       tags:
       - PipelineRun
+  /api/v1/namespaces/{namespace}/pipelineruns/sync:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: pipelineRef
+        in: body
+        name: pipelineRef
+        required: true
+        schema:
+          type: string
+      - description: variables
+        in: body
+        name: variables
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create PipelineRun Sync
+      tags:
+      - PipelineRun
   /api/v1/namespaces/{namespace}/pipelines:
     get:
       consumes:
@@ -870,6 +902,38 @@ paths:
         "200":
           description: OK
       summary: Get TaskRun
+      tags:
+      - TaskRun
+  /api/v1/namespaces/{namespace}/taskruns/sync:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: taskRef
+        in: body
+        name: taskRef
+        required: true
+        schema:
+          type: string
+      - description: variables
+        in: body
+        name: variables
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create TaskRun Sync
       tags:
       - TaskRun
   /api/v1/namespaces/{namespace}/tasks:

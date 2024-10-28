@@ -932,7 +932,7 @@ func CreateTaskRun(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	showData(c, latest)
+	showData(c, latest.CopyWithOutVersion())
 }
 
 // @Summary Create TaskRun Sync
@@ -950,10 +950,10 @@ func CreateTaskRunSync(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	showData(c, latest)
+	showData(c, latest.CopyWithOutVersion())
 }
 
-func createTaskRun(c *gin.Context, sync bool) (latest *opsv1.TaskRun, err error) {
+func createTaskRun(c *gin.Context, sync bool) (latest opsv1.TaskRun, err error) {
 	type Params struct {
 		Namespace string            `uri:"namespace"`
 		TaskRef   string            `json:"taskRef"`
@@ -1000,6 +1000,7 @@ func createTaskRun(c *gin.Context, sync bool) (latest *opsv1.TaskRun, err error)
 		return
 	}
 	if !sync {
+		latest = taskRun
 		return
 	}
 	// wait done
@@ -1012,11 +1013,11 @@ func createTaskRun(c *gin.Context, sync bool) (latest *opsv1.TaskRun, err error)
 	for {
 		select {
 		case <-ticker.C:
-			latest = &opsv1.TaskRun{}
+			latest = opsv1.TaskRun{}
 			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 				Namespace: taskRun.Namespace,
 				Name:      taskRun.Name,
-			}, latest)
+			}, &latest)
 			if err != nil {
 				return
 			}
@@ -1046,7 +1047,7 @@ func CreatePipelineRun(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	showData(c, latest)
+	showData(c, latest.CopyWithOutVersion())
 }
 
 // @Summary Create PipelineRun Sync
@@ -1064,10 +1065,10 @@ func CreatePipelineRunSync(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	showData(c, latest)
+	showData(c, latest.CopyWithOutVersion())
 }
 
-func createPipelineRun(c *gin.Context, sync bool) (latest *opsv1.PipelineRun, err error) {
+func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err error) {
 	type Params struct {
 		Namespace   string            `uri:"namespace"`
 		PipelineRef string            `json:"pipelineRef"`
@@ -1107,6 +1108,7 @@ func createPipelineRun(c *gin.Context, sync bool) (latest *opsv1.PipelineRun, er
 	}
 
 	if !sync {
+		latest = *pipelinerun
 		return
 	}
 	// wait done
@@ -1117,11 +1119,11 @@ func createPipelineRun(c *gin.Context, sync bool) (latest *opsv1.PipelineRun, er
 	for {
 		select {
 		case <-ticker.C:
-			latest = &opsv1.PipelineRun{}
+			latest = opsv1.PipelineRun{}
 			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 				Namespace: pipelinerun.Namespace,
 				Name:      pipelinerun.Name,
-			}, latest)
+			}, &latest)
 			if err != nil {
 				return
 			}
