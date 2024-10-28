@@ -3,7 +3,6 @@ COPY . .
 RUN make build-server
 
 FROM hubimage/builder-node:18 AS builder-web
-RUN yarn config set network-timeout 600000
 COPY . .
 RUN make build-web
 

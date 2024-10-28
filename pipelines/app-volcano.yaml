@@ -18,5 +18,5 @@ spec:
       required: true
       default: apply
   tasks:
-    - name: npu-exporter
-      taskRef: app-npu-exporter
+    - name: volcano
+      taskRef: app-volcano
