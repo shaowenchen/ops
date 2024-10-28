@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
+import { router } from '@/router'
 import { usePipelinesStore, useClustersStore, usePipelineRunsStore } from "@/stores";
 import { proxyVariablesToJsonObject, formatObject } from "@/utils/common";
 
@@ -149,7 +150,7 @@ async function confirm() {
 
         <el-table :data="filteredDataList" border size="default">
             <el-table-column v-for="field in selectedFields" :key="field" :prop="field"
-                :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)" >
+                :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)">
                 <template #default="{ row }">
                     <span v-html="formatObject(row, field)"></span>
                 </template>

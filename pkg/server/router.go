@@ -30,6 +30,7 @@ func SetupRouter(r *gin.Engine) {
 	{
 		v1Taskruns.GET("", ListTaskRun)
 		v1Taskruns.POST("", CreateTaskRun)
+		v1Taskruns.POST("/sync", CreateTaskRunSync)
 		v1Taskruns.GET("/:taskrun", GetTaskRun)
 	}
 	v1Pipelines := r.Group("/api/v1/namespaces/:namespace/pipelines").Use(AuthMiddleware())
@@ -45,6 +46,7 @@ func SetupRouter(r *gin.Engine) {
 	{
 		v1Pipelineruns.GET("", ListPipelineRuns)
 		v1Pipelineruns.POST("", CreatePipelineRun)
+		v1Pipelineruns.POST("/sync", CreatePipelineRunSync)
 		v1Pipelineruns.GET("/:pipelinerun", GetPipelineRun)
 	}
 	v1Copilot := r.Group("/api/v1/copilot").Use(AuthMiddleware())

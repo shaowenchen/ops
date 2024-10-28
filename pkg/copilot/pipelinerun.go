@@ -102,7 +102,7 @@ func (m *PipelineRunsManager) GetForVariables(pr *opsv1.PipelineRun) string {
 func (m *PipelineRunsManager) Run(logger *opslog.Logger, pipelinerun *opsv1.PipelineRun) (err error) {
 
 	// patch pipelinerun
-	uri := "/api/v1/namespaces/" + m.namespace + "/pipelineruns"
+	uri := "/api/v1/namespaces/" + m.namespace + "/pipelineruns/sync"
 	respBody, err := m.makeRequest(m.endpoint, m.token, uri, "POST", pipelinerun.Spec)
 	if err != nil {
 		return

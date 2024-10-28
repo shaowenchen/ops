@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"sort"
@@ -926,29 +927,53 @@ func ListPipelineRuns(c *gin.Context) {
 // @Success 200
 // @Router /api/v1/namespaces/{namespace}/taskruns [post]
 func CreateTaskRun(c *gin.Context) {
+	latest, err := createTaskRun(c, false)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, latest)
+}
+
+// @Summary Create TaskRun Sync
+// @Tags TaskRun
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param taskRef body string true "taskRef"
+// @Param variables body map[string]string true "variables"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/taskruns/sync [post]
+func CreateTaskRunSync(c *gin.Context) {
+	latest, err := createTaskRun(c, true)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, latest)
+}
+
+func createTaskRun(c *gin.Context, sync bool) (latest *opsv1.TaskRun, err error) {
 	type Params struct {
 		Namespace string            `uri:"namespace"`
 		TaskRef   string            `json:"taskRef"`
 		Variables map[string]string `json:"variables"`
 	}
 	var req = Params{}
-	err := c.ShouldBindUri(&req)
+	err = c.ShouldBindUri(&req)
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
 	err = c.ShouldBindJSON(&req)
 	if err != nil {
-		showError(c, "get body error "+err.Error())
 		return
 	}
 	if req.TaskRef == "" {
-		showError(c, "ref is required")
+		err = errors.New("taskRef is required")
 		return
 	}
 	client, err := getRuntimeClient("")
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
 	// get task
@@ -958,7 +983,6 @@ func CreateTaskRun(c *gin.Context) {
 		Name:      req.TaskRef,
 	}, task)
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
 	taskRun := opsv1.NewTaskRun(task)
@@ -973,10 +997,12 @@ func CreateTaskRun(c *gin.Context) {
 	taskRun.Namespace = req.Namespace
 	err = client.Create(context.TODO(), &taskRun)
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
-
+	if !sync {
+		return
+	}
+	// wait done
 	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
 	defer cancel()
 
@@ -986,22 +1012,20 @@ func CreateTaskRun(c *gin.Context) {
 	for {
 		select {
 		case <-ticker.C:
-			latest := &opsv1.TaskRun{}
+			latest = &opsv1.TaskRun{}
 			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 				Namespace: taskRun.Namespace,
 				Name:      taskRun.Name,
 			}, latest)
 			if err != nil {
-				showError(c, err.Error())
 				return
 			}
 			if latest.Status.RunStatus == opsconstants.StatusSuccessed || latest.Status.RunStatus == opsconstants.StatusFailed || latest.Status.RunStatus == opsconstants.StatusAborted || latest.Status.RunStatus == opsconstants.StatusDataInValid {
-				showData(c, latest)
 				return
 			}
 
 		case <-ctx.Done():
-			showError(c, "timeout")
+			err = errors.New("timeout")
 			return
 		}
 	}
@@ -1017,25 +1041,49 @@ func CreateTaskRun(c *gin.Context) {
 // @Success 200
 // @Router /api/v1/namespaces/{namespace}/pipelineruns [post]
 func CreatePipelineRun(c *gin.Context) {
+	latest, err := createPipelineRun(c, false)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, latest)
+}
+
+// @Summary Create PipelineRun Sync
+// @Tags PipelineRun
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param pipelineRef body string true "pipelineRef"
+// @Param variables body map[string]string true "variables"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/pipelineruns/sync [post]
+func CreatePipelineRunSync(c *gin.Context) {
+	latest, err := createPipelineRun(c, true)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, latest)
+}
+
+func createPipelineRun(c *gin.Context, sync bool) (latest *opsv1.PipelineRun, err error) {
 	type Params struct {
 		Namespace   string            `uri:"namespace"`
 		PipelineRef string            `json:"pipelineRef"`
 		Variables   map[string]string `json:"variables"`
 	}
 	var req = Params{}
-	err := c.ShouldBindUri(&req)
+	err = c.ShouldBindUri(&req)
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
 	err = c.ShouldBindJSON(&req)
 	if err != nil {
-		showError(c, "get body error "+err.Error())
 		return
 	}
 	client, err := getRuntimeClient("")
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
 	// merge pipeline variables
@@ -1045,7 +1093,6 @@ func CreatePipelineRun(c *gin.Context) {
 		Name:      req.PipelineRef,
 	}, pipeline)
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
 	// create pipelinerun
@@ -1056,10 +1103,13 @@ func CreatePipelineRun(c *gin.Context) {
 
 	err = client.Create(context.TODO(), pipelinerun)
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
-	// wait
+
+	if !sync {
+		return
+	}
+	// wait done
 	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
 	defer cancel()
 	ticker := time.NewTicker(3 * time.Second)
@@ -1067,22 +1117,20 @@ func CreatePipelineRun(c *gin.Context) {
 	for {
 		select {
 		case <-ticker.C:
-			latest := &opsv1.PipelineRun{}
+			latest = &opsv1.PipelineRun{}
 			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 				Namespace: pipelinerun.Namespace,
 				Name:      pipelinerun.Name,
 			}, latest)
 			if err != nil {
-				showError(c, err.Error())
 				return
 			}
 			if latest.Status.RunStatus == opsconstants.StatusSuccessed || latest.Status.RunStatus == opsconstants.StatusFailed || latest.Status.RunStatus == opsconstants.StatusAborted {
-				showData(c, latest)
 				return
 			}
 
 		case <-ctx.Done():
-			showError(c, "timeout")
+			err = errors.New("timeout")
 			return
 		}
 	}
