@@ -900,16 +900,20 @@ func ListPipelineRuns(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	pipelineRunList := &opsv1.PipelineRunList{}
+	objs := &opsv1.PipelineRunList{}
 	if req.Namespace == "all" {
-		err = client.List(context.TODO(), pipelineRunList)
+		err = client.List(context.TODO(), objs)
 	} else {
-		err = client.List(context.TODO(), pipelineRunList, runtimeClient.InNamespace(req.Namespace))
+		err = client.List(context.TODO(), objs, runtimeClient.InNamespace(req.Namespace))
 	}
 	if err != nil {
 		return
 	}
-	showData(c, paginator[opsv1.PipelineRun](pipelineRunList.Items, req.PageSize, req.Page))
+
+	sort.Slice(objs.Items, func(i, j int) bool {
+		return objs.Items[i].ObjectMeta.CreationTimestamp.Time.After(objs.Items[j].ObjectMeta.CreationTimestamp.Time)
+	})
+	showData(c, paginator[opsv1.PipelineRun](objs.Items, req.PageSize, req.Page))
 }
 
 // @Summary Create TaskRun

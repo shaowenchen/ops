@@ -1191,9 +1191,6 @@ const docTemplate = `{
         "v1.TaskSpec": {
             "type": "object",
             "properties": {
-                "cluster": {
-                    "type": "string"
-                },
                 "desc": {
                     "description": "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster\nImportant: Run \"make\" to regenerate code after modifying this file",
                     "type": "string"

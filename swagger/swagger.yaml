@@ -387,8 +387,6 @@ definitions:
     type: object
   v1.TaskSpec:
     properties:
-      cluster:
-        type: string
       desc:
         description: |-
           INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
