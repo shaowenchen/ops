@@ -1,22 +1,22 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: app-hccl-test
+  name: app-hccl-controller
   namespace: ops-system
 spec:
-  desc: install or uninstall hccl-test
+  desc: install or uninstall hccl-controller
   runtimeImage: registry.cn-hangzhou.aliyuncs.com/shaowenchen/hubimage:latest
   host: anymaster
   variables:
-    hccl-test-image:
-      desc: hccl-test image
+    hccl-controller-image:
+      desc: hccl-controller image
       required: true
     action:
       default: apply
   steps:
     - name: take action
       content: |
-        export HCCL_TEST_IMAGE=${hccl-test-image}
+        export HCCL_CONTROLLER_IMAGE=${hccl-controller-image}
 
         export KUBECONFIG=/host/root/.kube/config
-        envsubst < /ascend/hccl-test.yaml | kubectl ${action} -f -
+        envsubst < /ascend/hccl-controller.yaml | kubectl ${action} -f -

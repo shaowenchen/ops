@@ -8,9 +8,6 @@ spec:
   variables:
     cluster:
       required: true
-    host:
-      value: "anymaster"
-      required: true
     pod:
       desc: "For example, `pod: doc-translate-ec-long-v1-64cf8d5478-5zsvk or name: doc-translate-ec-long-v1-64cf8d5478-5zsvk`, where doc-translate-ec-long-v1-64cf8d5478-5zsvk is pod"
       value: ""

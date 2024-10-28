@@ -1,0 +1,20 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: app-hccl-controller
+  namespace: ops-system
+spec:
+  desc: 安装、卸载 hccl-controller 组件
+  variables:
+    cluster:
+      required: true
+    hccl-controller-image:
+      required: true
+      default: registry.cn-hangzhou.aliyuncs.com/opshub/ascend-hccl-controller:branch_v5.0.0-RC3
+    action:
+      required: true
+      default: apply
+  tasks:
+    - name: hccl-controller
+      taskRef: app-hccl-controller
+

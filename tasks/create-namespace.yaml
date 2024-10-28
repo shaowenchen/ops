@@ -1,0 +1,15 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: create-namespace
+  namespace: ops-system
+spec:
+  desc: create namespace
+  host: anymaster
+  variables:
+    namespace:
+      required: true
+  steps:
+    - name: create namespace
+      content: |
+        kubectl create namespace ${namespace}

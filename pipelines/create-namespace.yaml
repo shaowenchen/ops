@@ -1,16 +1,15 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Pipeline
 metadata:
-  name: list-datasets
+  name: create-namespace
   namespace: ops-system
 spec:
-  desc: 列出命名空间下的数据集
+  desc: 创建 namespace
   variables:
     cluster:
       required: true
     namespace:
       required: true
-      desc: 命名空间
   tasks:
-    - name: 列出数据集
-      taskRef: list-datasets
+    - name: 创建 namespace
+      taskRef: create-namespace
