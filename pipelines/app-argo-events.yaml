@@ -8,9 +8,6 @@ spec:
   variables:
     cluster:
       required: true
-    argo-events-image:
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/argoproj-argo-events:v1.8.0
     action:
       required: true
       default: apply

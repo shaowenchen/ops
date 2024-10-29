@@ -8,21 +8,10 @@ spec:
   runtimeImage: registry.cn-hangzhou.aliyuncs.com/shaowenchen/hubimage:latest
   host: anymaster
   variables:
-    volcano-scheduler-image:
-      desc: volcano scheduler image
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/volcanosh-vc-scheduler:v1.7.0
-    volcano-controller-image:
-      desc: volcano controller image
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/volcanosh-vc-controller-manager:v1.7.0
     action:
       default: apply
   steps:
     - name: take action
       content: |
-        export VOLCANO_SCHEDULER_IMAGE=${volcano-scheduler-image}
-        export VOLCANO_CONTROLLER_IMAGE=${volcano-controller-image}
-        
         export KUBECONFIG=/host/root/.kube/config
-        envsubst < /ascend/volcano-v1.7.0.yaml | kubectl ${action} -f -
+        envsubst < /volcanosh/v1.7.0-volcano.yaml | kubectl ${action} -f -

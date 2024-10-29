@@ -1,10 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: app-npu-exporter
+  name: app-metrics-server
   namespace: ops-system
 spec:
-  desc: install or uninstall npu-exporter
+  desc: install or uninstall metrics-server
   runtimeImage: registry.cn-hangzhou.aliyuncs.com/shaowenchen/hubimage:latest
   host: anymaster
   variables:
@@ -14,5 +14,4 @@ spec:
     - name: take action
       content: |
         export KUBECONFIG=/host/root/.kube/config
-
-        envsubst < /observation/v5.0.RC3-npu-exporter | kubectl ${action} -f -
+        envsubst < /observation/v0.7.1-metrics-server.yaml | kubectl ${action} -f -

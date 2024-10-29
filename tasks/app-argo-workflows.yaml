@@ -8,21 +8,11 @@ spec:
   runtimeImage: registry.cn-hangzhou.aliyuncs.com/shaowenchen/hubimage:latest
   host: anymaster
   variables:
-    argo-cli-image:
-      desc: argo cli image
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/argoproj-argocli:v3.5.5
-    argo-workflow-image:
-      desc: argo workflow image
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/argoproj-workflow-controller:v3.5.5
     action:
       default: apply
   steps:
     - name: take action
       content: |
-        export ARGO_CLI_IMAGE=${argo-cli-image}
-        export ARGO_WORKFLOW_IMAGE=${argo-workflow-image}
-
         export KUBECONFIG=/host/root/.kube/config
-        envsubst < /ascend/argo-workflows-v3.5.5.yaml | kubectl ${action} -f -
+
+        envsubst < /argoproj/v3.5.5-argo-workflows.yaml | kubectl ${action} -f -

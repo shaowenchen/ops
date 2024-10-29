@@ -8,9 +8,6 @@ spec:
   variables:
     cluster:
       required: true
-    hccl-controller-image:
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/ascend-hccl-controller:branch_v5.0.0-RC3
     action:
       required: true
       default: apply

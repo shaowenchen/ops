@@ -8,12 +8,6 @@ spec:
   variables:
     cluster:
       required: true
-    argo-cli-image:
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/argoproj-argocli:v3.5.5
-    argo-workflow-image:
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/argoproj-workflow-controller:v3.5.5
     action:
       required: true
       default: apply

@@ -8,16 +8,11 @@ spec:
   runtimeImage: registry.cn-hangzhou.aliyuncs.com/shaowenchen/hubimage:latest
   host: anymaster
   variables:
-    device-plugin-volcano-image:
-      desc: device plugin volcano image
-      required: true
-      default: "registry.cn-hangzhou.aliyuncs.com/opshub/ascend-k8sdeviceplugin:v5.0-arm64"
     action:
       default: apply
   steps:
     - name: take action
       content: |
-        export DEVICE_PLUGIN_VOLCANO_IMAGE=${device-plugin-volcano-image}
-
         export KUBECONFIG=/host/root/.kube/config
-        envsubst < /ascend/npu-exporter-v5.0.RC3.yaml | kubectl ${action} -f -
+
+        envsubst < /ascend/v5.0.RC3-device-plugin-volcano.yaml | kubectl ${action} -f -
