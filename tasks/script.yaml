@@ -1,0 +1,16 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: script
+  namespace: ops-system
+spec:
+  desc:
+  variables:
+    script:
+      required: true
+      display: script
+      default: "echo 'hello world'"
+  steps:
+    - name: run script
+      content: |
+        ${script}

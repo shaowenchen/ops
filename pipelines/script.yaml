@@ -1,0 +1,16 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: script
+  namespace: ops-system
+spec:
+  desc: 执行脚本
+  variables:
+    cluster:
+      required: true
+    script:
+      required: true
+      default: "echo 'hello world'"
+  tasks:
+    - name: script
+      taskRef: script
