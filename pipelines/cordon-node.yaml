@@ -14,8 +14,6 @@ spec:
       required: true
       regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
   tasks:
-    - name: 查看节点
-      taskRef: get-node-status
     - name: 禁用节点
       taskRef: cordon-node
     - name: 查看节点
