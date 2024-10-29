@@ -1,0 +1,16 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: list-pipelines-for-copilot
+  namespace: ops-system
+spec:
+  desc: list all available pipelines for copilot in cluster
+  variables:
+    namespace:
+      desc: namespace
+      required: true
+      default: ops-system
+  host: anymaster
+  steps:
+    - name: list pipelines
+      content: kubectl get pipelines.crd.chenshaowen.com -n ${namespace} -o custom-columns=NAME:.metadata.name,DESCRIPTION:.spec.desc -l ops/copilot=enabled

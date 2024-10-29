@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Pipeline
 metadata:
-  name: list-pipelines
+  name: list-pipelines-for-copilot
   namespace: ops-system
   labels:
     ops/copilot: enabled
@@ -14,7 +14,6 @@ spec:
     host:
       value: "anymaster"
       required: true
-
   tasks:
     - name: 列出所有集群
-      taskRef: list-pipelines
+      taskRef: list-pipelines-for-copilot
