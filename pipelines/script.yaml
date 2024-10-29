@@ -10,7 +10,7 @@ spec:
       required: true
     script:
       required: true
-      default: "echo 'hello world'"
+      default: "uname -a"
   tasks:
     - name: script
       taskRef: script

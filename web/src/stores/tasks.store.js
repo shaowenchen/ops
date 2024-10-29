@@ -8,9 +8,9 @@ export const useTasksStore = defineStore({
     alert: null,
   }),
   actions: {
-    async list(namespace, page_size = 10, page = 1, searchQuery = "") {
+    async list(namespace, page_size = 10, page = 1, search = "") {
       const analysis = await fetchWrapper.get(
-        `/api/v1/namespaces/${namespace}/tasks?page_size=${page_size}&page=${page}&search=${searchQuery}`
+        `/api/v1/namespaces/${namespace}/tasks?page_size=${page_size}&page=${page}&search=${search}`
       );
       return analysis.data;
     },

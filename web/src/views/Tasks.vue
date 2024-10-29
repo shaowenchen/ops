@@ -68,7 +68,7 @@ function run(item) {
 </script>
 <template>
     <div class="container">
-        <el-input v-model="searchQuery" placeholder="Search..." class="search-input" clearable />
+        <el-input v-model="searchQuery" placeholder="Search..." class="search-input" clearable @input="loadData"/>
 
         <el-select v-model="selectedFields" multiple placeholder="Select columns to display">
             <el-option v-for="field in allFields" :key="field.value" :label="field.label" :value="field.value" />

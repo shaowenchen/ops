@@ -1,6 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
-import { router } from '@/router'
+import { ref } from "vue";
 import { usePipelinesStore, useClustersStore, usePipelineRunsStore } from "@/stores";
 import { proxyVariablesToJsonObject, formatObject } from "@/utils/common";
 
@@ -29,23 +28,10 @@ loadData();
 
 async function loadData() {
     const store = usePipelinesStore();
-    var res = await store.list("all", pageSize.value, currentPage.value);
+    var res = await store.list("all", pageSize.value, currentPage.value, searchQuery.value);
     dataList.value = res.list;
     total.value = res.total;
 }
-
-const filteredDataList = computed(() => {
-    if (!searchQuery.value) {
-        return dataList.value;
-    }
-    return dataList.value.filter(item => {
-        return Object.values(item.metadata).some(value =>
-            value.toString().toLowerCase().includes(searchQuery.value.toLowerCase())
-        ) || Object.values(item.spec).some(value =>
-            value.toString().toLowerCase().includes(searchQuery.value.toLowerCase())
-        );
-    });
-});
 
 function onPaginationChange() {
     loadData();
@@ -68,7 +54,6 @@ function run(item) {
 async function onClusterChange() {
     var resp = await clusterStore.listNodes("ops-system", cluster.value, 999, 1);
     hosts.value = resp.list;
-    host.value = null;
 }
 
 function close() {
@@ -87,7 +72,7 @@ async function confirm() {
 
 <template>
     <div class="container">
-        <el-input v-model="searchQuery" placeholder="Search..." class="search-input" clearable />
+        <el-input v-model="searchQuery" placeholder="Search..." class="search-input" clearable @input="loadData" />
 
         <el-select v-model="selectedFields" multiple placeholder="Select columns to display" class="column-select">
             <el-option v-for="field in allFields" :key="field.value" :label="field.label" :value="field.value" />
@@ -109,18 +94,18 @@ async function confirm() {
                     <label>Description</label>
                     <input name="desc" type="text" disabled :value="selectedItem?.spec?.desc" class="form-control" />
                 </div>
-                <div class="form-group" v-if="'cluster' in selectedItem.spec.variables">
+                <div class="form-group">
                     <label>Cluster</label>
                     <el-select v-model="cluster" @change="onClusterChange">
                         <el-option v-for="item in clusters" :key="item.metadata.name" :label="item.metadata.name"
                             :value="item.metadata.name" />
                     </el-select>
                 </div>
-                <div class="form-group" v-if="'host' in selectedItem.spec.variables">
+                <div class="form-group">
                     <label>Host</label>
                     <el-select v-model="host">
                         <el-option v-for="item in hosts" :key="item.metadata.name" :label="item.metadata.name"
-                            :value="item.metadata.name" />
+                            :value="item.metadata?.name" />
                     </el-select>
                 </div>
                 <div class="form-group" v-if="selectedItem.spec.variables">
@@ -148,7 +133,7 @@ async function confirm() {
             </template>
         </el-dialog>
 
-        <el-table :data="filteredDataList" border size="default">
+        <el-table :data="dataList" border size="default">
             <el-table-column v-for="field in selectedFields" :key="field" :prop="field"
                 :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)">
                 <template #default="{ row }">

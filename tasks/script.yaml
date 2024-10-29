@@ -4,12 +4,12 @@ metadata:
   name: script
   namespace: ops-system
 spec:
-  desc:
+  desc: run script
   variables:
     script:
       required: true
       display: script
-      default: "echo 'hello world'"
+      default: "uname -a"
   steps:
     - name: run script
       content: |

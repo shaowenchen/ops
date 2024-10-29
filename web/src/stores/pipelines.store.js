@@ -8,9 +8,9 @@ export const usePipelinesStore = defineStore({
     alert: null,
   }),
   actions: {
-    async list(namespace, page_size = 10, page = 1) {
+    async list(namespace, page_size = 10, page = 1, search = "") {
       const analysis = await fetchWrapper.get(
-        `/api/v1/namespaces/${namespace}/pipelines?page_size=${page_size}&page=${page}`
+        `/api/v1/namespaces/${namespace}/pipelines?search=${search}&page_size=${page_size}&page=${page}`
       );
       return analysis.data;
     },
