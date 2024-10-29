@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: collect-gpu-log
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: Collect - 搜集 GPU 的相关日志
   variables:

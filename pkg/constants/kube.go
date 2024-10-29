@@ -14,12 +14,15 @@ const LabelNodeRoleControlPlane = "node-role.kubernetes.io/control-plane"
 
 const LabelNodeRoleWorker = "node-role.kubernetes.io/worker"
 
-const LabelOpsTaskKey = "ops"
+const LabelOpsTaskKey = "ops/task"
 
-const LabelOpsTaskValue = "task"
+const LabelOpsTaskValue = "true"
 
 const LabelOpsServerKey = "app.kubernetes.io/name"
 const LabelOpsServerValue = "ops"
+
+const LabelCopilotPipelineEnabledKey = "ops/copilot"
+const LabelCopilotPipelineEnabledValue = "enabled"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 

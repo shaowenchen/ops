@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: restart-fabricmanager
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: restart fabricmanager
   variables:

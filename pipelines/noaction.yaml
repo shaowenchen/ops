@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: noaction
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: no action to do
   tasks:

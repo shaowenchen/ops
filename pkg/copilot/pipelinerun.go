@@ -121,7 +121,7 @@ func (m *PipelineRunsManager) Run(logger *opslog.Logger, pipelinerun *opsv1.Pipe
 }
 
 func (m *PipelineRunsManager) GetPipelines() (ps []opsv1.Pipeline, err error) {
-	uri := "/api/v1/namespaces/" + m.namespace + "/pipelines?page_size=999"
+	uri := "/api/v1/namespaces/" + m.namespace + "/pipelines?labels_selector=ops/copilot=enabled&page_size=999"
 	body, err := m.makeRequest(m.endpoint, m.token, uri, "GET", nil)
 	if err != nil || len(string(body)) < 10 {
 		return

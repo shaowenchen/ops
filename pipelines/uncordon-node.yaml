@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: uncordon-node
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: 恢复集群中的某一个节点
   variables:

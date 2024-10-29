@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: get-dataset-status
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: 查看数据集的状态
   variables:

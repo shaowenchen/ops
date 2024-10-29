@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: list-pipelines
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: 查看、列出所有的流水线
   variables:

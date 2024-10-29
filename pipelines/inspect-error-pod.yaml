@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: inspect-error-pod
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: pod 处于异常状态时，用来查看 pod 的错误日志和错误事件
   variables:

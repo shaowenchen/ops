@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: restart-pod
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: 重启、删除集群中的某一个 Pod
   variables:

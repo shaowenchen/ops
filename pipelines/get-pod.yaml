@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: get-pod
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: 查看 Pod 信息、状态
   variables:

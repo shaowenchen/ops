@@ -3,6 +3,8 @@ kind: Pipeline
 metadata:
   name: get-public-ip
   namespace: ops-system
+  labels:
+    ops/copilot: enabled
 spec:
   desc: 获取出口、公网 IP
   variables:

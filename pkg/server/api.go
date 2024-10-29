@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -66,7 +67,7 @@ func ListHosts(c *gin.Context) {
 		return
 	}
 	hostList := &opsv1.HostList{}
-	if req.Namespace == "all" {
+	if req.Namespace == opsconstants.AllNamespaces {
 		err = client.List(context.TODO(), hostList)
 	} else {
 		err = client.List(context.TODO(), hostList, runtimeClient.InNamespace(req.Namespace))
@@ -133,7 +134,7 @@ func ListClusters(c *gin.Context) {
 		return
 	}
 	clusterList := &opsv1.ClusterList{}
-	if req.Namespace == "all" {
+	if req.Namespace == opsconstants.AllNamespaces {
 		err = client.List(context.TODO(), clusterList)
 	} else {
 		err = client.List(context.TODO(), clusterList, runtimeClient.InNamespace(req.Namespace))
@@ -188,7 +189,7 @@ func GetCluster(c *gin.Context) {
 		return
 	}
 	cluster := &opsv1.Cluster{}
-	if req.Namespace == "all" {
+	if req.Namespace == opsconstants.AllNamespaces {
 		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
 			Name: req.Cluster,
 		}, cluster)
@@ -598,7 +599,7 @@ func ListTasks(c *gin.Context) {
 		return
 	}
 	taskList := &opsv1.TaskList{}
-	if req.Namespace == "all" {
+	if req.Namespace == opsconstants.AllNamespaces {
 		err = client.List(context.TODO(), taskList)
 	} else {
 		err = client.List(context.TODO(), taskList, runtimeClient.InNamespace(req.Namespace))
@@ -635,36 +636,54 @@ func ListTasks(c *gin.Context) {
 // @Success 200
 // @Router /api/v1/namespaces/{namespace}/pipelines [get]
 func ListPipelines(c *gin.Context) {
+	objs, err := listPipelines(c, nil)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, objs)
+}
+
+func listPipelines(c *gin.Context, labels map[string]string) (pagination Pagination[opsv1.Pipeline], err error) {
 	type Params struct {
-		Namespace string `uri:"namespace"`
-		Page      uint   `form:"page"`
-		PageSize  uint   `form:"page_size"`
-		Search    string `form:"search"`
+		Namespace      string `uri:"namespace"`
+		Page           uint   `form:"page"`
+		PageSize       uint   `form:"page_size"`
+		Search         string `form:"search"`
+		LabelsSelector string `form:"labels_selector"`
 	}
 	var req = Params{
 		PageSize: 10,
 		Page:     1,
 	}
-	err := c.ShouldBindUri(&req)
+	err = c.ShouldBindUri(&req)
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
 	err = c.ShouldBindQuery(&req)
 	if err != nil {
-		showError(c, err.Error())
 		return
+	}
+	// labels
+	if labels == nil {
+		labels = make(map[string]string)
+	}
+	labelSelectorKeyValues := strings.Split(req.LabelsSelector, ",")
+	for i := range labelSelectorKeyValues {
+		keyValue := strings.Split(labelSelectorKeyValues[i], "=")
+		if len(keyValue) == 2 {
+			labels[keyValue[0]] = keyValue[1]
+		}
 	}
 	client, err := getRuntimeClient("")
 	if err != nil {
-		showError(c, err.Error())
 		return
 	}
 	pipelineList := &opsv1.PipelineList{}
-	if req.Namespace == "all" {
-		err = client.List(context.TODO(), pipelineList)
+	if req.Namespace == opsconstants.AllNamespaces {
+		err = client.List(context.TODO(), pipelineList, runtimeClient.MatchingLabels(labels))
 	} else {
-		err = client.List(context.TODO(), pipelineList, runtimeClient.InNamespace(req.Namespace))
+		err = client.List(context.TODO(), pipelineList, runtimeClient.InNamespace(req.Namespace), runtimeClient.MatchingLabels(labels))
 	}
 	if err != nil {
 		return
@@ -684,7 +703,7 @@ func ListPipelines(c *gin.Context) {
 	} else {
 		newPipelineList = pipelineList.Items
 	}
-	showData(c, paginator[opsv1.Pipeline](newPipelineList, req.PageSize, req.Page))
+	return paginator[opsv1.Pipeline](newPipelineList, req.PageSize, req.Page), nil
 }
 
 // @Summary List Pipeline Tools
@@ -697,51 +716,36 @@ func ListPipelines(c *gin.Context) {
 // @Success 200
 // @Router /api/v1/namespaces/{namespace}/pipelinetools [get]
 func ListPipelineTools(c *gin.Context) {
-	type Params struct {
-		Namespace string `uri:"namespace"`
-		Page      uint   `form:"page"`
-		PageSize  uint   `form:"page_size"`
+	labels := map[string]string{
+		opsconstants.LabelCopilotPipelineEnabledKey: opsconstants.LabelCopilotPipelineEnabledValue,
 	}
-	var req = Params{
-		PageSize: 10,
-		Page:     1,
-	}
-	err := c.ShouldBindUri(&req)
+	objs, err := listPipelines(c, labels)
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
-	err = c.ShouldBindQuery(&req)
-	if err != nil {
-		showError(c, err.Error())
-		return
-	}
+	// get clusters
 	client, err := getRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
-	pipelineList := &opsv1.PipelineList{}
-	if req.Namespace == "all" {
-		err = client.List(context.TODO(), pipelineList)
-	} else {
-		err = client.List(context.TODO(), pipelineList, runtimeClient.InNamespace(req.Namespace))
-	}
-	if err != nil {
-		return
-	}
-	// get clusters
 	clusters := opsv1.ClusterList{}
 	err = client.List(context.TODO(), &clusters)
 	if err != nil {
 		return
 	}
 	// build tools
-	objs := []openai.Tool{}
-	for _, pipeline := range pipelineList.Items {
-		objs = append(objs, pipeline.GetTool(clusters.Items))
+	objs2 := Pagination[openai.Tool]{
+		PageSize: objs.PageSize,
+		Page:     objs.Page,
+		List:     make([]openai.Tool, 0),
+		Total:    objs.Total,
 	}
-	showData(c, paginator[openai.Tool](objs, req.PageSize, req.Page))
+	for i := range objs.List {
+		objs2.List = append(objs2.List, objs.List[i].GetTool(clusters.Items))
+	}
+	showData(c, objs2)
 }
 
 // @Summary Get TaskRun
@@ -851,7 +855,7 @@ func ListTaskRun(c *gin.Context) {
 		return
 	}
 	taskRunList := &opsv1.TaskRunList{}
-	if req.Namespace == "all" {
+	if req.Namespace == opsconstants.AllNamespaces {
 		err = client.List(context.TODO(), taskRunList)
 	} else {
 		err = client.List(context.TODO(), taskRunList, runtimeClient.InNamespace(req.Namespace))
@@ -902,7 +906,7 @@ func ListPipelineRuns(c *gin.Context) {
 		return
 	}
 	objs := &opsv1.PipelineRunList{}
-	if req.Namespace == "all" {
+	if req.Namespace == opsconstants.AllNamespaces {
 		err = client.List(context.TODO(), objs)
 	} else {
 		err = client.List(context.TODO(), objs, runtimeClient.InNamespace(req.Namespace))
