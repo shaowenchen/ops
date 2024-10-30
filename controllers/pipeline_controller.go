@@ -25,6 +25,7 @@ import (
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -74,9 +75,53 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// filled variables
+	changed := r.filledVariables(logger, ctx, obj)
+	if changed {
+		logger.Info.Println("filled variables for pipeline", obj.GetUniqueKey())
+		r.Update(ctx, obj)
+		return ctrl.Result{}, nil
+	}
+
+	// sync
 	r.syncResource(logger, ctx, false, obj)
 
 	return ctrl.Result{}, nil
+}
+
+func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.Context, obj *opsv1.Pipeline) (changed bool) {
+	// get tasks
+	taskList := []opsv1.Task{}
+	for _, t := range obj.Spec.Tasks {
+		task := opsv1.Task{}
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: obj.Namespace, Name: t.TaskRef}, &task)
+		if err != nil {
+			logger.Error.Println(err, "failed to get task")
+			return false
+		}
+		taskList = append(taskList, task)
+	}
+	// merge variables
+	for _, t := range taskList {
+		if obj.MergeVariables(t.Spec.Variables) {
+			changed = true
+		}
+	}
+	// check cluster variables
+	findClusterVariable := false
+	for _, v := range obj.Spec.Variables {
+		if v.Value == opsconstants.Cluster {
+			findClusterVariable = true
+			break
+		}
+	}
+	if !findClusterVariable {
+		changed = true
+		obj.Spec.Variables[opsconstants.Cluster] = opsv1.Variable{
+			Desc: opsconstants.Cluster,
+		}
+	}
+	return
 }
 
 func (r *PipelineReconciler) syncResource(logger *opslog.Logger, ctx context.Context, isDeleted bool, obj *opsv1.Pipeline) {

@@ -7,12 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: Collect - 搜集 GPU 的相关日志
-  variables:
-    cluster:
-      required: true
-    host:
-      required: true
-      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
   tasks:
     - name: 收集 GPU 日志
       taskRef: collect-gpu-log

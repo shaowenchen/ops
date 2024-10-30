@@ -5,15 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: 安装、卸载 device plugin volcano 组件
-  variables:
-    cluster:
-      required: true
-    device-plugin-volcano-image:
-      required: true
-      default: registry.cn-hangzhou.aliyuncs.com/opshub/ascend-k8sdeviceplugin:v5.0-arm64
-    action:
-      required: true
-      default: apply
   tasks:
     - name: device plugin volcano
       taskRef: app-device-plugin-volcano

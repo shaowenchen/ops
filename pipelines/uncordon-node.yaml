@@ -7,16 +7,8 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 恢复集群中的某一个节点
-  variables:
-    cluster:
-      required: true
-    host:
-      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
-      required: true
   tasks:
-    - name: 查看节点
-      taskRef: get-node
     - name: 恢复节点
       taskRef: uncordon-node
     - name: 查看节点
-      taskRef: get-node
+      taskRef: get-node-status

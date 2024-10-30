@@ -7,12 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 禁用集群中的某个节点
-  variables:
-    cluster:
-      required: true
-    host:
-      required: true
-      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
   tasks:
     - name: 禁用节点
       taskRef: cordon-node

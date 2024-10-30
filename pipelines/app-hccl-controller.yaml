@@ -5,12 +5,6 @@ metadata:
   namespace: ops-system
 spec:
   desc: 安装、卸载 hccl-controller 组件
-  variables:
-    cluster:
-      required: true
-    action:
-      required: true
-      default: apply
   tasks:
     - name: hccl-controller
       taskRef: app-hccl-controller

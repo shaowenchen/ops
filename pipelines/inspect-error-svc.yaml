@@ -7,15 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: svc 处于异常状态时，用来查看 svc 的错误日志和错误事件
-  variables:
-    cluster:
-      required: true
-    svc:
-      required: true
-      regex: "[A-Za-z0-9-]+"
-    namespace:
-      required: true
-      regex: "[A-Za-z0-9-]+"
   tasks:
     - name: 获取 svc
       taskRef: get-svc

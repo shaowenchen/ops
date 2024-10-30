@@ -7,11 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 创建 namespace
-  variables:
-    cluster:
-      required: true
-    namespace:
-      required: true
   tasks:
     - name: 创建 namespace
       taskRef: create-namespace

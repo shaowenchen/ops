@@ -7,11 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 获取出口、公网 IP
-  variables:
-    cluster:
-      required: true
-    host:
-      required: true
   tasks:
     - name: get public ip
       taskRef: get-public-ip

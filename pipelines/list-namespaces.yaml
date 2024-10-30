@@ -7,9 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 列出、查看所有的命名空间
-  variables:
-    cluster:
-      required: true
   tasks:
     - name: 列出所有命名空间
       taskRef: list-namespaces

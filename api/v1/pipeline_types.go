@@ -90,6 +90,56 @@ func (obj *Pipeline) CopyWithOutVersion() *Pipeline {
 	}
 }
 
+func (obj *Pipeline) MergeVariables(vars Variables) bool {
+	if obj.Spec.Variables == nil {
+		obj.Spec.Variables = make(map[string]Variable)
+	}
+	var changed bool
+	for k, v := range vars {
+		_, ok := obj.Spec.Variables[k]
+		if ok {
+			// merge others
+			originV := obj.Spec.Variables[k]
+			if originV.Value == "" {
+				changed = true
+				originV.Value = v.Value
+			}
+			if originV.Default == "" {
+				changed = true
+				originV.Default = v.Default
+			}
+			if len(originV.Enums) == 0 {
+				changed = true
+				originV.Enums = v.Enums
+			}
+			if len(originV.Examples) == 0 {
+				changed = true
+				originV.Examples = v.Examples
+			}
+			if originV.Regex == "" {
+				changed = true
+				originV.Regex = v.Regex
+			}
+			if originV.Desc == "" {
+				changed = true
+				originV.Desc = v.Desc
+			}
+			if originV.Required == false {
+				changed = true
+				originV.Required = v.Required
+			}
+			if changed {
+				obj.Spec.Variables[k] = originV
+			}
+		} else {
+			changed = true
+			obj.Spec.Variables[k] = v
+		}
+	}
+
+	return changed
+}
+
 func (obj *Pipeline) MergeVersion(merge *Pipeline) *Pipeline {
 	obj.ObjectMeta.ResourceVersion = merge.ObjectMeta.ResourceVersion
 	return obj

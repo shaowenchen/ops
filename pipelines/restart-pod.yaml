@@ -7,17 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 重启、删除集群中的某一个 Pod
-  variables:
-    cluster:
-      required: true
-    pod:
-      desc: "For example, `pod: doc-translate-ec-long-v1-64cf8d5478-5zsvk or name: doc-translate-ec-long-v1-64cf8d5478-5zsvk`, where doc-translate-ec-long-v1-64cf8d5478-5zsvk is pod"
-      value: ""
-      required: true
-    white:
-      required: true
-    whitelist:
-      required: true
   tasks:
     - name: 白名单检测
       taskRef: check-whitelist

@@ -7,13 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 查看、列出所有的流水线
-  variables:
-    cluster:
-      value: "ksyun-bj6-e"
-      required: true
-    host:
-      value: "anymaster"
-      required: true
   tasks:
     - name: 列出所有集群
       taskRef: list-pipelines-for-copilot

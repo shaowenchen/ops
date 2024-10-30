@@ -7,12 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 清理磁盘
-  variables:
-    cluster:
-      required: true
-    host:
-      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
-      required: true
   tasks:
     - name: 清理磁盘
       taskRef: clear-disk

@@ -7,9 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 查看、列出某个集群的所有节点
-  variables:
-    cluster:
-      required: true
   tasks:
     - name: 列出集群的节点
       taskRef: list-nodes

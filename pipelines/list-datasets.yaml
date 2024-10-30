@@ -7,12 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 列出命名空间下的数据集
-  variables:
-    cluster:
-      required: true
-    namespace:
-      required: true
-      desc: 命名空间
   tasks:
     - name: 列出数据集
       taskRef: list-datasets

@@ -7,17 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 删除指定的 KAS Job
-  variables:
-    cluster:
-      required: true
-    task:
-      required: true
-      examples: ["21780"]
-      regex: "^[0-9]*$"
-    white:
-      required: true
-    whitelist:
-      required: true
   tasks:
     - name: 白名单检测
       taskRef: check-whitelist

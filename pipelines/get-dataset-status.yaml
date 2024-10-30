@@ -7,17 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 查看数据集的状态
-  variables:
-    cluster:
-      required: true
-    namespace:
-      required: true
-      desc: namespace
-      regex: ^(?!.*__)([a-z0-9](-[a-z0-9]){0,61}[a-z0-9]?|[a-z0-9]{1,63})$
-    dataset:
-      required: true
-      desc: dataset
-      regex: ^(?!.*__)([a-z0-9](-[a-z0-9]){0,61}[a-z0-9]?|[a-z0-9]{1,63})$
   tasks:
     - name: 查询数据集状态
       taskRef: get-dataset-status

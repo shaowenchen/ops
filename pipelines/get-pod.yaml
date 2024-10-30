@@ -7,20 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 查看 Pod 信息、状态
-  variables:
-    cluster:
-      value: "cluster"
-      required: true
-    namespace:
-      required: true
-      examples:
-        - ai-app
-        - ai-test
-    pod:
-      required: true
-      examples:
-        - ubuntu-8474647969-qszcj
-        - text2image-prompt-extend-v1-66fbd9db6d-vnns2
   tasks:
     - name: get pod status
       taskRef: get-pod

@@ -7,16 +7,6 @@ metadata:
     ops/copilot: enabled
 spec:
   desc: 重启 kubelet
-  variables:
-    cluster:
-      required: true
-    host:
-      required: true
-      regex: "\b[a-zA-Z-]*node[a-zA-Z-]*\b"
-    white:
-      required: true
-    whitelist:
-      required: true
   tasks:
     - name: 白名单检测
       taskRef: check-whitelist
