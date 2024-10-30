@@ -21,7 +21,7 @@ flags="-X github.com/shaowenchen/ops/cmd/cli/version.BuildVersion=`git symbolic-
 all: build
 
 cli: 
-	go build -ldflags ${flags} -o ./bin/opscli ./cmd/cli/main.go
+	GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -ldflags ${flags} -o ./bin/opscli ./cmd/cli/main.go
 
 ##@ General
 
@@ -69,10 +69,10 @@ test: manifests generate fmt vet envtest ## Run tests.
 
 .PHONY: build
 build: generate fmt vet ## Build manager binary.
-	go build -o bin/ops-controller-manager main.go
+	GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -o bin/ops-controller-manager main.go
 
 build-server: swagger-docs
-	go build -o bin/ops-server cmd/server/main.go
+	GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -o bin/ops-server cmd/server/main.go
 
 build-web:
 	cd web && yarn && yarn build

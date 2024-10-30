@@ -134,7 +134,7 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 			if !opsconstants.IsAnyKubeNode(t.Spec.Host) {
 				changed = true
 				obj.Spec.Variables[opsconstants.Host] = opsv1.Variable{
-					Desc: opsconstants.Host,
+					Desc:     opsconstants.Host,
 					Required: true,
 				}
 				break
