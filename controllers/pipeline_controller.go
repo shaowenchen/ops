@@ -135,6 +135,7 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 				changed = true
 				obj.Spec.Variables[opsconstants.Host] = opsv1.Variable{
 					Desc: opsconstants.Host,
+					Required: true,
 				}
 				break
 			}
