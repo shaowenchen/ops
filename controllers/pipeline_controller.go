@@ -121,6 +121,25 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 			Desc: opsconstants.Cluster,
 		}
 	}
+	// check host variables
+	findHostVariable := false
+	for _, v := range obj.Spec.Variables {
+		if v.Value == opsconstants.Host {
+			findHostVariable = true
+			break
+		}
+	}
+	if !findHostVariable {
+		for _, t := range taskList {
+			if !opsconstants.IsAnyKubeNode(t.Spec.Host) {
+				changed = true
+				obj.Spec.Variables[opsconstants.Host] = opsv1.Variable{
+					Desc: opsconstants.Host,
+				}
+				break
+			}
+		}
+	}
 	return
 }
 
