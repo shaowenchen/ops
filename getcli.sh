@@ -10,6 +10,9 @@ case "$(uname -m)" in
   x86_64)
     ARCH=amd64
     ;;
+  aarch64)
+    ARCH=arm64
+    ;;
   *)
     echo "ARCH isn't supported"
     exit 1
