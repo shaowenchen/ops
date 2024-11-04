@@ -33,6 +33,7 @@ var TaskCmd = &cobra.Command{
 			logger.Error.Println("--filepath is must provided")
 			return
 		}
+		inventory = utils.GetAbsoluteFilePath(inventory)
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
