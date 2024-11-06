@@ -51,28 +51,6 @@ node1 为节点名称。
 /usr/local/bin/opscli task -f ~/.ops/tasks/list-podimage.yaml --namespace all
 ```
 
-- 批量查看
-
-```bash
-/usr/local/bin/opscli shell --content "sudo /usr/local/bin/opscli task -f ~/.ops/tasks/list-podimage.yaml --namespace all" -i hosts.txt
-```
-
-### 替换 metrics-server 镜像
-
-```bash
-/usr/local/bin/opscli shell --content "sudo kubectl -n kube-system set image deployment/metrics-server metrics-server=hubimage/metrics-server:v0.5.0" -i hosts.txt
-```
-
-```bash
-/usr/local/bin/opscli shell --content "sudo kubectl -n kube-system set image deployment/metrics-server metrics-server=hubimage/metrics-server:v0.6.1" -i hosts-B.txt
-```
-
-### 替换 kube-state-metrics 镜像
-
-```bash
-/usr/local/bin/opscli shell --content "sudo kubectl -n kube-system set image deployment/prom-k8s-kube-state-metrics kube-state-metrics=hubimage/kube-state-metrics:v2.2.4" -i hosts.txt
-```
-
 ### 集群批量操作
 
 - 全部节点
