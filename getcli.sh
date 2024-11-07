@@ -6,6 +6,7 @@ if ! [ -x "$(command -v curl)" ]; then
   exit 1
 fi
 
+# Detect architecture
 case "$(uname -m)" in
   x86_64)
     ARCH=amd64
@@ -13,18 +14,29 @@ case "$(uname -m)" in
   aarch64)
     ARCH=arm64
     ;;
+  i386 | i686)
+    ARCH=386
+    ;;
+  armv7l)
+    ARCH=arm
+    GOARM=7
+    ;;
   *)
     echo "ARCH isn't supported"
     exit 1
     ;;
 esac
 
+# Detect OS type
 case "$(uname)" in
   Linux)
     OSTYPE=linux
     ;;
   Darwin)
     OSTYPE=darwin
+    ;;
+  CYGWIN*|MINGW*|MSYS*)
+    OSTYPE=windows
     ;;
   *)
     echo "OS isn't supported"
