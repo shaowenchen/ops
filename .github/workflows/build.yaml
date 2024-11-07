@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: v1.0.0
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
