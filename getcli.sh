@@ -6,6 +6,7 @@ if ! [ -x "$(command -v curl)" ]; then
   exit 1
 fi
 
+# Detect architecture
 case "$(uname -m)" in
   x86_64)
     ARCH=amd64
@@ -13,12 +14,20 @@ case "$(uname -m)" in
   aarch64)
     ARCH=arm64
     ;;
+  i386 | i686)
+    ARCH=386
+    ;;
+  armv7l)
+    ARCH=arm
+    GOARM=7
+    ;;
   *)
     echo "ARCH isn't supported"
     exit 1
     ;;
 esac
 
+# Detect OS type
 case "$(uname)" in
   Linux)
     OSTYPE=linux
@@ -26,20 +35,29 @@ case "$(uname)" in
   Darwin)
     OSTYPE=darwin
     ;;
+  CYGWIN*|MINGW*|MSYS*)
+    OSTYPE=windows
+    ;;
   *)
     echo "OS isn't supported"
     exit 1
     ;;
 esac
 
+# remove version prefix 'v'
+VERSION=$(echo "$VERSION" | sed 's/^[vV]//')
+FILENAME="opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
+
 # get version
 if [ "x${VERSION}" = "x" ]; then
   VERSION="latest"
+  DOWNLOAD_URL="https://github.com/shaowenchen/ops/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
+else
+  DOWNLOAD_URL="https://github.com/shaowenchen/ops/releases/download/v${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
+  VERSION=v${VERSION}
 fi
 
 # download file
-FILENAME="opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
-DOWNLOAD_URL="https://github.com/shaowenchen/ops/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 
 http_code=$(curl --connect-timeout 2 -s -o temp.out -w '%{http_code}' https://github.com)
 rm -rf temp.out || true
