@@ -49,7 +49,7 @@ VERSION=$(echo "$VERSION" | sed 's/^[vV]//')
 FILENAME="opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 
 # get version
-if [ "x${VERSION}" = "x" ]; then
+if [ "x${VERSION}" = "x" ] || [ "${VERSION}" = "latest" ]; then
   VERSION="latest"
   DOWNLOAD_URL="https://github.com/shaowenchen/ops/releases/download/${VERSION}/opscli-${VERSION}-${OSTYPE}-${ARCH}.tar.gz"
 else
