@@ -36,6 +36,7 @@ jobs:
 
       - name: Copy Helm Charts
         run: |
+          wget https://github.com/shaowenchen/ops/raw/refs/heads/v1.0/charts/ops-1.0.0.tgz -O ./charts/ops-1.0.0.tgz
           mkdir -p ./docs/_book/charts
           cp ./charts/*.tgz ./docs/_book/charts/
           cp ./charts/artifacthub-repo.yml ./docs/_book/charts/
