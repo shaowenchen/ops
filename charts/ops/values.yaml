@@ -6,16 +6,16 @@ replicaCount: 1
 
 image:
   repository: registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-controller-manager
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "v1.0.0"
 
 server:
   image:
     repository: registry.cn-hangzhou.aliyuncs.com/shaowenchen/ops-server
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "v1.0.0"
 
 imagePullSecrets: []
 nameOverride: ""

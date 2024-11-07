@@ -2,29 +2,24 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: ""
+        required: true
+        default: "v1.0.0"
+
 jobs:
   GoReleaser:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete Latest Tag And Release
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      - uses: actions/checkout@v3
+      - uses: rickstaa/action-create-tag@v1
         with:
-          delete_release: true
-          tag_name: latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Checkout Main
-        uses: actions/checkout@v3
-      - name: Tag Repo
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Checkout Latest
-        uses: actions/checkout@v3
-        with:
-          ref: latest
+          tag: "${{inputs.tag}}"
+          tag_exists_error: false
+          message: "Release ${{inputs.tag}}"
+      - name: Checkout Tag
+        run: git checkout ${{inputs.tag}}
       - name: Set Up Go
         uses: actions/setup-go@v2
         with:
@@ -33,6 +28,6 @@ jobs:
         uses: goreleaser/goreleaser-action@v3
         with:
           version: v0.173.2
-          args: release --skip-validate --rm-dist
+          args: release 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
