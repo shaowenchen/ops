@@ -157,6 +157,9 @@ func (r *PipelineReconciler) syncResource(logger *opslog.Logger, ctx context.Con
 	}
 
 	for _, c := range clusterList.Items {
+		if !c.IsHealthy() {
+			continue
+		}
 		objs := []opsv1.Pipeline{*obj}
 		kc, err := opskube.NewClusterConnection(&c)
 		if err != nil {

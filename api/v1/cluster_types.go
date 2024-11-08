@@ -88,6 +88,10 @@ func (c *Cluster) GetStatus() *ClusterStatus {
 	return &c.Status
 }
 
+func (c *Cluster) IsHealthy() bool {
+	return c.Status.HeartStatus == opsconstants.StatusSuccessed
+}
+
 func (c *Cluster) GetUniqueKey() string {
 	return types.NamespacedName{
 		Namespace: c.Namespace,

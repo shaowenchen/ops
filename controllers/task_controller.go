@@ -93,6 +93,9 @@ func (r *TaskReconciler) syncResource(logger *opslog.Logger, ctx context.Context
 		logger.Info.Println("sync task " + obj.GetUniqueKey())
 	}
 	for _, c := range clusterList.Items {
+		if !c.IsHealthy() {
+			continue
+		}
 		objs := []opsv1.Task{*obj}
 		kc, err := opskube.NewClusterConnection(&c)
 		if err != nil {
