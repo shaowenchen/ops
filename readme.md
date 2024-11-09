@@ -28,4 +28,7 @@ helm install myops ops/ops --version 1.0.0 --namespace ops-system --create-names
 
 ## More
 
-Go to [docs](https://www.chenshaowen.com/ops/) for more information.
+Go to docs for more information.
+
+- [中文文档](https://www.chenshaowen.com/ops/zh)
+- [English Docs](https://www.chenshaowen.com/ops/en)

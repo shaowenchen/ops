@@ -24,27 +24,27 @@
       "token": "G-TRHEYFQGW4"
     },
     "code": {
-        "theme": "default",
-        "linenums": true
+      "theme": "default",
+      "linenums": true
     },
     "favicon": "favicon.ico",
     "github-buttons": {
-        "buttons": [
-          {
-            "user": "shaowenchen",
-            "repo": "ops", 
-            "type": "star",
-            "count": false,
-            "size": "small"
-          }, 
-          {
-            "user": "shaowenchen",
-            "width": "160", 
-            "type": "follow", 
-            "count": false,
-            "size": "small"
-          }
-        ]
+      "buttons": [
+        {
+          "user": "shaowenchen",
+          "repo": "ops",
+          "type": "star",
+          "count": false,
+          "size": "small"
+        },
+        {
+          "user": "shaowenchen",
+          "width": "160",
+          "type": "follow",
+          "count": false,
+          "size": "small"
+        }
+      ]
     }
   },
   "links": {
