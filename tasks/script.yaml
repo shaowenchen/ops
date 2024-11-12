@@ -6,11 +6,11 @@ metadata:
 spec:
   desc: run script
   variables:
-    script:
+    content:
       required: true
-      display: script
+      display: content
       default: "uname -a"
   steps:
     - name: run script
       content: |
-        ${script}
+        ${content}
