@@ -1,0 +1,16 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: app-gpu-manager
+  namespace: ops-system
+spec:
+  desc: install or uninstall gpu-manager
+  host: anymaster
+  variables:
+    action:
+      default: apply
+  steps:
+    - name: take action
+      content: |
+        export KUBECONFIG=/host/root/.kube/config
+        envsubst < /ai/gpu-manager-containerd-daemonset.yaml | kubectl ${action} -f -
