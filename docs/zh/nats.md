@@ -39,6 +39,14 @@ export leafpassword=leafpassword
 ```bash
 cat <<EOF > nats-values.yaml
 config:
+  jetstream:
+    enabled: false
+    fileStore:
+      enabled: true
+      dir: /data
+    pvc:
+      enabled: true
+      storageClassName: my-sc-client
   cluster:
     enabled: true
   leafnodes:
@@ -71,7 +79,7 @@ reloader:
 EOF
 ```
 
-这样安装的 Nats 只是安装了 core-nats 没有持久化，如果需要持久化，需要开启 nats-jetstream，但需要 PV 存储。
+这样安装的 Nats 只是安装了 core-nats 没有持久化，如果需要持久化，需要开启 nats-jetstream，但需要 配置存储。
 
 - 安装 nats
 
