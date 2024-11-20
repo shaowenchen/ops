@@ -1,43 +1,80 @@
 package event
 
 import (
+	"github.com/shaowenchen/ops/pkg/constants"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
 
-func FactoryController() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectController)
+func FactoryController(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectController)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryHost() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectHost)
+func FactoryHost(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectHost)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryCluster() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectCluster)
+func FactoryCluster(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectCluster)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryTask() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectTask)
+func FactoryTask(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectTask)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryTaskRun() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectTaskRun)
+func FactoryTaskRun(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectTaskRun)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryPipeline() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectPipeline)
+func FactoryPipeline(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectPipeline)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryPipelineRun() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectPipelineRun)
+func FactoryPipelineRun(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectPipelineRun)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryWebhook() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectWebhook)
+func FactoryWebhook(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectWebhook)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryCheck() *EventBus {
-	return (&EventBus{}).WithSubject(opsconstants.SubjectCheck)
+func FactoryCheck(sub string) *EventBus {
+	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectCheck)
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
 func FactoryWithServer(server string) *EventBus {

@@ -36,7 +36,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/check', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/check/subjects/${TASK_NAME}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def get_pod_status():

@@ -10,12 +10,10 @@ import (
 )
 
 type EventController struct {
-	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
-	Kind    string `json:"kind,omitempty" yaml:"kind,omitempty"`
+	Kind string `json:"kind,omitempty" yaml:"kind,omitempty"`
 }
 
 type EventHost struct {
-	Cluster  string           `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Address  string           `json:"address,omitempty" yaml:"address,omitempty"`
 	Port     int              `json:"port,omitempty" yaml:"port,omitempty"`
 	Username string           `json:"username,omitempty" yaml:"username,omitempty"`
@@ -23,19 +21,16 @@ type EventHost struct {
 }
 
 type EventCluster struct {
-	Cluster string              `json:"cluster,omitempty" yaml:"cluster,omitempty"`
-	Server  string              `json:"server,omitempty" yaml:"server,omitempty" `
-	Status  opsv1.ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
+	Server string              `json:"server,omitempty" yaml:"server,omitempty" `
+	Status opsv1.ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type EventTask struct {
-	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	opsv1.TaskSpec
 	Status opsv1.TaskStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type EventTaskRun struct {
-	Cluster   string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	TaskRef   string            `json:"taskRef"`
 	Desc      string            `json:"desc"`
 	Variables map[string]string `json:"variables"`
@@ -43,13 +38,11 @@ type EventTaskRun struct {
 }
 
 type EventPipeline struct {
-	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	opsv1.PipelineSpec
 	Status opsv1.PipelineStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type EventPipelineRun struct {
-	Cluster     string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	PipelineRef string            `json:"pipelineRef"`
 	Desc        string            `json:"desc"`
 	Variables   map[string]string `json:"variables"`
@@ -63,7 +56,6 @@ type EventWebhook struct {
 }
 
 type EventCheck struct {
-	Cluster   string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Host      string `json:"host,omitempty" yaml:"host,omitempty"`
 	Kind      string `json:"kind,omitempty" yaml:"kind,omitempty"`
 	Threshold string `json:"threshold,omitempty" yaml:"threshold,omitempty"`

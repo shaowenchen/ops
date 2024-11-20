@@ -18,7 +18,6 @@ func (e EventHost) GetDiskUsageAlertMessage(t time.Time) string {
 		}
 	}
 	appendField("kind", "alert-disk-usage")
-	appendField("cluster", e.Cluster)
 	appendField("host", e.Status.Hostname)
 	appendField("value", e.Status.DiskUsagePercent)
 	appendField("action", "clean disk")
@@ -37,7 +36,6 @@ func (e EventCheck) GetAlertMessage(t time.Time) string {
 			result.WriteString(fmt.Sprintf("%s: %s  \n", label, value))
 		}
 	}
-	appendField("cluster", e.Cluster)
 	appendField("host", e.Host)
 	appendField("kind", e.Kind)
 	appendField("threshold", e.Threshold)

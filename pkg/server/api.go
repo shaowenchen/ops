@@ -1148,12 +1148,12 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 // @Produce json
 // @Param event path string true "event"
 // @Success 200
-// @Router /api/v1/events/{event} [post]
+// @Router /api/v1/events/{event}/subjects/{subject} [post]
 func CreateEvent(c *gin.Context) {
 	type Params struct {
-		Event string `uri:"event"`
+		Event   string `uri:"event"`
+		Subject string `uri:"subject"`
 	}
-	cluster := opsconstants.GetEnvCluster()
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
 	if err != nil {
@@ -1167,10 +1167,7 @@ func CreateEvent(c *gin.Context) {
 			showError(c, "fail to parse event check "+err.Error())
 			return
 		}
-		if len(cluster) > 0 {
-			event.Cluster = cluster
-		}
-		go opsevent.FactoryCheck().Publish(context.TODO(), event)
+		go opsevent.FactoryCheck(req.Subject).Publish(context.TODO(), event)
 		showSuccess(c)
 		return
 	} else if opsconstants.IsWebhookEvent(req.Event) {
@@ -1180,7 +1177,7 @@ func CreateEvent(c *gin.Context) {
 			showError(c, "fail to parse event webhook "+err.Error())
 			return
 		}
-		go opsevent.FactoryWebhook().Publish(context.TODO(), event)
+		go opsevent.FactoryWebhook(req.Subject).Publish(context.TODO(), event)
 		showSuccess(c)
 		return
 	}

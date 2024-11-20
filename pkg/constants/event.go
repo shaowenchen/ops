@@ -1,20 +1,30 @@
 package constants
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 const Source = "https://github.com/shaowenchen/ops"
 
 const DefaultEventBusServer = "http://nats-headless.ops-system.svc:4222"
 
-const SubjectController = KindOps + "." + KindController
-const SubjectHost = KindOps + "." + KindHost
-const SubjectCluster = KindOps + "." + KindCluster
-const SubjectTask = KindOps + "." + KindTask
-const SubjectTaskRun = KindOps + "." + KindTaskRun
-const SubjectPipeline = KindOps + "." + KindPipeline
-const SubjectPipelineRun = KindOps + "." + KindPipelineRun
-const SubjectWebhook = KindOps + "." + EventWebhook
-const SubjectCheck = KindOps + "." + EventCheck
+const SubjectController = KindOps + ".%s." + KindController
+const SubjectHost = KindOps + ".%s." + KindHost
+const SubjectCluster = KindOps + ".%s." + KindCluster
+const SubjectTask = KindOps + ".%s." + KindTask
+const SubjectTaskRun = KindOps + ".%s." + KindTaskRun
+const SubjectPipeline = KindOps + ".%s." + KindPipeline
+const SubjectPipelineRun = KindOps + ".%s." + KindPipelineRun
+const SubjectWebhook = KindOps + ".%s." + EventWebhook
+const SubjectCheck = KindOps + ".%s." + EventCheck
+
+func GetClusterSubject(cluster, format string) string {
+	if cluster == "" {
+		cluster = "default"
+	}
+	return fmt.Sprintf(format, cluster)
+}
 
 const (
 	EventCheck   = "Check"
