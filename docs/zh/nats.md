@@ -32,6 +32,7 @@ helm show values nats/nats
 export adminpassword=adminpassword
 export leafuser=leafuser
 export leafpassword=leafpassword
+export apppassword=apppassword
 ```
 
 - 生成 nats-values.yaml
@@ -61,6 +62,11 @@ config:
         users:
           - user: admin
             password: ${adminpassword}
+      APP:
+        users:
+          - user: app
+            password: ${apppassword}
+        jetstream: true
     system_account: SYS
 container:
   image:
@@ -79,7 +85,7 @@ reloader:
 EOF
 ```
 
-这样安装的 Nats 只是安装了 core-nats 没有持久化，如果需要持久化，需要开启 nats-jetstream，但需要 配置存储。
+这样安装的 Nats 只是安装了 core-nats 没有持久化，如果需要持久化，需要开启 nats-jetstream，但需要配置存储。
 
 - 安装 nats
 
@@ -123,12 +129,16 @@ export nats_master=leafuser:leafpassword@x.x.x.x:32222
 
 - 生成 nats-values.yaml
 
+需要注意的是，不同集群的 `server_name` 不能相同，否则会有重复连接的问题。
+
 ```bash
 cat <<EOF > nats-values.yaml
 config:
   leafnodes:
     enabled: true
     merge: {"remotes": [{"urls": ["nats://${nats_master}"]}]}
+  merge:
+    server_name: nats-cluster-1
 container:
   image:
     repository: nats
@@ -163,26 +173,43 @@ kubectl -n ops-system exec -it deployment/nats-box -- sh
 - 订阅消息
 
 ```bash
-nats sub mysub
+nats sub ops.* --user=app --password=${apppassword}
 ```
 
 - 发布消息
 
 ```bash
-nats pub mysub "mymessage mycontent"
+nats pub ops.* "mymessage mycontent" --user=app --password=${apppassword}
+```
+
+- 创建 stream 持久化消息
+
+```bash
+nats stream add ops --subjects "ops.*" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m --user=app --password=${apppassword}
+```
+
+- 查看 stream 信息
+
+```bash
+nats stream view ops --user=app --password=${apppassword}
+```
+
+- 查看 stream 配置
+
+```bash
+nats stream info ops --user=app --password=${apppassword}
 ```
 
 - 查看集群信息
 
 ```bash
-export adminpassword=adminpassword
 nats server list --user=admin --password=${adminpassword}
 ```
 
 - 压力测试
 
 ```bash
-nats bench benchsubject --pub 1 --sub 10
+nats bench benchsubject --pub 1 --sub 10 --user=app --password=${apppassword}
 ```
 
 ### 参考
@@ -190,4 +217,3 @@ nats bench benchsubject --pub 1 --sub 10
 https://docs.nats.io/running-a-nats-service/configuration#jetstream
 https://docs.nats.io/running-a-nats-service/configuration/leafnodes/leafnode_conf
 https://docs.nats.io/running-a-nats-service/configuration/gateways/gateway#gateway-configuration-block
-
