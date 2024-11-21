@@ -1,71 +1,44 @@
 package event
 
 import (
+	"github.com/nats-io/nats.go"
 	"github.com/shaowenchen/ops/pkg/constants"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	"os"
 )
 
-func FactoryController(sub string) *EventBus {
+func FactoryController() *EventBus {
 	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectController)
-	if sub != "" {
-		subject = subject + "." + sub
-	}
 	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryHost(sub string) *EventBus {
+func FactoryHost() *EventBus {
 	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectHost)
-	if sub != "" {
-		subject = subject + "." + sub
-	}
 	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryCluster(sub string) *EventBus {
+func FactoryCluster() *EventBus {
 	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectCluster)
-	if sub != "" {
-		subject = subject + "." + sub
-	}
 	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryTask(sub string) *EventBus {
+func FactoryTask() *EventBus {
 	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectTask)
-	if sub != "" {
-		subject = subject + "." + sub
-	}
 	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryTaskRun(sub string) *EventBus {
+func FactoryTaskRun() *EventBus {
 	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectTaskRun)
-	if sub != "" {
-		subject = subject + "." + sub
-	}
 	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryPipeline(sub string) *EventBus {
+func FactoryPipeline() *EventBus {
 	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectPipeline)
-	if sub != "" {
-		subject = subject + "." + sub
-	}
 	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryPipelineRun(sub string) *EventBus {
+func FactoryPipelineRun() *EventBus {
 	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectPipelineRun)
-	if sub != "" {
-		subject = subject + "." + sub
-	}
-	return (&EventBus{}).WithSubject(subject)
-}
-
-func FactoryWebhook(sub string) *EventBus {
-	subject := opsconstants.GetClusterSubject(constants.GetEnvCluster(), opsconstants.SubjectWebhook)
-	if sub != "" {
-		subject = subject + "." + sub
-	}
 	return (&EventBus{}).WithSubject(subject)
 }
 
@@ -77,10 +50,29 @@ func FactoryCheck(sub string) *EventBus {
 	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryWithServer(server string) *EventBus {
-	return (&EventBus{}).WithServer(server)
+func FactoryWebhook(sub string) *EventBus {
+	subject := opsconstants.SubjectWebhook
+	if sub != "" {
+		subject = subject + "." + sub
+	}
+	return (&EventBus{}).WithSubject(subject)
 }
 
-func FactoryWithSubject(subject string) *EventBus {
-	return (&EventBus{}).WithSubject(subject)
+func FactoryJetStreamClient(server string) (*nats.JetStreamContext, error) {
+	if server == "" {
+		if os.Getenv("EVENTBUS_ADDRESS") != "" {
+			server = os.Getenv("EVENTBUS_ADDRESS")
+		} else {
+			server = opsconstants.DefaultEventBusServer
+		}
+	}
+	client, err := CurrentEventBusClient.GetClient(server, "ops.>")
+	if err == nil {
+		return client.JetStream, nil
+	}
+	return nil, err
+}
+
+func FactoryWithServer(server string) *EventBus {
+	return (&EventBus{}).WithServer(server)
 }

@@ -231,7 +231,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	}
 	r.commitStatus(logger, ctx, tr, finallyStatus)
 	// push event
-	go opsevent.FactoryTaskRun("").Publish(ctx, opsevent.EventTaskRun{
+	go opsevent.FactoryTaskRun().Publish(ctx, opsevent.EventTaskRun{
 		TaskRef:       tr.Spec.TaskRef,
 		Desc:          tr.Spec.Desc,
 		Variables:     tr.Spec.Variables,
@@ -493,7 +493,7 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	// push event
-	go opsevent.FactoryController("").Publish(context.TODO(), opsevent.EventController{
+	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
 		Kind: opsconstants.KindTaskRun,
 	})
 	return ctrl.NewControllerManagedBy(mgr).

@@ -1184,6 +1184,45 @@ func CreateEvent(c *gin.Context) {
 	showData(c, "unknown event")
 }
 
+// @Summary List Subjects
+// @Tags Event
+// @Accept json
+// @Produce json
+// @Param subject path string true "subject"
+// @Success 200
+// @Router /api/v1/subjects/{subject} [get]
+func ListSubjects(c *gin.Context) {
+	type Params struct {
+		Subject   string `uri:"subject"`
+		StartTime string `query:"start_time"`
+		MaxLen    uint   `query:"max_len"`
+		Page      uint   `query:"page"`
+		PageSize  uint   `query:"page_size"`
+	}
+	var req = Params{
+		PageSize: 50,
+		Page:     1,
+		MaxLen: 1000,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// 2006-01-02T15:04:05Z07:00
+	startTime, err := time.Parse(time.RFC3339, req.StartTime)
+	if err != nil {
+		startTime = time.Now().Add(-time.Hour * 1)
+	}
+	client, err := opsevent.FactoryJetStreamClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	data, err := opsevent.QueryStartTime(*client, req.Subject, startTime, req.MaxLen)
+	showData(c, paginator[string](data, req.PageSize, req.Page))
+}
+
 // @Summary Login Check
 // @Tags Login
 // @Accept json

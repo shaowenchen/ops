@@ -962,6 +962,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/subjects/{subject}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "summary": "List Subjects",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "subject",
+                        "name": "subject",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/summary": {
             "get": {
                 "consumes": [

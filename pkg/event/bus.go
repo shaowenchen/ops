@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/nats-io/nats.go"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"os"
 	"strings"
 	"sync"
-
-	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
 
 type Event cloudevents.Client
@@ -21,8 +21,9 @@ type GlobalEventBusClients struct {
 }
 
 type ProducerConsumerClient struct {
-	Producer *cloudevents.Client
-	Consumer *cloudevents.Client
+	Producer  *cloudevents.Client
+	Consumer  *cloudevents.Client
+	JetStream *nats.JetStreamContext
 }
 
 func (globalClient *GlobalEventBusClients) GetClient(server string, subject string) (*ProducerConsumerClient, error) {
@@ -50,13 +51,23 @@ func (globalClient *GlobalEventBusClients) GetClient(server string, subject stri
 		if err != nil {
 			return nil, err
 		}
+		// build jetstream
+		nc, err := nats.Connect(server)
+		if err != nil {
+			return nil, err
+		}
+		js, _ := nc.JetStream()
 		// update cache
 		globalClient.Mutex.Lock()
 		defer globalClient.Mutex.Unlock()
 		if globalClient.Clients == nil {
 			globalClient.Clients = make(map[string]*ProducerConsumerClient)
 		}
-		globalClient.Clients[key] = &ProducerConsumerClient{Producer: &producerClient, Consumer: &consumerClient}
+		globalClient.Clients[key] = &ProducerConsumerClient{
+			Producer:  &producerClient,
+			Consumer:  &consumerClient,
+			JetStream: &js,
+		}
 		clientP = globalClient.Clients[key]
 	}
 	return clientP, nil

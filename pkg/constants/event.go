@@ -16,8 +16,9 @@ const SubjectTask = KindOps + ".%s." + KindTask
 const SubjectTaskRun = KindOps + ".%s." + KindTaskRun
 const SubjectPipeline = KindOps + ".%s." + KindPipeline
 const SubjectPipelineRun = KindOps + ".%s." + KindPipelineRun
-const SubjectWebhook = KindOps + ".%s." + EventWebhook
 const SubjectCheck = KindOps + ".%s." + EventCheck
+
+const SubjectWebhook = KindOps + "." + EventWebhook
 
 func GetClusterSubject(cluster, format string) string {
 	if cluster == "" {
@@ -33,11 +34,11 @@ const (
 )
 
 func IsCheckEvent(event string) bool {
-	return strings.ToLower(event) == strings.ToLower(EventCheck)
+	return strings.HasPrefix(strings.ToLower(event), strings.ToLower(EventCheck))
 }
 
 func IsWebhookEvent(event string) bool {
-	return strings.ToLower(event) == strings.ToLower(EventWebhook)
+	return strings.HasPrefix(strings.ToLower(event), strings.ToLower(EventWebhook))
 }
 
 const ActionClearDisk = "clean disk"

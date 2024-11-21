@@ -183,7 +183,7 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	}
 	err = r.commitStatus(logger, ctx, c, status, "")
 	// push event
-	go opsevent.FactoryCluster("").Publish(ctx, opsevent.EventCluster{
+	go opsevent.FactoryCluster().Publish(ctx, opsevent.EventCluster{
 		Server: c.Spec.Server,
 		Status: *status,
 	})
@@ -214,7 +214,7 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
-	go opsevent.FactoryController("").Publish(context.TODO(), opsevent.EventController{
+	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
 		Kind: opsconstants.KindCluster,
 	})
 	return ctrl.NewControllerManagedBy(mgr).

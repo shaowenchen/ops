@@ -1057,6 +1057,24 @@ paths:
       summary: Get Task
       tags:
       - Tasks
+  /api/v1/subjects/{subject}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: subject
+        in: path
+        name: subject
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: List Subjects
+      tags:
+      - Event
   /api/v1/summary:
     get:
       consumes:

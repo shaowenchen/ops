@@ -12,9 +12,10 @@ spec:
     download_url: 
       default: https://ghp.ci/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
     region: 
-      required: true
+      default: cn-north-4
     endpoint: 
       required: true
+      default: https://obs.cn-north-4.myhuaweicloud.com
     bucket:
       desc: bucket name
       required: true
@@ -41,4 +42,4 @@ spec:
       content: echo "aws_secret_access_key = ${sk}" >> velero-credentials
 
     - name: Install Velero Server
-      content: ./velero-${velero_version}-linux-amd64/velero install --image velero/velero:${velero_version} --plugins velero/velero-plugin-for-aws:v1.5.1 --provider aws  --bucket ${bucket} --namespace velero --secret-file ./velero-credentials --use-restic --backup-location-config region=${region},s3ForcePathStyle="true",s3Url=${endpoint} --snapshot-location-config region=${region}
+      content: ./velero-${velero_version}-linux-amd64/velero install --image registry.cn-hangzhou.aliyuncs.com/opshub/velero:${velero_version} --plugins registry.cn-hangzhou.aliyuncs.com/opshub/velero-plugin-for-aws:v1.5.1 --provider aws  --bucket ${bucket} --namespace velero --secret-file ./velero-credentials --use-restic --backup-location-config region=${region},s3ForcePathStyle="true",s3Url=${endpoint} --snapshot-location-config region=${region}

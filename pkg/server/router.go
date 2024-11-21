@@ -61,6 +61,10 @@ func SetupRouter(r *gin.Engine) {
 	{
 		v1Summary.GET("", GetSummary)
 	}
+	v1Subjects := r.Group("/api/v1/subjects")
+	{
+		v1Subjects.GET("/:subject", ListSubjects)
+	}
 }
 
 func SetupRouteWithoutAuth(r *gin.Engine) {
