@@ -41,7 +41,7 @@ export apppassword=apppassword
 cat <<EOF > nats-values.yaml
 config:
   jetstream:
-    enabled: false
+    enabled: true
     fileStore:
       enabled: true
       dir: /data
@@ -173,49 +173,49 @@ kubectl -n ops-system exec -it deployment/nats-box -- sh
 - 订阅消息
 
 ```bash
-nats sub ops.test --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} sub ops.test
 ```
 
 - 发布消息
 
 ```bash
-nats pub ops.test "mymessage mycontent" --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} pub ops.test "mymessage mycontent"
 ```
 
 - 创建 stream 持久化消息
 
 ```bash
-nats stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m 
 ```
 
-- 查看 stream 信息
+- 查看 stream 事件
 
 ```bash
-nats stream view ops --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} stream view ops
 ```
 
 - 查看 stream 配置
 
 ```bash
-nats stream info ops --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} stream info ops
 ```
 
 - 查看集群信息
 
 ```bash
-nats server list --user=admin --password=${adminpassword}
+nats --user=admin --password=${adminpassword} server list
 ```
 
 - 查看 stream 的 subjects
 
 ```bash
-nats stream subjects --user=app --password=${adminpassword}
+nats --user=app --password=${adminpassword} stream subjects ops
 ```
 
 - 压力测试
 
 ```bash
-nats bench benchsubject --pub 1 --sub 10 --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} bench benchsubject --pub 1 --sub 10
 ```
 
 ### 参考

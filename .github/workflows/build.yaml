@@ -1,6 +1,11 @@
 name: Build
 on:
   workflow_dispatch:
+    inputs:
+      platforms:
+        description: ""
+        required: true
+        default: "linux/amd64,linux/arm64"
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -24,7 +29,7 @@ jobs:
       - name: Build and push Controller
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ inputs.platforms }}
           push: true
           tags: docker.io/shaowenchen/ops-controller-manager:latest
           file: Dockerfile
@@ -35,7 +40,7 @@ jobs:
       - name: Build and push Server
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ inputs.platforms }}
           push: true
           tags: docker.io/shaowenchen/ops-server:latest
           file: Dockerfile-Server
@@ -46,7 +51,7 @@ jobs:
       - name: Build and push Cli
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ inputs.platforms }}
           push: true
           tags: docker.io/shaowenchen/ops-cli:latest
           file: Dockerfile-Cli

@@ -42,7 +42,7 @@ func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 				return
 			}
 		}
-		kc.BuildClients()
+		err = kc.BuildClients()
 		return
 	}
 	// try config
@@ -54,7 +54,7 @@ func NewClusterConnection(c *opsv1.Cluster) (kc *KubeConnection, err error) {
 	if err != nil {
 		return
 	}
-	kc.BuildClients()
+	err = kc.BuildClients()
 	return
 }
 
@@ -67,11 +67,17 @@ func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
 	if err != nil {
 		return
 	}
-	kc.BuildClients()
+	err = kc.BuildClients()
 	return
 }
 
 func (kc *KubeConnection) SyncTasks(isDeleted bool, objs []opsv1.Task) (err error) {
+	if kc == nil {
+		return errors.New("synctasks kube connection is nil")
+	}
+	if kc.OpsClient == nil {
+		return errors.New("synctasks ops client is nil")
+	}
 	for _, t := range objs {
 		copyObj := (&t).CopyWithOutVersion()
 		if isDeleted {
