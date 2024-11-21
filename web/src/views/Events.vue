@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
 import { useEventsStore } from '@/stores';
+import { computed, ref, watch } from 'vue';
 
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
-var searchQuery = ref('ops.*');
+var searchQuery = ref('ops.>');
 var selectedFields = ref(['subject', 'data']);
 
 async function loadData() {

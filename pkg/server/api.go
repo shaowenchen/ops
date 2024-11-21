@@ -1147,6 +1147,7 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 // @Accept json
 // @Produce json
 // @Param event path string true "event"
+// @Param        body   body      map[string]interface{}          true  "Event payload"
 // @Success 200
 // @Router /api/v1/events/{event} [post]
 func CreateEvent(c *gin.Context) {
@@ -1190,7 +1191,7 @@ func ListEvents(c *gin.Context) {
 		PageSize:  50,
 		Page:      1,
 		MaxLen:    1000,
-		Event:     "ops.*",
+		Event:     "ops.>",
 		StartTime: time.Now().Add(-time.Hour * 1).Format(time.RFC3339),
 	}
 	err := c.ShouldBindUri(&req)

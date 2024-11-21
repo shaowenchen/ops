@@ -464,6 +464,13 @@ paths:
         name: event
         required: true
         type: string
+      - description: Event payload
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
       produces:
       - application/json
       responses:

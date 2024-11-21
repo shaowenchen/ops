@@ -173,19 +173,19 @@ kubectl -n ops-system exec -it deployment/nats-box -- sh
 - Subscribe to a message
 
 ```bash
-nats sub ops.* --user=app --password=${apppassword}
+nats sub ops.test --user=app --password=${apppassword}
 ```
 
 - Publish a message
 
 ```bash
-nats pub ops.* "mymessage mycontent" --user=app --password=${apppassword}
+nats pub ops.test "mymessage mycontent" --user=app --password=${apppassword}
 ```
 
 - Create a stream to persist messages
 
 ```bash
-nats stream add ops --subjects "ops.*" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m --user=app --password=${apppassword}
+nats stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m --user=app --password=${apppassword}
 ```
 
 - View stream information
@@ -204,6 +204,12 @@ nats stream info ops --user=app --password=${apppassword}
 
 ```bash
 nats server list --user=admin --password=${adminpassword}
+```
+
+- View stream subjects
+
+```bash
+nats stream subjects --user=app --password=${adminpassword}
 ```
 
 - Perform a stress test

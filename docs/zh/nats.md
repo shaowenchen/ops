@@ -173,19 +173,19 @@ kubectl -n ops-system exec -it deployment/nats-box -- sh
 - 订阅消息
 
 ```bash
-nats sub ops.* --user=app --password=${apppassword}
+nats sub ops.test --user=app --password=${apppassword}
 ```
 
 - 发布消息
 
 ```bash
-nats pub ops.* "mymessage mycontent" --user=app --password=${apppassword}
+nats pub ops.test "mymessage mycontent" --user=app --password=${apppassword}
 ```
 
 - 创建 stream 持久化消息
 
 ```bash
-nats stream add ops --subjects "ops.*" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m --user=app --password=${apppassword}
+nats stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m --user=app --password=${apppassword}
 ```
 
 - 查看 stream 信息
@@ -204,6 +204,12 @@ nats stream info ops --user=app --password=${apppassword}
 
 ```bash
 nats server list --user=admin --password=${adminpassword}
+```
+
+- 查看 stream 的 subjects
+
+```bash
+nats stream subjects --user=app --password=${adminpassword}
 ```
 
 - 压力测试
