@@ -1148,11 +1148,10 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 // @Produce json
 // @Param event path string true "event"
 // @Success 200
-// @Router /api/v1/events/{event}/subjects/{subject} [post]
+// @Router /api/v1/events/{event} [post]
 func CreateEvent(c *gin.Context) {
 	type Params struct {
-		Event   string `uri:"event"`
-		Subject string `uri:"subject"`
+		Event string `uri:"event"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -1160,49 +1159,39 @@ func CreateEvent(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	if opsconstants.IsCheckEvent(req.Event) {
-		event := opsevent.EventCheck{}
-		err := c.ShouldBind(&event)
-		if err != nil {
-			showError(c, "fail to parse event check "+err.Error())
-			return
-		}
-		go opsevent.FactoryCheck(req.Subject).Publish(context.TODO(), event)
-		showSuccess(c)
-		return
-	} else if opsconstants.IsWebhookEvent(req.Event) {
-		event := opsevent.EventWebhook{}
-		err := c.ShouldBind(&event)
-		if err != nil {
-			showError(c, "fail to parse event webhook "+err.Error())
-			return
-		}
-		go opsevent.FactoryWebhook(req.Subject).Publish(context.TODO(), event)
-		showSuccess(c)
+
+	body := make(map[string]interface{})
+	err = c.ShouldBindJSON(&body)
+
+	if err != nil {
+		showError(c, err.Error())
 		return
 	}
-	showData(c, "unknown event")
+	go opsevent.FactoryWithServer("").WithSubject(req.Event).Publish(context.TODO(), body)
+	showSuccess(c)
 }
 
 // @Summary List Subjects
 // @Tags Event
 // @Accept json
 // @Produce json
-// @Param subject path string true "subject"
+// @Param event path string true "event"
 // @Success 200
-// @Router /api/v1/subjects/{subject} [get]
-func ListSubjects(c *gin.Context) {
+// @Router /api/v1/events/{event} [get]
+func ListEvents(c *gin.Context) {
 	type Params struct {
-		Subject   string `uri:"subject"`
+		Event     string `uri:"event"`
 		StartTime string `query:"start_time"`
 		MaxLen    uint   `query:"max_len"`
 		Page      uint   `query:"page"`
 		PageSize  uint   `query:"page_size"`
 	}
 	var req = Params{
-		PageSize: 50,
-		Page:     1,
-		MaxLen: 1000,
+		PageSize:  50,
+		Page:      1,
+		MaxLen:    1000,
+		Event:     "ops.*",
+		StartTime: time.Now().Add(-time.Hour * 1).Format(time.RFC3339),
 	}
 	err := c.ShouldBindUri(&req)
 	if err != nil {
@@ -1219,8 +1208,8 @@ func ListSubjects(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	data, err := opsevent.QueryStartTime(*client, req.Subject, startTime, req.MaxLen)
-	showData(c, paginator[string](data, req.PageSize, req.Page))
+	data, err := opsevent.QueryStartTime(*client, req.Event, startTime, req.MaxLen)
+	showData(c, paginator[opsevent.EventData](data, req.PageSize, req.Page))
 }
 
 // @Summary Login Check

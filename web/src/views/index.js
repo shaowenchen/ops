@@ -9,3 +9,4 @@ export { default as PipelineRuns } from './PipelineRuns.vue';
 export { default as Login } from './Login.vue';
 export { default as Logout } from './Logout.vue';
 export { default as Copilot } from './Copilot.vue'
+export { default as Events } from './Events.vue'

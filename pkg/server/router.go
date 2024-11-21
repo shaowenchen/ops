@@ -61,16 +61,16 @@ func SetupRouter(r *gin.Engine) {
 	{
 		v1Summary.GET("", GetSummary)
 	}
-	v1Subjects := r.Group("/api/v1/subjects")
+	v1Events := r.Group("/api/v1/events")
 	{
-		v1Subjects.GET("/:subject", ListSubjects)
+		v1Events.GET("/:event", ListEvents)
 	}
 }
 
 func SetupRouteWithoutAuth(r *gin.Engine) {
 	v1Events := r.Group("/api/v1/events")
 	{
-		v1Events.POST("/:event/subjects/:subject", CreateEvent)
+		v1Events.POST("/:event", CreateEvent)
 	}
 	r.GET("/api/v1/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }

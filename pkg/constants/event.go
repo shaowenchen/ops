@@ -2,7 +2,6 @@ package constants
 
 import (
 	"fmt"
-	"strings"
 )
 
 const Source = "https://github.com/shaowenchen/ops"
@@ -32,14 +31,6 @@ const (
 	EventWebhook = "Webhook"
 	EventUnknown = "Unknown"
 )
-
-func IsCheckEvent(event string) bool {
-	return strings.HasPrefix(strings.ToLower(event), strings.ToLower(EventCheck))
-}
-
-func IsWebhookEvent(event string) bool {
-	return strings.HasPrefix(strings.ToLower(event), strings.ToLower(EventWebhook))
-}
 
 const ActionClearDisk = "clean disk"
 const ActionGetDataSetStatus = "get dataset status"

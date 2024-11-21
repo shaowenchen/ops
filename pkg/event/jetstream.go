@@ -2,11 +2,17 @@ package event
 
 import (
 	"context"
-	"github.com/nats-io/nats.go"
 	"time"
+
+	"github.com/nats-io/nats.go"
 )
 
-func QueryStartTime(client nats.JetStreamContext, subject string, startTime time.Time, maxLen uint) (data []string, err error) {
+type EventData struct {
+	Subject string `json:"subject"`
+	Data    string `json:"data"`
+}
+
+func QueryStartTime(client nats.JetStreamContext, subject string, startTime time.Time, maxLen uint) (data []EventData, err error) {
 	sub, err := client.PullSubscribe(
 		subject,
 		"",
@@ -23,7 +29,10 @@ func QueryStartTime(client nats.JetStreamContext, subject string, startTime time
 		return nil, err
 	}
 	for _, msg := range msgs {
-		data = append(data, string(msg.Data))
+		data = append(data, EventData{
+			Subject: msg.Subject,
+			Data:    string(msg.Data),
+		})
 	}
 	return data, nil
 }

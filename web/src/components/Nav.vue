@@ -36,6 +36,7 @@ export default {
                 { navItem: 'TaskRuns', path: '/taskruns', icon: 'el-icon-s-operation' },
                 { navItem: 'Pipelines', path: '/pipelines', icon: 'el-icon-s-promotion' },
                 { navItem: 'PipelineRuns', path: '/pipelineruns', icon: 'el-icon-s-tools' },
+                { navItem: 'Events', path: '/events', icon: 'el-icon-s-release' },
                 { navItem: 'Logout', path: '/logout', icon: 'el-icon-s-release' }
             ]
         };

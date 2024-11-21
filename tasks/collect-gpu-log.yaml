@@ -28,16 +28,16 @@ spec:
         rm -rf /tmp/col-gpu-log-${random} || true
         mkdir -p /tmp/col-gpu-log-${random} && cd /tmp/col-gpu-log-${random}
         curl -sfL https://ghp.ci/https://raw.githubusercontent.com/shaowenchen/hubimage/main/ai/col_gpu_log.sh | bash
-        mv *.tar.gz ${HOSTNAME}-col-gpu-log-${random}.tar.gz
+        mv *.tar.gz ${HOST}-col-gpu-log-${random}.tar.gz
     - name: upload to s3
-      remotefile: s3://collect-gpu-log/${HOSTNAME}-col-gpu-log-${random}.tar.gz
-      localfile: /tmp/col-gpu-log-${random}/${HOSTNAME}-col-gpu-log-${random}.tar.gz
+      remotefile: s3://collect-gpu-log/${HOST}-col-gpu-log-${random}.tar.gz
+      localfile: /tmp/col-gpu-log-${random}/${HOST}-col-gpu-log-${random}.tar.gz
       direction: upload
     - name: get 2h shared link
       content: |
         curl -sfL https://ks3util-version-update.ks3-cn-beijing.ksyuncs.com/2.6.0/ks3util-linux-amd64 -o /usr/local/bin/ks3util >/dev/null
         chmod +x /usr/local/bin/ks3util
-        /usr/local/bin/ks3util sign ks3://${bucket}/collect-gpu-log/${HOSTNAME}-col-gpu-log-${random}.tar.gz --endpoint ${endpoint} --timeout 7200 -i ${ak} -k ${sk}
+        /usr/local/bin/ks3util sign ks3://${bucket}/collect-gpu-log/${HOST}-col-gpu-log-${random}.tar.gz --endpoint ${endpoint} --timeout 7200 -i ${ak} -k ${sk}
     - name: clean
       content: |
         rm -rf /tmp/col-gpu-log-${random} || true

@@ -18,14 +18,14 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'kind': '${TASK_NAME}',
+                      'kind': '${TASK}',
                       'status': status,
                       'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/check/subjects/${TASK_NAME}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/ops.${CLUSTER}.check.${TASK}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               try:

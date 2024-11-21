@@ -12,6 +12,7 @@ import {
   Login,
   Logout,
   Copilot,
+  Events
 } from "@/views";
 
 export const router = createRouter({
@@ -29,6 +30,7 @@ export const router = createRouter({
     { path: "/login", component: Login, name: "login" },
     { path: "/logout", component: Logout, name: "logout" },
     { path: "/copilot", component: Copilot, name: "copilot" },
+    { path: "/events", component: Events, name: "events" },
   ],
 });
 

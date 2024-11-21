@@ -15,7 +15,33 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/events/{event}/subjects/{subject}": {
+        "/api/v1/events/{event}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "summary": "List Subjects",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "event",
+                        "name": "event",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -951,34 +977,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "task",
                         "name": "task",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api/v1/subjects/{subject}": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Event"
-                ],
-                "summary": "List Subjects",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "subject",
-                        "name": "subject",
                         "in": "path",
                         "required": true
                     }

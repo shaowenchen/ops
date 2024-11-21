@@ -23,8 +23,8 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'host': '${HOSTNAME}',
-                      'kind': '${TASK_NAME}',
+                      'host': '${HOST}',
+                      'kind': '${TASK}',
                       'threshold': str(threshold),
                       'operator': '==',
                       'status': status,
@@ -33,7 +33,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/check/subjects/${TASK_NAME}.${HOSTNAME}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/ops.${CLUSTER}.check.${TASK}.${HOST}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def build_message(message, card_id=''):

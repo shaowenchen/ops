@@ -26,7 +26,7 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'kind': '${TASK_NAME}',
+                      'kind': '${TASK}',
                       'threshold': str(threshold),
                       'operator': '>',
                       'value': len(abnormal_pods),
@@ -36,7 +36,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/check/subjects/${TASK_NAME}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/ops.${CLUSTER}.check.${TASK}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def get_pod_status():
