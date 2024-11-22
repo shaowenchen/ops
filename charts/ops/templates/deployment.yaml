@@ -62,8 +62,10 @@ spec:
                   fieldPath: metadata.namespace
             - name: DEFAULT_RUNTIME_IMAGE
               value: registry.cn-hangzhou.aliyuncs.com/opshub/ubuntu:22.04
-            - name: CLUSTER
+            - name: EVENT_CLUSTER
               value: "default"
+            - name: EVENT_ADDRESS
+              value: http://app:mypassword@nats-headless.ops-system.svc:4222
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
