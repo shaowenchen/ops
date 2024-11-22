@@ -29,10 +29,8 @@ helm show values nats/nats
 - 设置 Nats 的基本信息
 
 ```bash
-export adminpassword=adminpassword
-export leafuser=leafuser
-export leafpassword=leafpassword
-export apppassword=apppassword
+export adminpassword=mypassword
+export apppassword=mypassword
 ```
 
 - 生成 nats-values.yaml
@@ -43,19 +41,18 @@ config:
   jetstream:
     enabled: true
     fileStore:
-      enabled: true
+      enabled: false
       dir: /data
-    pvc:
+    memoryStore:
       enabled: true
-      storageClassName: my-sc-client
+      maxSize: 1Gi
+    pvc:
+      enabled: false
+      storageClassName: my-sc
   cluster:
     enabled: true
   leafnodes:
     enabled: true
-    merge:
-      authorization:
-        user: ${leafuser}
-        password: ${leafpassword}
   merge:
     accounts:
       SYS:
@@ -85,12 +82,16 @@ reloader:
 EOF
 ```
 
-这样安装的 Nats 只是安装了 core-nats 没有持久化，如果需要持久化，需要开启 nats-jetstream，但需要配置存储。
+数据被持久化到内存中，如果需要存储到磁盘，需要设置 `fileStore`。
 
 - 安装 nats
 
 ```bash
-helm install nats nats/nats  --version 1.2.4  -f nats-values.yaml -n ops-system
+helm -n ops-system install nats nats/nats  --version 1.2.4  -f nats-values.yaml
+```
+
+```bash
+helm -n ops-system uninstall nats
 ```
 
 - 暴露 Nats 服务端口
@@ -124,7 +125,7 @@ helm repo update
 - 设置主集群的 nats 信息
 
 ```bash
-export nats_master=leafuser:leafpassword@x.x.x.x:32222
+export natsendpoint=10.8.101.244:32222
 ```
 
 - 生成 nats-values.yaml
@@ -136,9 +137,27 @@ cat <<EOF > nats-values.yaml
 config:
   leafnodes:
     enabled: true
-    merge: {"remotes": [{"urls": ["nats://${nats_master}"]}]}
+    merge:
+      remotes:
+        - urls:
+          - nats://admin:${adminpassword}@${natsendpoint}
+          account: SYS
+        - urls:
+          - nats://app:${apppassword}@${natsendpoint}
+          account: APP
   merge:
-    server_name: nats-cluster-1
+    server_name: need-to-be-unique
+    accounts:
+      SYS:
+        users:
+          - user: admin
+            password: ${adminpassword}
+      APP:
+        users:
+          - user: app
+            password: ${apppassword}
+        jetstream: true
+    system_account: SYS
 container:
   image:
     repository: nats
@@ -173,7 +192,7 @@ kubectl -n ops-system exec -it deployment/nats-box -- sh
 - 订阅消息
 
 ```bash
-nats --user=app --password=${apppassword} sub ops.test
+nats --user=app --password=${apppassword} sub "ops.>"
 ```
 
 - 发布消息
@@ -185,8 +204,10 @@ nats --user=app --password=${apppassword} pub ops.test "mymessage mycontent"
 - 创建 stream 持久化消息
 
 ```bash
-nats --user=app --password=${apppassword} stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m 
+nats --user=app --password=${apppassword} stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage memory --retention limits --max-msg-size=-1 --discard=old --replicas 1 --dupe-window=2m
 ```
+
+生产环境中，推荐使用 file 存储，并且 replica 设置为 3。
 
 - 查看 stream 事件
 
@@ -203,8 +224,10 @@ nats --user=app --password=${apppassword} stream info ops
 - 查看集群信息
 
 ```bash
-nats --user=admin --password=${adminpassword} server list
+nats --user=admin --password=${adminpassword} server report jetstream
 ```
+
+这里可以看到，主集群的信息，边缘集群的信息，以及连接的信息。
 
 - 查看 stream 的 subjects
 

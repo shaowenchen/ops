@@ -1183,15 +1183,17 @@ func ListEvents(c *gin.Context) {
 	type Params struct {
 		Event     string `uri:"event"`
 		StartTime string `query:"start_time"`
-		MaxLen    uint   `query:"max_len"`
+		MaxLength uint   `query:"max_length"`
+		TimeOut   uint   `query:"timeout"`
 		Page      uint   `query:"page"`
 		PageSize  uint   `query:"page_size"`
 	}
 	var req = Params{
 		PageSize:  50,
 		Page:      1,
-		MaxLen:    1000,
+		MaxLength: 1000,
 		Event:     "ops.>",
+		TimeOut:   1,
 		StartTime: time.Now().Add(-time.Hour * 1).Format(time.RFC3339),
 	}
 	err := c.ShouldBindUri(&req)
@@ -1209,7 +1211,7 @@ func ListEvents(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	data, err := opsevent.QueryStartTime(*client, req.Event, startTime, req.MaxLen)
+	data, err := opsevent.QueryStartTime(*client, req.Event, startTime, req.MaxLength, req.TimeOut)
 	showData(c, paginator[opsevent.EventData](data, req.PageSize, req.Page))
 }
 

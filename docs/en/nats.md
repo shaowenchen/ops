@@ -1,61 +1,58 @@
-## Nats
+## NATS
 
 ### Purpose
 
-Ops uses the Nats component to export relevant events, primarily in two categories:
+Ops uses the NATS component to export relevant events, primarily of two types:
 
-- CRD status, including the status of hosts, clusters, TaskRun, and PipelineRun.
-- Alert status information reported by scheduled inspections.
+- The status of CRDs, including the status of hosts, clusters, TaskRun, and PipelineRun.
+- Status information reported by scheduled inspections from alerts.
 
-Below is the installation and configuration for the Nats component. We use one main cluster and several edge clusters, where the edge clusters forward events to the main cluster for centralized processing.
+Below is a guide for installing and configuring the NATS component. This setup follows a model with one primary cluster and multiple edge clusters. The edge clusters forward events to the primary cluster for unified processing.
 
-### Add Helm Repo
+### Adding the Helm Repo
 
-- Add repository
+- Add the repository:
 
 ```bash
 helm repo add nats https://nats-io.github.io/k8s/helm/charts/
 helm repo update
 ```
 
-- View configurable fields
+- View configurable fields:
 
 ```bash
 helm show values nats/nats
 ```
 
-### Deploy the Main Cluster
+### Deploying the Primary Cluster
 
-- Set basic Nats information
+- Set basic NATS credentials:
 
 ```bash
-export adminpassword=adminpassword
-export leafuser=leafuser
-export leafpassword=leafpassword
-export apppassword=apppassword
+export adminpassword=mypassword
+export apppassword=mypassword
 ```
 
-- Generate `nats-values.yaml`
+- Generate `nats-values.yaml`:
 
 ```bash
 cat <<EOF > nats-values.yaml
 config:
   jetstream:
-    enabled: false
+    enabled: true
     fileStore:
-      enabled: true
+      enabled: false
       dir: /data
-    pvc:
+    memoryStore:
       enabled: true
-      storageClassName: my-sc-client
+      maxSize: 1Gi
+    pvc:
+      enabled: false
+      storageClassName: my-sc
   cluster:
     enabled: true
   leafnodes:
     enabled: true
-    merge:
-      authorization:
-        user: ${leafuser}
-        password: ${leafpassword}
   merge:
     accounts:
       SYS:
@@ -85,21 +82,27 @@ reloader:
 EOF
 ```
 
-This Nats installation only installs the core Nats without persistence. To enable persistence, Jetstream must be enabled, and storage should be configured.
+The data is persisted in memory. To store it on disk, enable the `fileStore` configuration.
 
-- Install Nats
+- Install NATS:
 
 ```bash
-helm install nats nats/nats  --version 1.2.4  -f nats-values.yaml -n ops-system
+helm -n ops-system install nats nats/nats  --version 1.2.4  -f nats-values.yaml
 ```
 
-- Expose Nats service port
+- Uninstall NATS:
+
+```bash
+helm -n ops-system uninstall nats
+```
+
+- Expose the NATS service ports:
 
 ```bash
 kubectl patch svc nats -p '{"spec":{"type":"NodePort","ports":[{"port":4222,"nodePort":32223,"targetPort":"nats"},{"port":7422,"nodePort":32222,"targetPort":"leafnodes"}]}}' -n ops-system
 ```
 
-- View load status
+- Check the workload:
 
 ```bash
 kubectl -n ops-system get pod,svc | grep nats
@@ -112,33 +115,51 @@ service/nats            NodePort    10.100.109.24    <none>        4222:32223/TC
 service/nats-headless   ClusterIP   None             <none>        4222/TCP,7422/TCP,6222/TCP,8222/TCP   15h
 ```
 
-### Deploy Edge Node
+### Deploying Edge Clusters
 
-- Add repository
+- Add the repository:
 
 ```bash
 helm repo add nats https://nats-io.github.io/k8s/helm/charts/
 helm repo update
 ```
 
-- Set Nats information for the main cluster
+- Set the primary cluster's NATS information:
 
 ```bash
-export nats_master=leafuser:leafpassword@x.x.x.x:32222
+export natsendpoint=10.8.101.244:32222
 ```
 
-- Generate `nats-values.yaml`
+- Generate `nats-values.yaml`:
 
-Note that the `server_name` for different clusters must not be the same, as this would cause duplicate connection issues.
+Note that the `server_name` must be unique for each cluster; otherwise, duplicate connection issues will arise.
 
 ```bash
 cat <<EOF > nats-values.yaml
 config:
   leafnodes:
     enabled: true
-    merge: {"remotes": [{"urls": ["nats://${nats_master}"]}]}
+    merge:
+      remotes:
+        - urls:
+          - nats://admin:${adminpassword}@${natsendpoint}
+          account: SYS
+        - urls:
+          - nats://app:${apppassword}@${natsendpoint}
+          account: APP
   merge:
-    server_name: nats-cluster-1
+    server_name: need-to-be-unique
+    accounts:
+      SYS:
+        users:
+          - user: admin
+            password: ${adminpassword}
+      APP:
+        users:
+          - user: app
+            password: ${apppassword}
+        jetstream: true
+    system_account: SYS
 container:
   image:
     repository: nats
@@ -156,70 +177,74 @@ reloader:
 EOF
 ```
 
-- Install Nats
+- Install NATS:
 
 ```bash
 helm install nats nats/nats  --version 1.2.4  -f nats-values.yaml -n ops-system
 ```
 
-### Common Nats Commands
+### Common NATS Commands
 
-- Test Nats
+- Test NATS:
 
 ```bash
 kubectl -n ops-system exec -it deployment/nats-box -- sh
 ```
 
-- Subscribe to a message
+- Subscribe to messages:
 
 ```bash
-nats sub ops.test --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} sub "ops.>"
 ```
 
-- Publish a message
+- Publish messages:
 
 ```bash
-nats pub ops.test "mymessage mycontent" --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} pub ops.test "mymessage mycontent"
 ```
 
-- Create a stream to persist messages
+- Create a stream to persist messages:
 
 ```bash
-nats stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 3 --dupe-window=2m --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage memory --retention limits --max-msg-size=-1 --discard=old --replicas 1 --dupe-window=2m
 ```
 
-- View stream information
+For production environments, it is recommended to use file storage and set replicas to 3.
+
+- View stream events:
 
 ```bash
-nats stream view ops --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} stream view ops
 ```
 
-- View stream configuration
+- View stream configuration:
 
 ```bash
-nats stream info ops --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} stream info ops
 ```
 
-- View cluster information
+- View cluster information:
 
 ```bash
-nats server list --user=admin --password=${adminpassword}
+nats --user=admin --password=${adminpassword} server report jetstream
 ```
 
-- View stream subjects
+This command displays information about the primary cluster, edge clusters, and their connections.
+
+- View the subjects of a stream:
 
 ```bash
-nats stream subjects --user=app --password=${adminpassword}
+nats --user=app --password=${adminpassword} stream subjects ops
 ```
 
-- Perform a stress test
+- Perform a benchmark:
 
 ```bash
-nats bench benchsubject --pub 1 --sub 10 --user=app --password=${apppassword}
+nats --user=app --password=${apppassword} bench benchsubject --pub 1 --sub 10
 ```
 
 ### References
 
-- [NATS JetStream Configuration](https://docs.nats.io/running-a-nats-service/configuration#jetstream)
-- [NATS Leafnode Configuration](https://docs.nats.io/running-a-nats-service/configuration/leafnodes/leafnode_conf)
-- [NATS Gateway Configuration](https://docs.nats.io/running-a-nats-service/configuration/gateways/gateway#gateway-configuration-block)
+- [JetStream Configuration](https://docs.nats.io/running-a-nats-service/configuration#jetstream)
+- [LeafNode Configuration](https://docs.nats.io/running-a-nats-service/configuration/leafnodes/leafnode_conf)
+- [Gateway Configuration](https://docs.nats.io/running-a-nats-service/configuration/gateways/gateway#gateway-configuration-block)

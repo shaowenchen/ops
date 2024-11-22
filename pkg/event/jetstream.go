@@ -12,7 +12,7 @@ type EventData struct {
 	Data    string `json:"data"`
 }
 
-func QueryStartTime(client nats.JetStreamContext, subject string, startTime time.Time, maxLen uint) (data []EventData, err error) {
+func QueryStartTime(client nats.JetStreamContext, subject string, startTime time.Time, maxLen uint, seconds uint) (data []EventData, err error) {
 	sub, err := client.PullSubscribe(
 		subject,
 		"",
@@ -22,7 +22,7 @@ func QueryStartTime(client nats.JetStreamContext, subject string, startTime time
 		return nil, err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
 	defer cancel()
 	msgs, err := sub.Fetch(int(maxLen), nats.Context(ctx))
 	if err != nil {

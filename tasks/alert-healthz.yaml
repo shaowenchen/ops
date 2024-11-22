@@ -1,0 +1,31 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+    name: alert-healthz
+    namespace: ops-system
+spec:
+    desc: alert cluster healthz
+    host: anymaster
+    steps:
+        - name: alert cluster healthz
+          content: |
+              #!/usr/bin/python
+              import os
+              import subprocess
+              import requests
+              import json
+              from datetime import datetime
+
+              def send(status, message):
+                  payload = {
+                      'kind': '${TASK}',
+                      'status': status,
+                      'message': message
+                  }
+                  headers = {
+                      'Content-Type': 'application/json'
+                  }
+                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/ops.${CLUSTER}.check.${TASK}', headers=headers, data=json.dumps(payload))
+                  print(response.text)
+
+              send('success', 'cluster healthz is ok')
