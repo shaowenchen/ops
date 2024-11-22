@@ -10,6 +10,7 @@ const (
 	KindTaskRun     = "TaskRun"
 	KindPipeline    = "Pipeline"
 	KindPipelineRun = "PipelineRun"
+	KindNamespace   = "Namespace"
 )
 
 const Host = "host"

@@ -15,11 +15,17 @@ var GlobalConfig = &ConfigOptions{}
 type ConfigOptions struct {
 	Server  ServerOptions
 	Copilot option.CopilotOption
+	Event   EventOption
 }
 
 type ServerOptions struct {
 	RunMode string
 	Token   string
+}
+
+type EventOption struct {
+	ADDRESS string
+	Cluster string
 }
 
 func LoadConfig(configPath string) {

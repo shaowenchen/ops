@@ -37,7 +37,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -231,7 +230,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	}
 	r.commitStatus(logger, ctx, tr, finallyStatus)
 	// push event
-	go opsevent.FactoryTaskRun().Publish(ctx, opsevent.EventTaskRun{
+	go opsevent.FactoryTaskRun(tr.Namespace, tr.Name).Publish(ctx, opsevent.EventTaskRun{
 		TaskRef:       tr.Spec.TaskRef,
 		Desc:          tr.Spec.Desc,
 		Variables:     tr.Spec.Variables,
@@ -243,10 +242,10 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, client client.Client, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host) (err error) {
 	// fill variables
 	vars := tr.Spec.Variables
-	vars["HOST"] = h.GetHostname()
-	vars["EVENTBUS_ADDRESS"] = r.getEventBusNodePortAddress(t.Namespace)
 	vars["TASK"] = t.Name
-	vars["CLUSTER"] = opsconstants.GetEnvCluster()
+	vars["HOST"] = h.GetHostname()
+	vars["EVENT_ADDRESS"] = opsconstants.GetEnvEventAddress()
+	vars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
 
 	// insert host labels
 	for k, v := range h.ObjectMeta.Labels {
@@ -313,7 +312,8 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	for _, node := range nodes {
 		vars := tr.Spec.Variables
 		vars["HOSTNAME"] = node.Name
-		vars["EVENTBUS_ADDRESS"] = r.getEventBusNodePortAddress(t.Namespace)
+		vars["NAEMSPACE"] = tr.Namespace
+		vars["EVENT_ADDRESS"] = opsconstants.GetEnvEventAddress()
 		vars["TASKNAME"] = t.Name
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
@@ -321,43 +321,6 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 			}, kubeOpt)
 	}
 	return
-}
-
-func (r *TaskRunReconciler) getEventBusNodePortAddress(namespace string) string {
-	// get app.kubernetes.io/name service under current namespace
-	// if svc no nodeport, set to nodeport
-	// get nodeport address and node ip address and return
-	if len(r.eventBusAddress) > 0 {
-		return r.eventBusAddress
-	}
-	// get svc
-	serviceList := &corev1.ServiceList{}
-	labelSelector := labels.SelectorFromSet(labels.Set{
-		opsconstants.LabelOpsServerKey: opsconstants.LabelOpsServerValue,
-	})
-
-	listOptions := &client.ListOptions{
-		Namespace:     namespace,
-		LabelSelector: labelSelector,
-	}
-
-	r.List(context.Background(), serviceList, listOptions)
-	if len(serviceList.Items) == 0 {
-		return ""
-	}
-	svc := serviceList.Items[0]
-	if svc.Spec.Type != corev1.ServiceTypeNodePort {
-		return ""
-	}
-	// get node
-	anyWorker, err := opsutils.GetAnyReadyNodesByReconcileClient(r.Client)
-	if err != nil {
-		return ""
-	}
-	nodeIp := opsutils.GetNodeInternalIp(anyWorker)
-	r.eventBusAddress = fmt.Sprintf("http://%s:%d", nodeIp, svc.Spec.Ports[0].NodePort)
-
-	return r.eventBusAddress
 }
 
 func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, tr *opsv1.TaskRun, status string) (err error) {
@@ -494,7 +457,7 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	// push event
-	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
+	go opsevent.FactoryController(opsconstants.KindTaskRun, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
 		Kind: opsconstants.KindTaskRun,
 	})
 	return ctrl.NewControllerManagedBy(mgr).

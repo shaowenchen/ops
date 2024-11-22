@@ -7,3 +7,6 @@ key=""
 model="gpt-3.5-turbo-16k"
 opsserver="http://myops-server.ops-system.svc"
 opstoken="ops"
+[event]
+cluster=default
+address=http://app:mypassword@nats-headless.ops-system.svc:4222

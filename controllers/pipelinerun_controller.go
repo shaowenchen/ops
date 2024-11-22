@@ -148,7 +148,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				return
 			}
 			// send event
-			err = opsevent.FactoryPipelineRun().Publish(ctx, pr)
+			err = opsevent.FactoryPipelineRun(pr.Namespace, pr.Name).Publish(ctx, pr)
 		}()
 		return ctrl.Result{}, nil
 	}
@@ -170,7 +170,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// run
 	err = r.run(logger, ctx, p, pr)
 	// send event
-	err = opsevent.FactoryPipelineRun().Publish(ctx, pr)
+	err = opsevent.FactoryPipelineRun(pr.Namespace, pr.Name).Publish(ctx, pr)
 	return ctrl.Result{}, err
 }
 
@@ -324,7 +324,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 	}
 	r.commitStatus(logger, ctx, pr, finallyStatus, "", "", nil)
 	// push event
-	go opsevent.FactoryPipelineRun().Publish(ctx, opsevent.EventPipelineRun{
+	go opsevent.FactoryPipelineRun(pr.Namespace, pr.Name).Publish(ctx, opsevent.EventPipelineRun{
 		PipelineRef:       pr.Spec.PipelineRef,
 		Desc:              pr.Spec.Desc,
 		Variables:         pr.Spec.Variables,
@@ -342,7 +342,7 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	// push event
-	go opsevent.FactoryController().Publish(context.TODO(), opsevent.EventController{
+	go opsevent.FactoryController(opsconstants.KindTaskRun, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
 		Kind: opsconstants.KindPipelineRun,
 	})
 	return ctrl.NewControllerManagedBy(mgr).

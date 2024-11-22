@@ -1149,10 +1149,11 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 // @Param event path string true "event"
 // @Param        body   body      map[string]interface{}          true  "Event payload"
 // @Success 200
-// @Router /api/v1/events/{event} [post]
+// @Router /api/v1/namespaces/{namespace}/events/{event} [post]
 func CreateEvent(c *gin.Context) {
 	type Params struct {
-		Event string `uri:"event"`
+		Event     string `uri:"event"`
+		Namespace string `uri:"namespace"`
 	}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
@@ -1168,7 +1169,7 @@ func CreateEvent(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	go opsevent.FactoryWithServer("").WithSubject(req.Event).Publish(context.TODO(), body)
+	go opsevent.Factory(GlobalConfig.Event.ADDRESS, GlobalConfig.Event.Cluster, req.Namespace, req.Event).WithSubject(req.Event).Publish(context.TODO(), body)
 	showSuccess(c)
 }
 
@@ -1206,7 +1207,7 @@ func ListEvents(c *gin.Context) {
 	if err != nil {
 		startTime = time.Now().Add(-time.Hour * 1)
 	}
-	client, err := opsevent.FactoryJetStreamClient("")
+	client, err := opsevent.FactoryJetStreamClient(GlobalConfig.Event.ADDRESS, GlobalConfig.Event.Cluster)
 	if err != nil {
 		showError(c, err.Error())
 		return

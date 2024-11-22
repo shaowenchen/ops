@@ -25,7 +25,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/events/ops.${CLUSTER}.check.${TASK}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/namespaces/${NAMESPACE}/events/check.${TASK}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               try:

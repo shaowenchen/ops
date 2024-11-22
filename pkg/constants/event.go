@@ -4,33 +4,30 @@ import (
 	"fmt"
 )
 
+const EventSetup = "setup"
+const EventStatus = "status"
+
 const Source = "https://github.com/shaowenchen/ops"
 
-const DefaultEventBusServer = "http://nats-headless.ops-system.svc:4222"
-
-const SubjectController = KindOps + ".%s." + KindController
-const SubjectHost = KindOps + ".%s." + KindHost
-const SubjectCluster = KindOps + ".%s." + KindCluster
-const SubjectTask = KindOps + ".%s." + KindTask
-const SubjectTaskRun = KindOps + ".%s." + KindTaskRun
-const SubjectPipeline = KindOps + ".%s." + KindPipeline
-const SubjectPipelineRun = KindOps + ".%s." + KindPipelineRun
-const SubjectCheck = KindOps + ".%s." + EventCheck
-
-const SubjectWebhook = KindOps + "." + EventWebhook
-
-func GetClusterSubject(cluster, format string) string {
-	if cluster == "" {
-		cluster = "default"
-	}
-	return fmt.Sprintf(format, cluster)
-}
+const SubjectController = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + KindController
+const SubjectHost = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + KindHost
+const SubjectCluster = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + KindCluster
+const SubjectTask = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + KindTask
+const SubjectTaskRun = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + KindTaskRun
+const SubjectPipeline = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + KindPipeline
+const SubjectPipelineRun = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + KindPipelineRun
+const SubjectCheck = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + EventCheck
+const SubjectWebhook = KindOps + "." + KindCluster + ".%s." + KindNamespace + ".%s." + EventWebhook
 
 const (
 	EventCheck   = "Check"
 	EventWebhook = "Webhook"
 	EventUnknown = "Unknown"
 )
+
+func GetClusterSubject(cluster, namespace, format string) string {
+	return fmt.Sprintf(format, cluster, namespace)
+}
 
 const ActionClearDisk = "clean disk"
 const ActionGetDataSetStatus = "get dataset status"
