@@ -37,7 +37,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENT_ADDRESS}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.${url}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENT_ENDPOINT}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.${url}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               try:

@@ -1169,7 +1169,7 @@ func CreateEvent(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	go opsevent.Factory(GlobalConfig.Event.ADDRESS, GlobalConfig.Event.Cluster, req.Namespace, req.Event).WithSubject(req.Event).Publish(context.TODO(), body)
+	go opsevent.Factory(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster, req.Namespace, req.Event).WithSubject(req.Event).Publish(context.TODO(), body)
 	showSuccess(c)
 }
 
@@ -1207,7 +1207,7 @@ func ListEvents(c *gin.Context) {
 	if err != nil {
 		startTime = time.Now().Add(-time.Hour * 1)
 	}
-	client, err := opsevent.FactoryJetStreamClient(GlobalConfig.Event.ADDRESS, GlobalConfig.Event.Cluster)
+	client, err := opsevent.FactoryJetStreamClient(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster)
 	if err != nil {
 		showError(c, err.Error())
 		return

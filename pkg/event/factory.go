@@ -7,7 +7,7 @@ import (
 )
 
 // for controller
-var server = opsconstants.GetEnvEventAddress()
+var endpoint = opsconstants.GetEnvEventEndpoint()
 var cluster = opsconstants.GetEnvEventCluster()
 
 func FactoryController(namespace string, subs ...string) *EventBus {
@@ -15,7 +15,7 @@ func FactoryController(namespace string, subs ...string) *EventBus {
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
 func FactoryCluster(namespace string, subs ...string) *EventBus {
@@ -23,7 +23,7 @@ func FactoryCluster(namespace string, subs ...string) *EventBus {
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
 func FactoryHost(namespace string, subs ...string) *EventBus {
@@ -31,7 +31,7 @@ func FactoryHost(namespace string, subs ...string) *EventBus {
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
 func FactoryTask(namespace string, subs ...string) *EventBus {
@@ -39,7 +39,7 @@ func FactoryTask(namespace string, subs ...string) *EventBus {
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
 func FactoryTaskRun(namespace string, subs ...string) *EventBus {
@@ -47,7 +47,7 @@ func FactoryTaskRun(namespace string, subs ...string) *EventBus {
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
 func FactoryPipeline(namespace string, subs ...string) *EventBus {
@@ -55,7 +55,7 @@ func FactoryPipeline(namespace string, subs ...string) *EventBus {
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
 func FactoryPipelineRun(namespace string, subs ...string) *EventBus {
@@ -63,31 +63,31 @@ func FactoryPipelineRun(namespace string, subs ...string) *EventBus {
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
-// for server
-func FactoryWebhook(server, cluster, namespace string, subs ...string) *EventBus {
+// for endpoint
+func FactoryWebhook(endpoint, cluster, namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectWebhook)
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
-func Factory(server, cluster, namespace string, subs ...string) *EventBus {
+func Factory(endpoint, cluster, namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectWebhook)
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
+	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
 var jetCache = make(map[string]*nats.JetStreamContext)
 
-func FactoryJetStreamClient(server, cluster string) (*nats.JetStreamContext, error) {
+func FactoryJetStreamClient(endpoint, cluster string) (*nats.JetStreamContext, error) {
 	if _, ok := jetCache[cluster]; !ok {
-		nc, err := nats.Connect(server)
+		nc, err := nats.Connect(endpoint)
 		if err != nil {
 			return nil, err
 		}

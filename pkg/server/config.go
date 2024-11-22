@@ -24,8 +24,8 @@ type ServerOptions struct {
 }
 
 type EventOption struct {
-	ADDRESS string
-	Cluster string
+	Endpoint string
+	Cluster  string
 }
 
 func LoadConfig(configPath string) {

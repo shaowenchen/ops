@@ -10,7 +10,7 @@ const (
 	EnvActiveNamespaceKey  = "ACTIVE_NAMESPACE"
 	EnvDefaultRuntimeImage = "DEFAULT_RUNTIME_IMAGE"
 	EnvEventClusterKey     = "EVENT_CLUSTER"
-	EnvEventAddressKey     = "EVENT_ADDRESS"
+	EnvEventEndpointKey    = "EVENT_ENDPOINT"
 )
 
 // just for controller
@@ -27,8 +27,8 @@ func GetEnvEventCluster() string {
 	return os.Getenv(EnvEventClusterKey)
 }
 
-func GetEnvEventAddress() string {
-	return os.Getenv(EnvEventAddressKey)
+func GetEnvEventEndpoint() string {
+	return os.Getenv(EnvEventEndpointKey)
 }
 
 func GetEnvDefaultRuntimeImage() string {

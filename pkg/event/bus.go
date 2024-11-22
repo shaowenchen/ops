@@ -22,15 +22,15 @@ type ProducerConsumerClient struct {
 	Consumer *cloudevents.Client
 }
 
-func (globalClient *GlobalEventBusClients) GetClient(server string, subject string) (*ProducerConsumerClient, error) {
+func (globalClient *GlobalEventBusClients) GetClient(endpoint string, subject string) (*ProducerConsumerClient, error) {
 	// get from cache
-	key := fmt.Sprintf("%s-%s", server, subject)
+	key := fmt.Sprintf("%s-%s", endpoint, subject)
 	globalClient.Mutex.RLock()
 	clientP, ok := globalClient.Clients[key]
 	globalClient.Mutex.RUnlock()
 	if !ok {
 		// build producer
-		producerP, err := cenats.NewSender(server, subject, cenats.NatsOptions())
+		producerP, err := cenats.NewSender(endpoint, subject, cenats.NatsOptions())
 		if err != nil {
 			return nil, err
 		}
@@ -39,7 +39,7 @@ func (globalClient *GlobalEventBusClients) GetClient(server string, subject stri
 			return nil, err
 		}
 		// build consumer
-		consumerP, err := cenats.NewConsumer(server, subject, cenats.NatsOptions())
+		consumerP, err := cenats.NewConsumer(endpoint, subject, cenats.NatsOptions())
 		if err != nil {
 			return nil, err
 		}
@@ -69,11 +69,11 @@ type EventBus struct {
 	Subject string
 }
 
-func (bus *EventBus) WithServer(server string) *EventBus {
+func (bus *EventBus) WithEndpoint(endpoint string) *EventBus {
 	if bus == nil {
 		bus = &EventBus{}
 	}
-	bus.Server = server
+	bus.Server = endpoint
 	return bus
 }
 

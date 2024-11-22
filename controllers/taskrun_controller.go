@@ -245,7 +245,7 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 	vars["TASK"] = t.Name
 	vars["TASKRUN"] = tr.Name
 	vars["HOSTNAME"] = h.GetHostname()
-	vars["EVENT_ADDRESS"] = opsconstants.GetEnvEventAddress()
+	vars["EVENT_ENDPOINT"] = opsconstants.GetEnvEventEndpoint()
 	vars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
 
 	// insert host labels
@@ -314,7 +314,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		vars := tr.Spec.Variables
 		vars["HOSTNAME"] = node.Name
 		vars["NAEMSPACE"] = tr.Namespace
-		vars["EVENT_ADDRESS"] = opsconstants.GetEnvEventAddress()
+		vars["EVENT_ENDPOINT"] = opsconstants.GetEnvEventEndpoint()
 		vars["TASK"] = t.Name
 		vars["TASKRUN"] = tr.Name
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,

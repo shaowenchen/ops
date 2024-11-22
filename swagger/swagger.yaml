@@ -455,30 +455,6 @@ paths:
       summary: List Subjects
       tags:
       - Event
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: event
-        in: path
-        name: event
-        required: true
-        type: string
-      - description: Event payload
-        in: body
-        name: body
-        required: true
-        schema:
-          additionalProperties: true
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Create Event
-      tags:
-      - Event
   /api/v1/login/check:
     get:
       consumes:
@@ -563,6 +539,31 @@ paths:
       summary: Get Cluster Nodes
       tags:
       - Clusters
+  /api/v1/namespaces/{namespace}/events/{event}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: event
+        in: path
+        name: event
+        required: true
+        type: string
+      - description: Event payload
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create Event
+      tags:
+      - Event
   /api/v1/namespaces/{namespace}/hosts:
     get:
       consumes:

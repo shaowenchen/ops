@@ -41,42 +41,6 @@ const docTemplate = `{
                         "description": "OK"
                     }
                 }
-            },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Event"
-                ],
-                "summary": "Create Event",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "event",
-                        "name": "event",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Event payload",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
             }
         },
         "/api/v1/login/check": {
@@ -199,6 +163,44 @@ const docTemplate = `{
                         "name": "cluster",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/namespaces/{namespace}/events/{event}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Create Event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "event",
+                        "name": "event",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Event payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     }
                 ],
                 "responses": {
