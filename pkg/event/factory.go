@@ -20,43 +20,49 @@ func FactoryController(namespace string, subs ...string) *EventBus {
 
 func FactoryCluster(namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectCluster)
-	subs = append(subs, namespace)
-	subject = subject + "." + strings.Join(subs, ".")
+	if len(subs) > 0 {
+		subject = subject + "." + strings.Join(subs, ".")
+	}
 	return (&EventBus{}).WithServer(server).WithSubject(subject)
 }
 
 func FactoryHost(namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectHost)
-	subs = append(subs, namespace)
-	subject = subject + "." + strings.Join(subs, ".")
+	if len(subs) > 0 {
+		subject = subject + "." + strings.Join(subs, ".")
+	}
 	return (&EventBus{}).WithServer(server).WithSubject(subject)
 }
 
 func FactoryTask(namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectTask)
-	subs = append(subs, namespace)
-	subject = subject + "." + strings.Join(subs, ".")
+	if len(subs) > 0 {
+		subject = subject + "." + strings.Join(subs, ".")
+	}
 	return (&EventBus{}).WithServer(server).WithSubject(subject)
 }
 
 func FactoryTaskRun(namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectTaskRun)
-	subs = append(subs, namespace)
-	subject = subject + "." + strings.Join(subs, ".")
+	if len(subs) > 0 {
+		subject = subject + "." + strings.Join(subs, ".")
+	}
 	return (&EventBus{}).WithServer(server).WithSubject(subject)
 }
 
 func FactoryPipeline(namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectPipeline)
-	subs = append(subs, namespace)
-	subject = subject + "." + strings.Join(subs, ".")
+	if len(subs) > 0 {
+		subject = subject + "." + strings.Join(subs, ".")
+	}
 	return (&EventBus{}).WithServer(server).WithSubject(subject)
 }
 
 func FactoryPipelineRun(namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectPipelineRun)
-	subs = append(subs, namespace)
-	subject = subject + "." + strings.Join(subs, ".")
+	if len(subs) > 0 {
+		subject = subject + "." + strings.Join(subs, ".")
+	}
 	return (&EventBus{}).WithServer(server).WithSubject(subject)
 }
 
@@ -77,14 +83,16 @@ func Factory(server, cluster, namespace string, subs ...string) *EventBus {
 	return (&EventBus{}).WithServer(server).WithSubject(subject)
 }
 
+var jetCache = make(map[string]*nats.JetStreamContext)
+
 func FactoryJetStreamClient(server, cluster string) (*nats.JetStreamContext, error) {
-	nc, err := nats.Connect(server)
-	if err != nil {
-		return nil, err
+	if _, ok := jetCache[cluster]; !ok {
+		nc, err := nats.Connect(server)
+		if err != nil {
+			return nil, err
+		}
+		js, _ := nc.JetStream()
+		jetCache[cluster] = &js
 	}
-	js, _ := nc.JetStream()
-	if err == nil {
-		return &js, nil
-	}
-	return nil, err
+	return jetCache[cluster], nil
 }
