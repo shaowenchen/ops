@@ -20,15 +20,15 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'host': '${HOST}',
-                      'kind': '${TASK}',
+                      'host': '${HOSTNAME}',
+                      'kind': '${TASKRUN}',
                       'status': status,
                       'message': message
                   }
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/namespaces/${NAMESPACE}/events/check.${TASK}.${HOST}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENT_ADDRESS}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.${HOSTNAME}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def get_config_maps(namespace="kube-system"):

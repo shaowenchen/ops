@@ -55,7 +55,7 @@ type EventWebhook struct {
 	WebhookUrl string `json:"webhookUrl,omitempty" yaml:"webhookUrl,omitempty"`
 }
 
-type EventCheck struct {
+type EventTaskRunReport struct {
 	Host      string `json:"host,omitempty" yaml:"host,omitempty"`
 	Kind      string `json:"kind,omitempty" yaml:"kind,omitempty"`
 	Threshold string `json:"threshold,omitempty" yaml:"threshold,omitempty"`
@@ -65,7 +65,7 @@ type EventCheck struct {
 	Message   string `json:"message,omitempty" yaml:"message,omitempty"`
 }
 
-func (e EventCheck) IsAlert() bool {
+func (e EventTaskRunReport) IsAlert() bool {
 	return e.Status == "alert"
 }
 
@@ -78,23 +78,23 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	var eventType string
 	switch data.(type) {
 	case *EventController, EventController:
-		eventType = opsconstants.KindController
+		eventType = opsconstants.Controllers
 	case *EventHost, EventHost:
-		eventType = opsconstants.KindHost
+		eventType = opsconstants.Hosts
 	case *EventCluster, EventCluster:
-		eventType = opsconstants.KindCluster
+		eventType = opsconstants.Clusters
 	case *EventTask, EventTask:
-		eventType = opsconstants.KindTask
+		eventType = opsconstants.Tasks
 	case *EventTaskRun, EventTaskRun:
-		eventType = opsconstants.KindTaskRun
+		eventType = opsconstants.TaskRuns
 	case *EventPipeline, EventPipeline:
-		eventType = opsconstants.KindPipeline
+		eventType = opsconstants.Pipelines
 	case *EventPipelineRun, EventPipelineRun:
-		eventType = opsconstants.KindPipelineRun
+		eventType = opsconstants.PipelineRun
 	case *EventWebhook, EventWebhook:
 		eventType = opsconstants.EventWebhook
-	case *EventCheck, EventCheck:
-		eventType = opsconstants.EventCheck
+	case *EventTaskRunReport, EventTaskRunReport:
+		eventType = opsconstants.EventTaskRunReport
 	default:
 		eventType = opsconstants.EventUnknown
 	}

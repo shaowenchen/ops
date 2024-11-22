@@ -21,6 +21,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -174,6 +175,12 @@ func (r *PipelineReconciler) syncResource(logger *opslog.Logger, ctx context.Con
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *PipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	namespace, err := opsconstants.GetCurrentNamespace()
+	if err == nil {
+		go opsevent.FactoryController(namespace, opsconstants.Pipelines, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+			Kind: opsconstants.Pipelines,
+		})
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Pipeline{}).
 		WithEventFilter(

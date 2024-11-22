@@ -61,14 +61,6 @@ func FactoryPipelineRun(namespace string, subs ...string) *EventBus {
 }
 
 // for server
-func FactoryCheck(server, cluster, namespace string, subs ...string) *EventBus {
-	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectCheck)
-	if len(subs) > 0 {
-		subject = subject + "." + strings.Join(subs, ".")
-	}
-	return (&EventBus{}).WithServer(server).WithSubject(subject)
-}
-
 func FactoryWebhook(server, cluster, namespace string, subs ...string) *EventBus {
 	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectWebhook)
 	if len(subs) > 0 {

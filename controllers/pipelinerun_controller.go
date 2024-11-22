@@ -335,16 +335,20 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// push event
+	namespace, err := opsconstants.GetCurrentNamespace()
+	if err == nil {
+		go opsevent.FactoryController(namespace, opsconstants.PipelineRuns, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+			Kind: opsconstants.PipelineRuns,
+		})
+	}
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.PipelineRun{}, ".spec.pipelineRef", func(rawObj client.Object) []string {
 		pr := rawObj.(*opsv1.PipelineRun)
 		return []string{pr.Spec.PipelineRef}
 	}); err != nil {
 		return err
 	}
-	// push event
-	go opsevent.FactoryController(opsconstants.KindTaskRun, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
-		Kind: opsconstants.KindPipelineRun,
-	})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&crdv1.PipelineRun{}).
 		WithEventFilter(

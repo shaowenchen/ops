@@ -214,9 +214,12 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
-	go opsevent.FactoryController(opsconstants.KindCluster, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
-		Kind: opsconstants.KindCluster,
-	})
+	namespace, err := opsconstants.GetCurrentNamespace()
+	if err == nil {
+		go opsevent.FactoryController(namespace, opsconstants.Clusters, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+			Kind: opsconstants.Hosts,
+		})
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Cluster{}).
 		WithOptions(controller.Options{

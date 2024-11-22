@@ -26,7 +26,7 @@ spec:
 
               def send(status, message):
                   payload = {
-                      'kind': '${TASK}',
+                      'kind': '${TASKRUN}',
                       'threshold': str(threshold),
                       'operator': '>',
                       'value': len(abnormal_pods),
@@ -36,7 +36,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/namespaces/${NAMESPACE}/events/check.${TASK}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENT_ADDRESS}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def get_pod_status():

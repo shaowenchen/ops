@@ -90,9 +90,12 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 // SetupWithManager sets up the controller with the Manager.
 func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
-	go opsevent.FactoryController(opsconstants.KindHost, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
-		Kind: opsconstants.KindHost,
-	})
+	namespace, err := opsconstants.GetCurrentNamespace()
+	if err == nil {
+		go opsevent.FactoryController(namespace, opsconstants.Hosts, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+			Kind: opsconstants.Hosts,
+		})
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Host{}).
 		WithOptions(controller.Options{

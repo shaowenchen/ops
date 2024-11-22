@@ -142,7 +142,7 @@ func NewPipelineRun(p *Pipeline) *PipelineRun {
 		pr.OwnerReferences = []metav1.OwnerReference{
 			{
 				APIVersion: opsconstants.APIVersion,
-				Kind:       opsconstants.KindPipeline,
+				Kind:       opsconstants.Pipeline,
 				Name:       p.Name,
 				UID:        p.UID,
 			},

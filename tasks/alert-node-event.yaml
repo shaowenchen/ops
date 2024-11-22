@@ -19,13 +19,13 @@ spec:
 
               def send(status, message):
                   payload = {
-                      "hostname": "${HOST}",
-                      "kind": "${TASK}",
+                      "hostname": "${HOSTNAME}",
+                      "kind": "${TASKRUN}",
                       "status": status,
                       "message": message,
                   }
                   headers = {"Content-Type": "application/json"}
-                  response = requests.post('${EVENTBUS_ADDRESS}/api/v1/namespaces/${NAMESPACE}/events/check.${TASK}.${HOST}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${EVENT_ADDRESS}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.${HOSTNAME}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
 

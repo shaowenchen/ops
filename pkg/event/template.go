@@ -25,11 +25,11 @@ func (e EventHost) GetDiskUsageAlertMessage(t time.Time) string {
 	return result.String()
 }
 
-func (e EventCheck) GetAlertMessageWithAction(t time.Time, action string) string {
+func (e EventTaskRunReport) GetAlertMessageWithAction(t time.Time, action string) string {
 	return e.GetAlertMessage(t) + fmt.Sprintf("action: %s  \n", action)
 }
 
-func (e EventCheck) GetAlertMessage(t time.Time) string {
+func (e EventTaskRunReport) GetAlertMessage(t time.Time) string {
 	var result strings.Builder
 	appendField := func(label, value string) {
 		if value != "" {

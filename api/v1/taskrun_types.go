@@ -100,7 +100,7 @@ func NewTaskRun(t *Task) TaskRun {
 		tr.OwnerReferences = []metav1.OwnerReference{
 			{
 				APIVersion: opsconstants.APIVersion,
-				Kind:       opsconstants.KindTask,
+				Kind:       opsconstants.Task,
 				Name:       t.Name,
 				UID:        t.UID,
 			},
@@ -117,7 +117,7 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: opsconstants.APIVersion,
-					Kind:       opsconstants.KindPipelineRun,
+					Kind:       opsconstants.PipelineRun,
 					Name:       pr.Name,
 					UID:        pr.UID,
 				},

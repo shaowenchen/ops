@@ -31,6 +31,7 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 )
@@ -110,6 +111,13 @@ func (r *TaskReconciler) syncResource(logger *opslog.Logger, ctx context.Context
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// push event
+	namespace, err := opsconstants.GetCurrentNamespace()
+	if err == nil {
+		go opsevent.FactoryController(namespace, opsconstants.Tasks, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+			Kind: opsconstants.Tasks,
+		})
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.Task{}).
 		WithEventFilter(

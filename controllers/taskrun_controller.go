@@ -243,7 +243,8 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 	// fill variables
 	vars := tr.Spec.Variables
 	vars["TASK"] = t.Name
-	vars["HOST"] = h.GetHostname()
+	vars["TASKRUN"] = tr.Name
+	vars["HOSTNAME"] = h.GetHostname()
 	vars["EVENT_ADDRESS"] = opsconstants.GetEnvEventAddress()
 	vars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
 
@@ -314,7 +315,8 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		vars["HOSTNAME"] = node.Name
 		vars["NAEMSPACE"] = tr.Namespace
 		vars["EVENT_ADDRESS"] = opsconstants.GetEnvEventAddress()
-		vars["TASKNAME"] = t.Name
+		vars["TASK"] = t.Name
+		vars["TASKRUN"] = tr.Name
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
 				Variables: vars,
@@ -450,16 +452,19 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// push event
+	namespace, err := opsconstants.GetCurrentNamespace()
+	if err == nil {
+		go opsevent.FactoryController(namespace, opsconstants.TaskRuns, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+			Kind: opsconstants.TaskRuns,
+		})
+	}
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.TaskRun{}, ".spec.taskRef", func(rawObj client.Object) []string {
 		tr := rawObj.(*opsv1.TaskRun)
 		return []string{tr.Spec.TaskRef}
 	}); err != nil {
 		return err
 	}
-	// push event
-	go opsevent.FactoryController(opsconstants.KindTaskRun, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
-		Kind: opsconstants.KindTaskRun,
-	})
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.TaskRun{}).
 		WithEventFilter(
