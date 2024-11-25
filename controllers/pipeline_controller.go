@@ -111,21 +111,21 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 	// check cluster variables
 	findClusterVariable := false
 	for _, v := range obj.Spec.Variables {
-		if v.Value == opsconstants.Cluster {
+		if v.Value == "cluster" {
 			findClusterVariable = true
 			break
 		}
 	}
 	if !findClusterVariable {
 		changed = true
-		obj.Spec.Variables[opsconstants.Cluster] = opsv1.Variable{
-			Desc: opsconstants.Cluster,
+		obj.Spec.Variables["cluster"] = opsv1.Variable{
+			Desc: "cluster",
 		}
 	}
 	// check host variables
 	findHostVariable := false
 	for _, v := range obj.Spec.Variables {
-		if v.Value == opsconstants.Host {
+		if v.Value == "host" {
 			findHostVariable = true
 			break
 		}
@@ -134,8 +134,8 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 		for _, t := range taskList {
 			if !opsconstants.IsAnyKubeNode(t.Spec.Host) {
 				changed = true
-				obj.Spec.Variables[opsconstants.Host] = opsv1.Variable{
-					Desc:     opsconstants.Host,
+				obj.Spec.Variables["host"] = opsv1.Variable{
+					Desc:     "host",
 					Required: true,
 				}
 				break

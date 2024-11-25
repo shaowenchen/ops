@@ -37,7 +37,7 @@ spec:
     - jsonPath: .status.heartTime
       name: HeartTime
       type: date
-    - jsonPath: .status.heartstatus
+    - jsonPath: .status.heartStatus
       name: HeartStatus
       type: string
     name: v1
@@ -73,10 +73,10 @@ spec:
             properties:
               certNotAfterDays:
                 type: integer
+              heartStatus:
+                type: string
               heartTime:
                 format: date-time
-                type: string
-              heartstatus:
                 type: string
               node:
                 type: integer

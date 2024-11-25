@@ -43,7 +43,7 @@ type ClusterStatus struct {
 	Pod              int          `json:"pod,omitempty" yaml:"pod,omitempty"`
 	RunningPod       int          `json:"runningPod,omitempty" yaml:"runningPod,omitempty"`
 	HeartTime        *metav1.Time `json:"heartTime,omitempty" yaml:"heartTime,omitempty"`
-	HeartStatus      string       `json:"heartstatus,omitempty" yaml:"heartstatus,omitempty"`
+	HeartStatus      string       `json:"heartStatus,omitempty" yaml:"heartStatus,omitempty"`
 	CertNotAfterDays int          `json:"certNotAfterDays,omitempty" yaml:"certNotAfterDays,omitempty"`
 }
 
@@ -57,7 +57,7 @@ type ClusterStatus struct {
 // +kubebuilder:printcolumn:name="TotalPod",type=string,JSONPath=`.status.pod`
 // +kubebuilder:printcolumn:name="CertDays",type=string,JSONPath=`.status.certNotAfterDays`
 // +kubebuilder:printcolumn:name="HeartTime",type=date,JSONPath=`.status.heartTime`
-// +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartstatus`
+// +kubebuilder:printcolumn:name="HeartStatus",type=string,JSONPath=`.status.heartStatus`
 type Cluster struct {
 	metav1.TypeMeta   `json:",inline" yaml:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`

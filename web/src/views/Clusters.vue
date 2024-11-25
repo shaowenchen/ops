@@ -1,7 +1,8 @@
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useClustersStore } from '@/stores';
 import { router } from '../router';
+import { formatObject } from '@/utils/common';
 
 var dataList = ref([]);
 var currentPage = ref(1);
@@ -21,7 +22,8 @@ const allFields = [
     { value: 'status.heartTime', label: 'HeartTime' },
     { value: 'status.heartStatus', label: 'HeartStatus' }
 ];
-var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'status.version', 'status.node', 'status.certNotAfterDays', 'status.heartTime']);
+
+var selectedFields = ref(['metadata.namespace', 'metadata.name', 'spec.desc', 'status.version', 'status.node', 'status.certNotAfterDays', 'status.heartStatus', 'status.heartTime']);
 
 async function loadData() {
     const store = useClustersStore();
@@ -43,10 +45,6 @@ function onPageSizeChange() {
 function run(item) {
     router.push({ name: 'cluster-details', params: { cluster: item.metadata.name } });
 }
-
-const displayedColumns = computed(() => {
-    return allFields.filter(field => selectedFields.value.includes(field.value));
-});
 </script>
 
 <template>
@@ -58,8 +56,12 @@ const displayedColumns = computed(() => {
             </el-select>
         </div>
         <el-table :data="dataList" border size="default">
-            <el-table-column v-for="column in displayedColumns" :key="column.value" :prop="column.value"
-                :label="column.label" />
+            <el-table-column v-for="field in selectedFields" :key="field" :prop="field"
+                :label="field.split('.').pop().charAt(0).toUpperCase() + field.split('.').pop().slice(1)">
+                <template #default="{ row }">
+                    <span v-html="formatObject(row, field)"></span>
+                </template>
+            </el-table-column>
             <el-table-column label="Actions">
                 <template #default="scope">
                     <el-button type="primary" @click="run(scope.row)">Detail</el-button>

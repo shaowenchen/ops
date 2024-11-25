@@ -2,14 +2,16 @@ package event
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
+	event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats.go"
 )
 
 type EventData struct {
-	Subject string `json:"subject"`
-	Data    string `json:"data"`
+	Subject string      `json:"subject"`
+	Event   event.Event `json:"event"`
 }
 
 func QueryStartTime(client nats.JetStreamContext, subject string, startTime time.Time, maxLen uint, seconds uint) (data []EventData, err error) {
@@ -29,9 +31,14 @@ func QueryStartTime(client nats.JetStreamContext, subject string, startTime time
 		return nil, err
 	}
 	for _, msg := range msgs {
+		e := event.Event{}
+		err := json.Unmarshal(msg.Data, &e)
+		if err != nil {
+			continue
+		}
 		data = append(data, EventData{
 			Subject: msg.Subject,
-			Data:    string(msg.Data),
+			Event:   e,
 		})
 	}
 	return data, nil
