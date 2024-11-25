@@ -1202,6 +1202,10 @@ func ListEvents(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
+	// set more resonable max length and timeout
+	if req.MaxLength < 1000 {
+		req.TimeOut = 5
+	}
 	// 2006-01-02T15:04:05Z07:00
 	startTime, err := time.Parse(time.RFC3339, req.StartTime)
 	if err != nil {

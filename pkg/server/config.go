@@ -13,19 +13,19 @@ import (
 var GlobalConfig = &ConfigOptions{}
 
 type ConfigOptions struct {
-	Server  ServerOptions
-	Copilot option.CopilotOption
-	Event   EventOption
+	Server  ServerOptions        `mapstructure:"server"`
+	Copilot option.CopilotOption `mapstructure:"copilot"`
+	Event   EventOption          `mapstructure:"event"`
 }
 
 type ServerOptions struct {
-	RunMode string
-	Token   string
+	RunMode string `mapstructure:"runmode"`
+	Token   string `mapstructure:"token"`
 }
 
 type EventOption struct {
-	Endpoint string
-	Cluster  string
+	Endpoint string `mapstructure:"endpoint"`
+	Cluster  string `mapstructure:"cluster"`
 }
 
 func LoadConfig(configPath string) {

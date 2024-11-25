@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -225,13 +226,12 @@ func GetAllReadyNodesByReconcileClient(client runtimeClient.Client) (nodes *core
 
 func GetAnyReadyNodesByReconcileClient(client runtimeClient.Client) (node *corev1.Node, err error) {
 	nodes, err := GetAllReadyNodesByReconcileClient(client)
-	if err != nil {
+	if err != nil || len(nodes.Items) == 0 {
 		return
 	}
-	if len(nodes.Items) > 0 {
-		node = &nodes.Items[0]
-	}
-	return
+	// random select a ready node
+	random := rand.Intn(len(nodes.Items))
+	return &nodes.Items[random], nil
 }
 
 func GetNodeByClient(client *kubernetes.Clientset, nodeName string) (node *corev1.Node, err error) {
