@@ -90,10 +90,9 @@ func ListHosts(c *gin.Context) {
 	} else {
 		newHosts = hostList.Items
 	}
-	// clear sensitive info
+	// clear info
 	for i := range newHosts {
-		newHosts[i].Spec.PrivateKey = ""
-		newHosts[i].Spec.Password = ""
+		newHosts[i].Cleaned()
 	}
 	showData(c, paginator[opsv1.Host](newHosts, req.PageSize, req.Page))
 }
@@ -157,9 +156,9 @@ func ListClusters(c *gin.Context) {
 	} else {
 		newCluster = clusterList.Items
 	}
-	// clear sensitive info
+	// clear info
 	for i := range newCluster {
-		newCluster[i].ClearSensitiveInfo()
+		newCluster[i].Cleaned()
 	}
 	showData(c, paginator[opsv1.Cluster](newCluster, req.PageSize, req.Page))
 }
@@ -203,8 +202,8 @@ func GetCluster(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	// hide sensitive info
-	cluster.ClearSensitiveInfo()
+	// hide info
+	cluster.Cleaned()
 	showData(c, cluster)
 }
 
@@ -1178,19 +1177,23 @@ func CreateEvent(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param event path string true "event"
+// @Parm max_length query int false "max_length"
+// @Param TimeOut query int false "timeout"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
 // @Success 200
 // @Router /api/v1/events/{event} [get]
 func ListEvents(c *gin.Context) {
 	type Params struct {
 		Event     string `uri:"event"`
-		StartTime string `query:"start_time"`
-		MaxLength uint   `query:"max_length"`
-		TimeOut   uint   `query:"timeout"`
-		Page      uint   `query:"page"`
-		PageSize  uint   `query:"page_size"`
+		StartTime string `form:"start_time"`
+		MaxLength uint   `form:"max_length"`
+		TimeOut   uint   `form:"timeout"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
 	}
 	var req = Params{
-		PageSize:  50,
+		PageSize:  10,
 		Page:      1,
 		MaxLength: 1000,
 		Event:     "ops.>",
@@ -1198,6 +1201,11 @@ func ListEvents(c *gin.Context) {
 		StartTime: time.Now().Add(-time.Hour * 1).Format(time.RFC3339),
 	}
 	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
 	if err != nil {
 		showError(c, err.Error())
 		return

@@ -24,7 +24,7 @@ const allFields = [
     { value: 'status.heartTime', label: 'HeartTime' },
     { value: 'status.heartStatus', label: 'HeartStatus' }
 ];
-var selectedFields = ref(['metadata.namespace', 'metadata.name', 'status.hostname', 'status.acceleratorVendor', 'status.heartstatus', 'status.heartTime']);
+var selectedFields = ref(['metadata.namespace', 'metadata.name', 'status.hostname', 'status.acceleratorVendor', 'status.heartStatus', 'status.heartTime']);
 
 async function loadData() {
     const store = useHostsStore();

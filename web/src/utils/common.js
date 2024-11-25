@@ -18,11 +18,16 @@ function formatObject(row, field) {
       row
     );
 
-  if (field === "spec.variables" || field === "spec.tasks") {
-    return JSON.stringify(value, null, 4);
-  } else if (field === "status.heartTime") {
+  if (field === "spec.tasks") {
+    if (Array.isArray(value)) {
+      const taskRefs = value
+        .map((item) => item.taskRef)
+        .filter(Boolean)
+        .join(", ");
+      return taskRefs || "No taskRef found";
+    }
+  } else if (field === "status.heartTime" || field === "status.startTime" || field === "event.time") {
     const date = new Date(value);
-
     if (!isNaN(date)) {
       const options = {
         month: "2-digit",
@@ -39,8 +44,12 @@ function formatObject(row, field) {
     } else {
       return "Invalid Date";
     }
+  } else if (field == "spec.variables") {
+    if (typeof value === "object" && value !== null) {
+      const keys = Object.keys(value).join(", ");
+      return keys;
+    }
   }
-
   return value;
 }
 

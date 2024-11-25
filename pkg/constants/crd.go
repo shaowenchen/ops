@@ -9,6 +9,7 @@ const (
 	Host         = "Host"
 	Hosts        = "Hosts"
 	ClusterLower = "cluster"
+	Cluster      = "Cluster"
 	Clusters     = "Clusters"
 	Task         = "Task"
 	Tasks        = "Tasks"

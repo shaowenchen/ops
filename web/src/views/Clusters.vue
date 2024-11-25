@@ -62,9 +62,9 @@ function run(item) {
                     <span v-html="formatObject(row, field)"></span>
                 </template>
             </el-table-column>
-            <el-table-column label="Actions">
+            <el-table-column label="Nodes">
                 <template #default="scope">
-                    <el-button type="primary" @click="run(scope.row)">Detail</el-button>
+                    <el-button type="primary" @click="run(scope.row)">View</el-button>
                 </template>
             </el-table-column>
         </el-table>

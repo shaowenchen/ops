@@ -66,7 +66,7 @@ type Cluster struct {
 	Status ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
-func (c *Cluster) ClearSensitiveInfo() {
+func (c *Cluster) Cleaned() {
 	if c == nil {
 		return
 	}

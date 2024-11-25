@@ -105,6 +105,19 @@ func (obj *Host) FilledByOption(hostOpt option.HostOption) *Host {
 	return obj
 }
 
+func (h *Host) Cleaned() {
+	if h == nil {
+		return
+	}
+	h.Spec.Password = ""
+	if h.ObjectMeta.Annotations != nil {
+		if _, ok := h.ObjectMeta.Annotations["kubectl.kubernetes.io/last-applied-configuration"]; ok {
+			delete(h.ObjectMeta.Annotations, "kubectl.kubernetes.io/last-applied-configuration")
+		}
+	}
+	h.ObjectMeta.ManagedFields = nil
+}
+
 func (h *Host) GetUniqueKey() string {
 	return types.NamespacedName{
 		Namespace: h.Namespace,

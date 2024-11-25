@@ -16,15 +16,10 @@ const allFields = [
     { value: 'subject', label: 'Subject' },
     { value: 'event.type', label: 'Type' },
     { value: 'event.datacontenttype', label: 'DataContentType' },
-    { value: 'event.data', label: 'Data' },
     { value: 'event.time', label: 'Time' }
 ];
 
-const displayedColumns = computed(() => {
-    return allFields.filter(field => selectedFields.value.includes(field.value));
-});
-
-var selectedFields = ref(['event.id', 'subject', 'event.type', 'event.datacontenttype', 'event.data', 'event.time']);
+var selectedFields = ref(['event.id', 'subject', 'event.type', 'event.time']);
 
 function view(item) {
     dialogVisible.value = true;
@@ -79,7 +74,7 @@ loadData();
             </el-table-column>
             <el-table-column label="Actions">
                 <template #default="scope">
-                    <el-button type="primary" @click="view(scope.row)">Detais</el-button>
+                    <el-button type="primary" @click="view(scope.row)">View</el-button>
                 </template>
             </el-table-column>
         </el-table>
