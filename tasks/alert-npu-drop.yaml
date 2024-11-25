@@ -34,7 +34,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${EVENT_ENDPOINT}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.${HOSTNAME}', headers=headers, data=json.dumps(payload))
+                  response = requests.post('${OPSSERVER_ENDPOINT}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.${HOSTNAME}', headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               def build_message(message, card_id=''):

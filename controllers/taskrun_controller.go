@@ -37,6 +37,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -49,11 +50,11 @@ import (
 // TaskRunReconciler reconciles a TaskRun object
 type TaskRunReconciler struct {
 	client.Client
-	Scheme          *runtime.Scheme
-	crontabMap      map[string]cron.EntryID
-	cron            *cron.Cron
-	clearCron       *cron.Cron
-	eventBusAddress string
+	Scheme            *runtime.Scheme
+	crontabMap        map[string]cron.EntryID
+	cron              *cron.Cron
+	clearCron         *cron.Cron
+	opsserverEndpoint string
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
@@ -245,7 +246,7 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 	vars["TASK"] = t.Name
 	vars["TASKRUN"] = tr.Name
 	vars["HOSTNAME"] = h.GetHostname()
-	vars["EVENT_ENDPOINT"] = opsconstants.GetEnvEventEndpoint()
+	vars["OPSSERVER_ENDPOINT"] = r.getEventBusNodePortAddress(t.Namespace)
 	vars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
 
 	// insert host labels
@@ -314,7 +315,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		vars := tr.Spec.Variables
 		vars["HOSTNAME"] = node.Name
 		vars["NAEMSPACE"] = tr.Namespace
-		vars["EVENT_ENDPOINT"] = opsconstants.GetEnvEventEndpoint()
+		vars["OPSSERVER_ENDPOINT"] = r.getEventBusNodePortAddress(t.Namespace)
 		vars["TASK"] = t.Name
 		vars["TASKRUN"] = tr.Name
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
@@ -323,6 +324,43 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 			}, kubeOpt)
 	}
 	return
+}
+
+func (r *TaskRunReconciler) getEventBusNodePortAddress(namespace string) string {
+	// get app.kubernetes.io/name service under current namespace
+	// if svc no nodeport, set to nodeport
+	// get nodeport address and node ip address and return
+	if len(r.opsserverEndpoint) > 0 {
+		return r.opsserverEndpoint
+	}
+	// get svc
+	serviceList := &corev1.ServiceList{}
+	labelSelector := labels.SelectorFromSet(labels.Set{
+		opsconstants.LabelOpsServerKey: opsconstants.LabelOpsServerValue,
+	})
+
+	listOptions := &client.ListOptions{
+		Namespace:     namespace,
+		LabelSelector: labelSelector,
+	}
+
+	r.List(context.Background(), serviceList, listOptions)
+	if len(serviceList.Items) == 0 {
+		return ""
+	}
+	svc := serviceList.Items[0]
+	if svc.Spec.Type != corev1.ServiceTypeNodePort {
+		return ""
+	}
+	// get node
+	anyWorker, err := opsutils.GetAnyReadyNodesByReconcileClient(r.Client)
+	if err != nil {
+		return ""
+	}
+	nodeIp := opsutils.GetNodeInternalIp(anyWorker)
+	r.opsserverEndpoint = fmt.Sprintf("http://%s:%d", nodeIp, svc.Spec.Ports[0].NodePort)
+
+	return r.opsserverEndpoint
 }
 
 func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, tr *opsv1.TaskRun, status string) (err error) {
