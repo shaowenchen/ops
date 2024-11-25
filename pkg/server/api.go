@@ -1172,7 +1172,7 @@ func CreateEvent(c *gin.Context) {
 	showSuccess(c)
 }
 
-// @Summary List Subjects
+// @Summary Get Events
 // @Tags Event
 // @Accept json
 // @Produce json
@@ -1183,7 +1183,7 @@ func CreateEvent(c *gin.Context) {
 // @Param page_size query int false "page_size"
 // @Success 200
 // @Router /api/v1/events/{event} [get]
-func ListEvents(c *gin.Context) {
+func GetEvents(c *gin.Context) {
 	type Params struct {
 		Event     string `uri:"event"`
 		StartTime string `form:"start_time"`
@@ -1226,6 +1226,35 @@ func ListEvents(c *gin.Context) {
 	}
 	data, err := opsevent.QueryStartTime(*client, req.Event, startTime, req.MaxLength, req.TimeOut)
 	showData(c, paginator[opsevent.EventData](data, req.PageSize, req.Page))
+}
+
+// @Summary List Events
+// @Tags Event
+// @Accept json
+// @Produce json
+// @Param search query string false "search"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Success 200
+// @Router /api/v1/events [get]
+func ListEvents(c *gin.Context) {
+	type Params struct {
+		Search   string `form:"search"`
+		Page     uint   `form:"page"`
+		PageSize uint   `form:"page_size"`
+	}
+	var req = Params{
+		Search:   "",
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	data, err := opsevent.ListSubjects(GlobalConfig.Event.Endpoint, opsconstants.OpsStreamName, req.Search)
+	showData(c, paginator[string](data, req.PageSize, req.Page))
 }
 
 // @Summary Login Check

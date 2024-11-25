@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+const OpsStreamName = "ops"
+
 const EventSetup = "setup"
 const EventStatus = "status"
 

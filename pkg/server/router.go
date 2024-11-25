@@ -63,7 +63,8 @@ func SetupRouter(r *gin.Engine) {
 	}
 	v1Events := r.Group("/api/v1/events")
 	{
-		v1Events.GET("/:event", ListEvents)
+		v1Events.GET("", ListEvents)
+		v1Events.GET("/:event", GetEvents)
 	}
 }
 

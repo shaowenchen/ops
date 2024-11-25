@@ -437,6 +437,31 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/events:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search
+        in: query
+        name: search
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: page_size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: List Events
+      tags:
+      - Event
   /api/v1/events/{event}:
     get:
       consumes:
@@ -447,12 +472,24 @@ paths:
         name: event
         required: true
         type: string
+      - description: timeout
+        in: query
+        name: TimeOut
+        type: integer
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: page_size
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
-      summary: List Subjects
+      summary: Get Events
       tags:
       - Event
   /api/v1/login/check:
