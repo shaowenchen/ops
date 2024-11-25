@@ -96,14 +96,14 @@ func (obj *PipelineRun) GetCluster() string {
 	if obj.Spec.Variables == nil {
 		return ""
 	}
-	return obj.Spec.Variables[opsconstants.Cluster]
+	return obj.Spec.Variables[opsconstants.ClusterLower]
 }
 
 func (obj *PipelineRun) SetCurrentCluster() {
 	if obj.Spec.Variables == nil {
 		return
 	}
-	obj.Spec.Variables[opsconstants.Cluster] = ""
+	obj.Spec.Variables[opsconstants.ClusterLower] = ""
 }
 
 func (obj *PipelineRun) CopyWithOutVersion() *PipelineRun {

@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -246,8 +247,10 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 	vars["TASK"] = t.Name
 	vars["TASKRUN"] = tr.Name
 	vars["HOSTNAME"] = h.GetHostname()
-	vars["OPSSERVER_ENDPOINT"] = r.getEventBusNodePortAddress(t.Namespace)
+	vars["NAMESPACE"] = tr.Namespace
+	vars["OPSSERVER_ENDPOINT"] = r.getOpsServerEndpoint(t.Namespace)
 	vars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
+	vars["UUID"] = uuid.New().String()
 
 	// insert host labels
 	for k, v := range h.ObjectMeta.Labels {
@@ -314,10 +317,11 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	for _, node := range nodes {
 		vars := tr.Spec.Variables
 		vars["HOSTNAME"] = node.Name
-		vars["NAEMSPACE"] = tr.Namespace
-		vars["OPSSERVER_ENDPOINT"] = r.getEventBusNodePortAddress(t.Namespace)
+		vars["NAMESPACE"] = tr.Namespace
+		vars["OPSSERVER_ENDPOINT"] = r.getOpsServerEndpoint(t.Namespace)
 		vars["TASK"] = t.Name
 		vars["TASKRUN"] = tr.Name
+		vars["UUID"] = uuid.New().String()
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
 				Variables: vars,
@@ -326,7 +330,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	return
 }
 
-func (r *TaskRunReconciler) getEventBusNodePortAddress(namespace string) string {
+func (r *TaskRunReconciler) getOpsServerEndpoint(namespace string) string {
 	// get app.kubernetes.io/name service under current namespace
 	// if svc no nodeport, set to nodeport
 	// get nodeport address and node ip address and return
@@ -359,7 +363,6 @@ func (r *TaskRunReconciler) getEventBusNodePortAddress(namespace string) string 
 	}
 	nodeIp := opsutils.GetNodeInternalIp(anyWorker)
 	r.opsserverEndpoint = fmt.Sprintf("http://%s:%d", nodeIp, svc.Spec.Ports[0].NodePort)
-
 	return r.opsserverEndpoint
 }
 

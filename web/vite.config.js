@@ -13,8 +13,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        // target: "http://localhost:80",
-        target: "https://ops-server.wps.cn",
+        target: "http://localhost:80",
         changeOrigin: true,
       },
     },

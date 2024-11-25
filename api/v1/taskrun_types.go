@@ -58,8 +58,8 @@ func (obj *TaskRun) GetHost(t *Task) string {
 	if t.Spec.Host != "" {
 		return t.Spec.Host
 	}
-	if _, ok := obj.Spec.Variables[opsconstants.Host]; ok {
-		return obj.Spec.Variables[opsconstants.Host]
+	if _, ok := obj.Spec.Variables[opsconstants.HostLower]; ok {
+		return obj.Spec.Variables[opsconstants.HostLower]
 	}
 	return ""
 }
