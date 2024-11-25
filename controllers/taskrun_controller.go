@@ -206,7 +206,9 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	hosts := r.getAvaliableHosts(logger, ctx, t, tr)
 
 	cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
-	if len(hosts) > 0 {
+
+	// only run script
+	if len(hosts) > 0 && t.OnlyScript() {
 		for _, h := range hosts {
 			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.Host))
 			err = r.runTaskOnHost(cliLogger, ctx, r.Client, t, tr, &h)
