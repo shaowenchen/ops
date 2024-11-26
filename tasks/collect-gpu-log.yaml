@@ -25,17 +25,16 @@ spec:
   steps:
     - name: run col_gpu_log.sh
       content: |
-        mkdir -p /tmp/collect-gpu-log || true
-        rm -rf /tmp/collect-gpu-log/*
-        cd /tmp/collect-gpu-log
+        mkdir -p /tmp/collect-gpu-log-${TIME}
+        cd /tmp/collect-gpu-log-${TIME}
         curl -sfL https://ghp.ci/https://raw.githubusercontent.com/shaowenchen/hubimage/main/ai/col_gpu_log.sh | bash
-        mv *.tar.gz collect-gpu-log-${HOSTNAME}-${UUID}.tar.gz
+        mv *.tar.gz collect-gpu-log-${HOSTNAME}-${TIME}.tar.gz
     - name: upload to s3
-      remotefile: s3://collect-gpu-log/collect-gpu-log-${HOSTNAME}-${UUID}.tar.gz
-      localfile: /tmp/collect-gpu-log/collect-gpu-log-${HOSTNAME}-${UUID}.tar.gz
+      remotefile: s3://collect-gpu-log/collect-gpu-log-${HOSTNAME}-${TIME}.tar.gz
+      localfile: /tmp/collect-gpu-log-${TIME}/collect-gpu-log-${HOSTNAME}-${TIME}.tar.gz
       direction: upload
     - name: get 2h shared link
       content: |
         curl -sfL https://ks3util-version-update.ks3-cn-beijing.ksyuncs.com/2.6.0/ks3util-linux-amd64 -o /usr/local/bin/ks3util >/dev/null
         chmod +x /usr/local/bin/ks3util
-        /usr/local/bin/ks3util sign ks3://${bucket}/collect-gpu-log/collect-gpu-log-${HOSTNAME}-${UUID}.tar.gz --endpoint ${endpoint} --timeout 7200 -i ${ak} -k ${sk}
+        /usr/local/bin/ks3util sign ks3://${bucket}/collect-gpu-log/collect-gpu-log-${HOSTNAME}-${TIME}.tar.gz --endpoint ${endpoint} --timeout 7200 -i ${ak} -k ${sk}

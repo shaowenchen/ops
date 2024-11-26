@@ -99,6 +99,8 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if opsconstants.IsFinishedStatus(pr.Status.RunStatus) {
 		return ctrl.Result{}, nil
 	}
+	// insert env
+	pr.SetEnv()
 	// if is others cluster, send and just sync status
 	cluster := r.isOtherCluster(pr)
 	if cluster != nil {

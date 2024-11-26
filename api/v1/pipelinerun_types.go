@@ -17,9 +17,11 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"time"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -118,6 +120,14 @@ func (obj *PipelineRun) CopyWithOutVersion() *PipelineRun {
 		Spec:   obj.Spec,
 		Status: obj.Status,
 	}
+}
+
+func (obj *PipelineRun) SetEnv() *PipelineRun {
+	if obj.Spec.Variables == nil {
+		obj.Spec.Variables = make(map[string]string)
+	}
+	obj.Spec.Variables["TIME"] = fmt.Sprintf("%d", time.Now().UnixMicro())
+	return obj
 }
 
 func NewPipelineRun(p *Pipeline) *PipelineRun {

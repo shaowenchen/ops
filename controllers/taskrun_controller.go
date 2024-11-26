@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 	cron "github.com/robfig/cron/v3"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -219,6 +218,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		}
 	} else {
 		cluster := opsv1.NewCurrentCluster()
+		logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), cluster.Name))
 		err = r.runTaskOnKube(cliLogger, ctx, t, tr, &cluster)
 		if err != nil {
 			logger.Error.Println(err)
@@ -252,7 +252,6 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 	vars["NAMESPACE"] = tr.Namespace
 	vars["OPSSERVER_ENDPOINT"] = r.getOpsServerEndpoint(t.Namespace)
 	vars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
-	vars["UUID"] = uuid.New().String()
 
 	// insert host labels
 	for k, v := range h.ObjectMeta.Labels {
@@ -287,11 +286,11 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		return err
 	}
 	// if find host in cluster, and can connect
-	host, _ := kc.GetHost(opsconstants.OpsNamespace, tr.GetHost(t))
-	if host != nil {
-		logger.Info.Println("use host credentials to run cluster task " + tr.Name)
-		return r.runTaskOnHost(logger, ctx, *kc.OpsClient, t, tr, host)
-	}
+	// host, _ := kc.GetHost(opsconstants.OpsNamespace, tr.GetHost(t))
+	// if host != nil {
+	// 	logger.Info.Println("use host credentials to run cluster task " + tr.Name)
+	// 	return r.runTaskOnHost(logger, ctx, *kc.OpsClient, t, tr, host)
+	// }
 	// else use pod to run task
 	// build options
 	hostStr := tr.GetHost(t)
@@ -323,7 +322,6 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		vars["OPSSERVER_ENDPOINT"] = r.getOpsServerEndpoint(t.Namespace)
 		vars["TASK"] = t.Name
 		vars["TASKRUN"] = tr.Name
-		vars["UUID"] = uuid.New().String()
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
 				Variables: vars,
