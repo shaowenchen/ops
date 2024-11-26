@@ -76,7 +76,7 @@ func FactoryWebhook(endpoint, cluster, namespace string, subs ...string) *EventB
 }
 
 func Factory(endpoint, cluster, namespace string, subs ...string) *EventBus {
-	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectWebhook)
+	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectPrefix)
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}

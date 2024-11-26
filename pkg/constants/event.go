@@ -12,14 +12,15 @@ const EventStatus = "status"
 
 const Source = "https://github.com/shaowenchen/ops"
 
-const SubjectController = Ops + "." + Clusters + ".%s." + Namespaces + ".%s." + Controllers
-const SubjectHost = Ops + "." + Clusters + ".%s." + Namespaces + ".%s." + Hosts
-const SubjectCluster = Ops + "." + Clusters + ".%s." + Namespaces + ".%s." + Clusters
-const SubjectTask = Ops + "." + Clusters + ".%s." + Namespaces + ".%s." + Tasks
-const SubjectTaskRun = Ops + "." + Clusters + ".%s." + Namespaces + ".%s." + TaskRuns
-const SubjectPipeline = Ops + "." + Clusters + ".%s." + Namespaces + ".%s." + Pipelines
-const SubjectPipelineRun = Ops + "." + Clusters + ".%s." + Namespaces + ".%s." + PipelineRuns
-const SubjectWebhook = Ops + "." + Clusters + ".%s." + Namespaces + ".%s." + EventWebhook
+const SubjectPrefix = Ops + "." + Clusters + ".%s." + Namespaces + ".%s"
+const SubjectController = SubjectPrefix + "." + Controllers
+const SubjectHost = SubjectPrefix + "." + Hosts
+const SubjectCluster = SubjectPrefix + "." + Clusters
+const SubjectTask = SubjectPrefix + "." + Tasks
+const SubjectTaskRun = SubjectPrefix + "." + TaskRuns
+const SubjectPipeline = SubjectPrefix + "." + Pipelines
+const SubjectPipelineRun = SubjectPrefix + "." + PipelineRuns
+const SubjectWebhook = SubjectPrefix + "." + EventWebhook
 
 const (
 	EventTaskRunReport = "TaskRunReport"
