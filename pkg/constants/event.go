@@ -25,7 +25,7 @@ const SubjectWebhook = SubjectPrefix + "." + EventWebhook
 const (
 	EventTaskRunReport = "TaskRunReport"
 	EventWebhook       = "Webhook"
-	EventUnknown       = "Unknown"
+	EventDefault       = "Default"
 )
 
 func GetClusterSubject(cluster, namespace, format string) string {

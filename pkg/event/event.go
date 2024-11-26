@@ -96,7 +96,7 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	case *EventTaskRunReport, EventTaskRunReport:
 		eventType = opsconstants.EventTaskRunReport
 	default:
-		eventType = opsconstants.EventUnknown
+		eventType = opsconstants.EventDefault
 	}
 	e.SetType(eventType)
 	err := e.SetData(cloudevents.ApplicationJSON, data)
