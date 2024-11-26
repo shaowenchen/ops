@@ -84,16 +84,24 @@ function fetchSuggestions(query, callback) {
 
 <template>
     <div class="container">
-        <div class="form-control">
-            <el-autocomplete v-model="searchQuery" :fetch-suggestions="fetchSuggestions" placeholder="Search"
-                @select="handleSelectChange" trigger-on-focus>
-            </el-autocomplete>
-            <el-date-picker v-model="selectTime" type="date" placeholder="Select Start Time"
-                format="YYYY-MM-DD HH:mm:ss" class="date-picker">
-            </el-date-picker>
-
-            <el-button type="primary" @click="loadData">Search</el-button>
+        <div class="form-control enhanced-form">
+            <el-row :gutter="20" align="middle">
+                <el-col :span="10">
+                    <el-autocomplete v-model="searchQuery" :fetch-suggestions="fetchSuggestions" placeholder="Search"
+                        @select="handleSelectChange" trigger-on-focus class="search-bar"></el-autocomplete>
+                </el-col>
+                <el-col :span="8">
+                    <el-date-picker v-model="selectTime" type="datetime" placeholder="Select Start Time"
+                        format="YYYY-MM-DD HH:mm:ss" class="date-picker"></el-date-picker>
+                </el-col>
+                <el-col :span="6">
+                    <el-button type="primary" icon="el-icon-search" @click="loadData" class="search-button">
+                        Search
+                    </el-button>
+                </el-col>
+            </el-row>
         </div>
+
         <div class="form-control" hidden>
             <el-select v-model="selectedFields" multiple placeholder="Select fields to display">
                 <el-option v-for="field in allFields" :key="field.value" :label="field.label" :value="field.value" />
@@ -141,6 +149,35 @@ function fetchSuggestions(query, callback) {
     margin-bottom: 20px;
     width: 100%;
 }
+
+.enhanced-form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-bar {
+    width: 100%;
+}
+
+.date-picker {
+    width: 100%;
+}
+
+.search-button {
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.el-row {
+    display: flex;
+    align-items: center;
+}
+
 
 .search-input {
     width: 80%;
