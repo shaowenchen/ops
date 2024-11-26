@@ -8,9 +8,9 @@ export const useEventsStore = defineStore({
     alert: null,
   }),
   actions: {
-    async get(event, page_size = 10, page = 1) {
+    async get(event, startTime, page_size = 10, page = 1) {
       const analysis = await fetchWrapper.get(
-        `/api/v1/events/${event}?page_size=${page_size}&page=${page}`
+        `/api/v1/events/${event}?page_size=${page_size}&page=${page}&start_time=${startTime}`
       );
       return analysis.data;
     },

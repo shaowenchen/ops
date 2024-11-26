@@ -1,6 +1,6 @@
 <script setup>
 import { useEventsStore } from '@/stores';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { formatObject } from '@/utils/common';
 
 var dataList = ref([]);
@@ -10,8 +10,8 @@ var total = ref(0);
 var dialogVisible = ref(false);
 var selectedItem = ref(null);
 var searchQuery = ref('ops.>');
-var selectedDate = ref(null);
-var selectedTime = ref(null);
+var selectTime = ref(Date);
+selectTime.value = new Date(new Date() - 60 * 60 * 1000);
 
 const allFields = [
     { value: 'event.id', label: 'ID' },
@@ -44,9 +44,6 @@ watch(searchQuery, (newQuery) => {
     fetchSubjects(newQuery);
 });
 
-fetchSubjects("");
-loadData();
-
 function handleSelectChange(selectedValue) {
     loadData();
 }
@@ -58,11 +55,15 @@ function view(item) {
 
 async function loadData() {
     const store = useEventsStore();
-    var res = await store.get(searchQuery.value, pageSize.value, currentPage.value);
-
+    const utcTime = new Date(Date.UTC(selectTime.value.getUTCFullYear(), selectTime.value.getUTCMonth(), selectTime.value.getUTCDate(), selectTime.value.getUTCHours(), selectTime.value.getUTCMinutes(), selectTime.value.getUTCSeconds()));
+    const utcTimestamp = utcTime.getTime();
+    var res = await store.get(searchQuery.value, utcTimestamp, pageSize.value, currentPage.value);
     dataList.value = res.list;
     total.value = res.total;
 }
+
+fetchSubjects("");
+loadData();
 
 function onPaginationChange() {
     loadData();
@@ -87,12 +88,9 @@ function fetchSuggestions(query, callback) {
             <el-autocomplete v-model="searchQuery" :fetch-suggestions="fetchSuggestions" placeholder="Search"
                 @select="handleSelectChange" trigger-on-focus>
             </el-autocomplete>
-            <el-date-picker v-model="selectedDate" type="date" placeholder="Select Date" format="YYYY-MM-DD"
-                class="date-picker">
+            <el-date-picker v-model="selectTime" type="date" placeholder="Select Start Time"
+                format="YYYY-MM-DD HH:mm:ss" class="date-picker">
             </el-date-picker>
-
-            <el-time-picker v-model="selectedTime" placeholder="Select Time" format="HH:mm:ss" class="time-picker">
-            </el-time-picker>
 
             <el-button type="primary" @click="loadData">Search</el-button>
         </div>
@@ -145,7 +143,7 @@ function fetchSuggestions(query, callback) {
 }
 
 .search-input {
-    width: 250px;
+    width: 80%;
 }
 
 .search-button {

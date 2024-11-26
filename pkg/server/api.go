@@ -1186,7 +1186,7 @@ func CreateEvent(c *gin.Context) {
 func GetEvents(c *gin.Context) {
 	type Params struct {
 		Event     string `uri:"event"`
-		StartTime string `form:"start_time"`
+		StartTime int64  `form:"start_time"`
 		MaxLength uint   `form:"max_length"`
 		TimeOut   uint   `form:"timeout"`
 		Page      uint   `form:"page"`
@@ -1198,7 +1198,7 @@ func GetEvents(c *gin.Context) {
 		MaxLength: 1000,
 		Event:     "ops.>",
 		TimeOut:   1,
-		StartTime: time.Now().Add(-time.Hour * 1).Format(time.RFC3339),
+		StartTime: time.Now().UnixMicro(),
 	}
 	err := c.ShouldBindUri(&req)
 	if err != nil {
@@ -1214,8 +1214,11 @@ func GetEvents(c *gin.Context) {
 	if req.MaxLength < 1000 {
 		req.TimeOut = 5
 	}
-	// 2006-01-02T15:04:05Z07:00
-	startTime, err := time.Parse(time.RFC3339, req.StartTime)
+	sec := req.StartTime / 1000
+
+	t := time.Unix(sec, 0).UTC()
+	location := time.FixedZone("CST", 8*60*60)
+	startTime := t.In(location)
 	if err != nil {
 		startTime = time.Now().Add(-time.Hour * 1)
 	}
