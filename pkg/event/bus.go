@@ -3,14 +3,11 @@ package event
 import (
 	"context"
 	"errors"
-	"fmt"
 	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"strings"
 	"sync"
 )
-
-type Event cloudevents.Client
 
 type GlobalEventBusClients struct {
 	Mutex   sync.RWMutex
@@ -24,7 +21,7 @@ type ProducerConsumerClient struct {
 
 func (globalClient *GlobalEventBusClients) GetClient(endpoint string, subject string) (*ProducerConsumerClient, error) {
 	// get from cache
-	key := fmt.Sprintf("%s-%s", endpoint, subject)
+	key := endpoint
 	globalClient.Mutex.RLock()
 	clientP, ok := globalClient.Clients[key]
 	globalClient.Mutex.RUnlock()

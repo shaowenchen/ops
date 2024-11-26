@@ -100,5 +100,7 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	}
 	e.SetType(eventType)
 	err := e.SetData(cloudevents.ApplicationJSON, data)
+	// add extension
+	e.SetExtension(opsconstants.Cluster, cluster)
 	return e, err
 }
