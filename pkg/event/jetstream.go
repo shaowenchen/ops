@@ -34,7 +34,7 @@ func QueryStartTime(client nats.JetStreamContext, subject string, startTime time
 		return nil, err
 	}
 	len := len(msgs)
-	for i := 0; i < len; i++ {
+	for i := len - 1; i >= 0; i-- {
 		msg := msgs[i]
 		e := event.Event{}
 		err := json.Unmarshal(msg.Data, &e)
