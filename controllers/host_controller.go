@@ -92,7 +92,7 @@ func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.Hosts, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+		go opsevent.FactoryController(namespace, opsconstants.Hosts, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
 			Kind: opsconstants.Hosts,
 		})
 	}

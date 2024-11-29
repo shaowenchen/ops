@@ -7,8 +7,8 @@ import (
 
 const OpsStreamName = "ops"
 
-const EventSetup = "setup"
-const EventStatus = "status"
+const Setup = "setup"
+const Status = "status"
 
 const Source = "https://github.com/shaowenchen/ops"
 

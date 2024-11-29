@@ -340,7 +340,7 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.PipelineRuns, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+		go opsevent.FactoryController(namespace, opsconstants.PipelineRuns, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
 			Kind: opsconstants.PipelineRuns,
 		})
 	}

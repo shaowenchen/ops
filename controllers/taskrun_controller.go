@@ -496,7 +496,7 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.TaskRuns, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+		go opsevent.FactoryController(namespace, opsconstants.TaskRuns, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
 			Kind: opsconstants.TaskRuns,
 		})
 	}

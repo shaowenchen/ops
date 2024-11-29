@@ -177,7 +177,7 @@ func (r *PipelineReconciler) syncResource(logger *opslog.Logger, ctx context.Con
 func (r *PipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.Pipelines, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+		go opsevent.FactoryController(namespace, opsconstants.Pipelines, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
 			Kind: opsconstants.Pipelines,
 		})
 	}

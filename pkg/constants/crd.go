@@ -23,6 +23,8 @@ const (
 	Namespaces   = "Namespaces"
 	Webhook      = "Webhook"
 	Webhooks     = "Webhooks"
+	Event        = "Event"
+	Events       = "Events"
 )
 
 const StatusSuccessed = "Successed"

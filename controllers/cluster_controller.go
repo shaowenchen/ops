@@ -183,7 +183,7 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	}
 	err = r.commitStatus(logger, ctx, c, status, "")
 	// push event
-	go opsevent.FactoryCluster(c.Namespace, c.Name, opsconstants.EventStatus).Publish(ctx, opsevent.EventCluster{
+	go opsevent.FactoryCluster(c.Namespace, c.Name, opsconstants.Status).Publish(ctx, opsevent.EventCluster{
 		Server: c.Spec.Server,
 		Status: *status,
 	})
@@ -216,7 +216,7 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.Clusters, opsconstants.EventSetup).Publish(context.TODO(), opsevent.EventController{
+		go opsevent.FactoryController(namespace, opsconstants.Clusters, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
 			Kind: opsconstants.Hosts,
 		})
 	}
