@@ -20,10 +20,11 @@ const SubjectTask = SubjectPrefix + "." + Tasks
 const SubjectTaskRun = SubjectPrefix + "." + TaskRuns
 const SubjectPipeline = SubjectPrefix + "." + Pipelines
 const SubjectPipelineRun = SubjectPrefix + "." + PipelineRuns
-const SubjectWebhook = SubjectPrefix + "." + EventWebhook
+const SubjectWebhook = SubjectPrefix + "." + EventWebhooks
 
 const (
 	EventTaskRunReport = "TaskRunReport"
+	EventWebhooks      = "Webhooks"
 	EventWebhook       = "Webhook"
 	EventDefault       = "Default"
 )

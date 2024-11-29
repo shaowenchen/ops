@@ -78,17 +78,17 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	var eventType string
 	switch data.(type) {
 	case *EventController, EventController:
-		eventType = opsconstants.Controllers
+		eventType = opsconstants.Controller
 	case *EventHost, EventHost:
-		eventType = opsconstants.Hosts
+		eventType = opsconstants.Host
 	case *EventCluster, EventCluster:
-		eventType = opsconstants.Clusters
+		eventType = opsconstants.Cluster
 	case *EventTask, EventTask:
-		eventType = opsconstants.Tasks
+		eventType = opsconstants.Task
 	case *EventTaskRun, EventTaskRun:
-		eventType = opsconstants.TaskRuns
+		eventType = opsconstants.TaskRun
 	case *EventPipeline, EventPipeline:
-		eventType = opsconstants.Pipelines
+		eventType = opsconstants.Pipeline
 	case *EventPipelineRun, EventPipelineRun:
 		eventType = opsconstants.PipelineRun
 	case *EventWebhook, EventWebhook:

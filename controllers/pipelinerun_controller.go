@@ -150,7 +150,12 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				return
 			}
 			// send event
-			err = opsevent.FactoryPipelineRun(pr.Namespace, pr.Name).Publish(ctx, pr)
+			go opsevent.FactoryPipelineRun(pr.Namespace, pr.Name, opsconstants.Status).Publish(ctx, &opsevent.EventPipelineRun{
+				PipelineRef:       pr.Spec.PipelineRef,
+				Desc:              pr.Spec.Desc,
+				Variables:         pr.Spec.Variables,
+				PipelineRunStatus: pr.Status,
+			})
 		}()
 		return ctrl.Result{}, nil
 	}

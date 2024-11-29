@@ -31,6 +31,7 @@ func FactoryHost(namespace string, subs ...string) *EventBus {
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
+	println("host subject: ", subject)
 	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 

@@ -3,7 +3,7 @@ package constants
 const APIVersion = "crd.chenshaowen.com/v1"
 const (
 	Ops          = "Ops"
-	controller   = "controller"
+	Controller   = "controller"
 	Controllers  = "Controllers"
 	HostLower    = "host"
 	Host         = "Host"

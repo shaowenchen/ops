@@ -37,8 +37,8 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  url = url.replace('http://', '').replace('https://', '').replace('/', '').replace('.', '-')
-                  response = requests.post('${OPSSERVER_ENDPOINT}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.${url}', headers=headers, data=json.dumps(payload))
+                  u = url.replace('http://', '').replace('https://', '').replace('/', '').replace('.', '-')
+                  response = requests.post('${OPSSERVER_ENDPOINT}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.' + u, headers=headers, data=json.dumps(payload))
                   print(response.text)
 
               try:
