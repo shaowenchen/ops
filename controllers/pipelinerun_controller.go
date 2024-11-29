@@ -326,7 +326,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 	}
 	r.commitStatus(logger, ctx, pr, finallyStatus, "", "", nil)
 	// push event
-	go opsevent.FactoryPipelineRun(pr.Namespace, pr.Name).Publish(ctx, opsevent.EventPipelineRun{
+	go opsevent.FactoryPipelineRun(pr.Namespace, pr.Name, opsconstants.Status).Publish(ctx, opsevent.EventPipelineRun{
 		PipelineRef:       pr.Spec.PipelineRef,
 		Desc:              pr.Spec.Desc,
 		Variables:         pr.Spec.Variables,

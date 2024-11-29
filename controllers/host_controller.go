@@ -192,7 +192,7 @@ func (r *HostReconciler) updateStatus(logger *opslog.Logger, ctx context.Context
 	}
 	err = r.commitStatus(logger, ctx, h, status, "")
 	// push event
-	go opsevent.FactoryHost(h.Namespace, h.Name).Publish(ctx, opsevent.EventHost{
+	go opsevent.FactoryHost(h.Namespace, h.Name, opsconstants.Status).Publish(ctx, opsevent.EventHost{
 		Address:  h.Spec.Address,
 		Port:     h.Spec.Port,
 		Username: h.Spec.Username,

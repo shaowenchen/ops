@@ -234,7 +234,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	}
 	r.commitStatus(logger, ctx, tr, finallyStatus)
 	// push event
-	go opsevent.FactoryTaskRun(tr.Namespace, tr.Name).Publish(ctx, opsevent.EventTaskRun{
+	go opsevent.FactoryTaskRun(tr.Namespace, tr.Name, opsconstants.Status).Publish(ctx, opsevent.EventTaskRun{
 		TaskRef:       tr.Spec.TaskRef,
 		Desc:          tr.Spec.Desc,
 		Variables:     tr.Spec.Variables,
