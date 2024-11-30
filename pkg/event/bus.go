@@ -21,7 +21,7 @@ type ProducerConsumerClient struct {
 
 func (globalClient *GlobalEventBusClients) GetClient(endpoint string, subject string) (*ProducerConsumerClient, error) {
 	// get from cache
-	key := endpoint
+	key := endpoint + subject
 	globalClient.Mutex.RLock()
 	clientP, ok := globalClient.Clients[key]
 	globalClient.Mutex.RUnlock()
