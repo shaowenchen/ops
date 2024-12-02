@@ -66,8 +66,8 @@ func FactoryPipelineRun(namespace string, subs ...string) *EventBus {
 	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
-func FactoryDeployment(namespace string, subs ...string) *EventBus {
-	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectDeployments)
+func FactoryKube(namespace string, subs ...string) *EventBus {
+	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectPrefix)
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}

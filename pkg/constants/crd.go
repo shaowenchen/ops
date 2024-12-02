@@ -29,12 +29,7 @@ const (
 	Default       = "Default"
 	Deployments   = "Deployments"
 	Deployment    = "Deployment"
-	Create        = "create"
-	CreateEvent   = "CreateEvent"
-	Update        = "update"
-	UpdateEvent   = "UpdateEvent"
-	Delete        = "delete"
-	DeleteEvent   = "DeleteEvent"
+	Kube          = "Kube"
 )
 
 const StatusSuccessed = "Successed"

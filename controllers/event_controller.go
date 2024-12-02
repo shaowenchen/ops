@@ -22,7 +22,6 @@ import (
 
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
-	appsv1 "k8s.io/api/apps/v1"
 	eventsv1 "k8s.io/api/events/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/workqueue"
@@ -62,20 +61,51 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&eventsv1.Event{}).
 		Watches(
-			&source.Kind{Type: &appsv1.Deployment{}},
+			&source.Kind{Type: &eventsv1.Event{}},
 			&handler.Funcs{
 				CreateFunc: func(e event.CreateEvent, q workqueue.RateLimitingInterface) {
-					if e.Object.GetCreationTimestamp().Sub(time.Now().Add(-30*time.Second)) > 0 {
-						opsevent.FactoryDeployment(e.Object.GetNamespace(), e.Object.GetName(), opsconstants.Create).Publish(context.TODO(), e)
+					v1e, ok := e.Object.(*eventsv1.Event)
+					if !ok {
+						return
+					}
+					if v1e.CreationTimestamp.Sub(time.Now().Add(-30*time.Second)) > 0 {
+						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
 					}
 				},
 				UpdateFunc: func(e event.UpdateEvent, q workqueue.RateLimitingInterface) {
-					opsevent.FactoryDeployment(e.ObjectOld.GetNamespace(), e.ObjectOld.GetName(), opsconstants.Update).Publish(context.TODO(), e)
+					v1e, ok := e.ObjectNew.(*eventsv1.Event)
+					if !ok {
+						return
+					}
+					if v1e.CreationTimestamp.Sub(time.Now().Add(-30*time.Second)) > 0 {
+						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+					}
 				},
 				DeleteFunc: func(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
-					opsevent.FactoryDeployment(e.Object.GetNamespace(), e.Object.GetName(), opsconstants.Delete).Publish(context.TODO(), e)
+					v1e, ok := e.Object.(*eventsv1.Event)
+					if !ok {
+						return
+					}
+					if v1e.CreationTimestamp.Sub(time.Now().Add(-30*time.Second)) > 0 {
+						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+					}
 				},
 			},
 		).
 		Complete(r)
+}
+
+func GetEventKube(v1e *eventsv1.Event) (ek *opsevent.EventKube) {
+	ek = &opsevent.EventKube{
+		Type:              v1e.Type,
+		Reason:            v1e.Reason,
+		CreationTimestamp: v1e.CreationTimestamp.Time,
+		Note:              v1e.Note,
+	}
+	if v1e.ManagedFields != nil && len(v1e.ManagedFields) > 0 {
+		for _, mf := range v1e.ManagedFields {
+			ek.From = mf.Manager + ek.From
+		}
+	}
+	return
 }

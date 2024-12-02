@@ -34,7 +34,7 @@
       "cwd": "${workspaceFolder}",
       "program": "main.go",
       "args": [],
-      "env": {}
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }

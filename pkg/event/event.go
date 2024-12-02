@@ -5,7 +5,6 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
@@ -66,6 +65,14 @@ type EventTaskRunReport struct {
 	Message   string `json:"message,omitempty" yaml:"message,omitempty"`
 }
 
+type EventKube struct {
+	Type              string    `json:"type,omitempty" yaml:"type,omitempty"`
+	Reason            string    `json:"reason,omitempty" yaml:"reason,omitempty"`
+	CreationTimestamp time.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
+	From              string    `json:"from,omitempty" yaml:"from,omitempty"`
+	Note              string    `json:"note,omitempty" yaml:"note,omitempty"`
+}
+
 func (e EventTaskRunReport) IsAlert() bool {
 	return e.Status == "alert"
 }
@@ -96,12 +103,8 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 		eventType = opsconstants.Webhook
 	case *EventTaskRunReport, EventTaskRunReport:
 		eventType = opsconstants.TaskRunReport
-	case *event.CreateEvent, event.CreateEvent:
-		eventType = opsconstants.CreateEvent
-	case *event.UpdateEvent, event.UpdateEvent:
-		eventType = opsconstants.UpdateEvent
-	case *event.DeleteEvent, event.DeleteEvent:
-		eventType = opsconstants.DeleteEvent
+	case *EventKube, EventKube:
+		eventType = opsconstants.Kube
 	default:
 		eventType = opsconstants.Default
 	}
