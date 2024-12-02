@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
@@ -64,7 +65,9 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			&source.Kind{Type: &appsv1.Deployment{}},
 			&handler.Funcs{
 				CreateFunc: func(e event.CreateEvent, q workqueue.RateLimitingInterface) {
-					opsevent.FactoryDeployment(e.Object.GetNamespace(), e.Object.GetName(), opsconstants.Create).Publish(context.TODO(), e)
+					if e.Object.GetCreationTimestamp().Sub(time.Now().Add(-30*time.Second)) > 0 {
+						opsevent.FactoryDeployment(e.Object.GetNamespace(), e.Object.GetName(), opsconstants.Create).Publish(context.TODO(), e)
+					}
 				},
 				UpdateFunc: func(e event.UpdateEvent, q workqueue.RateLimitingInterface) {
 					opsevent.FactoryDeployment(e.ObjectOld.GetNamespace(), e.ObjectOld.GetName(), opsconstants.Update).Publish(context.TODO(), e)

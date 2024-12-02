@@ -180,6 +180,9 @@ rules:
   - events
   - nodes
   - services
+  - deployments
+  - replicasets
+  - endpoints
   - pods
   - pods/status
   - pods/log
