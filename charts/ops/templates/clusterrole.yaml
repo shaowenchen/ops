@@ -174,6 +174,18 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+  - "events.k8s.io" 
+  resources:
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
 - apiGroups: 
   - ""
   resources:
