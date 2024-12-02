@@ -12,6 +12,7 @@ const Status = "status"
 
 const Source = "https://github.com/shaowenchen/ops"
 
+const SubjectClusterPrefix = Ops + "." + Clusters + ".%s"
 const SubjectPrefix = Ops + "." + Clusters + ".%s." + Namespaces + ".%s"
 const SubjectController = SubjectPrefix + "." + Controllers
 const SubjectHost = SubjectPrefix + "." + Hosts

@@ -1,9 +1,11 @@
 package event
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/nats-io/nats.go"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
-	"strings"
 )
 
 // for controller
@@ -67,7 +69,12 @@ func FactoryPipelineRun(namespace string, subs ...string) *EventBus {
 }
 
 func FactoryKube(namespace string, subs ...string) *EventBus {
-	subject := opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectPrefix)
+	subject := ""
+	if namespace == "" {
+		subject = fmt.Sprintf(opsconstants.SubjectClusterPrefix, cluster)
+	} else {
+		subject = opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectPrefix)
+	}
 	if len(subs) > 0 {
 		subject = subject + "." + strings.Join(subs, ".")
 	}
