@@ -58,4 +58,9 @@ resources:
   kind: PipelineRun
   path: github.com/shaowenchen/ops/api/v1
   version: v1
+- controller: true
+  domain: chenshaowen.com
+  group: crd
+  kind: Event
+  version: v1
 version: "3"

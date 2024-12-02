@@ -5,6 +5,7 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
@@ -92,11 +93,17 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	case *EventPipelineRun, EventPipelineRun:
 		eventType = opsconstants.PipelineRun
 	case *EventWebhook, EventWebhook:
-		eventType = opsconstants.EventWebhook
+		eventType = opsconstants.Webhook
 	case *EventTaskRunReport, EventTaskRunReport:
-		eventType = opsconstants.EventTaskRunReport
+		eventType = opsconstants.TaskRunReport
+	case *event.CreateEvent, event.CreateEvent:
+		eventType = opsconstants.CreateEvent
+	case *event.UpdateEvent, event.UpdateEvent:
+		eventType = opsconstants.UpdateEvent
+	case *event.DeleteEvent, event.DeleteEvent:
+		eventType = opsconstants.DeleteEvent
 	default:
-		eventType = opsconstants.EventDefault
+		eventType = opsconstants.Default
 	}
 	e.SetType(eventType)
 	err := e.SetData(cloudevents.ApplicationJSON, data)

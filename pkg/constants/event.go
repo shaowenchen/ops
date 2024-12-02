@@ -20,14 +20,9 @@ const SubjectTask = SubjectPrefix + "." + Tasks
 const SubjectTaskRun = SubjectPrefix + "." + TaskRuns
 const SubjectPipeline = SubjectPrefix + "." + Pipelines
 const SubjectPipelineRun = SubjectPrefix + "." + PipelineRuns
-const SubjectWebhook = SubjectPrefix + "." + EventWebhooks
+const SubjectWebhook = SubjectPrefix + "." + Webhooks
+const SubjectDeployments = SubjectPrefix + "." + Deployments
 
-const (
-	EventTaskRunReport = "TaskRunReport"
-	EventWebhooks      = "Webhooks"
-	EventWebhook       = "Webhook"
-	EventDefault       = "Default"
-)
 
 func GetClusterSubject(cluster, namespace, format string) string {
 	return fmt.Sprintf(format, cluster, namespace)
