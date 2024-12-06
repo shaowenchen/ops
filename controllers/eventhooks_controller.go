@@ -93,7 +93,7 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 	r.mutex.Unlock()
 
 	client := &opsevent.EventBus{}
-	opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, "eventhook watching subject: `"+obj.Spec.Subject+"`, start: "+time.Now().Format(time.RFC3339), "")
+	opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, "eventhook watching subject: `"+obj.Spec.Subject+"`, keywords: "+strings.Join(obj.Spec.Keywords, ",")+", start: "+time.Now().Format(time.RFC3339), "")
 	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).Subscribe(ctx, func(ctx context.Context, event cloudevents.Event) {
 		select {
 		case <-ctx.Done():
