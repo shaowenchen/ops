@@ -106,7 +106,7 @@ func GetEventKube(v1e *eventsv1.Event) (ek *opsevent.EventKube) {
 		Type:              v1e.Type,
 		Reason:            v1e.Reason,
 		CreationTimestamp: v1e.CreationTimestamp.Time,
-		Note:              v1e.Note,
+		Message:           v1e.Note,
 	}
 	if v1e.ManagedFields != nil && len(v1e.ManagedFields) > 0 {
 		for _, mf := range v1e.ManagedFields {

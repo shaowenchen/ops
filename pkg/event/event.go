@@ -114,7 +114,7 @@ type EventKube struct {
 	Reason            string    `json:"reason,omitempty" yaml:"reason,omitempty"`
 	CreationTimestamp time.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
 	From              string    `json:"from,omitempty" yaml:"from,omitempty"`
-	Note              string    `json:"note,omitempty" yaml:"note,omitempty"`
+	Message           string    `json:"message,omitempty" yaml:"message,omitempty"`
 }
 
 func (e EventKube) String() string {

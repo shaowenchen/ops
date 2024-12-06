@@ -69,7 +69,7 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	logger.Debug.Println("Reconcile EventHooks: ", obj.Name)
+	logger.Info.Println("Reconcile EventHooks: ", req.NamespacedName.String())
 	go r.create(logger, ctx, obj)
 	return ctrl.Result{}, nil
 }
@@ -79,12 +79,12 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 		r.eventbusMap = make(map[string]context.CancelFunc)
 	}
 
-	// Cancel existing context if it exists
-	if cancel, ok := r.eventbusMap[obj.Namespace]; ok {
-		cancel()
-		r.mutex.Lock()
-		delete(r.eventbusMap, obj.Namespace)
-		r.mutex.Unlock()
+	// delete old eventbus
+	if _, ok := r.eventbusMap[obj.Namespace]; ok {
+		r.delete(logger, ctx, types.NamespacedName{
+			Namespace: obj.Namespace,
+			Name:      obj.Name,
+		})
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -105,7 +105,7 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 		if len(obj.Spec.Keywords) > 0 {
 			skip := true
 			for _, keyword := range obj.Spec.Keywords {
-				if strings.ContainsAny(eventStrings, keyword) {
+				if strings.Contains(eventStrings, keyword) {
 					skip = false
 					break
 				}
@@ -125,9 +125,9 @@ func (r *EventHooksReconciler) delete(logger *opslog.Logger, ctx context.Context
 	defer r.mutex.Unlock()
 
 	if cancel, ok := r.eventbusMap[namespacedName.Namespace]; ok {
-		cancel() // Cancel the context to stop the goroutine
+		logger.Debug.Println("canceling EventBus for ", namespacedName.String())
+		cancel()
 		delete(r.eventbusMap, namespacedName.Namespace)
-		logger.Debug.Println("Deleted EventBus for namespace: ", namespacedName.Namespace)
 	}
 	return nil
 }
