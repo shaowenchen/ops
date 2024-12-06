@@ -18,19 +18,31 @@ package controllers
 
 import (
 	"context"
+	"os"
+	"strings"
+	"sync"
+	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	crdv1 "github.com/shaowenchen/ops/api/v1"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opsevent "github.com/shaowenchen/ops/pkg/event"
+	opseventhook "github.com/shaowenchen/ops/pkg/eventhook"
+	opslog "github.com/shaowenchen/ops/pkg/log"
 )
 
 // EventHooksReconciler reconciles a EventHooks object
 type EventHooksReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme      *runtime.Scheme
+	mutex       sync.RWMutex
+	eventbusMap map[string]bool
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks,verbs=get;list;watch;create;update;patch;delete
@@ -47,16 +59,84 @@ type EventHooksReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	actionNs := opsconstants.GetEnvActiveNamespace()
+	if actionNs != "" && actionNs != req.Namespace {
+		return ctrl.Result{}, nil
+	}
+	logger := opslog.NewLogger().SetStd().SetFlag().Build()
+	if opsconstants.GetEnvDebug() {
+		logger.SetVerbose("debug").Build()
+	}
+	obj := &opsv1.EventHooks{}
+	err := r.Get(ctx, req.NamespacedName, obj)
 
-	// TODO(user): your logic here
+	//if delete, stop watch
+	if apierrors.IsNotFound(err) {
+		return ctrl.Result{}, r.delete(logger, ctx, req.NamespacedName)
+	}
 
-	return ctrl.Result{}, nil
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, r.create(logger, ctx, obj)
+}
+
+func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context, obj *opsv1.EventHooks) error {
+	if r.eventbusMap == nil {
+		r.eventbusMap = make(map[string]bool)
+	}
+	if _, ok := r.eventbusMap[obj.Namespace]; ok {
+		r.delete(logger, ctx, types.NamespacedName{
+			Namespace: obj.Namespace,
+			Name:      obj.Name,
+		})
+	}
+	client := &opsevent.EventBus{}
+	opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, "eventhook config success, subject: "+obj.Spec.Subject+", time: "+time.Now().Format(time.RFC3339), "")
+	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).Subscribe(context.TODO(), func(ctx context.Context, event cloudevents.Event) {
+		eventStrings := opsevent.GetCloudEventString(event)
+		if len(obj.Spec.Keywords) > 0 {
+			skip := true
+			for _, keyword := range obj.Spec.Keywords {
+				if strings.ContainsAny(eventStrings, keyword) {
+					skip = false
+					break
+				}
+			}
+			if skip {
+				return
+			}
+		}
+		opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
+		return
+	})
+	return nil
+}
+
+func (r *EventHooksReconciler) delete(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {
+	if r.eventbusMap == nil {
+		return nil
+	}
+	if _, ok := r.eventbusMap[namespacedName.String()]; ok {
+		//Todo: close eventbus
+		r.mutex.Lock()
+		delete(r.eventbusMap, namespacedName.String())
+		r.mutex.Unlock()
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *EventHooksReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// push event
+	namespace, err := opsconstants.GetCurrentNamespace()
+	if err == nil {
+		go opsevent.FactoryController(namespace, opsconstants.EventHooks, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
+			Kind: opsconstants.EventHooks,
+		})
+	}
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&crdv1.EventHooks{}).
+		For(&opsv1.EventHooks{}).
 		Complete(r)
 }

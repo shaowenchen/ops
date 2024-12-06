@@ -57,7 +57,13 @@ func (r *EventReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	// Setup the controller to manage corev1.Event
+	// push event
+	namespace, err := opsconstants.GetCurrentNamespace()
+	if err == nil {
+		go opsevent.FactoryController(namespace, opsconstants.Events, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
+			Kind: opsconstants.PipelineRuns,
+		})
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&eventsv1.Event{}).
 		Watches(

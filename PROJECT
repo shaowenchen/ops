@@ -1,66 +1,75 @@
 domain: chenshaowen.com
 layout:
-- go.kubebuilder.io/v3
+  - go.kubebuilder.io/v3
 projectName: ops
 repo: github.com/shaowenchen/ops
 resources:
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: chenshaowen.com
-  group: crd
-  kind: Host
-  path: github.com/shaowenchen/ops/api/v1
-  version: v1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: chenshaowen.com
-  group: crd
-  kind: Task
-  path: github.com/shaowenchen/ops/api/v1
-  version: v1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: chenshaowen.com
-  group: crd
-  kind: Cluster
-  path: github.com/shaowenchen/ops/api/v1
-  version: v1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: chenshaowen.com
-  group: crd
-  kind: TaskRun
-  path: github.com/shaowenchen/ops/api/v1
-  version: v1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: chenshaowen.com
-  group: crd
-  kind: Pipeline
-  path: github.com/shaowenchen/ops/api/v1
-  version: v1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: chenshaowen.com
-  group: crd
-  kind: PipelineRun
-  path: github.com/shaowenchen/ops/api/v1
-  version: v1
-- controller: true
-  domain: chenshaowen.com
-  group: crd
-  kind: Event
-  version: v1
+  - api:
+      crdVersion: v1
+      namespaced: true
+    controller: true
+    domain: chenshaowen.com
+    group: crd
+    kind: Host
+    path: github.com/shaowenchen/ops/api/v1
+    version: v1
+  - api:
+      crdVersion: v1
+      namespaced: true
+    controller: true
+    domain: chenshaowen.com
+    group: crd
+    kind: Task
+    path: github.com/shaowenchen/ops/api/v1
+    version: v1
+  - api:
+      crdVersion: v1
+      namespaced: true
+    controller: true
+    domain: chenshaowen.com
+    group: crd
+    kind: Cluster
+    path: github.com/shaowenchen/ops/api/v1
+    version: v1
+  - api:
+      crdVersion: v1
+      namespaced: true
+    controller: true
+    domain: chenshaowen.com
+    group: crd
+    kind: TaskRun
+    path: github.com/shaowenchen/ops/api/v1
+    version: v1
+  - api:
+      crdVersion: v1
+      namespaced: true
+    controller: true
+    domain: chenshaowen.com
+    group: crd
+    kind: Pipeline
+    path: github.com/shaowenchen/ops/api/v1
+    version: v1
+  - api:
+      crdVersion: v1
+      namespaced: true
+    controller: true
+    domain: chenshaowen.com
+    group: crd
+    kind: PipelineRun
+    path: github.com/shaowenchen/ops/api/v1
+    version: v1
+  - controller: true
+    domain: chenshaowen.com
+    group: crd
+    kind: Event
+    version: v1
+  - api:
+      crdVersion: v1
+      namespaced: true
+    controller: true
+    domain: chenshaowen.com
+    group: crd
+    kind: EventHooks
+    path: github.com/shaowenchen/ops/api/v1
+    version: v1
 version: "3"

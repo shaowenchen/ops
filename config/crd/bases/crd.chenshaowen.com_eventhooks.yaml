@@ -15,7 +15,17 @@ spec:
     singular: eventhooks
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.subject
+      name: Subject
+      type: string
+    - jsonPath: .spec.type
+      name: Desc
+      type: string
+    - jsonPath: .spec.url
+      name: URL
+      type: string
+    name: v1
     schema:
       openAPIV3Schema:
         description: EventHooks is the Schema for the eventhooks API
@@ -35,10 +45,18 @@ spec:
           spec:
             description: EventHooksSpec defines the desired state of EventHooks
             properties:
+              additional:
+                type: string
+              keywords:
+                items:
+                  type: string
+                type: array
               options:
                 additionalProperties:
                   type: string
                 type: object
+              subject:
+                type: string
               type:
                 description: Foo is an example field of EventHooks. Edit eventhooks_types.go
                   to remove/update

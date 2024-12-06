@@ -1,16 +1,20 @@
 package event
 
 import (
-	"time"
-
+	"encoding/json"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	"time"
 )
 
 type EventController struct {
 	Kind string `json:"kind,omitempty" yaml:"kind,omitempty"`
+}
+
+func (e EventController) String() string {
+	return `kind: ` + e.Kind
 }
 
 type EventHost struct {
@@ -20,14 +24,29 @@ type EventHost struct {
 	Status   opsv1.HostStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
+func (e EventHost) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
+}
+
 type EventCluster struct {
 	Server string              `json:"server,omitempty" yaml:"server,omitempty" `
 	Status opsv1.ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
+func (e EventCluster) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
+}
+
 type EventTask struct {
 	opsv1.TaskSpec
 	Status opsv1.TaskStatus `json:"status,omitempty" yaml:"status,omitempty"`
+}
+
+func (e EventTask) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
 }
 
 type EventTaskRun struct {
@@ -37,9 +56,19 @@ type EventTaskRun struct {
 	opsv1.TaskRunStatus
 }
 
+func (e EventTaskRun) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
+}
+
 type EventPipeline struct {
 	opsv1.PipelineSpec
 	Status opsv1.PipelineStatus `json:"status,omitempty" yaml:"status,omitempty"`
+}
+
+func (e EventPipeline) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
 }
 
 type EventPipelineRun struct {
@@ -49,10 +78,20 @@ type EventPipelineRun struct {
 	opsv1.PipelineRunStatus
 }
 
+func (e EventPipelineRun) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
+}
+
 type EventWebhook struct {
 	Content    string `json:"content,omitempty" yaml:"content,omitempty"`
 	Source     string `json:"source,omitempty" yaml:"source,omitempty"`
 	WebhookUrl string `json:"webhookUrl,omitempty" yaml:"webhookUrl,omitempty"`
+}
+
+func (e EventWebhook) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
 }
 
 type EventTaskRunReport struct {
@@ -65,12 +104,22 @@ type EventTaskRunReport struct {
 	Message   string `json:"message,omitempty" yaml:"message,omitempty"`
 }
 
+func (e EventTaskRunReport) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
+}
+
 type EventKube struct {
 	Type              string    `json:"type,omitempty" yaml:"type,omitempty"`
 	Reason            string    `json:"reason,omitempty" yaml:"reason,omitempty"`
 	CreationTimestamp time.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
 	From              string    `json:"from,omitempty" yaml:"from,omitempty"`
 	Note              string    `json:"note,omitempty" yaml:"note,omitempty"`
+}
+
+func (e EventKube) String() string {
+	r, _ := json.Marshal(e)
+	return string(r)
 }
 
 func (e EventTaskRunReport) IsAlert() bool {
@@ -113,4 +162,50 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	// add extension
 	e.SetExtension(opsconstants.Cluster, cluster)
 	return e, err
+}
+
+func GetCloudEventString(ce cloudevents.Event) string {
+	if ce.Type() == opsconstants.Controller {
+		data := &EventController{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.Host {
+		data := &EventHost{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.Cluster {
+		data := &EventCluster{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.Task {
+		data := &EventTask{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.TaskRun {
+		data := &EventTaskRun{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.Pipeline {
+		data := &EventPipeline{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.PipelineRun {
+		data := &EventPipelineRun{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.Webhook {
+		data := &EventWebhook{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.TaskRunReport {
+		data := &EventTaskRunReport{}
+		ce.DataAs(data)
+		return data.String()
+	} else if ce.Type() == opsconstants.Kube {
+		data := &EventKube{}
+		ce.DataAs(data)
+		return data.String()
+	} else {
+		return string(ce.Data())
+	}
 }

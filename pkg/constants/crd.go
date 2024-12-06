@@ -25,6 +25,8 @@ const (
 	Webhooks      = "Webhooks"
 	Event         = "Event"
 	Events        = "Events"
+	EventHook     = "EventHook"
+	EventHooks    = "EventHooks"
 	TaskRunReport = "TaskRunReport"
 	Default       = "Default"
 	Deployments   = "Deployments"

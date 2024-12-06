@@ -29,9 +29,12 @@ type EventHooksSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of EventHooks. Edit eventhooks_types.go to remove/update
-	Type    string            `json:"type,omitempty"`
-	URL     string            `json:"url,omitempty"`
-	Options map[string]string `json:"options,omitempty"`
+	Type       string            `json:"type,omitempty"`
+	Subject    string            `json:"subject,omitempty"`
+	URL        string            `json:"url,omitempty"`
+	Options    map[string]string `json:"options,omitempty"`
+	Keywords   []string          `json:"keywords,omitempty"`
+	Additional string            `json:"additional,omitempty"`
 }
 
 // EventHooksStatus defines the observed state of EventHooks
@@ -40,9 +43,11 @@ type EventHooksStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Subject",type=string,JSONPath=`.spec.subject`
+// +kubebuilder:printcolumn:name="Desc",type=string,JSONPath=`.spec.type`
+// +kubebuilder:printcolumn:name="URL",type=string,JSONPath=`.spec.url`
 // EventHooks is the Schema for the eventhooks API
 type EventHooks struct {
 	metav1.TypeMeta   `json:",inline"`
