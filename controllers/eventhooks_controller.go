@@ -93,7 +93,7 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 	r.mutex.Unlock()
 
 	client := &opsevent.EventBus{}
-	opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, "eventhook config success, subject: `"+obj.Spec.Subject+"`, time: "+time.Now().Format(time.RFC3339), "")
+	opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, "eventhook watching subject: `"+obj.Spec.Subject+"`, start: "+time.Now().Format(time.RFC3339), "")
 	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).Subscribe(ctx, func(ctx context.Context, event cloudevents.Event) {
 		select {
 		case <-ctx.Done():
@@ -101,7 +101,7 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 			return
 		default:
 		}
-		eventStrings := opsevent.GetCloudEventString(event)
+		eventStrings := opsevent.GetCloudEventReadable(event)
 		if len(obj.Spec.Keywords) > 0 {
 			skip := true
 			for _, keyword := range obj.Spec.Keywords {

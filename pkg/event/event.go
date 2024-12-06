@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	"strings"
 	"time"
 )
 
@@ -14,7 +15,9 @@ type EventController struct {
 }
 
 func (e EventController) String() string {
-	return `kind: ` + e.Kind
+	var result = &strings.Builder{}
+	result.WriteString(`kind: ` + e.Kind)
+	return result.String()
 }
 
 type EventHost struct {
@@ -117,9 +120,26 @@ type EventKube struct {
 	Message           string    `json:"message,omitempty" yaml:"message,omitempty"`
 }
 
-func (e EventKube) String() string {
-	r, _ := json.Marshal(e)
-	return string(r)
+func (e EventKube) Readable(ce cloudevents.Event) string {
+	var result = &strings.Builder{}
+	AppendCluser(result, ce)
+	AppendField(result, "type", e.Type)
+	AppendField(result, "reason", e.Reason)
+	AppendField(result, "creationTimestamp", e.CreationTimestamp.Format("2006-01-02 15:04:05"))
+	AppendField(result, "from", e.From)
+	AppendField(result, "message", e.Message)
+	//
+	subject := ce.Subject()
+	// ops.clusters.xxx.namespaces.xxx.resources.xxx.events
+	subjectSplits := strings.Split(subject, ".")
+	if len(subjectSplits) == 8 {
+		resources := subjectSplits[5]
+		AppendField(result, "namespace", subjectSplits[4])
+		if len(resources) > 2 {
+			AppendField(result, resources[:len(resources)-2], subjectSplits[6])
+		}
+	}
+	return result.String()
 }
 
 func (e EventTaskRunReport) IsAlert() bool {
@@ -164,7 +184,7 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	return e, err
 }
 
-func GetCloudEventString(ce cloudevents.Event) string {
+func GetCloudEventReadable(ce cloudevents.Event) string {
 	if ce.Type() == opsconstants.Controller {
 		data := &EventController{}
 		ce.DataAs(data)
@@ -204,7 +224,7 @@ func GetCloudEventString(ce cloudevents.Event) string {
 	} else if ce.Type() == opsconstants.Kube {
 		data := &EventKube{}
 		ce.DataAs(data)
-		return data.String()
+		return data.Readable(ce)
 	} else {
 		return string(ce.Data())
 	}
