@@ -434,7 +434,6 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 		if err != nil {
 			logger.Error.Println(err, "failed to list hosts")
 		}
-		logger.Info.Println("any: ", len(nodes.Items), len(hosts.Items))
 		// find node
 		var targetNode *corev1.Node
 		for _, node := range nodes.Items {
@@ -449,7 +448,6 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 				break
 			}
 		}
-		logger.Info.Println(targetNode.Name)
 		// find host
 		for _, host := range hosts.Items {
 			if host.Spec.Address == opsutils.GetNodeInternalIp(targetNode) {

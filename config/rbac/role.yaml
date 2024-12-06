@@ -34,6 +34,58 @@ rules:
 - apiGroups:
   - crd.chenshaowen.com
   resources:
+  - eventhooks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - eventhooks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - eventhooks/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - events
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - events/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
+  - events/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - crd.chenshaowen.com
+  resources:
   - hosts
   verbs:
   - create

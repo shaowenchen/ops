@@ -24,7 +24,6 @@ const SubjectPipelineRun = SubjectPrefix + "." + PipelineRuns
 const SubjectWebhook = SubjectPrefix + "." + Webhooks
 const SubjectDeployments = SubjectPrefix + "." + Deployments
 
-
 func GetClusterSubject(cluster, namespace, format string) string {
 	return fmt.Sprintf(format, cluster, namespace)
 }
