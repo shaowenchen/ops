@@ -1,5 +1,5 @@
 /*
-Copyright 2022 shaowenchen.
+Copyright 2024 shaowenchen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,22 +42,13 @@ type EventHooksReconciler struct {
 	client.Client
 	Scheme      *runtime.Scheme
 	mutex       sync.RWMutex
-	eventbusMap map[string]bool
+	eventbusMap map[string]context.CancelFunc
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the EventHooks object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
@@ -70,7 +61,7 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	obj := &opsv1.EventHooks{}
 	err := r.Get(ctx, req.NamespacedName, obj)
 
-	//if delete, stop watch
+	// If delete, stop watch and exit the goroutine
 	if apierrors.IsNotFound(err) {
 		return ctrl.Result{}, r.delete(logger, ctx, req.NamespacedName)
 	}
@@ -78,23 +69,38 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-
-	return ctrl.Result{}, r.create(logger, ctx, obj)
+	logger.Debug.Println("Reconcile EventHooks: ", obj.Name)
+	go r.create(logger, ctx, obj)
+	return ctrl.Result{}, nil
 }
 
 func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context, obj *opsv1.EventHooks) error {
 	if r.eventbusMap == nil {
-		r.eventbusMap = make(map[string]bool)
+		r.eventbusMap = make(map[string]context.CancelFunc)
 	}
-	if _, ok := r.eventbusMap[obj.Namespace]; ok {
-		r.delete(logger, ctx, types.NamespacedName{
-			Namespace: obj.Namespace,
-			Name:      obj.Name,
-		})
+
+	// Cancel existing context if it exists
+	if cancel, ok := r.eventbusMap[obj.Namespace]; ok {
+		cancel()
+		r.mutex.Lock()
+		delete(r.eventbusMap, obj.Namespace)
+		r.mutex.Unlock()
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	r.mutex.Lock()
+	r.eventbusMap[obj.Namespace] = cancel
+	r.mutex.Unlock()
+
 	client := &opsevent.EventBus{}
 	opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, "eventhook config success, subject: "+obj.Spec.Subject+", time: "+time.Now().Format(time.RFC3339), "")
-	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).Subscribe(context.TODO(), func(ctx context.Context, event cloudevents.Event) {
+	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).Subscribe(ctx, func(ctx context.Context, event cloudevents.Event) {
+		select {
+		case <-ctx.Done():
+			logger.Debug.Println("Exiting goroutine for EventHooks: ", obj.Name)
+			return
+		default:
+		}
 		eventStrings := opsevent.GetCloudEventString(event)
 		if len(obj.Spec.Keywords) > 0 {
 			skip := true
@@ -115,14 +121,13 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 }
 
 func (r *EventHooksReconciler) delete(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {
-	if r.eventbusMap == nil {
-		return nil
-	}
-	if _, ok := r.eventbusMap[namespacedName.String()]; ok {
-		//Todo: close eventbus
-		r.mutex.Lock()
-		delete(r.eventbusMap, namespacedName.String())
-		r.mutex.Unlock()
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	if cancel, ok := r.eventbusMap[namespacedName.Namespace]; ok {
+		cancel() // Cancel the context to stop the goroutine
+		delete(r.eventbusMap, namespacedName.Namespace)
+		logger.Debug.Println("Deleted EventBus for namespace: ", namespacedName.Namespace)
 	}
 	return nil
 }
