@@ -123,22 +123,19 @@ type EventKube struct {
 func (e EventKube) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
 	AppendCluser(result, ce)
-	AppendField(result, "type", e.Type)
-	AppendField(result, "reason", e.Reason)
-	AppendField(result, "creationTimestamp", e.CreationTimestamp.Format("2006-01-02 15:04:05"))
-	AppendField(result, "from", e.From)
-	AppendField(result, "message", e.Message)
-	//
 	subject := ce.Subject()
 	// ops.clusters.xxx.namespaces.xxx.resources.xxx.events
 	subjectSplits := strings.Split(subject, ".")
 	if len(subjectSplits) == 8 {
 		resources := subjectSplits[5]
 		AppendField(result, "namespace", subjectSplits[4])
-		if len(resources) > 2 {
-			AppendField(result, resources[:len(resources)-2], subjectSplits[6])
-		}
+		AppendField(result, strings.TrimRight(resources, "s"), subjectSplits[6])
 	}
+	AppendField(result, "type", e.Type)
+	AppendField(result, "reason", e.Reason)
+	AppendField(result, "creationTimestamp", e.CreationTimestamp.Format("2006-01-02 15:04:05"))
+	AppendField(result, "from", e.From)
+	AppendField(result, "message", e.Message)
 	return result.String()
 }
 
