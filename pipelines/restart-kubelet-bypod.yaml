@@ -1,0 +1,25 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: restart-kubelet-bypod
+  namespace: ops-system
+  labels:
+    ops/copilot: enabled
+spec:
+  desc: 重启 kubelet
+  variables:
+    namespace:
+      display: namespace
+      required: true
+    pod:
+      display: pod name
+      required: true
+    host:
+      value: anymaster
+  tasks:
+    - name: 白名单检测
+      taskRef: check-whitelist
+    - name: get pod standing node
+      taskRef: get-pod-node
+    - name: 重启 kubelet
+      taskRef: restart-kubelet

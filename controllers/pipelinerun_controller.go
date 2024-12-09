@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -277,6 +278,7 @@ func (r *PipelineRunReconciler) registerClearCron() {
 
 func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, p *opsv1.Pipeline, pr *opsv1.PipelineRun) (err error) {
 	runAlways := false
+	latestTrOuput := ""
 	for _, tRef := range p.Spec.Tasks {
 		if runAlways && !tRef.RunAlways {
 			continue
@@ -292,6 +294,15 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			})
 			continue
 		}
+		// patch latest tr ouput var:value to variables
+		// Todo: support multi vars
+		if latestTrOuput != "" {
+			latestTrOuputArr := strings.Split(latestTrOuput, ":")
+			if len(latestTrOuputArr) == 2 {
+				pr.Spec.Variables[latestTrOuputArr[0]] = latestTrOuputArr[1]
+			}
+		}
+
 		tr := opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
 		err = r.Client.Create(ctx, tr)
 		if err != nil {
@@ -312,6 +323,14 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			if trRunning.Status.RunStatus == opsconstants.StatusRunning || trRunning.Status.RunStatus == opsconstants.StatusEmpty {
 				continue
 			} else if trRunning.Status.RunStatus == opsconstants.StatusSuccessed {
+				// patch latest tr ouput var:value to variables
+				if len(trRunning.Status.TaskRunNodeStatus) == 1 {
+					for _, nodeStatus := range trRunning.Status.TaskRunNodeStatus {
+						if len(nodeStatus.TaskRunStep) > 0 {
+							latestTrOuput = nodeStatus.TaskRunStep[len(nodeStatus.TaskRunStep)-1].StepOutput
+						}
+					}
+				}
 				break
 			} else {
 				runAlways = true

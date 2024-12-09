@@ -9,7 +9,6 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
-	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsopt "github.com/shaowenchen/ops/pkg/option"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
