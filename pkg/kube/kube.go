@@ -117,6 +117,14 @@ func GetNodes(ctx context.Context, logger *opslog.Logger, client *kubernetes.Cli
 		nodeList = wokers
 		return
 	}
+	// if allmaster
+	if kubeOpt.IsAllMasters() {
+		nodeList = masters
+		return
+	} else if kubeOpt.IsAllWorkers() {
+		nodeList = wokers
+		return
+	}
 	// random select one
 	if kubeOpt.IsAnyMaster() {
 		nodeList = masters
