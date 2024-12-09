@@ -93,7 +93,16 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 			logger.Error.Println(err)
 		}
 		stepFunc := GetKubeStepFunc(s)
-		stepStatus, stepOutput, stepErr := stepFunc(logger, t, kc, node, s, taskOpt, kubeOpt)
+		// patch node to master, if content including kubectl
+		master := node
+		if strings.Contains(s.Content, "kubectl") && !kc.IsMaster(node) {
+			master, err = kc.GetAnyMaster()
+			if err != nil {
+				logger.Error.Println(err)
+				return err
+			}
+		}
+		stepStatus, stepOutput, stepErr := stepFunc(logger, t, kc, master, s, taskOpt, kubeOpt)
 		stepStatus = GetValidStatusError(stepStatus, stepErr)
 		tr.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, stepStatus)
 		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")

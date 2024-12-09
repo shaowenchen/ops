@@ -4,8 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
+	"time"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsopt "github.com/shaowenchen/ops/pkg/option"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
@@ -15,9 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"math/rand"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
 )
 
 type KubeConnection struct {
@@ -69,6 +71,14 @@ func NewKubeConnection(kubeconfigPath string) (kc *KubeConnection, err error) {
 	}
 	err = kc.BuildClients()
 	return
+}
+
+func (kc *KubeConnection) IsMaster(node *corev1.Node) bool {
+	return opsutils.IsMasterNode(node)
+}
+
+func (kc *KubeConnection) GetAnyMaster() (node *corev1.Node, err error) {
+	return opsutils.GetAnyMaster(kc.Client)
 }
 
 func (kc *KubeConnection) SyncTasks(isDeleted bool, objs []opsv1.Task) (err error) {
