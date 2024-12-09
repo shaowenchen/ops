@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	Xiezuo = "xiezuo"
+	Xiezuo  = "xiezuo"
+	Webhook = "webhook"
 )
 
 type PostInterface interface {
@@ -15,7 +16,8 @@ type PostInterface interface {
 }
 
 var NotificationMap = map[string]PostInterface{
-	Xiezuo: &XiezuoPost{},
+	Xiezuo:  &XiezuoPost{},
+	Webhook: &WebhookPost{},
 }
 
 type XiezuoPost struct {
@@ -34,6 +36,26 @@ func (xiezuo *XiezuoPost) Post(url string, options map[string]string, data strin
 	waoMsgJson, _ := json.Marshal(waoMsg)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(waoMsgJson)))
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	_, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type WebhookPost struct {
+	URL string
+}
+
+func (webhook *WebhookPost) Post(url string, options map[string]string, data string, addtional string) error {
+	data = data + addtional
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(data)))
 	if err != nil {
 		return err
 	}
