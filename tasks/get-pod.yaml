@@ -15,4 +15,4 @@ spec:
       required: true
   steps:
     - name: get pod status
-      content: kubectl get pod ${pod} -n ${namespace}
+      content: kubectl get pod ${pod} -n ${namespace} -o wide

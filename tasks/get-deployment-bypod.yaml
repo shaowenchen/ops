@@ -16,11 +16,6 @@ spec:
   steps:
     - name: get pod deployment
       content: |
-        APP_SELECTOR=$(kubectl get pod ${pod} -n ${namespace} -o jsonpath='{.metadata.labels.app}')
+        export deployment=`echo ${pod} | cut -d'-' -f1-4`
+        kubectl get deployments ${deployment} -n ${namespace}
 
-        if [ -z "$APP_SELECTOR" ]; then
-          echo "cannot find app selector"
-          exit 1
-        fi
-
-        kubectl get deployments -n ${namespace} -l app=${APP_SELECTOR}
