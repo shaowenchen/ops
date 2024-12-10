@@ -7,7 +7,7 @@ spec:
   desc: set a better kernel parameters for kubernetes host
   steps:
     - name: install required packages
-      content: apt-get install -y openssl socat conntrack ipset ebtables chrony ipvsadm
+      content: apt-get install -y openssl socat conntrack ipset ebtables chrony ipvsadm nfs-common
     - name: Max PID
       content: echo "kernel.pid_max=65535 " >> /etc/sysctl.conf && sysctl -p
     - name: Max Thread
