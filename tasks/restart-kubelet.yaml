@@ -14,5 +14,4 @@ spec:
         systemctl is-active kubelet
     - name: check-activeTime
       content: |
-        systemctl show kubelet -p ActiveEnterTimestamp
-
+        systemctl show kubelet -p ActiveEnterTimestamp | awk -F= '{print $2}'

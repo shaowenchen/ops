@@ -14,7 +14,7 @@ spec:
       display: pod name
       required: true
   steps:
-    - name: get pod status
+    - name: get pod standing node
       content: |
         host=`kubectl get pod ${pod} -n ${namespace} -o jsonpath='{.spec.nodeName}'`
         if [ -z "$host" ]; then

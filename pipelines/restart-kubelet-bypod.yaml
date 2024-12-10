@@ -10,7 +10,7 @@ spec:
   tasks:
     - name: 白名单检测
       taskRef: check-whitelist
-    - name: get pod standing node
+    - name: 获取 Pod 所在节点
       taskRef: get-pod-node
     - name: 重启 kubelet
       taskRef: restart-kubelet
