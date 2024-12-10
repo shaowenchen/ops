@@ -17,13 +17,25 @@ spec:
   steps:
     - name: check whitelist
       content: |
-        #!/usr/bin/python
+        #!/bin/bash
+
         white="${white}"
         whitelist="${whitelist}"
-        whitelist = whitelist.split(',')
-        if white not in whitelist:
-            print("${white} is not in the whitelist.")
-            exit(1)
-        else:
-            print("${white} is in the whitelist.")
-            exit(0)
+
+        IFS=',' read -r -a whitelist_array <<< "$whitelist"
+
+        found=false
+        for item in "${whitelist_array[@]}"; do
+          if [[ "$item" == "$white" ]]; then
+            found=true
+            break
+          fi
+        done
+
+        if [[ "$found" == true ]]; then
+          echo "${white} is in the whitelist."
+          exit 0
+        else
+          echo "${white} is not in the whitelist."
+          exit 1
+        fi
