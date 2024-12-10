@@ -80,7 +80,11 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *R
 		for k, _ := range variables {
 			if val, ok := variables[k]; ok && val != "" {
 				variables[k] = val
-			} else if _, ok := extraVariables[k]; !ok && pipelineObj.Spec.Variables[k].Required && pipelineObj.Spec.Variables[k].Default == "" {
+			} else if _, ok := pipelineObj.Spec.Variables[k]; ok && pipelineObj.Spec.Variables[k].Value != "" {
+				variables[k] = pipelineObj.Spec.Variables[k].Value
+			} else if _, ok := pipelineObj.Spec.Variables[k]; ok && pipelineObj.Spec.Variables[k].Default != "" {
+				variables[k] = pipelineObj.Spec.Variables[k].Default
+			} else if _, ok := extraVariables[k]; !ok && pipelineObj.Spec.Variables[k].Required {
 				inValidParameters = true
 				variables[k] = ""
 			}
