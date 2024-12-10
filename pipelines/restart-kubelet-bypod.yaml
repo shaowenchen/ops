@@ -6,16 +6,7 @@ metadata:
   labels:
     ops/copilot: enabled
 spec:
-  desc: 重启 kubelet
-  variables:
-    namespace:
-      display: namespace
-      required: true
-    pod:
-      display: pod name
-      required: true
-    host:
-      value: anymaster
+  desc: 重启 Pod 所在节点的 kubelet
   tasks:
     - name: 白名单检测
       taskRef: check-whitelist

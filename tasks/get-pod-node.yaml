@@ -17,4 +17,8 @@ spec:
     - name: get pod status
       content: |
         host=`kubectl get pod ${pod} -n ${namespace} -o jsonpath='{.spec.nodeName}'`
+        if [ -z "$host" ]; then
+          echo "pod not found"
+          exit 1
+        fi
         echo "host:$host"
