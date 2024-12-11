@@ -139,8 +139,8 @@ func (e EventKube) Readable(ce cloudevents.Event) string {
 	return result.String()
 }
 
-func (e EventTaskRunReport) IsAlert() bool {
-	return e.Status == "alert"
+func (e EventTaskRunReport) IsAlerting() bool {
+	return e.Status == "alerting"
 }
 
 func builderEvent(data interface{}) (cloudevents.Event, error) {

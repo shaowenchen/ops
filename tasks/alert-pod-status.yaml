@@ -71,6 +71,6 @@ spec:
                               message += f"\n{namespace}/{pod_name} {status} {age_str}"
 
               if message:
-                  send('alert', message)
+                  send('alerting', message)
               else:
                   send('normal', 'All pods are in ok state and younger than 5 minutes.')

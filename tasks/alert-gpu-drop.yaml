@@ -82,6 +82,6 @@ spec:
                       message = str(e)
               finally:
                   if len(message) > 0:
-                      send('alert', message)
+                      send('alerting', message)
                   else:
                       send('normal', '')
