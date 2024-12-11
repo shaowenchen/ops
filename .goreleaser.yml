@@ -34,5 +34,6 @@ archives:
     - tasks/*
     - taskruns/*
     - pipelines/*
+    - eventhooks/*
 changelog:
   skip: true

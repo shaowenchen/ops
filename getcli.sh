@@ -108,6 +108,12 @@ fi
 
 mv "$OPSTEMPDIR/pipelines" ${OPSDIR}
 
+if [ -d "${OPSDIR}eventhooks" ]; then
+  mv ${OPSDIR}eventhooks ${OPSDIR}.eventhooks_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
+fi
+
+mv "$OPSTEMPDIR/eventhooks" ${OPSDIR}
+
 if [ `id -u` -eq 0 ]; then
   mv -f "$OPSTEMPDIR/opscli" /usr/local/bin/
   echo "Congratulations! Opscli live in /usr/local/bin/opscli"
