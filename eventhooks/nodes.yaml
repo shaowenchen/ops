@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: nodes
+  namespace: ops-system
+spec:
+  keywords:
+    - faild
+    - xid
+  subject: ops.clusters.*.nodes.*.event
+  type: xiezuo
+  url: https://xz.wps.cn/api/v1/webhook/send?key=

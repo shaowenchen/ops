@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: pods
+  namespace: ops-system
+spec:
+  keywords:
+    - Evicted
+    - OOMKilled
+  subject: ops.clusters.*.namespaces.*.pods.*.event
+  type: xiezuo
+  url: https://xz.wps.cn/api/v1/webhook/send?key=
