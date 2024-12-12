@@ -70,7 +70,7 @@ func GetPodLog(logger *opslog.Logger, ctx context.Context, debug bool, client *k
 			if err != nil {
 				return
 			}
-			if utils.IsSucceededPod(pod) {
+			if utils.IsSucceededPod(pod) || utils.IsUnknownPod(pod) {
 				return
 			}
 			if utils.IsFailedPod(pod) {
