@@ -163,6 +163,11 @@ func GetTaskAbsoluteFilePath(proxy, path string) string {
 	if _, err := os.Stat(localTaskPath); !os.IsNotExist(err) {
 		return localTaskPath
 	}
+	// try local task
+	localTaskPath = constants.GetOpsTaskDir() + "/" + path + ".yaml"
+	if _, err := os.Stat(localTaskPath); !os.IsNotExist(err) {
+		return localTaskPath
+	}
 	// try cloud task
 	cloudTaskPath := constants.GetCloudTaskDir() + "/" + path
 	cmd := ShellDownloadFile(proxy, cloudTaskPath, localTaskPath)
