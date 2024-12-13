@@ -464,6 +464,10 @@ func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, execut
 	}
 END:
 	err = sess.Wait()
+	// If the command is "reboot", "halt" , "ipmitool", handle disconnection as success
+	if strings.Contains(cmd, "reboot") || strings.Contains(cmd, "halt") || strings.Contains(cmd, "ipmitool") {
+		return "", nil
+	}
 	return strings.TrimRight(string(output), "\r\n"), err
 }
 
