@@ -143,7 +143,7 @@ func IsSucceededPod(pod *corev1.Pod) bool {
 
 func IsUnknownPod(pod *corev1.Pod) bool {
 	status := pod.Status.ContainerStatuses
-	if len(status) > 0 {
+	if len(status) > 0 && status[0].State.Terminated != nil {
 		return status[0].State.Terminated.Reason == "Unknown"
 	}
 	return false
