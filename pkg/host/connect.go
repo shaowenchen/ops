@@ -417,18 +417,12 @@ func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, execut
 	out, _ := sess.StdoutPipe()
 	err = sess.Start(cmd)
 	if err != nil {
-		// If the command is "reboot", "halt" , "ipmitool", handle disconnection as success
-		if strings.Contains(rawCmd, "reboot") || strings.Contains(rawCmd, "halt") || strings.Contains(rawCmd, "ipmitool") {
-			println("reboot or halt or ipmitool in if")
-			return "", nil
-		}
 		return "", err
 	}
-	if strings.Contains(rawCmd, "reboot") || strings.Contains(rawCmd, "halt") || strings.Contains(rawCmd, "ipmitool") {
-		println("reboot or halt or ipmitool")
+	//TODO: add timeout and improve the code
+	if strings.Contains(rawCmd, "reboot") || strings.Contains(rawCmd, "halt") || strings.Contains(rawCmd, "shutdown") || strings.Contains(rawCmd, "ipmitool") {
 		return "", nil
 	}
-
 	var (
 		output []byte
 		line   = ""
