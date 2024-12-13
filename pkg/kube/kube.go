@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -67,21 +68,18 @@ func GetPodLog(logger *opslog.Logger, ctx context.Context, debug bool, client *k
 				continue
 			}
 			logs, err = utils.GetPodLog(ctx, client, pod.Namespace, pod.Name)
-			if err != nil {
-				// fix unable to retrieve container logs for containerd
-				if utils.IsUnknownPod(pod) {
-					logger.Error.Println(err.Error())
-					err = nil
-				}
+			if len(logs) == 0 && err != nil {
+				logs = err.Error()
+			}
+			if err != nil && utils.IsUnknownPod(pod) || strings.Contains(logs, "connection refused") {
+				err = nil
 				return
 			}
 			if utils.IsSucceededPod(pod) {
 				return
 			}
 			if utils.IsFailedPod(pod) {
-				if len(logs) == 0 && err != nil {
-					logs = err.Error()
-				}
+
 				err = errors.New("status failed, logs: " + logs)
 				return
 			}

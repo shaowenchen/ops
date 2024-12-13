@@ -388,8 +388,8 @@ func (c *HostConnection) execScript(ctx context.Context, sudo bool, cmd string) 
 	return c.execSh(ctx, sudo, cmd)
 }
 
-func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, executor, param, cmd string) (stdout string, err error) {
-	cmd = opsutils.BuildBase64CmdWithExecutor(sudo, cmd, executor)
+func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, executor, param, rawCmd string) (stdout string, err error) {
+	cmd := opsutils.BuildBase64CmdWithExecutor(sudo, rawCmd, executor)
 	// run in localhost
 	if c.Host.Spec.Address == opsconstants.LocalHostIP {
 		runner := exec.Command("bash", "-c", cmd)
@@ -417,10 +417,15 @@ func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, execut
 	out, _ := sess.StdoutPipe()
 	err = sess.Start(cmd)
 	if err != nil {
+		// If the command is "reboot", "halt" , "ipmitool", handle disconnection as success
+		if strings.Contains(rawCmd, "reboot") || strings.Contains(rawCmd, "halt") || strings.Contains(rawCmd, "ipmitool") {
+			println("reboot or halt or ipmitool in if")
+			return "", nil
+		}
 		return "", err
 	}
-	// If the command is "reboot", "halt" , "ipmitool", handle disconnection as success
-	if strings.Contains(cmd, "reboot") || strings.Contains(cmd, "halt") || strings.Contains(cmd, "ipmitool") {
+	if strings.Contains(rawCmd, "reboot") || strings.Contains(rawCmd, "halt") || strings.Contains(rawCmd, "ipmitool") {
+		println("reboot or halt or ipmitool")
 		return "", nil
 	}
 
