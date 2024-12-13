@@ -68,6 +68,7 @@ func GetPodLog(logger *opslog.Logger, ctx context.Context, debug bool, client *k
 			}
 			logs, err = utils.GetPodLog(ctx, client, pod.Namespace, pod.Name)
 			if err != nil {
+				// fix unable to retrieve container logs for containerd
 				if utils.IsUnknownPod(pod) {
 					logger.Error.Println(err.Error())
 					err = nil
