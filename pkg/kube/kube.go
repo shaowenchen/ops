@@ -68,9 +68,13 @@ func GetPodLog(logger *opslog.Logger, ctx context.Context, debug bool, client *k
 			}
 			logs, err = utils.GetPodLog(ctx, client, pod.Namespace, pod.Name)
 			if err != nil {
+				if utils.IsUnknownPod(pod) {
+					logger.Error.Println(err.Error())
+					err = nil
+				}
 				return
 			}
-			if utils.IsSucceededPod(pod) || utils.IsUnknownPod(pod) {
+			if utils.IsSucceededPod(pod) {
 				return
 			}
 			if utils.IsFailedPod(pod) {
