@@ -83,6 +83,9 @@ func (bus *EventBus) WithSubject(subject string) *EventBus {
 }
 
 func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
+	if bus.Server == "" || bus.Subject == "" || data == nil {
+		return nil
+	}
 	event, err := builderEvent(data)
 	event.SetSubject(bus.Subject)
 	if err != nil {
