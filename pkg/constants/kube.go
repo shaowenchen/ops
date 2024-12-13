@@ -26,8 +26,8 @@ const LabelCopilotPipelineEnabledValue = "enabled"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
-const DefaultRuntimeImage = "registry.cn-hangzhou.aliyuncs.com/opshub/ubuntu:22.04"
-const OpsCliRuntimeImage = "registry.cn-hangzhou.aliyuncs.com/shaowenchen/opscli:latest"
+const DefaultRuntimeImage = "registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04"
+const OpsCliRuntimeImage = "registry.cn-beijing.aliyuncs.com/shaowenchen/opscli:latest"
 
 const SyncResourceStatusHeatSeconds = 60 * 5
 const SyncResourceRandomBiasSeconds = 60 * 2

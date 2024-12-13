@@ -5,7 +5,7 @@ metadata:
   namespace: ops-system
 spec:
   desc: install or uninstall volcano
-  runtimeImage: registry.cn-hangzhou.aliyuncs.com/shaowenchen/hubimage:latest
+  runtimeImage: registry.cn-beijing.aliyuncs.com/shaowenchen/hubimage:latest
   host: anymaster
   variables:
     action:

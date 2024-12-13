@@ -42,4 +42,4 @@ spec:
       content: echo "aws_secret_access_key = ${sk}" >> velero-credentials
 
     - name: Install Velero Server
-      content: ./velero-${velero_version}-linux-amd64/velero install --image registry.cn-hangzhou.aliyuncs.com/opshub/velero:${velero_version} --plugins registry.cn-hangzhou.aliyuncs.com/opshub/velero-plugin-for-aws:v1.5.1 --provider aws  --bucket ${bucket} --namespace velero --secret-file ./velero-credentials --use-restic --backup-location-config region=${region},s3ForcePathStyle="true",s3Url=${endpoint} --snapshot-location-config region=${region}
+      content: ./velero-${velero_version}-linux-amd64/velero install --image registry.cn-beijing.aliyuncs.com/opshub/velero:${velero_version} --plugins registry.cn-beijing.aliyuncs.com/opshub/velero-plugin-for-aws:v1.5.1 --provider aws  --bucket ${bucket} --namespace velero --secret-file ./velero-credentials --use-restic --backup-location-config region=${region},s3ForcePathStyle="true",s3Url=${endpoint} --snapshot-location-config region=${region}

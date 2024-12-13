@@ -61,7 +61,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: DEFAULT_RUNTIME_IMAGE
-              value: registry.cn-hangzhou.aliyuncs.com/opshub/ubuntu:22.04
+              value: registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04
             - name: EVENT_CLUSTER
               value: "default"
             - name: EVENT_ENDPOINT
