@@ -16,7 +16,7 @@ jobs:
       - name: Login to ACR
         uses: docker/login-action@v3
         with:
-          registry: https://registry.cn-hangzhou.aliyuncs.com
+          registry: https://registry.cn-beijing.aliyuncs.com
           username: "${{ secrets.ACR_USERNAME }}"
           password: "${{ secrets.ACR_PASSWORD }}"
       - name: Set up QEMU
@@ -33,7 +33,7 @@ jobs:
       - name: Push ops-controller-manager to aliyun
         run: |
           export image=ops-controller-manager:v1.0.0
-          docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-hangzhou.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
+          docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
       - name: Build and push Server
         uses: docker/build-push-action@v6
         with:
@@ -44,7 +44,7 @@ jobs:
       - name: Push ops-server to aliyun
         run: |
           export image=ops-server:v1.0.0
-          docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-hangzhou.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
+          docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
       - name: Build and push Cli
         uses: docker/build-push-action@v6
         with:
@@ -55,4 +55,4 @@ jobs:
       - name: Push ops-cli to aliyun
         run: |
           export image=ops-cli:v1.0.0
-          docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-hangzhou.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
+          docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
