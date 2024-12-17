@@ -16,8 +16,6 @@ spec:
               import re
               from datetime import datetime, timedelta
 
-              threshold = int('${threshold}')
-
               def send(status, message, node_name):
                   payload = {
                       'kind': '${TASKRUN}',
@@ -46,7 +44,7 @@ spec:
 
                   if hosts_data and 'items' in hosts_data:
                       for host in hosts_data['items']:
-                          if host['status']['heartStatus:'] == 'Failed':
+                          if host['status']['heartStatus'] == 'Failed':
                               status = 'alerting'
                               message = f"Host {host['metadata']['name']} failed to report heart status."
                               send(status, message, host['metadata']['name'])

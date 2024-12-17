@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: clear-opspod
+  namespace: ops-system
+spec:
+  desc: clear ops task pod
+  host: anymaster
+  steps:
+    - name: clear pod
+      content: |
+        kubectl -n ops-system delete pod -l ops/task=true  --field-selector=status.phase!=Running
