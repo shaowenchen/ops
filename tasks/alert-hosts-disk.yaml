@@ -21,12 +21,15 @@ spec:
 
               threshold = int('${threshold}')
 
-              def send(status, message, node_name):
+              def send(status, message, host, value):
                   payload = {
                       'kind': '${TASKRUN}',
                       'status': status,
                       'message': message,
-                      'node': node_name
+                      'host': host, 
+                      'threshold': '${threshold}',
+                      'operator': '>',
+                      'value': value
                   }
                   headers = {
                       'Content-Type': 'application/json'
@@ -52,6 +55,7 @@ spec:
                   status = 'normal'
                   message = ''
                   node_name = host['status']['hostname']
+                  value = ''
                   try:
                       disk_usage = host['status'].get('diskUsagePercent', '')
                       disk_usage_list = extract_disk_usage(disk_usage)
@@ -60,21 +64,22 @@ spec:
                           if usage > threshold:
                               message += (f"Disk {i + 1} usage {usage}% exceeds threshold {threshold}% on host {node_name}.")
                               status = 'alerting'
+                              value = str(usage)
                   except KeyError as e:
                       print(f"KeyError: {e}")
                       message = f"Invalid data format for host {node_name}"
                       status = 'alerting'
                   
-                  return status, message, node_name
+                  return status, message, node_name, value
 
               def main():
                   hosts_data = get_all_hosts()
 
                   if hosts_data and 'items' in hosts_data:
                       for host in hosts_data['items']:
-                          status, message, node_name = check_disk_usage(host)
-                          if message:
-                              send(status, message, node_name)
+                          status, message, node_name, value = check_disk_usage(host)
+                          if status == 'alerting':
+                              send(status, message, node_name, value)
 
               if __name__ == "__main__":
                   main()

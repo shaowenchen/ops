@@ -16,12 +16,15 @@ spec:
               import re
               from datetime import datetime, timedelta
 
-              def send(status, message, node_name):
+              def send(status, message, host, value):
                   payload = {
                       'kind': '${TASKRUN}',
                       'status': status,
                       'message': message,
-                      'node': node_name
+                      'host': host,
+                      'threshold': 'Successed',
+                      'operator': '!=',
+                      'value': value
                   }
                   headers = {
                       'Content-Type': 'application/json'
@@ -47,7 +50,7 @@ spec:
                           if host['status']['heartStatus'] == 'Failed':
                               status = 'alerting'
                               message = f"Host {host['metadata']['name']} failed to report heart status."
-                              send(status, message, host['metadata']['name'])
+                              send(status, message, host['metadata']['name'], 'Failed')
 
               if __name__ == "__main__":
                   main()

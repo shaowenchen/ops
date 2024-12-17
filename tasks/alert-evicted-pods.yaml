@@ -19,11 +19,14 @@ spec:
 
               threshold = int('${threshold}')  # Evicted pod 阈值
 
-              def send(status, message):
+              def send(status, message, value):
                   payload = {
                       'kind': '${TASKRUN}',
                       'status': status,
-                      'message': message
+                      'message': message,
+                      'threshold': '${threshold}',
+                      'operator': '>',
+                      'value': value
                   }
                   headers = {
                       'Content-Type': 'application/json'
@@ -47,10 +50,7 @@ spec:
 
                   if evicted_count >= threshold:
                       message = f"Evicted pods count {evicted_count} exceeds threshold {threshold}."
-                      send('alerting', message)
-                  else:
-                      message = f"Evicted pods count {evicted_count} is below threshold {threshold}."
-                      send('normal', message)
+                      send('alerting', message, evicted_count)
 
               if __name__ == "__main__":
                   main()
