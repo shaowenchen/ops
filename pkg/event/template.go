@@ -12,7 +12,7 @@ func (e EventHost) GetDiskUsageAlertMessageWithAction(event cloudevents.Event, a
 }
 
 func AppendField(result *strings.Builder, label, value string) {
-	result.WriteString(fmt.Sprintf("%s: %s  \n", label, value))
+	result.WriteString(fmt.Sprintf("%s: %s\n", label, value))
 }
 
 func AppendCluser(result *strings.Builder, ce cloudevents.Event) {
@@ -30,8 +30,8 @@ func (e EventHost) GetDiskUsageAlertMessage(event cloudevents.Event) string {
 	AppendField(result, "kind", "alert-disk-usage")
 	AppendField(result, "host", e.Status.Hostname)
 	AppendField(result, "value", e.Status.DiskUsagePercent)
-	AppendField(result, "action", "clean disk")
 	AppendField(result, "time", event.Time().Local().Format("2006-01-02 15:04:05"))
+	AppendField(result, "action", "clean disk")
 	return result.String()
 }
 

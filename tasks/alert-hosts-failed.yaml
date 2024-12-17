@@ -51,6 +51,10 @@ spec:
                               status = 'alerting'
                               message = f"Host {host['metadata']['name']} failed to report heart status."
                               send(status, message, host['metadata']['name'], 'Failed')
+                          else:
+                              status = 'normal'
+                              message = f"Host {host['metadata']['name']} reported heart status successfully."
+                              send(status, message, host['metadata']['name'], 'Successed')
 
               if __name__ == "__main__":
                   main()

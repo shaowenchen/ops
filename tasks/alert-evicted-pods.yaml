@@ -17,7 +17,7 @@ spec:
               import requests
               import json
 
-              threshold = int('${threshold}')  # Evicted pod 阈值
+              threshold = int('${threshold}')
 
               def send(status, message, value):
                   payload = {
@@ -51,6 +51,9 @@ spec:
                   if evicted_count >= threshold:
                       message = f"Evicted pods count {evicted_count} exceeds threshold {threshold}."
                       send('alerting', message, evicted_count)
+                  else:
+                      message = f"Evicted pods count {evicted_count} is less than threshold {threshold}."
+                      send('normal', message, evicted_count)
 
               if __name__ == "__main__":
                   main()

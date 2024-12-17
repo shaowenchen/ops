@@ -83,6 +83,7 @@ func (e EventWebhook) Readable(ce cloudevents.Event) string {
 	AppendField(result, "content", e.Content)
 	AppendField(result, "source", e.Source)
 	AppendField(result, "webhookUrl", e.WebhookUrl)
+	AppendField(result, "time", ce.Time().Local().Format("2006-01-02 15:04:05"))
 	return result.String()
 }
 
@@ -98,13 +99,15 @@ type EventTaskRunReport struct {
 
 func (e EventTaskRunReport) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
-	result.WriteString(`host: ` + e.Host)
-	result.WriteString(`kind: ` + e.Kind)
-	result.WriteString(`threshold: ` + e.Threshold)
-	result.WriteString(`operator: ` + e.Operator)
-	result.WriteString(`value: ` + e.Value)
-	result.WriteString(`status: ` + e.Status)
-	result.WriteString(`message: ` + e.Message)
+	AppendCluser(result, ce)
+	AppendField(result, `host: `, e.Host)
+	AppendField(result, `kind: `, e.Kind)
+	AppendField(result, `threshold: `, e.Threshold)
+	AppendField(result, `operator: `, e.Operator)
+	AppendField(result, `value: `, e.Value)
+	AppendField(result, `status: `, e.Status)
+	AppendField(result, `message: `, e.Message)
+	AppendField(result, "time", ce.Time().Local().Format("2006-01-02 15:04:05"))
 	return result.String()
 }
 
@@ -169,6 +172,14 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 		eventType = opsconstants.Kube
 	default:
 		eventType = opsconstants.Default
+	}
+	if eventType == opsconstants.Default {
+		dataMap := data.(map[string]interface{})
+		if _, ok1 := dataMap["operator"]; ok1 {
+			if _, ok2 := dataMap["threshold"]; ok2 {
+				eventType = opsconstants.TaskRunReport
+			}
+		}
 	}
 	e.SetType(eventType)
 	err := e.SetData(cloudevents.ApplicationJSON, data)

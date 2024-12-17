@@ -73,8 +73,7 @@ spec:
                   if hosts_data and 'items' in hosts_data:
                       for host in hosts_data['items']:
                           status, message, node_name, value = check_mem_usage(host)
-                          if status == 'alerting':
-                              send(status, message, node_name, value)
+                          send(status, message, node_name, value)
 
               if __name__ == "__main__":
                   main()
