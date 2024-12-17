@@ -1,0 +1,11 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: alert-evicted-pods-reports
+  namespace: ops-system
+spec:
+  keywords:
+    - alerting
+  subject: ops.clusters.*.namespaces.ops-system.taskruns.alert-evicted-pods.reports
+  type: xiezuo
+  url: https://xz.wps.cn/api/v1/webhook/send?key=

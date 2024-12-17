@@ -1,0 +1,8 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-hosts-failed
+  namespace: ops-system
+spec:
+  crontab: "*/10 * * * *"
+  taskRef: alert-hosts-failed

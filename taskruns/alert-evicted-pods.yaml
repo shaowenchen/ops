@@ -1,0 +1,10 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-evicted-pods
+  namespace: ops-system
+spec:
+  crontab: "*/10 * * * *"
+  taskRef: alert-evicted-pods
+  variables:
+    threshold: "10"
