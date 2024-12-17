@@ -1,8 +1,0 @@
-apiVersion: crd.chenshaowen.com/v1
-kind: TaskRun
-metadata:
-  name: alert-node-event
-  namespace: ops-system
-spec:
-  crontab: "*/5 * * * *"
-  taskRef: alert-node-event

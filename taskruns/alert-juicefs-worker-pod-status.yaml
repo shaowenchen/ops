@@ -4,7 +4,7 @@ metadata:
   name: alert-juicefs-worker-pod-status
   namespace: ops-system
 spec:
-  crontab: "*/5 * * * *"
+  crontab: "*/10 * * * *"
   taskRef: alert-pod-status
   variables:
     labels: "role=juicefs-worker"

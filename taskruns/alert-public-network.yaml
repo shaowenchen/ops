@@ -1,11 +1,11 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: TaskRun
 metadata:
-  name: alert-juicefs-http-status
+  name: alert-public-network
   namespace: ops-system
 spec:
-  crontab: "*/5 * * * *"
+  crontab: "*/10 * * * *"
   taskRef: alert-http-status
   variables:
-    url: http://192.168.1.1:8000/
+    url: https://www.qq.com/
     threshold: "200"

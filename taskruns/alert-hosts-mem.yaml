@@ -1,8 +1,10 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: TaskRun
 metadata:
-  name: alert-dataset-notready
+  name: alert-hosts-mem
   namespace: ops-system
 spec:
   crontab: "*/10 * * * *"
-  taskRef: alert-dataset-notready
+  taskRef: alert-hosts-mem
+  variables:
+    threshold: "80"

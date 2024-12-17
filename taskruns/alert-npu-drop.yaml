@@ -6,5 +6,3 @@ metadata:
 spec:
   crontab: "30 * * * *"
   taskRef: alert-npu-drop
-  variables:
-    notifaction: ${notifaction}
