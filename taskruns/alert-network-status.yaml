@@ -1,0 +1,10 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: alert-network-status
+  namespace: ops-system
+spec:
+  crontab: "*/10 * * * *"
+  taskRef: alert-network-status
+  variables:
+    ip: "127.0.0.1"
