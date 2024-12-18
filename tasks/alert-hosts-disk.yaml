@@ -54,7 +54,7 @@ spec:
               def check_disk_usage(host):
                   status = 'normal'
                   message = ''
-                  node_name = host['status']['hostname']
+                  node_name = host['status'].get('hostname', '')
                   value = ''
                   try:
                       disk_usage = host['status'].get('diskUsagePercent', '')

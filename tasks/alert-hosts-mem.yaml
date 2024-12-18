@@ -51,7 +51,7 @@ spec:
                   status = 'normal'
                   message = ''
                   value = ''
-                  node_name = host['status']['hostname']
+                  node_name = host['status'].get('hostname', '')
                   try:
                       mem_usage = host['status'].get('memUsagePercent', '')
                       mem_usage_int = int(mem_usage.strip('%').split('.')[0])
