@@ -21,12 +21,13 @@ spec:
               ip = '${ip}'
               message = ''
 
-              def send(status, message):
+              def send(status, message, value):
                   payload = {
                       'host': '${HOSTNAME}',
                       'kind': '${TASKRUN}',
-                      'threshold': '0',
+                      'threshold': 'up',
                       'operator': '!=',
+                      'value': value,
                       'status': status,
                       'message': message
                   }
@@ -53,4 +54,6 @@ spec:
                   message = f"{ip} is not reachable"
 
               if len(message) > 0:
-                  send('alerting', message)
+                  send('alerting', message, 'down')
+              else:
+                  send('normal', 'network is up', 'up')

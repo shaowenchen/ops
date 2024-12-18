@@ -8,3 +8,4 @@ spec:
   taskRef: alert-network-status
   variables:
     ip: "127.0.0.1"
+    host: "all"
