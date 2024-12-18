@@ -26,12 +26,9 @@ type XiezuoPost struct {
 
 func (xiezuo *XiezuoPost) Post(url string, options map[string]string, data string, addtional string) error {
 	data = data + addtional
-	woaMd := map[string]interface{}{
-		"text": data,
-	}
 	waoMsg := map[string]interface{}{
-		"msgtype":  "markdown",
-		"markdown": woaMd,
+		"msgtype": "text",
+		"content": data,
 	}
 	waoMsgJson, _ := json.Marshal(waoMsg)
 

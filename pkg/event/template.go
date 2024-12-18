@@ -12,7 +12,7 @@ func (e EventHost) GetDiskUsageAlertMessageWithAction(event cloudevents.Event, a
 }
 
 func AppendField(result *strings.Builder, label, value string) {
-	result.WriteString(fmt.Sprintf("%s: %s\n", label, value))
+	result.WriteString(fmt.Sprintf("%s: %s \n", label, value))
 }
 
 func AppendCluser(result *strings.Builder, ce cloudevents.Event) {
