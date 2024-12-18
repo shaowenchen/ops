@@ -64,7 +64,7 @@ spec:
                           if usage > threshold:
                               message += (f"Disk {i + 1} usage {usage}% exceeds threshold {threshold}% on host {node_name}.")
                               status = 'alerting'
-                          value = str(usage)
+                              value = str(usage)
                   except KeyError as e:
                       print(f"KeyError: {e}")
                       message = f"Invalid data format for host {node_name}"
@@ -80,7 +80,8 @@ spec:
                           if host['status']['heartStatus'] == 'Failed':
                               continue
                           status, message, node_name, value = check_disk_usage(host)
-                          send(status, message, node_name, value)
+                          if status == 'alerting':
+                              send(status, message, node_name, value)
 
               if __name__ == "__main__":
                   main()

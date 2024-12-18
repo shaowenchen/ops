@@ -100,15 +100,14 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 		default:
 		}
 		eventStrings := opsevent.GetCloudEventReadable(event)
-		notification := false
+		notification := true
 		if len(obj.Spec.Keywords) > 0 {
+			notification = false
 			for _, keyword := range obj.Spec.Keywords {
 				if strings.Contains(eventStrings, keyword) {
 					notification = true
 				}
 			}
-		} else {
-			notification = true
 		}
 		if notification {
 			opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)

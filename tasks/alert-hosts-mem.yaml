@@ -59,7 +59,7 @@ spec:
                       if mem_usage_int > threshold:
                         message += (f"Memory usage {mem_usage_int}% exceeds threshold {threshold}% on host {node_name}.")
                         status = 'alerting'
-                      value = str(mem_usage_int)
+                        value = str(mem_usage_int)
                   except KeyError as e:
                       print(f"KeyError: {e}")
                       message = f"Invalid data format for host {node_name}"
@@ -75,7 +75,8 @@ spec:
                           if host['status']['heartStatus'] == 'Failed':
                               continue
                           status, message, node_name, value = check_mem_usage(host)
-                          send(status, message, node_name, value)
+                          if status == 'alerting':
+                              send(status, message, node_name, value)
 
               if __name__ == "__main__":
                   main()
