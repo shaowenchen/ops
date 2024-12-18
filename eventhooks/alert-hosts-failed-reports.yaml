@@ -6,6 +6,6 @@ metadata:
 spec:
   keywords:
     - alerting
-  subject: ops.clusters.*.namespaces.ops-system.taskruns.alert-hosts-failed.reports
+  subject: ops.clusters.*.namespaces.ops-system.taskruns.alert-hosts-failed.reports.*
   type: xiezuo
   url: https://xz.wps.cn/api/v1/webhook/send?key=

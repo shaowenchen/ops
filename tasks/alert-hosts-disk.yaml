@@ -34,7 +34,7 @@ spec:
                   headers = {
                       'Content-Type': 'application/json'
                   }
-                  response = requests.post('${OPSSERVER_ENDPOINT}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports',
+                  response = requests.post('${OPSSERVER_ENDPOINT}/api/v1/namespaces/${NAMESPACE}/events/taskruns.${TASKRUN}.reports.' + host,
                                           headers=headers, data=json.dumps(payload))
                   print(response.text)
 
@@ -77,6 +77,8 @@ spec:
 
                   if hosts_data and 'items' in hosts_data:
                       for host in hosts_data['items']:
+                          if host['status']['heartStatus'] == 'Failed':
+                              continue
                           status, message, node_name, value = check_disk_usage(host)
                           send(status, message, node_name, value)
 

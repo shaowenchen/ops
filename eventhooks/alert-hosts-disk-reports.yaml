@@ -6,7 +6,7 @@ metadata:
 spec:
   keywords:
     - alerting
-  subject: ops.clusters.*.namespaces.ops-system.taskruns.alert-hosts-disk.reports
+  subject: ops.clusters.*.namespaces.ops-system.taskruns.alert-hosts-disk.reports.*
   type: webhook
   url: http://x.x.x.x/webhook
   additional: "action: clear-disk"
