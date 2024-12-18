@@ -52,8 +52,7 @@ spec:
               is_connected = check_connectivity(ip)
               if not is_connected:
                   message = f"{ip} is not reachable"
-
-              if len(message) > 0:
                   send('alerting', message, 'down')
               else:
-                  send('normal', 'network is up', 'up')
+                  message = f"{ip} is reachable"
+                  send('normal', message, 'up')

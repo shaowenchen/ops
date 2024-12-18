@@ -24,18 +24,24 @@ type XiezuoPost struct {
 	URL string
 }
 
+type XiezuoBody struct {
+	Msgtype  string `json:"msgtype"`
+	Markdown struct {
+		Text string `json:"text"`
+	} `json:"markdown"`
+	Text struct {
+		Content string `json:"content"`
+	} `json:"text"`
+}
+
 func (xiezuo *XiezuoPost) Post(url string, options map[string]string, data string, addtional string) error {
 	data = data + addtional
-	woaData := map[string]interface{}{
-		"content": data,
-	}
-	woaMsg := map[string]interface{}{
-		"msgtype": "text",
-		"text":    woaData,
-	}
-	woaMsgJson, _ := json.Marshal(woaMsg)
+	msg := XiezuoBody{}
+	msg.Msgtype = "text"
+	msg.Text.Content = data
+	json, _ := json.Marshal(msg)
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(woaMsgJson)))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(json)))
 	if err != nil {
 		return err
 	}
@@ -44,6 +50,7 @@ func (xiezuo *XiezuoPost) Post(url string, options map[string]string, data strin
 	client := &http.Client{}
 	_, err = client.Do(req)
 	if err != nil {
+		println(err.Error())
 		return err
 	}
 	return nil

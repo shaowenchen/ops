@@ -95,7 +95,7 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).Subscribe(ctx, func(ctx context.Context, event cloudevents.Event) {
 		select {
 		case <-ctx.Done():
-			logger.Debug.Println("Exiting goroutine for EventHooks: ", obj.Name)
+			logger.Info.Println("Exiting goroutine for EventHooks: ", obj.Name)
 			return
 		default:
 		}
