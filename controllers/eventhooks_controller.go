@@ -106,6 +106,7 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 			for _, keyword := range obj.Spec.Keywords {
 				if strings.Contains(eventStrings, keyword) {
 					notification = true
+					break
 				}
 			}
 		}

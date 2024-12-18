@@ -175,8 +175,8 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	}
 	if eventType == opsconstants.Default {
 		dataMap := data.(map[string]interface{})
-		if _, ok1 := dataMap["operator"]; ok1 {
-			if _, ok2 := dataMap["threshold"]; ok2 {
+		if _, ok1 := dataMap["kind"]; ok1 {
+			if _, ok2 := dataMap["status"]; ok2 {
 				eventType = opsconstants.TaskRunReport
 			}
 		}
