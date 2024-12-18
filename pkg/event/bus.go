@@ -3,10 +3,11 @@ package event
 import (
 	"context"
 	"errors"
-	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"strings"
 	"sync"
+
+	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
 type GlobalEventBusClients struct {
@@ -15,8 +16,9 @@ type GlobalEventBusClients struct {
 }
 
 type ProducerConsumerClient struct {
-	Producer *cloudevents.Client
-	Consumer *cloudevents.Client
+	Producer      *cloudevents.Client
+	Consumer      *cloudevents.Client
+	ConsumerFuncs []func(ctx context.Context, event cloudevents.Event)
 }
 
 func (globalClient *GlobalEventBusClients) GetClient(endpoint string, subject string) (*ProducerConsumerClient, error) {
@@ -91,7 +93,6 @@ func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	// get client
 	client, err := CurrentEventBusClient.GetClient(bus.Server, bus.Subject)
 	if err != nil {
 		return err
@@ -103,10 +104,19 @@ func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
 	return nil
 }
 
-func (bus *EventBus) Subscribe(ctx context.Context, fn interface{}) error {
+func (bus *EventBus) Subscribe(ctx context.Context, fn func(ctx context.Context, event cloudevents.Event)) error {
 	client, err := CurrentEventBusClient.GetClient(bus.Server, bus.Subject)
 	if err != nil {
 		return err
 	}
-	return (*client.Consumer).StartReceiver(ctx, fn)
+
+	client.ConsumerFuncs = append(client.ConsumerFuncs, fn)
+
+	receiverFn := func(event cloudevents.Event) {
+		for _, consumerFunc := range client.ConsumerFuncs {
+			consumerFunc(ctx, event)
+		}
+	}
+
+	return (*client.Consumer).StartReceiver(ctx, receiverFn)
 }
