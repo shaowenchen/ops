@@ -39,11 +39,13 @@ import (
 // EventHooksReconciler reconciles a EventHooks object
 type EventHooksReconciler struct {
 	client.Client
-	Scheme                  *runtime.Scheme
-	subjectEventBusMapMutex sync.RWMutex
-	subjectEventBusMap      map[string]opsevent.EventBus
-	objSubjectMapMutex      sync.RWMutex
-	objSubjectMap           map[string]string
+	Scheme                      *runtime.Scheme
+	subjectEventBusMapMutex     sync.RWMutex
+	subjectEventBusMap          map[string]opsevent.EventBus
+	objSubjectMapMutex          sync.RWMutex
+	objSubjectMap               map[string]string
+	subjectSubscriptCancelMutex sync.RWMutex
+	subjectSubscriptCancel      map[string]context.CancelFunc
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks,verbs=get;list;watch;create;update;patch;delete
@@ -71,7 +73,7 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 	logger.Info.Println("Reconcile EventHooks: ", req.NamespacedName.String())
-	go r.update(logger, ctx, obj)
+	r.update(logger, ctx, obj)
 	return ctrl.Result{}, nil
 }
 
@@ -86,6 +88,9 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 	}
 	if r.objSubjectMap == nil {
 		r.objSubjectMap = make(map[string]string)
+	}
+	if r.subjectSubscriptCancel == nil {
+		r.subjectSubscriptCancel = make(map[string]context.CancelFunc)
 	}
 	if _, ok := r.objSubjectMap[obj.Name]; !ok {
 		r.objSubjectMap[obj.Name] = subject
@@ -122,9 +127,28 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 			}
 
 		})
+		r.subjectEventBusMap[eventhook.Name] = client
 	}
 	r.subjectEventBusMapMutex.Unlock()
-	client.Subscribe(ctx)
+	
+	r.subjectSubscriptCancelMutex.Lock()
+	if cancle, ok := r.subjectSubscriptCancel[subject]; ok {
+		cancle()
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	r.subjectSubscriptCancel[subject] = cancel
+	r.subjectSubscriptCancelMutex.Unlock()
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				println("Goroutine done")
+				return
+			default:
+				client.Subscribe(ctx)
+			}
+		}
+	}()
 	return nil
 }
 
@@ -132,7 +156,7 @@ func (r *EventHooksReconciler) delete(logger *opslog.Logger, ctx context.Context
 	if r.objSubjectMap == nil {
 		return nil
 	}
-	if subject, ok := r.objSubjectMap[namespacedName.String()]; ok {
+	if subject, ok := r.objSubjectMap[namespacedName.Name]; ok {
 		r.update(logger, ctx, &opsv1.EventHooks{
 			Spec: opsv1.EventHooksSpec{
 				Subject: subject,
