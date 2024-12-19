@@ -24,6 +24,7 @@ spec:
               def send(status, message):
                   payload = {
                       'host': '${HOSTNAME}',
+                      'type': 'TaskRunReport',
                       'kind': '${TASKRUN}',
                       'threshold': str(threshold),
                       'operator': '!=',

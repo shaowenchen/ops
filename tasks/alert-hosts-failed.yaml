@@ -19,6 +19,7 @@ spec:
               def send(status, message, host, value):
                   payload = {
                       'kind': '${TASKRUN}',
+                      'type': 'TaskRunReport',
                       'status': status,
                       'message': message,
                       'host': host,

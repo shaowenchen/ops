@@ -27,6 +27,7 @@ spec:
               def send(status, message):
                   payload = {
                       'kind': '${TASKRUN}',
+                      'type': 'TaskRunReport',
                       'threshold': str(threshold),
                       'operator': '>',
                       'value': len(abnormal_pods),

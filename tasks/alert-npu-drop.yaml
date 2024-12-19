@@ -25,6 +25,7 @@ spec:
                   payload = {
                       'host': '${HOSTNAME}',
                       'kind': '${TASKRUN}',
+                      'type': 'TaskRunReport',
                       'threshold': str(threshold),
                       'operator': '!=',
                       'status': status,

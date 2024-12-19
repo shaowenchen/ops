@@ -94,6 +94,7 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 	}
 	client.AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
 		eventStrings := opsevent.GetCloudEventReadable(event)
+		println("subjcet: ", event.Subject())
 		notification := true
 		if len(obj.Spec.Keywords) > 0 {
 			notification = false
@@ -105,6 +106,7 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 			}
 		}
 		if notification {
+			println("notification: ", eventStrings)
 			go opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
 		}
 

@@ -23,6 +23,7 @@ spec:
               def send(status, message):
                   payload = {
                       'host': '${HOSTNAME}',
+                      'type': 'TaskRunReport',
                       'kind': '${TASKRUN}',
                       'status': status,
                       'message': message

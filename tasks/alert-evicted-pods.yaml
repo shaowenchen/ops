@@ -22,6 +22,7 @@ spec:
               def send(status, message, value):
                   payload = {
                       'kind': '${TASKRUN}',
+                      'type': 'TaskRunReport',
                       'status': status,
                       'message': message,
                       'threshold': '${threshold}',
