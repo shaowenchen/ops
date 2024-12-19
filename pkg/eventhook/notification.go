@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 const (
@@ -47,7 +48,9 @@ func (xiezuo *XiezuoPost) Post(url string, options map[string]string, data strin
 	}
 	req.Header.Add("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	_, err = client.Do(req)
 	if err != nil {
 		println(err.Error())

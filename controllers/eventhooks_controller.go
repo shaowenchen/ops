@@ -92,13 +92,8 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 	r.mutex.Unlock()
 
 	client := &opsevent.EventBus{}
-	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).Subscribe(ctx, func(ctx context.Context, event cloudevents.Event) {
-		select {
-		case <-ctx.Done():
-			logger.Info.Println("Exiting goroutine for EventHooks: ", obj.Name)
-			return
-		default:
-		}
+	println("sub subject: ", obj.Spec.Subject)
+	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
 		eventStrings := opsevent.GetCloudEventReadable(event)
 		notification := true
 		if len(obj.Spec.Keywords) > 0 {
@@ -111,10 +106,11 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 			}
 		}
 		if notification {
-			opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
+			go opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
 		}
 
 	})
+	client.Subscribe(ctx)
 	return nil
 }
 

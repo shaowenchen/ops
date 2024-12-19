@@ -30,8 +30,13 @@ func GetClient(endpoint string, subject string) (ceclient.Client, error) {
 }
 
 type EventBus struct {
-	Server  string
-	Subject string
+	Server        string
+	Subject       string
+	ConsumerFuncs []func(ctx context.Context, event cloudevents.Event)
+}
+
+func (bus *EventBus) AddConsumerFunc(fn func(ctx context.Context, event cloudevents.Event)) {
+	bus.ConsumerFuncs = append(bus.ConsumerFuncs, fn)
 }
 
 func (bus *EventBus) WithEndpoint(endpoint string) *EventBus {
@@ -70,11 +75,16 @@ func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
 	return nil
 }
 
-func (bus *EventBus) Subscribe(ctx context.Context, fn func(ctx context.Context, event cloudevents.Event)) error {
+func (bus *EventBus) Subscribe(ctx context.Context) error {
 	client, err := GetClient(bus.Server, bus.Subject)
 	if err != nil {
 		return err
 	}
+	combineFn := func(ctx context.Context, event cloudevents.Event) {
+		for _, fn := range bus.ConsumerFuncs {
+			fn(ctx, event)
+		}
+	}
 
-	return client.StartReceiver(ctx, fn)
+	return client.StartReceiver(ctx, combineFn)
 }
