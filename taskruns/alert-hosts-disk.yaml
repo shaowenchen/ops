@@ -4,7 +4,7 @@ metadata:
   name: alert-hosts-disk
   namespace: ops-system
 spec:
-  crontab: "*/10 * * * *"
+  crontab: "*/30 * * * *"
   taskRef: alert-hosts-disk
   variables:
-    threshold: "80"
+    threshold: "84"

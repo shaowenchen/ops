@@ -4,5 +4,5 @@ metadata:
   name: alert-hosts-failed
   namespace: ops-system
 spec:
-  crontab: "*/10 * * * *"
+  crontab: "*/30 * * * *"
   taskRef: alert-hosts-failed

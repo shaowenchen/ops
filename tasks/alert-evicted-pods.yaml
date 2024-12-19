@@ -21,13 +21,14 @@ spec:
 
               def send(status, message, value):
                   payload = {
+                      'host': '${HOSTNAME}',
                       'kind': '${TASKRUN}',
                       'type': 'TaskRunReport',
                       'status': status,
                       'message': message,
                       'threshold': '${threshold}',
                       'operator': '>',
-                      'value': value
+                      'value': str(value)
                   }
                   headers = {
                       'Content-Type': 'application/json'
@@ -53,7 +54,7 @@ spec:
                       message = f"Evicted pods count {evicted_count} exceeds threshold {threshold}."
                       send('alerting', message, evicted_count)
                   else:
-                      message = f"Evicted pods count {evicted_count} is less than threshold {threshold}."
+                      message = f"Evicted pods count {evicted_count} not exceeds threshold {threshold}."
                       send('normal', message, evicted_count)
 
               if __name__ == "__main__":

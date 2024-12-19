@@ -4,7 +4,7 @@ metadata:
   name: alert-hosts-mem
   namespace: ops-system
 spec:
-  crontab: "*/10 * * * *"
+  crontab: "*/30 * * * *"
   taskRef: alert-hosts-mem
   variables:
-    threshold: "80"
+    threshold: "84"

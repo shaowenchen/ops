@@ -39,9 +39,11 @@ import (
 // EventHooksReconciler reconciles a EventHooks object
 type EventHooksReconciler struct {
 	client.Client
-	Scheme      *runtime.Scheme
-	mutex       sync.RWMutex
-	eventbusMap map[string]opsevent.EventBus
+	Scheme                  *runtime.Scheme
+	subjectEventBusMapMutex sync.RWMutex
+	subjectEventBusMap      map[string]opsevent.EventBus
+	objSubjectMapMutex      sync.RWMutex
+	objSubjectMap           map[string]string
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks,verbs=get;list;watch;create;update;patch;delete
@@ -69,62 +71,76 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 	logger.Info.Println("Reconcile EventHooks: ", req.NamespacedName.String())
-	go r.create(logger, ctx, obj)
+	go r.update(logger, ctx, obj)
 	return ctrl.Result{}, nil
 }
 
-func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context, obj *opsv1.EventHooks) error {
-	if r.eventbusMap == nil {
-		r.eventbusMap = make(map[string]opsevent.EventBus)
+func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context, obj *opsv1.EventHooks) error {
+	r.subjectEventBusMapMutex.Lock()
+	if obj.Spec.Subject == "" {
+		return nil
 	}
-
-	// delete old eventbus
-	if _, ok := r.eventbusMap[obj.Namespace]; ok {
-		r.delete(logger, ctx, types.NamespacedName{
-			Namespace: obj.Namespace,
-			Name:      obj.Name,
-		})
+	subject := obj.Spec.Subject
+	if r.subjectEventBusMap == nil {
+		r.subjectEventBusMap = make(map[string]opsevent.EventBus)
 	}
-	key := obj.Spec.Subject
+	if r.objSubjectMap == nil {
+		r.objSubjectMap = make(map[string]string)
+	}
+	if _, ok := r.objSubjectMap[obj.Name]; !ok {
+		r.objSubjectMap[obj.Name] = subject
+	}
+	existingEventHooksList := &opsv1.EventHooksList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(obj.Namespace),
+		client.MatchingFields{".spec.subject": subject},
+	}
+	if err := r.List(ctx, existingEventHooksList, listOpts...); err != nil {
+		return err
+	}
 	client := opsevent.EventBus{}
-	if _, ok := r.eventbusMap[key]; ok {
-		client = r.eventbusMap[key]
+	if _, ok := r.subjectEventBusMap[subject]; ok {
+		client = r.subjectEventBusMap[subject]
 	} else {
-		client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject)
+		client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(subject)
 	}
-	client.AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
-		eventStrings := opsevent.GetCloudEventReadable(event)
-		println("subjcet: ", event.Subject())
-		notification := true
-		if len(obj.Spec.Keywords) > 0 {
-			notification = false
-			for _, keyword := range obj.Spec.Keywords {
-				if strings.Contains(eventStrings, keyword) {
-					notification = true
-					break
+	for _, eventhook := range existingEventHooksList.Items {
+		client.AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
+			eventStrings := opsevent.GetCloudEventReadable(event)
+			notification := true
+			if len(eventhook.Spec.Keywords) > 0 {
+				notification = false
+				for _, keyword := range obj.Spec.Keywords {
+					if strings.Contains(eventStrings, keyword) {
+						notification = true
+						break
+					}
 				}
 			}
-		}
-		if notification {
-			println("notification: ", eventStrings)
-			go opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
-		}
+			if notification {
+				go opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
+			}
 
-	})
-	r.mutex.Lock()
-	r.eventbusMap[key] = client
-	r.mutex.Unlock()
+		})
+	}
+	r.subjectEventBusMapMutex.Unlock()
 	client.Subscribe(ctx)
 	return nil
 }
 
 func (r *EventHooksReconciler) delete(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	if _, ok := r.eventbusMap[namespacedName.Namespace]; ok {
-		logger.Debug.Println("canceling EventBus for ", namespacedName.String())
-		delete(r.eventbusMap, namespacedName.Namespace)
+	if r.objSubjectMap == nil {
+		return nil
+	}
+	if subject, ok := r.objSubjectMap[namespacedName.String()]; ok {
+		r.update(logger, ctx, &opsv1.EventHooks{
+			Spec: opsv1.EventHooksSpec{
+				Subject: subject,
+			},
+		})
+		r.objSubjectMapMutex.Lock()
+		delete(r.objSubjectMap, namespacedName.Name)
+		r.objSubjectMapMutex.Unlock()
 	}
 	return nil
 }
@@ -137,6 +153,12 @@ func (r *EventHooksReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		go opsevent.FactoryController(namespace, opsconstants.EventHooks, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
 			Kind: opsconstants.EventHooks,
 		})
+	}
+	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.EventHooks{}, ".spec.subject", func(rawObj client.Object) []string {
+		tr := rawObj.(*opsv1.EventHooks)
+		return []string{tr.Spec.Subject}
+	}); err != nil {
+		return err
 	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.EventHooks{}).

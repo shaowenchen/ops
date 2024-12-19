@@ -37,9 +37,10 @@ func GetClient(endpoint string, subject string) (ceclient.Client, error) {
 }
 
 type EventBus struct {
-	Server        string
-	Subject       string
-	ConsumerFuncs []func(ctx context.Context, event cloudevents.Event)
+	Server          string
+	Subject         string
+	SubScribeCancel context.CancelFunc
+	ConsumerFuncs   []func(ctx context.Context, event cloudevents.Event)
 }
 
 func (bus *EventBus) AddConsumerFunc(fn func(ctx context.Context, event cloudevents.Event)) {
@@ -88,10 +89,15 @@ func (bus *EventBus) Subscribe(ctx context.Context) error {
 		return err
 	}
 	combineFn := func(ctx context.Context, event cloudevents.Event) {
+		// println("len: ", len(bus.ConsumerFuncs))
 		for _, fn := range bus.ConsumerFuncs {
 			fn(ctx, event)
 		}
 	}
-
+	if bus.SubScribeCancel != nil {
+		bus.SubScribeCancel()
+	}
+	ctx, cancel := context.WithCancel(ctx)
+	bus.SubScribeCancel = cancel
 	return client.StartReceiver(ctx, combineFn)
 }
