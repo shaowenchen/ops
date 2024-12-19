@@ -99,11 +99,8 @@ func (bus *EventBus) Subscribe(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	println("len(bus.ConsumerFuncs):", len(bus.ConsumerFuncs))
 	combineFn := func(ctx context.Context, event cloudevents.Event) {
 		var fns = bus.ConsumerFuncs
-		println("len(fns):", len(fns))
-		println("subject:", event.Subject())
 		for _, fn := range fns {
 			fn(ctx, event)
 		}

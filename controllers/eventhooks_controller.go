@@ -130,7 +130,7 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 		r.subjectEventBusMap[eventhook.Name] = client
 	}
 	r.subjectEventBusMapMutex.Unlock()
-	
+
 	r.subjectSubscriptCancelMutex.Lock()
 	if cancle, ok := r.subjectSubscriptCancel[subject]; ok {
 		cancle()
@@ -142,7 +142,6 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 		for {
 			select {
 			case <-ctx.Done():
-				println("Goroutine done")
 				return
 			default:
 				client.Subscribe(ctx)
