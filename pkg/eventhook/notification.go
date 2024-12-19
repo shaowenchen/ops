@@ -53,7 +53,6 @@ func (xiezuo *XiezuoPost) Post(url string, options map[string]string, data strin
 	}
 	_, err = client.Do(req)
 	if err != nil {
-		println(err.Error())
 		return err
 	}
 	return nil

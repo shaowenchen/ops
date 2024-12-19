@@ -4,18 +4,25 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 
 	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	ceclient "github.com/cloudevents/sdk-go/v2/client"
-	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 )
 
+var CacheClient = make(map[string]ceclient.Client)
+var MutexClient = sync.RWMutex{}
+
 func GetClient(endpoint string, subject string) (ceclient.Client, error) {
-	natsOptions := []nats.Option{
-		nats.Name(uuid.New().String()),
+	MutexClient.Lock()
+	defer MutexClient.Unlock()
+	key := endpoint + subject
+	if client, ok := CacheClient[key]; ok {
+		return client, nil
 	}
+	natsOptions := []nats.Option{}
 	p, err := cenats.NewProtocol(endpoint, subject, subject, natsOptions)
 	if err != nil {
 		return nil, err
@@ -25,7 +32,7 @@ func GetClient(endpoint string, subject string) (ceclient.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	CacheClient[key] = c
 	return c, nil
 }
 

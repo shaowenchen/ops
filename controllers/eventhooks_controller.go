@@ -41,7 +41,7 @@ type EventHooksReconciler struct {
 	client.Client
 	Scheme      *runtime.Scheme
 	mutex       sync.RWMutex
-	eventbusMap map[string]context.CancelFunc
+	eventbusMap map[string]opsevent.EventBus
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks,verbs=get;list;watch;create;update;patch;delete
@@ -75,7 +75,7 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context, obj *opsv1.EventHooks) error {
 	if r.eventbusMap == nil {
-		r.eventbusMap = make(map[string]context.CancelFunc)
+		r.eventbusMap = make(map[string]opsevent.EventBus)
 	}
 
 	// delete old eventbus
@@ -85,15 +85,14 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 			Name:      obj.Name,
 		})
 	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	r.mutex.Lock()
-	r.eventbusMap[obj.Namespace] = cancel
-	r.mutex.Unlock()
-
-	client := &opsevent.EventBus{}
-	println("sub subject: ", obj.Spec.Subject)
-	client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject).AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
+	key := obj.Spec.Subject
+	client := opsevent.EventBus{}
+	if _, ok := r.eventbusMap[key]; ok {
+		client = r.eventbusMap[key]
+	} else {
+		client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(obj.Spec.Subject)
+	}
+	client.AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
 		eventStrings := opsevent.GetCloudEventReadable(event)
 		notification := true
 		if len(obj.Spec.Keywords) > 0 {
@@ -110,6 +109,9 @@ func (r *EventHooksReconciler) create(logger *opslog.Logger, ctx context.Context
 		}
 
 	})
+	r.mutex.Lock()
+	r.eventbusMap[key] = client
+	r.mutex.Unlock()
 	client.Subscribe(ctx)
 	return nil
 }
@@ -118,9 +120,8 @@ func (r *EventHooksReconciler) delete(logger *opslog.Logger, ctx context.Context
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	if cancel, ok := r.eventbusMap[namespacedName.Namespace]; ok {
+	if _, ok := r.eventbusMap[namespacedName.Namespace]; ok {
 		logger.Debug.Println("canceling EventBus for ", namespacedName.String())
-		cancel()
 		delete(r.eventbusMap, namespacedName.Namespace)
 	}
 	return nil
