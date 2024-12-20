@@ -22,11 +22,14 @@ import (
 
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
+	corev1 "k8s.io/api/core/v1"
 	eventsv1 "k8s.io/api/events/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -64,6 +67,9 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			Kind: opsconstants.PipelineRuns,
 		})
 	}
+	if !isEventsV1Available(r.Client) {
+		return ctrl.NewControllerManagedBy(mgr).For(&corev1.Event{}).Complete(r)
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&eventsv1.Event{}).
 		Watches(
@@ -99,6 +105,34 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			},
 		).
 		Complete(r)
+}
+
+func isEventsV1Available(c client.Client) bool {
+	restConfig, err := config.GetConfig()
+	if err != nil {
+		return false
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(restConfig)
+	if err != nil {
+		return false
+	}
+
+	apiGroupList, err := discoveryClient.ServerGroups()
+	if err != nil {
+		return false
+	}
+
+	for _, group := range apiGroupList.Groups {
+		if group.Name == "events.k8s.io" {
+			for _, version := range group.Versions {
+				if version.Version == "v1" {
+					return false
+				}
+			}
+		}
+	}
+	return false
 }
 
 func GetEventKube(v1e *eventsv1.Event) (ek *opsevent.EventKube) {
