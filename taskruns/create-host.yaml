@@ -4,5 +4,5 @@ metadata:
   name: create-host
   namespace: ops-system
 spec:
-  crontab: "30 * * * *"
+  crontab: "15 * * * *"
   taskRef: create-host

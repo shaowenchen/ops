@@ -4,5 +4,5 @@ metadata:
   name: alert-dataset-notready
   namespace: ops-system
 spec:
-  crontab: "*/10 * * * *"
+  crontab: "45 * * * *"
   taskRef: alert-dataset-notready

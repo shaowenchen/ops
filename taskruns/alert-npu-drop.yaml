@@ -4,5 +4,5 @@ metadata:
   name: alert-npu-drop
   namespace: ops-system
 spec:
-  crontab: "30 * * * *"
+  crontab: "*/30 * * * *"
   taskRef: alert-npu-drop

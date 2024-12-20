@@ -4,5 +4,5 @@ metadata:
   name: alert-gpu-drop
   namespace: ops-system
 spec:
-  crontab: "30 * * * *"
+  crontab: "*/30 * * * *"
   taskRef: alert-gpu-drop

@@ -4,7 +4,7 @@ metadata:
   name: alert-gpu-ecc
   namespace: ops-system
 spec:
-  crontab: "30 * * * *"
+  crontab: "*/30 * * * *"
   taskRef: alert-gpu-ecc
   variables:
     threshold: "1"

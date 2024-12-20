@@ -4,7 +4,7 @@ metadata:
   name: alert-public-network
   namespace: ops-system
 spec:
-  crontab: "*/10 * * * *"
+  crontab: "*/30 * * * *"
   taskRef: alert-http-status
   variables:
     url: https://www.qq.com/
