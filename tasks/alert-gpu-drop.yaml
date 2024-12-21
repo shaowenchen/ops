@@ -21,13 +21,14 @@ spec:
               card_id = ''
               message = ''
 
-              def send(status, message):
+              def send(status, message, value):
                   payload = {
                       'host': '${HOSTNAME}',
                       'type': 'TaskRunReport',
                       'kind': '${TASKRUN}',
                       'threshold': str(threshold),
                       'operator': '!=',
+                      'value': str(value),
                       'status': status,
                       'message': message
                   }
@@ -64,7 +65,9 @@ spec:
                           message += build_message(line, index)
                   if card_count != threshold:
                       message += build_message('card count mismatch: %d (desired %d)' % (card_count, threshold))
-                      raise Exception(message)
+                      send('alerting', message, card_count)
+                  else:
+                      send('normal', '', card_count)
                   # 3. lspci check
                   output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
                   card_count = 0
@@ -77,12 +80,8 @@ spec:
                           message += build_message(line, index)
                   if card_count != threshold:
                       message += build_message('card count mismatch: %d (desired %d)' % (card_count, threshold))
-                      raise Exception(message)
-              except Exception as e:
-                  if len(message) == 0:
-                      message = str(e)
-              finally:
-                  if len(message) > 0:
-                      send('alerting', message)
+                      send('alerting', message, card_count)
                   else:
-                      send('normal', '')
+                      send('normal', '', card_count)
+              except Exception as e:
+                  send('alerting', str(e), 0)
