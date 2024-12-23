@@ -1,0 +1,8 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: TaskRun
+metadata:
+  name: drain-error-gpu
+  namespace: ops-system
+spec:
+  crontab: "*/15 * * * *"
+  taskRef: drain-error-gpu
