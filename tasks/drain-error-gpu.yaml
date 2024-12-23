@@ -38,12 +38,13 @@ spec:
                       raise Exception(f"Failed to disable GPU {pci_bus_id}: {str(e)}")
 
               def send_alert(status, message):
+                    host = '${HOSTNAME}'
                     payload = {
                         'kind': '${TASKRUN}',
                         'type': 'TaskRunReport',
                         'status': status,
                         'message': message,
-                        'host': '${HOSTNAME}', 
+                        'host': host, 
                         'operator': '>'
                     }
                     headers = {
@@ -59,7 +60,6 @@ spec:
                           raise Exception("nvidia-smi not found")
 
                       gpu_info = get_pci_info()
-                      print(f"Found GPUs: {gpu_info}")
                       for pci_bus_id in gpu_info:
                           disable_gpu(pci_bus_id)
                           message = f"dissabled GPU {pci_bus_id}"
