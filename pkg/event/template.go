@@ -12,7 +12,7 @@ func (e EventHost) GetDiskUsageAlertMessageWithAction(event cloudevents.Event, a
 }
 
 func AppendField(result *strings.Builder, label, value string) {
-	if label == "" || value == "0" {
+	if label == "" || value == "" {
 		return
 	}
 	result.WriteString(fmt.Sprintf("%s: %s \n", label, value))
