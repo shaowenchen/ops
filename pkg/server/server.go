@@ -1,10 +1,10 @@
 package server
 
 import (
+	"encoding/base64"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Pagination[T any] struct {
@@ -100,15 +100,19 @@ func GetToken(c *gin.Context) string {
 		headerParts := strings.SplitN(authHeader, " ", 2)
 		if len(headerParts) == 2 && headerParts[0] == "Bearer" {
 			return headerParts[1]
+		} else if len(headerParts) == 2 && headerParts[0] == "Basic" {
+			userInfoBase64 := headerParts[1]
+			userInfo, err := base64.StdEncoding.DecodeString(userInfoBase64)
+			if err != nil {
+				return ""
+			}
+			userInfoParts := strings.Split(string(userInfo), ":")
+			if len(userInfoParts) == 2 {
+				return userInfoParts[1]
+			}
 		}
 	}
 	// try get from cookie
 	token, _ := c.Cookie("opstoken")
-	// try get from URL
-	if userInfo := c.Request.URL.User; userInfo != nil {
-		if password, ok := userInfo.Password(); ok {
-			return password
-		}
-	}
 	return token
 }
