@@ -35,7 +35,7 @@ spec:
                   try:
                       subprocess.run(['nvidia-smi', 'drain', '-p', pci_bus_id, '-m', '1'], check=True)
                   except Exception as e:
-                      raise Exception(f"Failed to disable GPU {pci_bus_id}: {str(e)}")
+                      pass
 
               def send_alert(status, message):
                     host = '${HOSTNAME}'
