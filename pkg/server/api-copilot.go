@@ -1,11 +1,40 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+
 	"github.com/gin-gonic/gin"
 	opscopilot "github.com/shaowenchen/ops/pkg/copilot"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 )
+
+func PostCopilotPlain(c *gin.Context) {
+	// 1. Get input from body
+	readBody, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, "failed to read request body: "+err.Error())
+		return
+	}
+	input := string(readBody)
+
+	// 2. Forward input to PostCopilot
+	builder := struct {
+		Input string `json:"input"`
+	}{
+		Input: input,
+	}
+	builderStr, err := json.Marshal(builder)
+	if err != nil {
+		showError(c, "marshal error: "+err.Error())
+		return
+	}
+
+	c.Request.Body = io.NopCloser(bytes.NewReader(builderStr))
+	PostCopilot(c)
+}
 
 func PostCopilot(c *gin.Context) {
 	type Params struct {

@@ -104,5 +104,11 @@ func GetToken(c *gin.Context) string {
 	}
 	// try get from cookie
 	token, _ := c.Cookie("opstoken")
+	// try get from URL
+	if userInfo := c.Request.URL.User; userInfo != nil {
+		if password, ok := userInfo.Password(); ok {
+			return password
+		}
+	}
 	return token
 }
