@@ -64,7 +64,7 @@ spec:
                       elif len(line) > 0:
                           message += build_message(line, index)
                   if card_count != threshold:
-                      message += build_message('card count mismatch: %d (desired %d)' % (card_count, threshold))
+                      message += build_message('smi card count mismatch: %d (desired %d)' % (card_count, threshold))
                       send('alerting', message, card_count)
                   else:
                       send('normal', '', card_count)
@@ -79,7 +79,7 @@ spec:
                       elif len(line) > 0:
                           message += build_message(line, index)
                   if card_count != threshold:
-                      message += build_message('card count mismatch: %d (desired %d)' % (card_count, threshold))
+                      message += build_message('pci card count mismatch: %d (desired %d)' % (card_count, threshold))
                       send('alerting', message, card_count)
                   else:
                       send('normal', '', card_count)
