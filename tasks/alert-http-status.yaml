@@ -25,7 +25,7 @@ spec:
               threshold = int('${threshold}')
               message = ''
 
-              def send(status, message):
+              def send(status, message, value=''):
                   payload = {
                       'host': '${HOSTNAME}',
                       'kind': '${TASKRUN}',
@@ -33,6 +33,7 @@ spec:
                       'threshold': str(threshold),
                       'operator': '!=',
                       'status': status,
+                      'value': str(value),
                       'message': message
                   }
                   headers = {
@@ -48,13 +49,11 @@ spec:
 
                   if actual_status != threshold:
                       message = f"{url} http status is {actual_status}, expected {threshold}"
+                      send('alerting', message, actual_status)
+                  else:
+                      send('normal', '', actual_status)
 
               except Exception as e:
                   if len(message) == 0:
                       message = str(e)
-
-              finally:
-                  if len(message) > 0:
                       send('alerting', message)
-                  else:
-                      send('normal', '')

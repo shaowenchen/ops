@@ -1,7 +1,11 @@
 <script setup>
 import { useEventsStore } from '@/stores';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { formatObject } from '@/utils/common';
+import { useLoginStore } from "@/stores";
+
+var loginStore = useLoginStore();
+loginStore.check();
 
 var dataList = ref([]);
 var currentPage = ref(1);

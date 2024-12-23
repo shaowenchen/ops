@@ -29,6 +29,11 @@ spec:
                   print(response.text)
 
               try:
+                  cmd = "kubectl get crd | grep dataset"
+                  result = subprocess.check_output(cmd, shell=True).decode('utf-8')
+                  if not result:
+                      send('normal', 'dataset crd not found')
+                      return
                   cmd = "kubectl get dataset -A"
                   result = subprocess.check_output(cmd, shell=True).decode('utf-8')
                   current_time = datetime.now()
