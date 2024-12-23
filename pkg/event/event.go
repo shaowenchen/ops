@@ -100,13 +100,13 @@ type EventTaskRunReport struct {
 func (e EventTaskRunReport) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
 	AppendCluser(result, ce)
-	AppendField(result, `host: `, e.Host)
-	AppendField(result, `kind: `, e.Kind)
-	AppendField(result, `threshold: `, e.Threshold)
-	AppendField(result, `operator: `, e.Operator)
+	AppendField(result, `host`, e.Host)
+	AppendField(result, `kind`, e.Kind)
+	AppendField(result, `threshold`, e.Threshold)
+	AppendField(result, `operator`, e.Operator)
 	AppendField(result, `value: `, e.Value)
-	AppendField(result, `status: `, e.Status)
-	AppendField(result, `message: `, e.Message)
+	AppendField(result, `status`, e.Status)
+	AppendField(result, `message`, e.Message)
 	AppendField(result, "time", ce.Time().Local().Format("2006-01-02 15:04:05"))
 	return result.String()
 }
