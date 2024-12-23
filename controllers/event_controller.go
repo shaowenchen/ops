@@ -68,8 +68,10 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		})
 	}
 	if !isEventsV1Available(r.Client) {
+		println("events.k8s.io/v1 is not available, use core/v1.Event instead")
 		return ctrl.NewControllerManagedBy(mgr).For(&corev1.Event{}).Complete(r)
 	}
+	println("events.k8s.io/v1 is available")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&eventsv1.Event{}).
 		Watches(
@@ -127,7 +129,7 @@ func isEventsV1Available(c client.Client) bool {
 		if group.Name == "events.k8s.io" {
 			for _, version := range group.Versions {
 				if version.Version == "v1" {
-					return false
+					return true
 				}
 			}
 		}
