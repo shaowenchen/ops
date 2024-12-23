@@ -44,8 +44,7 @@ spec:
                         'type': 'TaskRunReport',
                         'status': status,
                         'message': message,
-                        'host': host, 
-                        'operator': '>'
+                        'host': host
                     }
                     headers = {
                         'Content-Type': 'application/json'
