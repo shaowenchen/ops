@@ -8,6 +8,7 @@ spec:
   steps:
     - name: install required packages
       content: apt-get install -y openssl socat conntrack ipset ebtables chrony ipvsadm nfs-common
+      allowFailure: true
     - name: Max PID
       content: echo "kernel.pid_max=65535 " >> /etc/sysctl.conf && sysctl -p
     - name: Max Thread
