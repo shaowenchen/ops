@@ -1,0 +1,23 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: restart-gpu-manager
+  namespace: ops-system
+spec:
+  desc: restart gpu-manager container
+  steps:
+    - name: restart-gpu-manager
+      content: |
+        #!/bin/bash
+        container_ids=$(nerdctl -n k8s.io ps | grep gpu-manager | awk '{print $1}')
+
+        if [ -z "$container_ids" ]; then
+          echo "can't find any gpu-manager container"
+          exit 0
+        fi
+
+        for container_id in $container_ids; do
+          echo "restart containerd: $container_id"
+          nerdctl -n k8s.io restart "$container_id" || true
+        done
+
