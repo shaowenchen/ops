@@ -16,6 +16,6 @@ spec:
   steps:
     - name: get pod deployment
       content: |
-        export deployment=`echo ${pod} | cut -d'-' -f1-4`
-        kubectl get deployments ${deployment} -n ${namespace}
+        export deploy=`echo ${pod} | cut -d'-' -f1-4`
+        kubectl get deployments $deploy -n ${namespace}
 
