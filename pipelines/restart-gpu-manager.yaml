@@ -10,5 +10,5 @@ spec:
   tasks:
     - name: 白名单检测
       taskRef: check-whitelist
-    - name: 重启 kubelet
+    - name: 重启 gpu-manager 容器
       taskRef: restart-gpu-manager

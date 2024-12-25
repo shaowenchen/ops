@@ -12,5 +12,5 @@ spec:
       taskRef: check-whitelist
     - name: 获取 Pod 所在节点
       taskRef: get-pod-node
-    - name: 重启 kubelet
+    - name: 重启 gpu-manager 容器
       taskRef: restart-gpu-manager
