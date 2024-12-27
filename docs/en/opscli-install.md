@@ -5,7 +5,7 @@
 - **For Domestic Users (China)**
 
 ```bash
-curl -sfL https://ghp.ci/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
+curl -sfL https://cf.ghproxy.cc/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
 ```
 
 - **For International Users (Outside China)**
@@ -21,7 +21,7 @@ To install `opscli` on multiple hosts, list the IP addresses of all hosts in a `
 - **For Domestic Users (China)**
 
 ```bash
-/usr/local/bin/opscli shell --content "curl -sfL https://ghp.ci/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -" -i hosts.txt
+/usr/local/bin/opscli shell --content "curl -sfL https://cf.ghproxy.cc/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -" -i hosts.txt
 ```
 
 - **For International Users (Outside China)**

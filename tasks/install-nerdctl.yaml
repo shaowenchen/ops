@@ -7,7 +7,7 @@ spec:
   desc: install nerdctl tool in specified host
   variables:
     proxy: 
-      default: https://ghp.ci/
+      default: https://cf.ghproxy.cc/
     version: 
       default: 1.7.6
     arch: 

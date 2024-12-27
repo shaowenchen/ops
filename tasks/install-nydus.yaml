@@ -7,7 +7,7 @@ spec:
   desc: install nydus kit in specified host
   variables:
     proxy: 
-      default: https://ghp.ci/
+      default: https://cf.ghproxy.cc/
     version: 
       default: 2.2.4
     rpcversion: 

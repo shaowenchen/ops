@@ -10,7 +10,7 @@ spec:
     velero_version: 
       default: v1.9.2
     download_url: 
-      default: https://ghp.ci/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
+      default: https://cf.ghproxy.cc/https://github.com/vmware-tanzu/velero/releases/download/${velero_version}/velero-${velero_version}-linux-amd64.tar.gz
     region: 
       default: cn-north-4
     endpoint: 
