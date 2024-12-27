@@ -309,6 +309,9 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		Namespace:    opsconstants.OpsNamespace,
 	}
 	// run
+	if kubeOpt.NodeName == "" {
+		kubeOpt.NodeName = opsconstants.AnyWorker
+	}
 	nodes, err := opskube.GetNodes(ctx, logger, kc.Client, kubeOpt)
 	if err != nil || len(nodes) == 0 {
 		r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
