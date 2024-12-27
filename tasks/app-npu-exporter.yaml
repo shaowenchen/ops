@@ -15,4 +15,4 @@ spec:
       content: |
         export KUBECONFIG=/host/root/.kube/config
 
-        envsubst < /observation/v5.0.RC3-npu-exporter | kubectl ${action} -f -
+        envsubst < /observation/v5.0.RC3-npu-exporter.yaml | kubectl ${action} -f -
