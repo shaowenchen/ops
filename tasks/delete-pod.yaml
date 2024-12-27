@@ -16,4 +16,9 @@ spec:
   steps:
     - name: delete pod
       content: |
+        if kubectl get pod -n ${namespace} ${pod} | grep Running; then
+          echo "not allow delete running pod"
+          exit 0
+        fi
+
         kubectl delete pod -n ${namespace} ${pod}
