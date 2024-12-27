@@ -16,5 +16,5 @@ spec:
   steps:
     - name: get pod deployment
       content: |
-        deploy=`echo ${pod} | cut -d'-' -f1-4`
+        deploy=`echo "${pod}" | sed -E 's/-[a-z0-9]+-[a-z0-9]+$//'`
         kubectl get deployments -n ${namespace} | grep $deploy
