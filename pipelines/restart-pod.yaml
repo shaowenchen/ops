@@ -8,8 +8,6 @@ metadata:
 spec:
   desc: 重启、删除集群中的某一个 Pod
   tasks:
-    - name: 白名单检测
-      taskRef: check-whitelist
     - name: 获取 Pod
       taskRef: get-pod
     - name: 删除 Pod
