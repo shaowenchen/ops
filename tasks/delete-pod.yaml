@@ -16,9 +16,13 @@ spec:
   steps:
     - name: delete pod
       content: |
-        if kubectl get pod -n ${namespace} ${pod} | grep Running; then
+        status=$(kubectl get pod -n ${namespace} ${pod} | awk 'NR==2 {print $2}')
+        ready=$(echo $status | cut -d'/' -f1)
+        total=$(echo $status | cut -d'/' -f2)
+
+        if [ "$ready" -eq "$total" ]; then
           echo "not allow delete running pod"
           exit 0
+        else
+          kubectl delete pod -n ${namespace} ${pod}
         fi
-
-        kubectl delete pod -n ${namespace} ${pod}
