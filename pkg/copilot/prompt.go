@@ -25,6 +25,7 @@ func GetIntentionPrompt(pipelines []opsv1.Pipeline) string {
 	}
 	return `Please select the most appropriate option to classify the intention of the user. 
 Don't ask any more questions, just select the option.
+If input includes keyword action, please select the action option as possible.
 Must be one of the following options:
 
 ` + b.String()
