@@ -70,7 +70,7 @@ spec:
                           device_info = json.loads(device_info_cfg)
                           device_list = device_info.get("DeviceInfo", {}).get("DeviceList", {})
                           for key, value in device_list.items():
-                              if value and is_json(value) and len(json.loads(value)) > 0 and "Fault" in key:
+                              if value and is_json(value) and len(json.loads(value)) > 0 and "fault" in key.lower():
                                   device = cm_name.split("deviceinfo-")[-1]
                                   if device in schedulable_nodes:
                                       message += f"Nodename: {device}, Status: {value}\n"
