@@ -64,7 +64,7 @@ func ShellRm(dst string) string {
 }
 
 func ShellCPUTotal() string {
-	return `grep -c "model name" /proc/cpuinfo`
+	return `grep -c "processor" /proc/cpuinfo`
 }
 
 func ShellCPULoad1() string {
