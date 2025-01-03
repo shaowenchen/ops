@@ -21,6 +21,8 @@ spec:
       content: find /var/log -type f -name "*log*" -size +100M -exec sh -c 'for file do echo "cleaned $file" >&2; echo "" > "$file"; done' sh {} + 2>/dev/null || true
     - name: clear > 100M log in /data/run
       content: find /data/run -type f \( -name "*.log" -o -name "*.log.[0-9]*" \) -size +100M -exec sh -c 'for file do echo "cleaned $file" >&2; echo "" > "$file"; done' sh {} + 2>/dev/null || true
+    - name: clear .cache
+      content: find /data/containerd/ -type f -size +1G -path '*/.cache/*' -exec rm -f {} \;
     - name: clear jfs cache
       content: |
         find /data*/jfs*/*/raw/chunks -maxdepth 3 -type d -ctime +3 -exec rm -rf {} + 2>/dev/null || true
