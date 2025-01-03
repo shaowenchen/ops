@@ -27,7 +27,7 @@ spec:
       content: |
         mkdir -p /tmp/collect-gpu-log-${TIME}
         cd /tmp/collect-gpu-log-${TIME}
-        curl -sfL https://cf.ghproxy.cc/https://raw.githubusercontent.com/shaowenchen/hubimage/main/ai/col_gpu_log.sh | bash
+        curl -sfL https://ghproxy.chenshaowen.com/https://raw.githubusercontent.com/shaowenchen/hubimage/main/ai/col_gpu_log.sh | bash
         mv *.tar.gz collect-gpu-log-${HOSTNAME}-${TIME}.tar.gz
     - name: upload to s3
       remotefile: s3://collect-gpu-log/collect-gpu-log-${HOSTNAME}-${TIME}.tar.gz

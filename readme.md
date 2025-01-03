@@ -10,7 +10,7 @@ If Good network connections to GitHub
 
 else Poor network connections to GitHub
 
-`curl -sfL https://cf.ghproxy.cc/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -`
+`curl -sfL https://ghproxy.chenshaowen.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -`
 
 ### install Ops Controller
 

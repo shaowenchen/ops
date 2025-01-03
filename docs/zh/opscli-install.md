@@ -7,7 +7,7 @@
 国内使用:
 
 ```bash
-curl -sfL https://cf.ghproxy.cc/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -
+curl -sfL https://ghproxy.chenshaowen.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -
 ```
 
 国外使用:
@@ -23,7 +23,7 @@ curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VER
 国内使用:
 
 ```bash
-/usr/local/bin/opscli shell --content "curl -sfL https://cf.ghproxy.cc/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -" -i hosts.txt
+/usr/local/bin/opscli shell --content "curl -sfL https://ghproxy.chenshaowen.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -" -i hosts.txt
 ```
 
 国外使用:

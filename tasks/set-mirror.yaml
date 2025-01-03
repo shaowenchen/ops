@@ -8,5 +8,5 @@ spec:
   steps:
     - name: install required packages
       content: |
-        PROXY="https://cf.ghproxy.cc/" &&
+        PROXY="https://ghproxy.chenshaowen.com/" &&
         curl -sfL "$PROXY"https://raw.githubusercontent.com/shaowenchen/hubimage/main/mirror/ubuntu/get.sh | sh -

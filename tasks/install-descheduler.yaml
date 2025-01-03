@@ -8,7 +8,7 @@ spec:
   host: anymaster
   variables:
     proxy: 
-      default: https://cf.ghproxy.cc/
+      default: https://ghproxy.chenshaowen.com/
     action: 
       default: apply
     kubeconfig: 
