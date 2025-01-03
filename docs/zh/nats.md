@@ -67,17 +67,17 @@ config:
     system_account: SYS
 container:
   image:
-    repository: nats
+    repository: registry.cn-beijing.aliyuncs.com/opshub/nats
     tag: 2.10.20-alpine
 natsBox:
   container:
     image:
-      repository: natsio/nats-box
+      repository: registry.cn-beijing.aliyuncs.com/opshub/nats-box
       tag: 0.14.5
 reloader:
   enabled: true
   image:
-    repository: natsio/nats-server-config-reloader
+    repository: registry.cn-beijing.aliyuncs.com/opshub/natsio-nats-server-config-reloader
     tag: 0.15.1
 EOF
 ```
