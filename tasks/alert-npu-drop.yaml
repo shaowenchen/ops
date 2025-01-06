@@ -1,8 +1,8 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: alert-npu-drop
-  namespace: ops-system
+    name: alert-npu-drop
+    namespace: ops-system
 spec:
     desc: check npu drop in specified host
     host: "alert-npu=enabled"
@@ -46,7 +46,7 @@ spec:
               try:
                   # 1. check npu-smi exists /usr/local/bin/npu-smi
                   if not os.path.exists('/usr/local/bin/npu-smi'):
-                      raise Exception(build_message('找不到 npu-smi 命令'))
+                      send('alerting', 'npu-smi not found')
                   # 2. check count from npu-smi
                   # npu-smi info |grep 910
                   output = subprocess.run(['/usr/local/bin/npu-smi', 'info'], universal_newlines=True, stdout=subprocess.PIPE).stdout
@@ -59,7 +59,7 @@ spec:
                       else:
                           message += build_message(line, card_count)
                   if card_count != threshold:
-                      raise Exception(message)
+                      send('alerting', message)
                   # 3. lspci check, lspci |grep d80
                   output = subprocess.run(['lspci'], universal_newlines=True, stdout=subprocess.PIPE).stdout
                   card_count = 0
@@ -70,12 +70,6 @@ spec:
                       if 'Huawei' in line:
                           card_count += 1
                   if card_count != threshold:
-                      raise Exception(message)
-              except Exception as e:
-                  if len(message) == 0:
-                      message = str(e)
-              finally:
-                  if len(message) > 0:
                       send('alerting', message)
-                  else:
-                      send('normal', message)
+              except Exception as e:
+                  send('alerting', str(e))
