@@ -26,11 +26,11 @@ spec:
       allowfailure: "true"
     - name: clear jfs cache
       content: |
-        find /data*/jfs*/*/raw/chunks -maxdepth 3 -type d -ctime +3 -exec rm -rf {} + 2>/dev/null || true
-        find /data*/jfs*/*/*/raw/chunks -maxdepth 3 -type d -ctime +3 -exec rm -rf {} + 2>/dev/null || true
-        find /data*/jfs*/*/*/*/raw/chunks -maxdepth 3 -type d -ctime +3 -exec rm -rf {} + 2>/dev/null || true
-        find /data*/jfs*/*/*/*/*/raw/chunks -maxdepth 3 -type d -ctime +3 -exec rm -rf {} + 2>/dev/null || true
-        find /var/lib/jfs/cache*/raw/chunks -maxdepth 3 -type d -ctime +3 -exec rm -rf {} + 2>/dev/null || true
+        find /data*/jfs*/*/raw/chunks -maxdepth 3 -type d -ctime +1 -exec rm -rf {} + 2>/dev/null || true
+        find /data*/jfs*/*/*/raw/chunks -maxdepth 3 -type d -ctime +1 -exec rm -rf {} + 2>/dev/null || true
+        find /data*/jfs*/*/*/*/raw/chunks -maxdepth 3 -type d -ctime +1 -exec rm -rf {} + 2>/dev/null || true
+        find /data*/jfs*/*/*/*/*/raw/chunks -maxdepth 3 -type d -ctime +1 -exec rm -rf {} + 2>/dev/null || true
+        find /var/lib/jfs/cache*/raw/chunks -maxdepth 3 -type d -ctime +1 -exec rm -rf {} + 2>/dev/null || true
     - name: after clear
       content: |
         timeout 5 df -H | grep -vE '^Filesystem|tmpfs|cdrom|loop|udev' | awk '{ print $5 "/" $2 " " $1 }' |grep " "/
