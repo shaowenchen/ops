@@ -7,7 +7,8 @@
 国内使用:
 
 ```bash
-curl -sfL https://ghproxy.chenshaowen.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -
+PROXY=https://ghfast.top/
+curl -sfL $PROXY/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest PROXY=$PROXY sh -
 ```
 
 国外使用:

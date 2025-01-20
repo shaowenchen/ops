@@ -5,7 +5,8 @@
 - **For Domestic Users (China)**
 
 ```bash
-curl -sfL https://ghproxy.chenshaowen.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
+PROXY=https://ghfast.top/
+curl -sfL $PROXY/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest PROXY=$PROXY sh -
 ```
 
 - **For International Users (Outside China)**

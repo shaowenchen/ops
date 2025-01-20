@@ -6,42 +6,48 @@ if ! [ -x "$(command -v curl)" ]; then
   exit 1
 fi
 
+if [ -z "$PROXY" ]; then
+  PROXY="https://ghproxy.chenshaowen.com/"
+fi
+
+echo "Using PROXY: $PROXY"
+
 # Detect architecture
 case "$(uname -m)" in
-  x86_64)
-    ARCH=amd64
-    ;;
-  aarch64)
-    ARCH=arm64
-    ;;
-  i386 | i686)
-    ARCH=386
-    ;;
-  armv7l)
-    ARCH=arm
-    GOARM=7
-    ;;
-  *)
-    echo "ARCH isn't supported"
-    exit 1
-    ;;
+x86_64)
+  ARCH=amd64
+  ;;
+aarch64)
+  ARCH=arm64
+  ;;
+i386 | i686)
+  ARCH=386
+  ;;
+armv7l)
+  ARCH=arm
+  GOARM=7
+  ;;
+*)
+  echo "ARCH isn't supported"
+  exit 1
+  ;;
 esac
 
 # Detect OS type
 case "$(uname)" in
-  Linux)
-    OSTYPE=linux
-    ;;
-  Darwin)
-    OSTYPE=darwin
-    ;;
-  CYGWIN*|MINGW*|MSYS*)
-    OSTYPE=windows
-    ;;
-  *)
-    echo "OS isn't supported"
-    exit 1
-    ;;
+Linux)
+  OSTYPE=linux
+  ;;
+Darwin)
+  OSTYPE=darwin
+  ;;
+CYGWIN* | MINGW* | MSYS*)
+  OSTYPE=windows
+  ;;
+*)
+  echo "OS isn't supported"
+  exit 1
+  ;;
 esac
 
 # remove version prefix 'v'
@@ -63,7 +69,7 @@ http_code=$(curl --connect-timeout 2 -s -o temp.out -w '%{http_code}' https://gi
 rm -rf temp.out || true
 
 if [ $http_code -ne 302 ]; then
-  DOWNLOAD_URL="https://ghproxy.chenshaowen.com/${DOWNLOAD_URL}"
+  DOWNLOAD_URL="${PROXY}${DOWNLOAD_URL}"
 fi
 
 OPSTEMPDIR=$(mktemp -d)
@@ -81,8 +87,8 @@ chmod +x "$OPSTEMPDIR/opscli"
 "$OPSTEMPDIR/opscli" version
 
 if [ $? -ne 0 ]; then
-    echo "Opscli file error"
-    exit 1
+  echo "Opscli file error"
+  exit 1
 fi
 
 OPSDIR="${HOME}/.ops/"
@@ -114,12 +120,12 @@ fi
 
 mv "$OPSTEMPDIR/eventhooks" ${OPSDIR}
 
-if [ `id -u` -eq 0 ]; then
+if [ $(id -u) -eq 0 ]; then
   mv -f "$OPSTEMPDIR/opscli" /usr/local/bin/
   echo "Congratulations! Opscli live in /usr/local/bin/opscli"
 else
-  mv -f "$OPSTEMPDIR/opscli" `pwd`
-  echo "Congratulations! Please run 'sudo mv `pwd`/opscli /usr/local/bin/' to install."
+  mv -f "$OPSTEMPDIR/opscli" $(pwd)
+  echo "Congratulations! Please run 'sudo mv $(pwd)/opscli /usr/local/bin/' to install."
 fi
 
 # clear

@@ -6,11 +6,23 @@ Supported OS Linux and macOS.
 
 If Good network connections to GitHub
 
-`curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -`
+```bash
+curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
+```
 
 else Poor network connections to GitHub
 
-`curl -sfL https://ghproxy.chenshaowen.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh |VERSION=latest sh -`
+```bash
+PROXY=https://ghfast.top/
+curl -sfL $PROXY/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest PROXY=$PROXY sh -
+```
+
+Available Proxy
+
+```bash
+PROXY=https://ghfast.top/
+PROXY=https://gh-proxy.com/
+```
 
 ### install Ops Controller
 
