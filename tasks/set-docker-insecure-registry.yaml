@@ -17,8 +17,10 @@ spec:
       content: test -f /etc/docker/daemon.json || echo '{}' > /etc/docker/daemon.json
     - name: Set Docker Insecure Registry
       content: |
-        if ! jq -e '.["insecure-registries"] | index("registry:5000") != null' /etc/docker/daemon.json > /dev/null; then
-          jq '.["insecure-registries"] += ["${registry}"]' /etc/docker/daemon.json > /etc/docker/daemon.json
+        if ! jq -e '.["insecure-registries"] | index("${registry}") != null' /etc/docker/daemon.json > /dev/null; then
+          cp /etc/docker/daemon.json /etc/docker/daemon.json.bak
+          jq --arg reg "$registry" '.["insecure-registries"] += ["${registry}"]' /etc/docker/daemon.json > /etc/docker/daemon.json.new
+          mv /etc/docker/daemon.json.new /etc/docker/daemon.json
         else
           echo "The registry ${registry} is already in the insecure-registries list"
         fi
