@@ -1,0 +1,28 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: set-docker-insecure-registry
+  namespace: ops-system
+spec:
+  desc: set docker insecure-registry specified host
+  variables:
+    registry:
+      desc: the insecure registry to be added
+      required: true
+      default: registry:5000
+  steps:
+    - name: Make Docker Etc Dir
+      content: mkdir -p /etc/docker
+    - name: Make Daemon.json
+      content: test -f /etc/docker/daemon.json || echo '{}' > /etc/docker/daemon.json
+    - name: Set Docker Insecure Registry
+      content: |
+        if ! jq -e '.["insecure-registries"] | index("registry:5000") != null' /etc/docker/daemon.json > /dev/null; then
+          jq '.["insecure-registries"] += ["${registry}"]' /etc/docker/daemon.json > /etc/docker/daemon.json
+        else
+          echo "The registry ${registry} is already in the insecure-registries list"
+        fi
+    - name: Reload Docker
+      content: systemctl reload docker
+    - name: Show Docker config
+      content: cat /etc/docker/daemon.json

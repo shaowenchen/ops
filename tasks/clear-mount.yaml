@@ -1,0 +1,29 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: clear-mount
+  namespace: ops-system
+spec:
+  desc: clear mount
+  steps:
+    - name: |
+        while true; do
+            timeout 3s df
+            if [ $? -ne 0 ]; then
+                # get strace df last line
+                strace_df=$(timeout -k 1s 3s strace df 2>&1)
+                last_line=$(echo "$strace_df" | tail -n 1)
+                # get mount path in last line
+                last_mount_path=$(echo "$last_line" | grep -oE '/[^ ,]+' | tail -n 1)
+                echo "last_mount_path: $last_mount_path"
+                umount -f "$last_mount_path" && echo "success umount: $last_mount_path" || echo "failed umount: $last_mount_path"
+                sleep 1
+                continue
+            fi
+            error_paths=$(df -h 2>&1 | grep 'Transport endpoint is not connected' | awk -F': ' '{print $2}')
+
+            for path in $error_paths; do
+                umount -f "$path" && echo "Successfully unmounted: $path" || echo "Failed to unmount: $path"
+            done
+            break
+        done
