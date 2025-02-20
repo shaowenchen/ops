@@ -1,0 +1,32 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: inspect-node-monitor
+  namespace: ops-system
+spec:
+  desc: get pod usage in node
+  host: anymaster
+  variables:
+    host:
+      required: true
+  steps:
+    - name: get pod usage
+      content: |
+        NODE_NAME="${host}"
+
+        printf "%-20s %-50s %-10s %-10s\n" "Namespace" "Pod" "CPU" "Memory"
+
+        kubectl get pods -A --field-selector spec.nodeName="$NODE_NAME" \
+          -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name --no-headers | \
+          while read -r NS POD; do
+          
+          METRICS=$(kubectl top pod -n "$NS" "$POD" --use-protocol-buffers --no-headers 2>/dev/null)
+          
+          if [ -n "$METRICS" ]; then
+            CPU=$(echo "$METRICS" | awk '{print $2}')
+            MEM=$(echo "$METRICS" | awk '{print $3}')
+            printf "%-20s %-50s %-10s %-10s\n" "$NS" "$POD" "$CPU" "$MEM"
+          else
+            printf "%-20s %-50s %-10s %-10s\n" "$NS" "$POD" "N/A" "N/A"
+          fi
+        done
