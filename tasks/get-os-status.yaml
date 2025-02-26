@@ -5,6 +5,10 @@ metadata:
   namespace: ops-system
 spec:
   desc: get status information of OS in specified host
+  variables:
+    host:
+      display: host
+      required: true
   steps:
     - name: Kernel Version
       content: uname -r
