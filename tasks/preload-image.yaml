@@ -1,0 +1,22 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: preload-image
+  namespace: ops-system
+spec:
+  host: anymaster
+  variables:
+    cluster:
+      display: cluster
+      required: true
+    image:
+      display: image
+      required: true
+  steps:
+    - name: preload
+        kubectl set image daemonset/preload preload=${image}
+        kubectl delete pod -l app=preload --force --grace-period=0
+    - name: get status
+      content: |
+        sleep 10
+        kubectl get pod -l app=preload -o wide

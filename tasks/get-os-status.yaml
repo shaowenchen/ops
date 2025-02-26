@@ -21,6 +21,8 @@ spec:
       content: echo `cat /proc/sys/net/netfilter/nf_conntrack_count`/`cat /proc/sys/net/netfilter/nf_conntrack_max`
     - name: PID Usage
       content: echo `ps -eLf | wc -l` `cat /proc/sys/kernel/pid_max` | awk '{printf "%.2f%%/%s\n", $1*100/$2, $2}'
+    - name: Thread Usage
+      content: echo `ps -eLf | wc -l` `cat /proc/sys/kernel/threads-max` | awk '{printf "%.2f%%/%s\n", $1*100/$2, $2}'
     - name: ARP Router
       content: echo `/usr/sbin/arp -an | wc -l` `/sbin/sysctl net.ipv4.neigh.default.gc_thresh1 | awk '{print $3}'` |awk '{printf "%.2f%%/%s\n", $1*100/$2, $2}'
     - name: Open Files Number

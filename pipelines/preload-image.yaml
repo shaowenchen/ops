@@ -1,0 +1,12 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: preload-image
+  namespace: ops-system
+  labels:
+    ops/copilot: enabled
+spec:
+  desc: Preload Image - 在集群预热镜像
+  tasks:
+    - name: preload
+      taskRef: preload-image

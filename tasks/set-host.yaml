@@ -7,9 +7,9 @@ spec:
   desc: set a better kernel parameters for kubernetes host
   steps:
     - name: Max PID
-      content: echo "kernel.pid_max=65535 " >> /etc/sysctl.conf && sysctl -p
+      content: echo "kernel.pid_max=4194303 " >> /etc/sysctl.conf && sysctl -p
     - name: Max Thread
-      content: echo "kernel.threads-max=65535 " >> /etc/sysctl.conf && sysctl -p
+      content: echo "kernel.threads-max=4194303 " >> /etc/sysctl.conf && sysctl -p
     - name: Max Conntrack
       content:
         echo "net.netfilter.nf_conntrack_max=3200000" >> /etc/sysctl.conf && sysctl -p ;
