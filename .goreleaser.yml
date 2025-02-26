@@ -1,4 +1,7 @@
 project_name: opscli
+before:
+  hooks:
+    - git clone https://github.com/shaowenchen/ops-manifests.git ops-manifests
 builds:
 -
   env:
@@ -31,9 +34,9 @@ dist: bin
 archives:
 - name_template: "opscli-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
   files:
-    - tasks/*
-    - taskruns/*
-    - pipelines/*
-    - eventhooks/*
+    - ops-manifests/tasks/*
+    - ops-manifests/taskruns/*
+    - ops-manifests/pipelines/*
+    - ops-manifests/eventhooks/*
 changelog:
   skip: true

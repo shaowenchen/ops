@@ -86,6 +86,8 @@ chmod +x "$OPSTEMPDIR/opscli"
 
 "$OPSTEMPDIR/opscli" version
 
+OPSMANIFESTSDIR=$OPSTEMPDIR/ops-manifests
+
 if [ $? -ne 0 ]; then
   echo "Opscli file error"
   exit 1
@@ -100,25 +102,25 @@ if [ -d "${OPSDIR}tasks" ]; then
   mv ${OPSDIR}tasks ${OPSDIR}.tasks_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
-mv "$OPSTEMPDIR/tasks" ${OPSDIR}
+mv "$OPSMANIFESTSDIR/tasks" ${OPSDIR}
 
 if [ -d "${OPSDIR}taskruns" ]; then
   mv ${OPSDIR}taskruns ${OPSDIR}.taskruns_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
-mv "$OPSTEMPDIR/taskruns" ${OPSDIR}
+mv "$OPSMANIFESTSDIR/taskruns" ${OPSDIR}
 
 if [ -d "${OPSDIR}pipelines" ]; then
   mv ${OPSDIR}pipelines ${OPSDIR}.pipelines_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
-mv "$OPSTEMPDIR/pipelines" ${OPSDIR}
+mv "$OPSMANIFESTSDIR/pipelines" ${OPSDIR}
 
 if [ -d "${OPSDIR}eventhooks" ]; then
   mv ${OPSDIR}eventhooks ${OPSDIR}.eventhooks_upgrade_$(date +%Y-%m-%d-%H-%M-%S)
 fi
 
-mv "$OPSTEMPDIR/eventhooks" ${OPSDIR}
+mv "$OPSMANIFESTSDIR/eventhooks" ${OPSDIR}
 
 if [ $(id -u) -eq 0 ]; then
   mv -f "$OPSTEMPDIR/opscli" /usr/local/bin/
@@ -129,4 +131,4 @@ else
 fi
 
 # clear
-rm -rf "$OPSTEMPDIR/$FILENAME"
+rm -rf "$OPSTEMPDIR"
