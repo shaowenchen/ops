@@ -1,7 +1,7 @@
 apiVersion: crd.chenshaowen.com/v1
 kind: Task
 metadata:
-  name: get-os-status
+  name: get-os-usage
   namespace: ops-system
 spec:
   desc: get status information of OS in specified host

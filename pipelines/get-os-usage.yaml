@@ -1,0 +1,10 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: Pipeline
+metadata:
+  name: get-os-usage
+  namespace: ops-system
+spec:
+  desc: 查看系统资源使用情况
+  tasks:
+    - name: get os usage
+      taskRef: get-os-usage

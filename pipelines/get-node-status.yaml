@@ -6,7 +6,7 @@ metadata:
   labels:
     ops/copilot: enabled
 spec:
-  desc: 查看节点的状态
+  desc: 查看节点是否就绪
   tasks:
     - name: 查询节点状态
       taskRef: get-node-status
