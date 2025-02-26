@@ -1,8 +1,0 @@
-apiVersion: crd.chenshaowen.com/v1
-kind: TaskRun
-metadata:
-  name: alert-npu-drop
-  namespace: ops-system
-spec:
-  crontab: "*/30 * * * *"
-  taskRef: alert-npu-drop
