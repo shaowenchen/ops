@@ -7,20 +7,11 @@ import (
 	"strings"
 )
 
-func GetInventoryType(inventory string) string {
-	_, err := GetRestConfig(inventory)
-	if err == nil {
-		return constants.InventoryTypeKubernetes
+func GetInventoryType(nodeName string) string {
+	if len(nodeName) == 0 {
+		return constants.InventoryTypeHosts
 	}
-
-	if strings.ToLower(inventory) == constants.InventoryInCluster {
-		_, err = GetInClusterConfig()
-		if err == nil {
-			return constants.InventoryTypeKubernetes
-		}
-	}
-
-	return constants.InventoryTypeHosts
+	return constants.InventoryTypeKubernetes
 }
 
 func AnalysisHostsParameter(str string) (result []string, err error) {

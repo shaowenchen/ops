@@ -28,7 +28,7 @@ var ShellCmd = &cobra.Command{
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventory = utils.GetAbsoluteFilePath(inventory)
-		inventoryType := utils.GetInventoryType(inventory)
+		inventoryType := utils.GetInventoryType(kubeOpt.NodeName)
 		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
 		if utils.IsExistsFile(shellOpt.Content) {
