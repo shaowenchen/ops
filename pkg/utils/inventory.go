@@ -12,9 +12,12 @@ func GetInventoryType(inventory string) string {
 	if err == nil {
 		return constants.InventoryTypeKubernetes
 	}
-	_, err = GetInClusterConfig()
-	if err == nil && len(inventory) != 0 {
-		return constants.InventoryTypeKubernetes
+
+	if strings.ToLower(inventory) == constants.InventoryInCluster {
+		_, err = GetInClusterConfig()
+		if err == nil {
+			return constants.InventoryTypeKubernetes
+		}
 	}
 
 	return constants.InventoryTypeHosts

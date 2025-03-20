@@ -20,6 +20,8 @@ const (
 	InventoryTypeHosts      = "hosts"
 )
 
+const InventoryInCluster = "incluster"
+
 const (
 	RemoteStorageTypeS3     = "s3"
 	RemoteStorageTypeImage  = "image"
