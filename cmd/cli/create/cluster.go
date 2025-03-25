@@ -48,7 +48,7 @@ func CreateCluster(ctx context.Context, logger *log.Logger, clusterOpt option.Cl
 		cClusterSpec.Server, _ = utils.GetServerUrl(inventory)
 	}
 	cClusterSpec.Config = utils.EncodingStringToBase64(config)
-	cluster := opsv1.NewCluster(clusterOpt.Namespace, clusterOpt.Name, cClusterSpec.Server, cClusterSpec.Config, cClusterSpec.Token)
+	cluster := opsv1.NewCluster(clusterOpt.Namespace, clusterOpt.Name, clusterOpt.Desc, cClusterSpec.Server, cClusterSpec.Config, cClusterSpec.Token)
 	err = kube.CreateCluster(ctx, logger, restConfig, cluster, clusterOpt.Clear)
 	if err != nil {
 		logger.Error.Println(err)
@@ -61,6 +61,7 @@ func init() {
 	clusterCmd.Flags().StringVarP(&cVerbose, "verbose", "v", "", "")
 	clusterCmd.Flags().StringVarP(&cClusterOpt.Namespace, "namespace", "", constants.OpsNamespace, "")
 	clusterCmd.Flags().StringVarP(&cClusterOpt.Name, "name", "", "", "")
+	clusterCmd.Flags().StringVarP(&cClusterOpt.Desc, "desc", "", "", "")
 	clusterCmd.MarkFlagRequired("name")
 	clusterCmd.Flags().StringVarP(&cClusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
 	clusterCmd.Flags().BoolVarP(&cClusterOpt.Clear, "clear", "", false, "")

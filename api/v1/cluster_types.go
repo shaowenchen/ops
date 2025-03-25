@@ -111,13 +111,14 @@ func NewCurrentCluster() Cluster {
 	}
 }
 
-func NewCluster(namespace, name, server, config, token string) *Cluster {
+func NewCluster(namespace, name, desc, server, config, token string) *Cluster {
 	return &Cluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
 		},
 		Spec: ClusterSpec{
+			Desc:   desc,
 			Server: server,
 			Config: config,
 			Token:  token,

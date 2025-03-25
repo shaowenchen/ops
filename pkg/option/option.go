@@ -132,6 +132,7 @@ type PrometheusOption struct {
 type ClusterOption struct {
 	Namespace  string
 	Name       string
+	Desc       string
 	Kubeconfig string
 	Clear      bool
 }
