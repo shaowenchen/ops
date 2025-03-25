@@ -2,9 +2,9 @@ FROM hubimage/builder-golang:1.20 as builder
 WORKDIR /workspace
 COPY . .
 RUN make cli
+RUN git clone https://github.com/shaowenchen/ops-manifests
 
 FROM hubimage/runtime-ubuntu:22.04
 WORKDIR /
 COPY --from=builder /workspace/bin/opscli /usr/local/bin/opscli
-COPY --from=builder /workspace/tasks /root/.ops/tasks
-COPY --from=builder /workspace/tasks /root/.ops/pipelines
+COPY --from=builder /workspace/ops-manifests/* /root/.ops/
