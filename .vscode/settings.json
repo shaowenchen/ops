@@ -1,6 +1,6 @@
 {
-    "go.inferGopath": false,
-    "yaml.schemas": {
-        "https://json.schemastore.org/yamllint.json": "*.yaml"
-    }
+  "go.inferGopath": false,
+  "yaml.schemas": {
+    "https://json.schemastore.org/yamllint.json": "*.yaml"
+  }
 }

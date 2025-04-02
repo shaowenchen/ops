@@ -75,7 +75,7 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 			output = fmt.Sprintf("%s", pipelinerunsManager.PrintMarkdownPipelineRuns(pr))
 		}
 		if output == "" {
-			output = "It's bug, please contact chenshaowen to fix it"
+			output = "It's bug, please contact shaowenchen to fix it"
 		}
 		if err != nil {
 			printTerm(stdFd, oldState, rawState, err.Error())
