@@ -28,12 +28,13 @@ curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bas
 
 ```bash
 helm repo add ops https://www.chenshaowen.com/ops/charts
+helm repo update
 ```
 
 ### 安装 ops-controller-manager
 
 ```bash
-helm install myops ops/ops --version 1.0.0 --namespace ops-system --create-namespace
+helm install myops ops/ops --version 2.0.0 --namespace ops-system --create-namespace
 ```
 
 ### 查看安装结果

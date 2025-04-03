@@ -24,6 +24,7 @@ Add the `ops` Helm repository to your Helm configuration:
 
 ```bash
 helm repo add ops https://www.chenshaowen.com/ops/charts
+helm repo update
 ```
 
 #### **Install ops-controller-manager**
@@ -31,7 +32,7 @@ helm repo add ops https://www.chenshaowen.com/ops/charts
 To install the `ops-controller-manager` using Helm:
 
 ```bash
-helm install myops ops/ops --version 1.0.0 --namespace ops-system --create-namespace
+helm install myops ops/ops --version 2.0.0 --namespace ops-system --create-namespace
 ```
 
 This command installs the `ops-controller-manager` in the `ops-system` namespace and creates the namespace if it doesn't exist.
