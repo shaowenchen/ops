@@ -3,36 +3,38 @@ before:
   hooks:
     - git clone https://github.com/shaowenchen/ops-manifests.git ops-manifests
 builds:
--
-  env:
-  - CGO_ENABLED=0
-  main: ./cmd/cli/main.go
-  binary: opscli
-  goos:
-    - linux
-    - darwin
-    - windows
-  goarch:
-    - amd64
-    - arm64
-  mod_timestamp: "{{ .CommitTimestamp }}"
-  flags:
-    - -trimpath
-  tags:
-    containers_image_openpgp
-  ldflags:
-    - -X "github.com/shaowenchen/ops/cmd/cli/version.BuildVersion={{ .Version }}"
-    - -X "github.com/shaowenchen/ops/cmd/cli/version.BuildDate={{ .Date }}"
-    - -X "github.com/shaowenchen/ops/cmd/cli/version.GitCommitID={{ .ShortCommit }}"
-    - -w
-    - -s
+  - env:
+      - CGO_ENABLED=0
+    main: ./cmd/cli/main.go
+    binary: opscli
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - "386"
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - "7"
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    tags: containers_image_openpgp
+    ldflags:
+      - -X "github.com/shaowenchen/ops/cmd/cli/version.BuildVersion={{ .Version }}"
+      - -X "github.com/shaowenchen/ops/cmd/cli/version.BuildDate={{ .Date }}"
+      - -X "github.com/shaowenchen/ops/cmd/cli/version.GitCommitID={{ .ShortCommit }}"
+      - -w
+      - -s
 dist: bin
 archives:
-- name_template: "opscli-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
-  files:
-    - ops-manifests/tasks/*
-    - ops-manifests/taskruns/*
-    - ops-manifests/pipelines/*
-    - ops-manifests/eventhooks/*
+  - name_template: "opscli-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    files:
+      - ops-manifests/tasks/*
+      - ops-manifests/taskruns/*
+      - ops-manifests/pipelines/*
+      - ops-manifests/eventhooks/*
 changelog:
   skip: true
