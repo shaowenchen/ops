@@ -125,7 +125,7 @@ helm repo update
 - 设置主集群的 nats 信息
 
 ```bash
-export natsendpoint=10.8.101.244:32222
+export natsendpoint=x.x.x.x:32222
 ```
 
 - 生成 nats-values.yaml

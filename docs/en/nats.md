@@ -127,7 +127,7 @@ helm repo update
 - Set the primary cluster's NATS information:
 
 ```bash
-export natsendpoint=10.8.101.244:32222
+export natsendpoint=x.x.x.x:32222
 ```
 
 - Generate `nats-values.yaml`:
