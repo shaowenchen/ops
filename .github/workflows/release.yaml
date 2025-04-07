@@ -2,6 +2,9 @@ name: Release
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 jobs:
   GoReleaser:
     runs-on: ubuntu-latest

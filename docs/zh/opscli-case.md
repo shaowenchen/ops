@@ -105,6 +105,7 @@ metadata:
 spec:
   crontab: 40 * * * *
   taskRef: alert-label-gpu
+EOF
 ```
 
 - GPU 掉卡巡检
