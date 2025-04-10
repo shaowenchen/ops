@@ -39,16 +39,14 @@ var TaskCmd = &cobra.Command{
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventoryType := utils.GetInventoryType(kubeOpt.NodeName)
 		tasks, err := opstask.ReadTaskYaml(utils.GetTaskAbsoluteFilePath(taskOpt.Proxy, taskOpt.FilePath))
-		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
-		defer cancel()
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
 		if inventoryType == constants.InventoryTypeHosts {
-			HostTask(ctx, logger, tasks, taskOpt, hostOpt, inventory)
+			HostTask(context.Background(), logger, tasks, taskOpt, hostOpt, inventory)
 		} else if inventoryType == constants.InventoryTypeKubernetes {
-			KubeTask(ctx, logger, tasks, taskOpt, kubeOpt, inventory)
+			KubeTask(context.Background(), logger, tasks, taskOpt, kubeOpt, inventory)
 		}
 	},
 }
@@ -68,7 +66,7 @@ func HostTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskO
 				continue
 			}
 			newTaskOpt := taskOpt
-			newTaskOpt.Variables["hostname"] = h.GetHostname()
+			newTaskOpt.Variables["host"] = h.GetHostname()
 			err = opstask.RunTaskOnHost(ctx, logger, &t, &tr, hc, newTaskOpt)
 			if err != nil {
 				logger.Error.Println(err)
@@ -97,6 +95,7 @@ func KubeTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskO
 					taskOpt.Variables[k] = v.GetValue()
 				}
 			}
+			taskOpt.Variables["host"] = node.GetName()
 			tr := opsv1.NewTaskRun(&t)
 			err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, newKubeOpt)
 			if err != nil {
