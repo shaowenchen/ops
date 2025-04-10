@@ -84,6 +84,9 @@ func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	defer bus.Close(ctx)
+
 	result := (*client).Send(ctx, event)
 	if cloudevents.IsUndelivered(result) {
 		return errors.New("failed to publish")
