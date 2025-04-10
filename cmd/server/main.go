@@ -5,12 +5,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shaowenchen/ops/pkg/server"
 	"github.com/shaowenchen/ops/web"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 func init() {
 	configpath := flag.String("c", "", "")
 	flag.Parse()
 	server.LoadConfig(*configpath)
+	go func() {
+		http.ListenAndServe("localhost:6060", nil)
+	}()
 }
 
 func main() {

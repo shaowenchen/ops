@@ -18,6 +18,8 @@ package main
 
 import (
 	"flag"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -49,6 +51,10 @@ func init() {
 	utilruntime.Must(opsv1.AddToScheme(scheme))
 	utilruntime.Must(crdv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
+
+	go func() {
+		http.ListenAndServe("localhost:6060", nil)
+	}()
 }
 
 func main() {
