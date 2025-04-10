@@ -1168,7 +1168,15 @@ func CreateEvent(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	go opsevent.Factory(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster, req.Namespace, req.Event).Publish(context.TODO(), body)
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		eventBus := opsevent.Factory(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster, req.Namespace, req.Event)
+		_ = eventBus.Publish(ctx, body)
+		eventBus.Close(ctx)
+	}()
+
 	showSuccess(c)
 }
 
