@@ -67,6 +67,7 @@ func HostTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskO
 			}
 			newTaskOpt := taskOpt
 			newTaskOpt.Variables["host"] = h.GetHostname()
+			newTaskOpt.Variables["proxy"] = taskOpt.Proxy
 			err = opstask.RunTaskOnHost(ctx, logger, &t, &tr, hc, newTaskOpt)
 			if err != nil {
 				logger.Error.Println(err)
@@ -96,6 +97,7 @@ func KubeTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskO
 				}
 			}
 			taskOpt.Variables["host"] = node.GetName()
+			taskOpt.Variables["proxy"] = taskOpt.Proxy
 			tr := opsv1.NewTaskRun(&t)
 			err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, newKubeOpt)
 			if err != nil {
