@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 
 	"net/http"
 	"time"
@@ -32,7 +33,8 @@ func ShellIsInChina() string {
 }
 
 func ShellInstallOpscli(proxy string) string {
-	return fmt.Sprintf(`curl %s | sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh", proxy))
+	proxy = formatProxy(proxy)
+	return fmt.Sprintf(`curl -sfL %s | VERSION=latest PROXY=%s sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh", proxy), proxy)
 }
 
 func ShellAddHost(ip, domain string) string {
@@ -119,6 +121,7 @@ func ShellAcceleratorCount() string {
 	return `(npu_count=$(npu-smi info -l 2>/dev/null | grep -o 'Total Count\s*:\s*[0-9]\+' | awk '{print $NF}' | sed 's/ //g'); [ -n "$npu_count" ] && echo "$npu_count") || (nvidia_count=$(nvidia-smi -L 2>/dev/null | wc -l | awk '{print $1}'); [ "$nvidia_count" -gt 0 ] && echo "$nvidia_count") || echo ""`
 }
 func GetAvailableUrl(url string, proxy string) string {
+	proxy = formatProxy(proxy)
 	if proxy != "" {
 		return proxy + url
 	}
@@ -130,4 +133,11 @@ func GetAvailableUrl(url string, proxy string) string {
 		url = proxy + url
 	}
 	return url
+}
+
+func formatProxy(proxy string) string {
+	if !strings.HasSuffix(proxy, "/") {
+		proxy = proxy + "/"
+	}
+	return proxy
 }

@@ -10,7 +10,7 @@ if [ -z "$PROXY" ]; then
   PROXY="https://ghproxy.chenshaowen.com/"
 fi
 
-echo "Using PROXY: $PROXY"
+echo "Using Proxy: $PROXY"
 
 # Detect architecture
 case "$(uname -m)" in
