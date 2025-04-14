@@ -99,7 +99,7 @@ func (f *FileOption) GetStorageType() string {
 	} else if remoteSplit[0] == "s3" {
 		f.StorageType = opsconstants.RemoteStorageTypeS3
 		f.RemoteFile = remoteSplit[1]
-	} else {
+	} else if len(remoteSplit) == 2 {
 		f.StorageType = opsconstants.RemoteStorageTypeImage
 		f.RuntimeImage = remoteSplit[0]
 		f.RemoteFile = remoteSplit[1]
