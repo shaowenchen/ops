@@ -112,7 +112,15 @@ func GetToken(c *gin.Context) string {
 			}
 		}
 	}
-	// try get from cookie
-	token, _ := c.Cookie("opstoken")
-	return token
+	// Try to get from cookie
+	if token, err := c.Cookie("opstoken"); err == nil && token != "" {
+		return token
+	}
+
+	// Try to get from URL query parameter
+	token := c.Query("opstoken")
+	if token != "" {
+		return token
+	}
+	return ""
 }

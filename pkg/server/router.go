@@ -67,6 +67,18 @@ func SetupRouter(r *gin.Engine) {
 		v1Events.GET("", ListEvents)
 		v1Events.GET("/:event", GetEvents)
 	}
+	v1MCP := r.Group("/api/v1/mcp")
+	{
+		sseHandler := func(c *gin.Context) {
+			sseServer, _ := NewSingletonMCPServer("debug",
+				GlobalConfig.Copilot.OpsServer,
+				GlobalConfig.Copilot.OpsToken,
+				"/api/v1/mcp")
+			sseServer.ServeHTTP(c.Writer, c.Request)
+		}
+		v1MCP.GET("/sse", sseHandler)
+		v1MCP.POST("/message", sseHandler)
+	}
 }
 
 func SetupRouteWithoutAuth(r *gin.Engine) {

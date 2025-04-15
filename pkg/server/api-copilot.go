@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-
 	"github.com/gin-gonic/gin"
+	"github.com/mark3labs/mcp-go/server"
 	opscopilot "github.com/shaowenchen/ops/pkg/copilot"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	"io"
+	"sync"
 )
 
 func PostCopilotPlain(c *gin.Context) {
@@ -79,4 +80,46 @@ func PostCopilot(c *gin.Context) {
 		output = err.Error()
 	}
 	showData(c, output)
+}
+
+var (
+	sseServer     *server.SSEServer
+	sseServerLock sync.Mutex
+)
+
+func NewSingletonMCPServer(verbose, opsServer, opsToken, mcpBase string) (*server.SSEServer, error) {
+	sseServerLock.Lock()
+	defer sseServerLock.Unlock()
+
+	if sseServer != nil {
+		return sseServer, nil
+	}
+
+	logger := opslog.NewLogger().SetVerbose(verbose).SetStd().SetFlag().Build()
+	pipelinerunsManager, err := opscopilot.NewPipelineRunsManager(opsServer, opsToken, "ops-system")
+	if err != nil {
+		logger.Error.Println("request ops server failed " + err.Error())
+		return nil, err
+	}
+
+	mcpServer := server.NewMCPServer(
+		"Ops Mcp Server",
+		"1.0.0",
+		server.WithResourceCapabilities(true, true),
+		server.WithLogging(),
+	)
+
+	err = pipelinerunsManager.AddMcpTools(logger, mcpServer)
+	if err != nil {
+		logger.Error.Println("init mcp failed " + err.Error())
+		return nil, err
+	}
+
+	sseServer = server.NewSSEServer(
+		mcpServer,
+		server.WithBaseURL(""),
+		server.WithBasePath(mcpBase), 
+	)
+
+	return sseServer, nil
 }

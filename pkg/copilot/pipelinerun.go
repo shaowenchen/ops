@@ -2,16 +2,18 @@ package copilot
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
+	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
+	opslog "github.com/shaowenchen/ops/pkg/log"
 	"io"
 	"net/http"
 	"strings"
 	"time"
-
-	opsv1 "github.com/shaowenchen/ops/api/v1"
-	opsconstants "github.com/shaowenchen/ops/pkg/constants"
-	opslog "github.com/shaowenchen/ops/pkg/log"
 )
 
 type PipelineRunsManager struct {
@@ -189,4 +191,46 @@ func (m *PipelineRunsManager) makeRequest(endpoint, token, uri, method string, p
 	defer resp.Body.Close()
 
 	return io.ReadAll(resp.Body)
+}
+
+func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger ,s *server.MCPServer) error {
+	pipelines, err := m.GetPipelines()
+	if err != nil {
+		return err
+	}
+	for _, pipeline := range pipelines {
+		var toolOptions = make([]mcp.ToolOption, 0)
+		for key, variable := range pipeline.Spec.Variables {
+			toolOptions = append(toolOptions, mcp.WithString(key,
+				mcp.Required(),
+				mcp.Description(variable.Desc),
+				mcp.Enum(variable.Enums...),
+				mcp.DefaultString(variable.Default),
+			))
+		}
+		mcpTool := mcp.NewTool(pipeline.Name, toolOptions...)
+		s.AddTool(mcpTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			logger.Info.Println(request.Params.Name)
+			variables := make(map[string]string)
+			for key, value := range request.Params.Arguments {
+				variables[key] = value.(string)
+			}
+			pipelines, err := m.GetPipelines()
+			if err != nil {
+				return mcp.NewToolResultText(err.Error()), nil
+			}
+			output := ""
+			for _, pipeline := range pipelines {
+				if pipeline.Name == request.Params.Name {
+					pipelinerun := opsv1.NewPipelineRun(&pipeline)
+					pipelinerun.Spec.Variables = variables
+					m.Run(logger, pipelinerun)
+					output = m.PrintMarkdownPipelineRuns(pipelinerun)
+				}
+			}
+			logger.Info.Printf(output)
+			return mcp.NewToolResultText(output), nil
+		})
+	}
+	return nil
 }
