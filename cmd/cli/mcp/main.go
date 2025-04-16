@@ -29,9 +29,14 @@ var McpCmd = &cobra.Command{
 			server.WithResourceCapabilities(true, true),
 			server.WithLogging(),
 		)
+		err = pipelinerunsManager.AddMcpResources(logger, mcpServer)
+		if err != nil {
+			logger.Error.Println("add mcp resources failed " + err.Error())
+			return
+		}
 		err = pipelinerunsManager.AddMcpTools(logger, mcpServer)
 		if err != nil {
-			logger.Error.Println("init mcp failed " + err.Error())
+			logger.Error.Println("add mcp tools failed " + err.Error())
 			return
 		}
 		if err := server.ServeStdio(mcpServer); err != nil {

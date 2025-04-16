@@ -58,6 +58,18 @@ func (m *PipelineRunsManager) Init() (err error) {
 	return nil
 }
 
+func (m *PipelineRunsManager) PrintMarkdownClusters() (output string) {
+	output = "### 集群列表\n"
+	if m.clusters == nil || len(m.clusters) == 0 {
+		return "not run any task\n"
+	}
+	for i := 0; i < len(m.clusters); i++ {
+		c := m.clusters[i]
+		output += fmt.Sprintf("- %s(%s)\n", c.Name, c.Spec.Desc)
+	}
+	return
+}
+
 func (m *PipelineRunsManager) PrintMarkdownPipelineRuns(pr *opsv1.PipelineRun) (output string) {
 	output = "### 执行" + pr.Name + "任务详情\n"
 	if pr == nil || len(pr.Status.PipelineRunStatus) == 0 {
@@ -193,7 +205,7 @@ func (m *PipelineRunsManager) makeRequest(endpoint, token, uri, method string, p
 	return io.ReadAll(resp.Body)
 }
 
-func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger ,s *server.MCPServer) error {
+func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger, s *server.MCPServer) error {
 	pipelines, err := m.GetPipelines()
 	if err != nil {
 		return err
@@ -232,5 +244,25 @@ func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger ,s *server.MCPSe
 			return mcp.NewToolResultText(output), nil
 		})
 	}
+	return nil
+}
+
+func (m *PipelineRunsManager) AddMcpResources(logger *opslog.Logger, s *server.MCPServer) error {
+	resource := mcp.NewResource(
+		"clusters://all",
+		"clusters",
+		mcp.WithResourceDescription("clusters"),
+		mcp.WithMIMEType("text/markdown"),
+	)
+
+	s.AddResource(resource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+		return []mcp.ResourceContents{
+			mcp.TextResourceContents{
+				URI:      "clusters://all",
+				MIMEType: "text/markdown",
+				Text:     string(m.PrintMarkdownClusters()),
+			},
+		}, nil
+	})
 	return nil
 }
