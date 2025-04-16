@@ -26,17 +26,6 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build and push Controller
-        uses: docker/build-push-action@v6
-        with:
-          platforms: ${{ inputs.platforms }}
-          push: true
-          tags: docker.io/shaowenchen/ops-controller-manager:latest
-          file: Dockerfile
-      - name: Push ops-controller-manager to aliyun
-        run: |
-          export image=ops-controller-manager:latest
-          docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
       - name: Build and push Server
         uses: docker/build-push-action@v6
         with:
@@ -47,6 +36,17 @@ jobs:
       - name: Push ops-server to aliyun
         run: |
           export image=ops-server:latest
+          docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
+      - name: Build and push Controller
+        uses: docker/build-push-action@v6
+        with:
+          platforms: ${{ inputs.platforms }}
+          push: true
+          tags: docker.io/shaowenchen/ops-controller-manager:latest
+          file: Dockerfile
+      - name: Push ops-controller-manager to aliyun
+        run: |
+          export image=ops-controller-manager:latest
           docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/shaowenchen/${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
       - name: Build and push Cli
         uses: docker/build-push-action@v6
