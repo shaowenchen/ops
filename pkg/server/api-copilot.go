@@ -109,16 +109,22 @@ func NewSingletonMCPServer(verbose, opsServer, opsToken, mcpBase string) (*serve
 		server.WithLogging(),
 	)
 
+	err = pipelinerunsManager.AddMcpResources(logger, mcpServer)
+	if err != nil {
+		logger.Error.Println("add mcp resources failed " + err.Error())
+		return nil, err
+	}
+
 	err = pipelinerunsManager.AddMcpTools(logger, mcpServer)
 	if err != nil {
-		logger.Error.Println("init mcp failed " + err.Error())
+		logger.Error.Println("add mcp tools failed " + err.Error())
 		return nil, err
 	}
 
 	sseServer = server.NewSSEServer(
 		mcpServer,
 		server.WithBaseURL(""),
-		server.WithBasePath(mcpBase), 
+		server.WithBasePath(mcpBase),
 	)
 
 	return sseServer, nil
