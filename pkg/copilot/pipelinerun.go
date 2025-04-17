@@ -59,9 +59,9 @@ func (m *PipelineRunsManager) Init() (err error) {
 }
 
 func (m *PipelineRunsManager) PrintMarkdownClusters() (output string) {
-	output = "### 集群列表\n"
+	output = "### Kubernetes cluster list\n"
 	if m.clusters == nil || len(m.clusters) == 0 {
-		return "not run any task\n"
+		return "no any available cluster \n"
 	}
 	for i := 0; i < len(m.clusters); i++ {
 		c := m.clusters[i]
@@ -70,8 +70,20 @@ func (m *PipelineRunsManager) PrintMarkdownClusters() (output string) {
 	return
 }
 
+func (m *PipelineRunsManager) PrintMarkdownPipelines() (output string) {
+	output = "### pipelines list\n"
+	if m.pipelines == nil || len(m.pipelines) == 0 {
+		return "no any available pipelines \n"
+	}
+	for i := 0; i < len(m.pipelines); i++ {
+		p := m.pipelines[i]
+		output += fmt.Sprintf("- %s(%s)\n", p.Name, p.Spec.Desc)
+	}
+	return
+}
+
 func (m *PipelineRunsManager) PrintMarkdownPipelineRuns(pr *opsv1.PipelineRun) (output string) {
-	output = "### 执行" + pr.Name + "任务详情\n"
+	output = "###" + pr.Name + " details\n"
 	if pr == nil || len(pr.Status.PipelineRunStatus) == 0 {
 		return "not run any task\n"
 	}
@@ -119,6 +131,7 @@ func (m *PipelineRunsManager) Run(logger *opslog.Logger, pipelinerun *opsv1.Pipe
 	uri := "/api/v1/namespaces/" + m.namespace + "/pipelineruns/sync"
 	respBody, err := m.makeRequest(m.endpoint, m.token, uri, "POST", pipelinerun.Spec)
 	if err != nil {
+		logger.Error.Println("error", err)
 		return
 	}
 	type Resp struct {
@@ -213,16 +226,19 @@ func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger, s *server.MCPSe
 	for _, pipeline := range pipelines {
 		var toolOptions = make([]mcp.ToolOption, 0)
 		for key, variable := range pipeline.Spec.Variables {
+			if variable.Value != "" {
+				variable.Default = variable.Value
+			}
 			toolOptions = append(toolOptions, mcp.WithString(key,
 				mcp.Required(),
 				mcp.Description(variable.Desc),
 				mcp.Enum(variable.Enums...),
 				mcp.DefaultString(variable.Default),
+				mcp.Pattern(variable.Regex),
 			))
 		}
 		mcpTool := mcp.NewTool(pipeline.Name, toolOptions...)
 		s.AddTool(mcpTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			logger.Info.Println(request.Params.Name)
 			variables := make(map[string]string)
 			for key, value := range request.Params.Arguments {
 				variables[key] = value.(string)
@@ -236,11 +252,14 @@ func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger, s *server.MCPSe
 				if pipeline.Name == request.Params.Name {
 					pipelinerun := opsv1.NewPipelineRun(&pipeline)
 					pipelinerun.Spec.Variables = variables
-					m.Run(logger, pipelinerun)
+					err := m.Run(logger, pipelinerun)
+					if err != nil {
+						logger.Error.Println(err)
+						return mcp.NewToolResultText(err.Error()), nil
+					}
 					output = m.PrintMarkdownPipelineRuns(pipelinerun)
 				}
 			}
-			logger.Info.Printf(output)
 			return mcp.NewToolResultText(output), nil
 		})
 	}
@@ -248,19 +267,35 @@ func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger, s *server.MCPSe
 }
 
 func (m *PipelineRunsManager) AddMcpResources(logger *opslog.Logger, s *server.MCPServer) error {
-	resource := mcp.NewResource(
+	clusterRes := mcp.NewResource(
 		"clusters://all",
-		"clusters",
-		mcp.WithResourceDescription("clusters"),
+		"all available clusters",
+		mcp.WithResourceDescription("clusters are the kubernetes clusters"),
 		mcp.WithMIMEType("text/markdown"),
 	)
 
-	s.AddResource(resource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	s.AddResource(clusterRes, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
 				URI:      "clusters://all",
 				MIMEType: "text/markdown",
 				Text:     string(m.PrintMarkdownClusters()),
+			},
+		}, nil
+	})
+	pipelineRes := mcp.NewResource(
+		"pipelines://all",
+		"all available pipelines",
+		mcp.WithResourceDescription("pipelines provide standard ops procedures"),
+		mcp.WithMIMEType("text/markdown"),
+	)
+
+	s.AddResource(pipelineRes, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+		return []mcp.ResourceContents{
+			mcp.TextResourceContents{
+				URI:      "pipelines://all",
+				MIMEType: "text/markdown",
+				Text:     string(m.PrintMarkdownPipelines()),
 			},
 		}, nil
 	})
