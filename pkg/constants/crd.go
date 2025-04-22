@@ -52,6 +52,6 @@ const (
 	LabelCronPipelineValue         = "pipeline"
 	LabelTaskRefKey                = "ops/taskref"
 	LabelPipelineRefKey            = "ops/pipelineref"
-	DefaultTTLSecondsAfterFinished = 60 * 60
+	DefaultTTLSecondsAfterFinished = 60 * 30
 	ClearCronTab                   = "*/30 * * * *"
 )
