@@ -204,7 +204,7 @@ nats --user=app --password=${apppassword} pub ops.test "mymessage mycontent"
 - 创建 stream 持久化消息
 
 ```bash
-nats --user=app --password=${apppassword} stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage memory --retention limits --max-msg-size=-1 --discard=old --replicas 1 --dupe-window=2m
+nats --user=app --password=${apppassword} stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=168h --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 1 --dupe-window=2m
 ```
 
 生产环境中，推荐使用 file 存储，并且 replica 设置为 3。
