@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"strings"
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -60,7 +59,7 @@ func GetPodLog(logger *opslog.Logger, ctx context.Context, debug bool, client *k
 			client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
 		}
 	}()
-	for range time.Tick(time.Second * 1) {
+	for range time.Tick(time.Second * 2) {
 		select {
 		default:
 			pod, err = client.CoreV1().Pods(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
@@ -71,7 +70,14 @@ func GetPodLog(logger *opslog.Logger, ctx context.Context, debug bool, client *k
 			if len(logs) == 0 && err != nil {
 				logs = err.Error()
 			}
-			if err != nil && utils.IsUnknownPod(pod) || strings.Contains(logs, "connection refused") {
+			// check node status, if not ready return success
+			node, err1 := client.CoreV1().Nodes().Get(ctx, pod.Spec.NodeName, metav1.GetOptions{})
+			if err1 != nil {
+				logger.Error.Println(err1)
+				err = err1
+				return
+			}
+			if !utils.IsNodeReady(node) {
 				err = nil
 				return
 			}

@@ -423,10 +423,8 @@ func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, execut
 	if err != nil {
 		return "", err
 	}
-	//TODO: add timeout and improve the code
-	if strings.Contains(rawCmd, "reboot") || strings.Contains(rawCmd, "halt") || strings.Contains(rawCmd, "shutdown") || strings.Contains(rawCmd, "ipmitool") {
-		return "", nil
-	}
+	isRebootCommand := strings.Contains(rawCmd, "reboot") || strings.Contains(rawCmd, "halt") || strings.Contains(rawCmd, "shutdown") || strings.Contains(rawCmd, "ipmitool")
+
 	var (
 		output []byte
 		line   = ""
@@ -470,6 +468,9 @@ func (c *HostConnection) ExecWithExecutor(ctx context.Context, sudo bool, execut
 		}
 	}
 END:
+	if isRebootCommand {
+		return "Reboot command triggered successfully", nil
+	}
 	err = sess.Wait()
 	return strings.TrimRight(string(output), "\r\n"), err
 }
