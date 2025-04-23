@@ -83,7 +83,7 @@ func (m *PipelineRunsManager) PrintMarkdownPipelines() (output string) {
 }
 
 func (m *PipelineRunsManager) PrintMarkdownPipelineRuns(pr *opsv1.PipelineRun) (output string) {
-	output = "###" + pr.Name + " details\n"
+	output = "###" + pr.Name + " Run Details\n"
 	if pr == nil || len(pr.Status.PipelineRunStatus) == 0 {
 		return "not run any task\n"
 	}
