@@ -79,7 +79,6 @@ func GetPodLog(logger *opslog.Logger, ctx context.Context, debug bool, client *k
 				return
 			}
 			if utils.IsFailedPod(pod) {
-
 				err = errors.New("status failed, logs: " + logs)
 				return
 			}

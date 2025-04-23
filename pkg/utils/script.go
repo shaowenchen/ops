@@ -74,7 +74,7 @@ func ShellCPULoad1() string {
 }
 
 func ShellCPUUsagePercent() string {
-	return `grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {printf ("%.2f%",usage)}'`
+	return `grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {printf ("%.2f%%\n",usage)}'`
 }
 
 func ShellMemTotal() string {

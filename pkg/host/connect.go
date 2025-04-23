@@ -260,18 +260,22 @@ func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv
 	} else {
 		err = err1
 	}
-	accelModel, err1 := c.getAcceleratorModel(ctx, sudo)
-	if err1 == nil {
-		anyOneIsOk = true
-	} else {
-		err = err1
-	}
+	accelModel := ""
+	accelCount := ""
+	if len(accelVendor) > 0 {
+		accelModel, err1 = c.getAcceleratorModel(ctx, sudo)
+		if err1 == nil {
+			anyOneIsOk = true
+		} else {
+			err = err1
+		}
 
-	accelCount, err1 := c.getAcceleratorCount(ctx, sudo)
-	if err1 == nil {
-		anyOneIsOk = true
-	} else {
-		err = err1
+		accelCount, err1 = c.getAcceleratorCount(ctx, sudo)
+		if err1 == nil {
+			anyOneIsOk = true
+		} else {
+			err = err1
+		}
 	}
 
 	status = &opsv1.HostStatus{
