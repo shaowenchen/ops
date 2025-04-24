@@ -469,7 +469,7 @@ func (r *TaskRunReconciler) getHosts(logger *opslog.Logger, ctx context.Context,
 		hosts = append(hosts, host)
 		return
 	}
-	// selector host, eg: az=cn-hangzhou
+	// selector host, eg: alert-gpu=enabled
 	hostList := &opsv1.HostList{}
 	selector, err := metav1.ParseToLabelSelector(t.Spec.Host)
 	if err != nil {
