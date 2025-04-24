@@ -11,12 +11,18 @@ import (
 )
 
 var proxy = ""
-
+var manifests = false
 var UpgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade to latest version",
 	Run: func(cmd *cobra.Command, args []string) {
-		upgrade := exec.Command("sh", "-c", utils.ShellInstallOpscli(proxy))
+		bash := ""
+		if manifests {
+			bash = utils.ShellInstallManifests(proxy)
+		} else {
+			bash = utils.ShellInstallOpscli(proxy)
+		}
+		upgrade := exec.Command("sh", "-c", bash)
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 		upgrade.Stdout = &stdout
@@ -35,4 +41,5 @@ var UpgradeCmd = &cobra.Command{
 
 func init() {
 	UpgradeCmd.Flags().StringVarP(&proxy, "proxy", "", constants.DefaultProxy, "")
+	UpgradeCmd.Flags().BoolVarP(&manifests, "manifests", "", false, "only upgrade manifests")
 }

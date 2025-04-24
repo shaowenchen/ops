@@ -32,6 +32,11 @@ func ShellIsInChina() string {
 	return `curl --connect-timeout 2 https://raw.githubusercontent.com/`
 }
 
+func ShellInstallManifests(proxy string) string {
+	proxy = formatProxy(proxy)
+	return fmt.Sprintf(`curl -sfL %s | VERSION=latest PROXY=%s sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getmanifests.sh", proxy), proxy)
+}
+
 func ShellInstallOpscli(proxy string) string {
 	proxy = formatProxy(proxy)
 	return fmt.Sprintf(`curl -sfL %s | VERSION=latest PROXY=%s sh -`, GetAvailableUrl("https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh", proxy), proxy)
