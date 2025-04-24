@@ -341,7 +341,7 @@ func (c *HostConnection) connecting() (err error) {
 	if len(privateKey) > 0 {
 		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
 		if err != nil {
-			return errors.New("The given SSH key could not be parsed")
+			return err
 		}
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	}
