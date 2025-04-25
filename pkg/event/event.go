@@ -105,7 +105,7 @@ func (e EventTaskRunReport) Readable(ce cloudevents.Event) string {
 	AppendField(result, `kind`, e.Kind)
 	AppendField(result, `threshold`, e.Threshold)
 	AppendField(result, `operator`, e.Operator)
-	AppendField(result, `value: `, e.Value)
+	AppendField(result, `value`, e.Value)
 	AppendField(result, `status`, e.Status)
 	AppendField(result, `message`, e.Message)
 	AppendField(result, "time", ce.Time().Local().Format("2006-01-02 15:04:05"))
