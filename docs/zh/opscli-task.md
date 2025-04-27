@@ -82,12 +82,12 @@ node1 为节点名称。
 - 上传到 Server
 
 ```bash
-/usr/local/bin/opscli task -f tasks/file-upload.yaml --api https://uploadapi.vinqi.com/api/v1/files --localfile dockerfile
+/usr/local/bin/opscli task -f tasks/file-upload.yaml --api https://uploadapi.chenshaowen.com/api/v1/files --localfile dockerfile
 
 > Run Task  ops-system/file-upload  on  127.0.0.1
 (1/1) upload file
 Please use the following command to download the file: 
-opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey a9f891afe71fda777b05a7063068360a914e83848d7da46d7513aee86c053f6c --direction download --remotefile https://uploadapi.vinqi.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes
+opscli file --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey a9f891afe71fda777b05a7063068360a914e83848d7da46d7513aee86c053f6c --direction download --remotefile https://uploadapi.chenshaowen.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes
 ```
 
 - 上传到 S3
@@ -101,11 +101,11 @@ opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey a9f891afe71f
 - 从 Server 下载
 
 ```bash
-/usr/local/bin/opscli task -f task -f tasks/file-download.yaml --api https://uploadapi.vinqi.com/api/v1/files --aeskey a9f891afe71fda777b05a7063068360a914e83848d7da46d7513aee86c053f6c --remotefile https://uploadapi.vinqi.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes --localfile dockerfile1
+/usr/local/bin/opscli task -f task -f tasks/file-download.yaml --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey a9f891afe71fda777b05a7063068360a914e83848d7da46d7513aee86c053f6c --remotefile https://uploadapi.chenshaowen.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes --localfile dockerfile1
 
 > Run Task  ops-system/file-download  on  127.0.0.1
 (1/1) download file
-success download https://uploadapi.vinqi.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes to dockerfile1
+success download https://uploadapi.chenshaowen.com/uploadbases/cdn0/raw/1721615659-dockerfile.aes to dockerfile1
 ```
 
 - 从 S3 下载

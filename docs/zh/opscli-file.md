@@ -37,10 +37,10 @@ unset sk
 - 上传
 
 ```bash
-/usr/local/bin/opscli file --direction upload --api https://uploadapi.vinqi.com/api/v1/files --aeskey "" --localfile ./tmp.log
+/usr/local/bin/opscli file --direction upload --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey "" --localfile ./tmp.log
 
 Please use the following command to download the file:
-opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey xxx --direction download --remotefile https://download_url_link.com.aes
+opscli file --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey xxx --direction download --remotefile https://download_url_link.com.aes
 ```
 
 这里的 api 提供上传服务，aeskey 为空字符串时自动生成一个随机秘钥，如果不设置 aeskey 默认为 unset 将不会进行文件加密。
@@ -48,7 +48,7 @@ opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey xxx --direct
 - 下载
 
 ```bash
-/usr/local/bin/opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey xxx --direction download --remotefile https://download_url_link.com.aes
+/usr/local/bin/opscli file --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey xxx --direction download --remotefile https://download_url_link.com.aes
 ```
 
 ### 集群 - 本地与 API Server 互传文件
@@ -56,13 +56,13 @@ opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey xxx --direct
 - 上传
 
 ```bash
-/usr/local/bin/opscli file -i ~/.kube/config --nodename node1 --direction upload --api https://uploadapi.vinqi.com/api/v1/files --aeskey "" --localfile /root/tmp.log --runtimeimage shaowenchen/ops-cli
+/usr/local/bin/opscli file -i ~/.kube/config --nodename node1 --direction upload --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey "" --localfile /root/tmp.log --runtimeimage shaowenchen/ops-cli
 ```
 
 - 下载
 
 ```bash
-/usr/local/bin/opscli file -i ~/.kube/config --nodename xxx --direction download --api https://uploadapi.vinqi.com/api/v1/files --aeskey xxx --localfile /root/tmp1.log --remotefile https://uploadapi.vinqi.com/uploadbases/cdn0/raw/1721621949-tmp.log.aes --runtimeimage shaowenchen/ops-cli
+/usr/local/bin/opscli file -i ~/.kube/config --nodename xxx --direction download --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey xxx --localfile /root/tmp1.log --remotefile https://uploadapi.chenshaowen.com/uploadbases/cdn0/raw/1721621949-tmp.log.aes --runtimeimage shaowenchen/ops-cli
 ```
 
 ### 集群 - 本地与对象存储互传文件

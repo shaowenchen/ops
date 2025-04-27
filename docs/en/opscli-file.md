@@ -52,7 +52,7 @@ unset sk
 - **Upload to API Server**
 
 ```bash
-/usr/local/bin/opscli file --direction upload --api https://uploadapi.vinqi.com/api/v1/files --aeskey "" --localfile ./tmp.log
+/usr/local/bin/opscli file --direction upload --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey "" --localfile ./tmp.log
 ```
 
 If `aeskey` is not provided (or set as an empty string), a random encryption key is generated automatically.
@@ -60,7 +60,7 @@ If `aeskey` is not provided (or set as an empty string), a random encryption key
 - **Download from API Server**
 
 ```bash
-/usr/local/bin/opscli file --api https://uploadapi.vinqi.com/api/v1/files --aeskey xxx --direction download --remotefile https://download_url_link.com.aes
+/usr/local/bin/opscli file --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey xxx --direction download --remotefile https://download_url_link.com.aes
 ```
 
 #### 3. **Cluster - Local and API Server File Transfer**
@@ -68,13 +68,13 @@ If `aeskey` is not provided (or set as an empty string), a random encryption key
 - **Upload to Cluster's API Server**
 
 ```bash
-/usr/local/bin/opscli file -i ~/.kube/config --nodename node1 --direction upload --api https://uploadapi.vinqi.com/api/v1/files --aeskey "" --localfile /root/tmp.log --runtimeimage shaowenchen/ops-cli
+/usr/local/bin/opscli file -i ~/.kube/config --nodename node1 --direction upload --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey "" --localfile /root/tmp.log --runtimeimage shaowenchen/ops-cli
 ```
 
 - **Download from Cluster's API Server**
 
 ```bash
-/usr/local/bin/opscli file -i ~/.kube/config --nodename xxx --direction download --api https://uploadapi.vinqi.com/api/v1/files --aeskey xxx --localfile /root/tmp1.log --remotefile https://uploadapi.vinqi.com/uploadbases/cdn0/raw/1721621949-tmp.log.aes --runtimeimage shaowenchen/ops-cli
+/usr/local/bin/opscli file -i ~/.kube/config --nodename xxx --direction download --api https://uploadapi.chenshaowen.com/api/v1/files --aeskey xxx --localfile /root/tmp1.log --remotefile https://uploadapi.chenshaowen.com/uploadbases/cdn0/raw/1721621949-tmp.log.aes --runtimeimage shaowenchen/ops-cli
 ```
 
 #### 4. **Cluster - Local and Object Storage File Transfer**
