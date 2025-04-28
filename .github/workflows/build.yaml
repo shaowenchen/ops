@@ -7,7 +7,7 @@ on:
     inputs:
       platforms:
         description: ""
-        required: true
+        required: false
         default: "linux/amd64,linux/arm64"
 jobs:
   docker:
@@ -32,7 +32,7 @@ jobs:
       - name: Build and push Controller
         uses: docker/build-push-action@v6
         with:
-          platforms: ${{ inputs.platforms }}
+          platforms: ${{ inputs.platforms || 'linux/amd64,linux/arm64' }}
           push: true
           tags: docker.io/shaowenchen/ops-controller-manager:latest
           file: Dockerfile
@@ -43,7 +43,7 @@ jobs:
       - name: Build and push Server
         uses: docker/build-push-action@v6
         with:
-          platforms: ${{ inputs.platforms }}
+          platforms: ${{ inputs.platforms || 'linux/amd64,linux/arm64' }}
           push: true
           tags: docker.io/shaowenchen/ops-server:latest
           file: Dockerfile-Server
@@ -54,7 +54,7 @@ jobs:
       - name: Build and push Cli
         uses: docker/build-push-action@v6
         with:
-          platforms: ${{ inputs.platforms }}
+          platforms: ${{ inputs.platforms || 'linux/amd64,linux/arm64' }}
           push: true
           tags: docker.io/shaowenchen/ops-cli:latest
           file: Dockerfile-Cli
