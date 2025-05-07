@@ -76,11 +76,18 @@ func SetupRouter(r *gin.Engine) {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 			c.Writer.Header().Set("X-Accel-Buffering", "no")
 			c.Writer.Header().Set("Transfer-Encoding", "chunked")
-			sseServer, _ := NewSingletonMCPServer("debug",
+			sseServer, err := NewSingletonMCPServer("debug",
 				GlobalConfig.Copilot.OpsServer,
 				GlobalConfig.Copilot.OpsToken,
 				"/api/v1/mcp")
+			if err != nil {
+				c.String(500, "Failed to initialize SSE server: %v", err)
+				return
+			}
 			sseServer.ServeHTTP(c.Writer, c.Request)
+			if c.Writer.Status() != 200 {
+				c.String(c.Writer.Status(), "SSE connection terminated with status: %d", c.Writer.Status())
+			}
 		}
 		v1MCP.GET("/sse", sseHandler)
 		v1MCP.POST("/message", sseHandler)
