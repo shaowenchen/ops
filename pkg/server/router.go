@@ -67,7 +67,7 @@ func SetupRouter(r *gin.Engine) {
 		v1Events.GET("", ListEvents)
 		v1Events.GET("/:event", GetEvents)
 	}
-	v1MCP := r.Group("/api/v1/mcp")
+	v1MCP := r.Group("/api/v1/mcp").Use(AuthMiddleware())
 	{
 		sseHandler := func(c *gin.Context) {
 			c.Writer.Header().Set("Content-Type", "text/event-stream")
