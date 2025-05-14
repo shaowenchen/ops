@@ -8,6 +8,29 @@ import (
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 )
 
+func GetChatPrompt() string {
+	return `
+`
+}
+
+func GetPlanPrompt(pipelines []opsv1.Pipeline) string {
+	if len(pipelines) == 0 {
+		return ""
+	}
+	var b strings.Builder
+	for _, pipeline := range pipelines {
+		b.WriteString(fmt.Sprintf("- %s(%s)\n", pipeline.Name, pipeline.Spec.Desc))
+	}
+	return `You are an ops expert, you are good at planning tasks.
+Please do the following:
+-understand the user's input.
+-make a plan for the user's input.
+-output the plan in JSON format.
+
+< available standard operating procedures >
+` + b.String()
+}
+
 func GetIntentionParametersPrompt(clusters []opsv1.Cluster, pipelines []opsv1.Pipeline) string {
 	return `{
 	"pipeline": "",
@@ -15,7 +38,7 @@ func GetIntentionParametersPrompt(clusters []opsv1.Cluster, pipelines []opsv1.Pi
 	}`
 }
 
-func GetIntentionPrompt(pipelines []opsv1.Pipeline) string {
+func GetActionPrompt(pipelines []opsv1.Pipeline) string {
 	if len(pipelines) == 0 {
 		return ""
 	}
@@ -31,7 +54,7 @@ Must be one of the following options:
 ` + b.String()
 }
 
-func GetParametersPrompt(pipeline opsv1.Pipeline, clusters []opsv1.Cluster) string {
+func GetActionParametersPrompt(pipeline opsv1.Pipeline, clusters []opsv1.Cluster) string {
 	// add vars
 	var desc strings.Builder
 	desc.WriteString(fmt.Sprintf("The %s pipeline is used to %s.\n", pipeline.Name, pipeline.Spec.Desc))

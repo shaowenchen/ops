@@ -22,7 +22,7 @@ const welcome = `Welcome to Opscli Copilot. Please type "exit" or "q" to quit.`
 const quit = "Goodbye!"
 const prompt = "Opscli> "
 const defaultEndpoint = "https://api.openai.com/v1"
-const defaultModel = "gpt-3.5-turbo-16k"
+const defaultModel = "gpt-4o-mini"
 
 var CopilotCmd = &cobra.Command{
 	Use:   "copilot",
@@ -75,7 +75,7 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 			output = fmt.Sprintf("%s", pipelinerunsManager.PrintMarkdownPipelineRuns(pr))
 		}
 		if output == "" {
-			output = "It's bug, please contact shaowenchen to fix it"
+			output = "It's bug, please contact admin to fix it"
 		}
 		if err != nil {
 			printTerm(stdFd, oldState, rawState, err.Error())

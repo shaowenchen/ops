@@ -5,15 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
-	"io"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type PipelineRunsManager struct {
@@ -83,6 +84,18 @@ func (m *PipelineRunsManager) PrintMarkdownPipelines() (output string) {
 }
 
 func (m *PipelineRunsManager) PrintMarkdownPipelineRuns(pr *opsv1.PipelineRun) (output string) {
+	// if pipeline is chat, print chat result
+	if pr != nil && pr.Spec.PipelineRef == "chat" {
+		if len(pr.Status.PipelineRunStatus) > 0 &&
+			len(pr.Status.PipelineRunStatus[0].TaskRunStatus.TaskRunNodeStatus) > 0 {
+			for _, nodeStatus := range pr.Status.PipelineRunStatus[0].TaskRunStatus.TaskRunNodeStatus {
+				if len(nodeStatus.TaskRunStep) > 0 {
+					return nodeStatus.TaskRunStep[0].StepOutput
+				}
+			}
+		}
+		return "chat result is empty"
+	}
 	output = "###" + pr.Name + " Run Details\n"
 	if pr == nil || len(pr.Status.PipelineRunStatus) == 0 {
 		return "not run any task\n"

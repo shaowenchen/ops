@@ -2,6 +2,8 @@ package copilot
 
 import (
 	"encoding/json"
+	"strings"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/pkg/log"
 )
@@ -50,7 +52,7 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *R
 	} else {
 		// chat intention
 		history.WithHistory(0)
-		_, pipeline, err = ChatIntention(logger, chat, GetIntentionPrompt, pipelines, history, input, 3)
+		_, pipeline, err = ChatIntention(logger, chat, GetActionPrompt, pipelines, history, input, 3)
 		if err != nil {
 			return nil, ExitSystemError, err
 		}
@@ -69,7 +71,7 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *R
 	if !useTools {
 		// chat parameters
 		history.WithHistory(0)
-		_, variables, err = ChatParameters(logger, chat, GetParametersPrompt, pipelines, clusters, history, pipelineObj, input, 3)
+		_, variables, err = ChatParameters(logger, chat, GetActionParametersPrompt, pipelines, clusters, history, pipelineObj, input, 3)
 		if err != nil {
 			return nil, ExitSystemError, err
 		}
@@ -103,5 +105,23 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *R
 	pipelinerun := opsv1.NewPipelineRun(pipelineObj)
 	pipelinerun.Spec.Variables = variables
 	logger.Debug.Printf("> run pipeline %s on %s, variables: %v\n", pipelinerun.Spec.PipelineRef, pipelinerun.Namespace, pipelinerun.Spec.Variables)
-	return pipelinerun, ExitCodeDefault, pipelinerunsManager.Run(logger, pipelinerun)
+
+	// 4 - run pipeline
+	err = pipelinerunsManager.Run(logger, pipelinerun)
+	// 5 - if pipeline is chat, run chat and return
+	if strings.ToLower(pipeline) == "chat" {
+		history.WithHistory(0)
+		output, err := chat(input, GetChatPrompt(), history)
+		if err != nil {
+			return nil, ExitSystemError, err
+		}
+		if len(pipelinerun.Status.PipelineRunStatus) > 0 {
+			for nodeName, taskStatus := range pipelinerun.Status.PipelineRunStatus[0].TaskRunStatus.TaskRunNodeStatus {
+				if len(taskStatus.TaskRunStep) > 0 {
+					pipelinerun.Status.PipelineRunStatus[0].TaskRunStatus.TaskRunNodeStatus[nodeName].TaskRunStep[0].StepOutput = output
+				}
+			}
+		}
+	}
+	return pipelinerun, ExitCodeDefault, err
 }
