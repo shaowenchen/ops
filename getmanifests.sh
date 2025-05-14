@@ -65,7 +65,7 @@ fi
 
 mv "$OPSMANIFESTSDIR/eventhooks" ${OPSDIR}
 
-echo "Congratulations! Ops manifests live in ${OPSDIR}"
+echo "Congratulations! Ops manifests has been upgraded in ${OPSDIR}"
 
 # clear
 rm -rf "$OPSTEMPDIR"
