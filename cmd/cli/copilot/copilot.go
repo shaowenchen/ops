@@ -38,7 +38,7 @@ var CopilotCmd = &cobra.Command{
 func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 	fmt.Println(welcome)
 	defer fmt.Println(quit)
-	history := copilot.RoleContentList{}
+	history := copilot.NewDefaultChatMessage()
 	stdFd := int(os.Stdin.Fd())
 	oldState, _ := term.MakeRaw(stdFd)
 	defer term.Restore(stdFd, oldState)
@@ -53,7 +53,7 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 	}
 
 	// build chat
-	chat, err := copilot.BuildOpenAIChat(copilotOpt.Endpoint, copilotOpt.Key, copilotOpt.Model, &history, "", "copilot", 0.1)
+	chat, err := copilot.BuildOpenAIChat(copilotOpt.Endpoint, copilotOpt.Key, copilotOpt.Model, history, "", "copilot", 0.1)
 	if err != nil {
 		logger.Error.Printf("build chat error: %v\n", err)
 		return
@@ -65,7 +65,7 @@ func CreateCopilot(logger *log.Logger, opt option.CopilotOption) {
 			break
 		}
 		input = strings.TrimSpace(input)
-		pr, exitCode, err := copilot.RunPipeline(logger, false, chat, &history, pipelinerunsManager, input, nil)
+		pr, exitCode, err := copilot.RunPipeline(logger, false, chat, history, pipelinerunsManager, input, nil)
 		output := ""
 		if exitCode == copilot.ExitCodeIntentionEmpty {
 			output = "I can not understand your input:" + input + ", please help me to solve it, use following intention:\n " + pipelinerunsManager.GetForIntent()

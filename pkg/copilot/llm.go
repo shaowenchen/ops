@@ -22,72 +22,127 @@ type RoleContent struct {
 const RoleUser = openai.ChatMessageRoleUser
 const RoleSystem = openai.ChatMessageRoleSystem
 const RoleAssistant = openai.ChatMessageRoleAssistant
+const DefaultMaxHistory = 5
 
-type RoleContentList []RoleContent
-
-func (rcl *RoleContentList) AddSystemContent(content string) *RoleContentList {
-	*rcl = append(*rcl, RoleContent{
-		Role:    RoleSystem,
-		Content: content,
-	})
-	return rcl
+func NewChatMessage(maxHistory int) *ChatMessage {
+	roleContentList := make([]RoleContent, 0)
+	return &ChatMessage{
+		RoleContentList: roleContentList,
+		MaxHistory:      maxHistory,
+	}
 }
 
-func (rcl *RoleContentList) AddUserContent(content string) *RoleContentList {
-	*rcl = append(*rcl, RoleContent{
+func NewDefaultChatMessage() *ChatMessage {
+	return NewChatMessage(DefaultMaxHistory)
+}
+
+type ChatMessage struct {
+	RoleContentList []RoleContent `json:"role_content_list"`
+	MaxHistory      int           `json:"max_history"`
+}
+
+func (msg *ChatMessage) AddSystemContent(content string) *ChatMessage {
+	// First try to find and replace existing system message
+	systemFound := false
+	for i, rc := range msg.RoleContentList {
+		if rc.Role == RoleSystem {
+			msg.RoleContentList[i].Content = content
+			systemFound = true
+			break
+		}
+	}
+
+	// If no system message found, add a new one
+	if !systemFound {
+		msg.RoleContentList = append(msg.RoleContentList, RoleContent{
+			Role:    RoleSystem,
+			Content: content,
+		})
+	}
+
+	msg.TrimHistory()
+	return msg
+}
+
+func (msg *ChatMessage) AddUserContent(content string) *ChatMessage {
+	msg.RoleContentList = append(msg.RoleContentList, RoleContent{
 		Role:    RoleUser,
 		Content: content,
 	})
-	return rcl
+	msg.TrimHistory()
+	return msg
 }
 
-func (rcl *RoleContentList) AddAssistantContent(content string) *RoleContentList {
-	*rcl = append(*rcl, RoleContent{
+func (msg *ChatMessage) AddAssistantContent(content string) *ChatMessage {
+	msg.RoleContentList = append(msg.RoleContentList, RoleContent{
 		Role:    RoleAssistant,
 		Content: content,
 	})
-	return rcl
+	msg.TrimHistory()
+	return msg
 }
 
-func (rcl *RoleContentList) AddChatPairContent(ask, reply string) *RoleContentList {
-	return rcl.AddUserContent(ask).AddAssistantContent(reply)
+func (msg *ChatMessage) AddChatPairContent(ask, reply string) *ChatMessage {
+	return msg.AddUserContent(ask).AddAssistantContent(reply)
 }
 
-func (rcl *RoleContentList) AddRunCodePairContent(code, reply string) *RoleContentList {
-	content := fmt.Sprintf("After run code:\n%s\n System output: %s\n", code, reply)
-	return rcl.AddUserContent(content)
-}
-
-func (rcl *RoleContentList) IsEndWithRunCodePair() bool {
-	if len(*rcl) == 0 {
-		return false
-	}
-	return strings.HasSuffix((*rcl)[len(*rcl)-1].Content, "After run code:")
-}
-
-func (rcl *RoleContentList) Merge(merge *RoleContentList) *RoleContentList {
+func (msg *ChatMessage) Merge(merge *ChatMessage) *ChatMessage {
 	if merge == nil {
-		return rcl
+		return msg
 	}
-	if rcl == nil {
+	if msg == nil {
 		return merge
 	}
-	*rcl = append(*rcl, *merge...)
-	return rcl
+	msg.RoleContentList = append(msg.RoleContentList, merge.RoleContentList...)
+	msg.TrimHistory()
+	return msg
 }
 
-func (rcl *RoleContentList) WithHistory(maxHistory int) *RoleContentList {
-	if len(*rcl) > maxHistory*2 {
-		*rcl = (*rcl)[len(*rcl)-maxHistory:]
+func (msg *ChatMessage) TrimHistory() *ChatMessage {
+	if msg == nil || len(msg.RoleContentList) <= msg.MaxHistory {
+		return msg
 	}
-	return rcl
+
+	// Check if there's a system message
+	var systemContent RoleContent
+	hasSystem := false
+	for _, rc := range msg.RoleContentList {
+		if rc.Role == RoleSystem {
+			systemContent = rc
+			hasSystem = true
+			break
+		}
+	}
+
+	// Filter out system messages, keep only the latest (MaxHistory-1) non-system messages
+	userAssistantMessages := make([]RoleContent, 0)
+	for _, rc := range msg.RoleContentList {
+		if rc.Role != RoleSystem {
+			userAssistantMessages = append(userAssistantMessages, rc)
+		}
+	}
+
+	// Keep only the most recent messages
+	if len(userAssistantMessages) > msg.MaxHistory-1 && msg.MaxHistory > 1 {
+		userAssistantMessages = userAssistantMessages[len(userAssistantMessages)-(msg.MaxHistory-1):]
+	}
+
+	// Reassemble the message list
+	if hasSystem {
+		msg.RoleContentList = []RoleContent{systemContent}
+		msg.RoleContentList = append(msg.RoleContentList, userAssistantMessages...)
+	} else {
+		msg.RoleContentList = userAssistantMessages
+	}
+
+	return msg
 }
 
-func (rcl *RoleContentList) GetOpenaiChatCompletionMessages() (messageList []openai.ChatCompletionMessage) {
-	if rcl == nil {
+func (msg *ChatMessage) GetOpenaiChatMessages() (messageList []openai.ChatCompletionMessage) {
+	if msg == nil {
 		return
 	}
-	for _, roleContent := range *rcl {
+	for _, roleContent := range msg.RoleContentList {
 		messageList = append(messageList, openai.ChatCompletionMessage{
 			Role:    roleContent.Role,
 			Content: roleContent.Content,
@@ -96,8 +151,8 @@ func (rcl *RoleContentList) GetOpenaiChatCompletionMessages() (messageList []ope
 	return
 }
 
-func (rcl *RoleContentList) GetOpenaiChatCompletionMessagesWithSystem(system string) (messageList []openai.ChatCompletionMessage) {
-	messageList = rcl.GetOpenaiChatCompletionMessages()
+func (msg *ChatMessage) GetOpenaiChatMessagesWithSystem(system string) (messageList []openai.ChatCompletionMessage) {
+	messageList = msg.GetOpenaiChatMessages()
 	messageList = append(messageList, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleSystem,
 		Content: system,
@@ -114,23 +169,28 @@ func GetClient(endpoint, key string) *openai.Client {
 	return openai.NewClientWithConfig(config)
 }
 
-func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, input, system string, temperature float32) (chat func(string, string, *RoleContentList) (string, error), err error) {
+func BuildOpenAIChat(endpoint, key, model string, history *ChatMessage, input, system string, temperature float32) (chat func(string, string, *ChatMessage) (string, error), err error) {
 	client := GetClient(endpoint, key)
 	if client == nil {
 		err = fmt.Errorf("build openai client failed")
 		return
 	}
-	chat = func(input, system string, history *RoleContentList) (string, error) {
+	chat = func(input, system string, history *ChatMessage) (string, error) {
 		if history == nil {
-			history = &RoleContentList{}
+			history = NewDefaultChatMessage()
 		}
 		history = history.AddSystemContent(system)
 		history = history.AddUserContent(input)
+		// for _, roleContent := range history.RoleContentList {
+		// 	println("llm chat role: ", roleContent.Role, " content: ", roleContent.Content)
+		// }
+		// println("---------------------------")
+		println("length: ", len(history.RoleContentList))
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{
 				Model:       model,
-				Messages:    history.GetOpenaiChatCompletionMessages(),
+				Messages:    history.GetOpenaiChatMessages(),
 				Temperature: temperature,
 			},
 		)
@@ -142,7 +202,7 @@ func BuildOpenAIChat(endpoint, key, model string, history *RoleContentList, inpu
 	return
 }
 
-func ChatIntention(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func([]opsv1.Pipeline) string, pipelines []opsv1.Pipeline, history *RoleContentList, input string, maxTryTimes int) (output string, pipeline string, err error) {
+func ChatIntention(logger *log.Logger, chat func(string, string, *ChatMessage) (string, error), buildSystem func([]opsv1.Pipeline) string, pipelines []opsv1.Pipeline, history *ChatMessage, input string, maxTryTimes int) (output string, pipeline string, err error) {
 Again:
 	system := buildSystem(pipelines)
 	output, err = chat(input, system, history)
@@ -190,7 +250,7 @@ Again:
 	return
 }
 
-func ChatParameters(logger *log.Logger, chat func(string, string, *RoleContentList) (string, error), buildSystem func(opsv1.Pipeline, []opsv1.Cluster) string, pipelines []opsv1.Pipeline, clusters []opsv1.Cluster, history *RoleContentList, pipeline *opsv1.Pipeline, input string, maxTryTimes int) (output string, variables map[string]string, err error) {
+func ChatParameters(logger *log.Logger, chat func(string, string, *ChatMessage) (string, error), buildSystem func(opsv1.Pipeline, []opsv1.Cluster) string, pipelines []opsv1.Pipeline, clusters []opsv1.Cluster, history *ChatMessage, pipeline *opsv1.Pipeline, input string, maxTryTimes int) (output string, variables map[string]string, err error) {
 Again:
 	system := buildSystem(*pipeline, clusters)
 	output, err = chat(input, system, history)

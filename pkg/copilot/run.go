@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/log"
 )
 
@@ -23,7 +24,7 @@ func (p PipelineTool) String() string {
 	return string(data)
 }
 
-func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *RoleContentList) (string, error), history *RoleContentList, pipelinerunsManager *PipelineRunsManager, input string, extraVariables map[string]string) (*opsv1.PipelineRun, int, error) {
+func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *ChatMessage) (string, error), history *ChatMessage, pipelinerunsManager *PipelineRunsManager, input string, extraVariables map[string]string) (*opsv1.PipelineRun, int, error) {
 	var pipeline string
 	var variables map[string]string
 	var pipelineObj *opsv1.Pipeline
@@ -51,8 +52,8 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *R
 		variables = pipelineTool.Variables
 	} else {
 		// chat intention
-		history.WithHistory(0)
 		_, pipeline, err = ChatIntention(logger, chat, GetActionPrompt, pipelines, history, input, 3)
+		println("pipeline: ", pipeline)
 		if err != nil {
 			return nil, ExitSystemError, err
 		}
@@ -65,16 +66,49 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *R
 		}
 	}
 	if pipelineObj == nil {
+		history.AddAssistantContent("can not find available actions to run")
 		return nil, ExitCodeIntentionEmpty, nil
 	}
-	// 2-1 - chat parameters
+	// 2-1-1 - chat parameters
 	if !useTools {
 		// chat parameters
-		history.WithHistory(0)
 		_, variables, err = ChatParameters(logger, chat, GetActionParametersPrompt, pipelines, clusters, history, pipelineObj, input, 3)
 		if err != nil {
 			return nil, ExitSystemError, err
 		}
+	}
+	// 2-1-2 - if pipeline is chat, run chat and return
+	if strings.ToLower(pipeline) == "default" {
+		output, err := chat(input, GetChatPrompt(), history)
+		println("pipeline is default" + output)
+		if err != nil {
+			return nil, ExitSystemError, err
+		}
+		pipelinerun := opsv1.NewPipelineRun(pipelineObj)
+
+		taskRunStatus := &opsv1.TaskRunStatus{
+			RunStatus: opsconstants.StatusSuccessed,
+			TaskRunNodeStatus: map[string]*opsv1.TaskRunNodeStatus{
+				"default": {
+					TaskRunStep: []*opsv1.TaskRunStep{
+						{
+							StepOutput: output,
+						},
+					},
+				},
+			},
+		}
+
+		pipelinerun.Status.PipelineRunStatus = []opsv1.PipelineRunTaskStatus{
+			{
+				TaskName:      "default",
+				TaskRef:       "default",
+				TaskRunStatus: taskRunStatus,
+			},
+		}
+		pipelinerun.Status.RunStatus = opsconstants.StatusSuccessed
+		history.AddAssistantContent(output)
+		return pipelinerun, ExitCodeDefault, nil
 	}
 	// 2-2 - validate parameters
 	inValidParameters := false
@@ -99,6 +133,7 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *R
 		}
 	}
 	if inValidParameters {
+		history.AddAssistantContent("can not find available parameters to run")
 		return nil, ExitCodeParametersNotFound, nil
 	}
 	// 3 - create pipelinerun and return
@@ -108,20 +143,6 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *R
 
 	// 4 - run pipeline
 	err = pipelinerunsManager.Run(logger, pipelinerun)
-	// 5 - if pipeline is chat, run chat and return
-	if strings.ToLower(pipeline) == "chat" {
-		history.WithHistory(0)
-		output, err := chat(input, GetChatPrompt(), history)
-		if err != nil {
-			return nil, ExitSystemError, err
-		}
-		if len(pipelinerun.Status.PipelineRunStatus) > 0 {
-			for nodeName, taskStatus := range pipelinerun.Status.PipelineRunStatus[0].TaskRunStatus.TaskRunNodeStatus {
-				if len(taskStatus.TaskRunStep) > 0 {
-					pipelinerun.Status.PipelineRunStatus[0].TaskRunStatus.TaskRunNodeStatus[nodeName].TaskRunStep[0].StepOutput = output
-				}
-			}
-		}
-	}
+	history.AddAssistantContent(input)
 	return pipelinerun, ExitCodeDefault, err
 }

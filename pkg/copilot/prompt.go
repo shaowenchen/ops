@@ -9,7 +9,7 @@ import (
 )
 
 func GetChatPrompt() string {
-	return `
+	return `You are an expert in operations and you are good at understanding user input and providing appropriate responses.
 `
 }
 
@@ -49,6 +49,7 @@ func GetActionPrompt(pipelines []opsv1.Pipeline) string {
 	return `Please select the most appropriate option to classify the intention of the user. 
 Don't ask any more questions, just select the option.
 If input includes keyword action, please select the action option as possible.
+If you can't find the appropriate option, please select the "default" option.
 Must be one of the following options:
 
 ` + b.String()

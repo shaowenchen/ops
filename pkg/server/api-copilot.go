@@ -53,8 +53,8 @@ func PostCopilot(c *gin.Context) {
 	}
 	input := req.Input
 	// build chat
-	chatHistory := opscopilot.RoleContentList{}
-	chat, err := opscopilot.BuildOpenAIChat(GlobalConfig.Copilot.Endpoint, GlobalConfig.Copilot.Key, GlobalConfig.Copilot.Model, &chatHistory, "", "copilot", 0.1)
+	history := opscopilot.NewDefaultChatMessage()
+	chat, err := opscopilot.BuildOpenAIChat(GlobalConfig.Copilot.Endpoint, GlobalConfig.Copilot.Key, GlobalConfig.Copilot.Model, history, "", "copilot", 0.1)
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -62,8 +62,8 @@ func PostCopilot(c *gin.Context) {
 	// init pr manager
 	logger := opslog.NewLogger().SetVerbose("debug").SetStd().SetFlag().Build()
 	pipelinerunsManager, _ := opscopilot.NewPipelineRunsManager(GlobalConfig.Copilot.OpsServer, GlobalConfig.Copilot.OpsToken, "ops-system")
-	prHistory := opscopilot.RoleContentList{}
-	pr, exitCode, err := opscopilot.RunPipeline(logger, false, chat, &prHistory, pipelinerunsManager, input, nil)
+	prHistory := opscopilot.NewDefaultChatMessage()
+	pr, exitCode, err := opscopilot.RunPipeline(logger, false, chat, prHistory, pipelinerunsManager, input, nil)
 
 	var output string
 	if exitCode == opscopilot.ExitCodeIntentionEmpty {
