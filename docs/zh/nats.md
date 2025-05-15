@@ -128,6 +128,12 @@ helm repo update
 export natsendpoint=x.x.x.x:32222
 ```
 
+- 设置 nats 的 server_name
+
+```bash
+export natsservername=need-to-be-unique
+```
+
 - 生成 nats-values.yaml
 
 需要注意的是，不同集群的 `server_name` 不能相同，否则会有重复连接的问题。
@@ -146,7 +152,7 @@ config:
           - nats://app:${apppassword}@${natsendpoint}
           account: APP
   merge:
-    server_name: need-to-be-unique
+    server_name: ${natsservername}
     accounts:
       SYS:
         users:
@@ -160,17 +166,17 @@ config:
     system_account: SYS
 container:
   image:
-    repository: nats
+    repository: registry.cn-beijing.aliyuncs.com/opshub/nats
     tag: 2.10.20-alpine
 natsBox:
   container:
     image:
-      repository: natsio/nats-box
+      repository: registry.cn-beijing.aliyuncs.com/opshub/natsio-nats-box
       tag: 0.14.5
 reloader:
   enabled: true
   image:
-    repository: natsio/nats-server-config-reloader
+    repository: registry.cn-beijing.aliyuncs.com/opshub/natsio-nats-server-config-reloader
     tag: 0.15.1
 EOF
 ```
