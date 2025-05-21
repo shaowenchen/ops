@@ -22,7 +22,7 @@ type RoleContent struct {
 const RoleUser = openai.ChatMessageRoleUser
 const RoleSystem = openai.ChatMessageRoleSystem
 const RoleAssistant = openai.ChatMessageRoleAssistant
-const DefaultMaxHistory = 5
+const DefaultMaxHistory = 8
 
 func NewChatMessage(maxHistory int) *ChatMessage {
 	roleContentList := make([]RoleContent, 0)
@@ -181,11 +181,6 @@ func BuildOpenAIChat(endpoint, key, model string, history *ChatMessage, input, s
 		}
 		history = history.AddSystemContent(system)
 		history = history.AddUserContent(input)
-		// for _, roleContent := range history.RoleContentList {
-		// 	println("llm chat role: ", roleContent.Role, " content: ", roleContent.Content)
-		// }
-		// println("---------------------------")
-		println("length: ", len(history.RoleContentList))
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{

@@ -9,7 +9,7 @@ import (
 )
 
 func GetChatPrompt() string {
-	return `You are an expert in operations and you are good at understanding user input and providing appropriate responses.
+	return `You are good at understanding user input and providing appropriate responses.
 `
 }
 
@@ -46,10 +46,9 @@ func GetActionPrompt(pipelines []opsv1.Pipeline) string {
 	for _, pipeline := range pipelines {
 		b.WriteString(fmt.Sprintf("- %s(%s)\n", pipeline.Name, pipeline.Spec.Desc))
 	}
-	return `Please select the most appropriate option to classify the intention of the user. 
-Don't ask any more questions, just select the option.
+	return `Try to choose one of the following actions to resolve the input issue as effectively as possible.
 If input includes keyword action, please select the action option as possible.
-If you can't find the appropriate option, please select the "default" option.
+If you can't find the appropriate option, please choose the "other" option.
 Must be one of the following options:
 
 ` + b.String()

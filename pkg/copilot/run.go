@@ -53,38 +53,29 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *C
 	} else {
 		// chat intention
 		_, pipeline, err = ChatIntention(logger, chat, GetActionPrompt, pipelines, history, input, 3)
-		println("pipeline: ", pipeline)
 		if err != nil {
 			return nil, ExitSystemError, err
 		}
 	}
-	// 1-2 - get pipelineObj
+	// 1 - get pipelineObj
 	for _, p := range pipelines {
 		if p.Name == pipeline {
 			pipelineObj = &p
 			break
 		}
 	}
-	if pipelineObj == nil {
-		history.AddAssistantContent("can not find available actions to run")
-		return nil, ExitCodeIntentionEmpty, nil
-	}
-	// 2-1-1 - chat parameters
-	if !useTools {
-		// chat parameters
-		_, variables, err = ChatParameters(logger, chat, GetActionParametersPrompt, pipelines, clusters, history, pipelineObj, input, 3)
-		if err != nil {
-			return nil, ExitSystemError, err
-		}
-	}
-	// 2-1-2 - if pipeline is chat, run chat and return
-	if strings.ToLower(pipeline) == "default" {
+	// if pipelineObj == nil {
+	// 	history.AddAssistantContent("can not find available actions to run")
+	// 	return nil, ExitCodeIntentionEmpty, nil
+	// }
+	// 2 - if pipeline is default, run chat and return
+	if strings.ToLower(pipeline) == "default" || pipelineObj == nil {
 		output, err := chat(input, GetChatPrompt(), history)
-		println("pipeline is default" + output)
 		if err != nil {
 			return nil, ExitSystemError, err
 		}
 		pipelinerun := opsv1.NewPipelineRun(pipelineObj)
+		pipelinerun.Spec.PipelineRef = "default"
 
 		taskRunStatus := &opsv1.TaskRunStatus{
 			RunStatus: opsconstants.StatusSuccessed,
@@ -110,7 +101,16 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *C
 		history.AddAssistantContent(output)
 		return pipelinerun, ExitCodeDefault, nil
 	}
-	// 2-2 - validate parameters
+	// 3-1 - chat parameters
+	if !useTools {
+		// chat parameters
+		_, variables, err = ChatParameters(logger, chat, GetActionParametersPrompt, pipelines, clusters, history, pipelineObj, input, 3)
+		if err != nil {
+			return nil, ExitSystemError, err
+		}
+	}
+
+	// 3-2 - validate parameters
 	inValidParameters := false
 	if variables != nil {
 		for k, _ := range variables {

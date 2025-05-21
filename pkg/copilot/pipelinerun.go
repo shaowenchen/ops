@@ -84,8 +84,8 @@ func (m *PipelineRunsManager) PrintMarkdownPipelines() (output string) {
 }
 
 func (m *PipelineRunsManager) PrintMarkdownPipelineRuns(pr *opsv1.PipelineRun) (output string) {
-	// if pipeline is chat, print chat result
-	if pr != nil && pr.Spec.PipelineRef == "chat" {
+	// if pipeline is default, print chat result
+	if pr != nil && pr.Spec.PipelineRef == "default" {
 		if len(pr.Status.PipelineRunStatus) > 0 &&
 			len(pr.Status.PipelineRunStatus[0].TaskRunStatus.TaskRunNodeStatus) > 0 {
 			for _, nodeStatus := range pr.Status.PipelineRunStatus[0].TaskRunStatus.TaskRunNodeStatus {
