@@ -52,7 +52,7 @@ func RunPipeline(logger *log.Logger, useTools bool, chat func(string, string, *C
 		variables = pipelineTool.Variables
 	} else {
 		// chat intention
-		_, pipeline, err = ChatIntention(logger, chat, GetActionPrompt, pipelines, history, input, 3)
+		_, pipeline, err = ChatIntention(logger, chat, GetActionPrompt, pipelines, history, input, 1)
 		if err != nil {
 			return nil, ExitSystemError, err
 		}
