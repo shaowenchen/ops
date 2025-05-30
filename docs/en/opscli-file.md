@@ -52,10 +52,10 @@ unset sk
 - **Upload to API Server**
 
 ```bash
-/usr/local/bin/opscli file --direction upload --api https://gh-uploadapi.chenshaowen.com/api/v1/files --aeskey "" --localfile ./tmp.log
+/usr/local/bin/opscli file --direction upload --api https://gh-uploadapi.chenshaowen.com/api/v1/files --localfile ./tmp.log
 ```
 
-If `aeskey` is not provided (or set as an empty string), a random encryption key is generated automatically.
+If `aeskey` is `""`, a random encryption key is generated automatically. If not set, the file is uploaded without encryption.
 
 - **Download from API Server**
 
