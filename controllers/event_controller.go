@@ -82,7 +82,7 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					if !ok {
 						return
 					}
-					if v1e.CreationTimestamp.Sub(time.Now().Add(-30*time.Second)) > 0 {
+					if v1e.CreationTimestamp.Sub(time.Now().Add(-120*time.Second)) > 0 {
 						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
 					}
 				},
@@ -91,7 +91,7 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					if !ok {
 						return
 					}
-					if v1e.CreationTimestamp.Sub(time.Now().Add(-30*time.Second)) > 0 {
+					if v1e.CreationTimestamp.Sub(time.Now().Add(-120*time.Second)) > 0 {
 						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
 					}
 				},
@@ -100,7 +100,7 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					if !ok {
 						return
 					}
-					if v1e.CreationTimestamp.Sub(time.Now().Add(-30*time.Second)) > 0 {
+					if v1e.CreationTimestamp.Sub(time.Now().Add(-120*time.Second)) > 0 {
 						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
 					}
 				},
