@@ -122,14 +122,16 @@ type EventKube struct {
 
 func (e EventKube) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
-	AppendCluser(result, ce)
 	subject := ce.Subject()
-	// ops.clusters.xxx.namespaces.xxx.resources.xxx.events
-	subjectSplits := strings.Split(subject, ".")
-	if len(subjectSplits) == 8 {
-		resources := subjectSplits[5]
-		AppendField(result, "namespace", subjectSplits[4])
-		AppendField(result, strings.TrimRight(resources, "s"), subjectSplits[6])
+	// ops.clusters.xxx.namespaces.xxx.resources.xxx.event
+	// ops.clusters.xxx.resources.xxx.event
+	subject = strings.TrimPrefix(subject, "ops.")
+	subject = strings.TrimSuffix(subject, ".event")
+	parts := strings.Split(subject, ".")
+	for i := 0; i < len(parts)-1; i += 2 {
+		key := strings.TrimRight(parts[i], "s")
+		value := parts[i+1]
+		AppendField(result, key, value)
 	}
 	AppendField(result, "type", e.Type)
 	AppendField(result, "reason", e.Reason)
