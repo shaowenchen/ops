@@ -181,84 +181,84 @@ func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get hostname failed, %v", err.Error()))
 	}
 
 	kerneVersion, err1 := c.getKernelVersion(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get kernel version failed, %v", err.Error()))
 	}
 
 	distribution, err1 := c.getDistribution(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get distribution failed, %v", err.Error()))
 	}
 
 	arch, err1 := c.getArch(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get arch failed, %v", err.Error()))
 	}
 
 	diskTotal, err1 := c.getDiskTotal(ctx, sudo, opsconstants.DefaultShellTimeoutSeconds)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get disk total failed, %v", err.Error()))
 	}
 
 	diskUsagePercent, err1 := c.getDiskUsagePercent(ctx, sudo, opsconstants.DefaultShellTimeoutSeconds)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get disk usage percent failed, %v", err.Error()))
 	}
 
 	cpuTotal, err1 := c.getCPUTotal(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get cpu total failed, %v", err.Error()))
 	}
 
 	cpuLoad1, err1 := c.getCPULoad1(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get cpu load 1 failed, %v", err.Error()))
 	}
 
 	cpuUsagePercent, err1 := c.getCPUUsagePercent(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get cpu usage percent failed, %v", err.Error()))
 	}
 
 	memTotal, err1 := c.getMemTotal(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get mem total failed, %v", err.Error()))
 	}
 
 	memUsagePercent, err1 := c.getMemUsagePercent(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get mem usage percent failed, %v", err.Error()))
 	}
 
 	accelVendor, err1 := c.getAcceleratorVendor(ctx, sudo)
 	if err1 == nil {
 		anyOneIsOk = true
 	} else {
-		err = err1
+		err = errors.Wrap(err1, fmt.Sprintf("get accelerator vendor failed, %v", err.Error()))
 	}
 	accelModel := ""
 	accelCount := ""
@@ -267,15 +267,19 @@ func (c *HostConnection) GetStatus(ctx context.Context, sudo bool) (status *opsv
 		if err1 == nil {
 			anyOneIsOk = true
 		} else {
-			err = err1
+			err = errors.Wrap(err1, fmt.Sprintf("get accelerator model failed, %v", err.Error()))
 		}
 
 		accelCount, err1 = c.getAcceleratorCount(ctx, sudo)
 		if err1 == nil {
 			anyOneIsOk = true
 		} else {
-			err = err1
+			err = errors.Wrap(err1, fmt.Sprintf("get accelerator count failed, %v", err.Error()))
 		}
+	}
+
+	if err != nil {
+		err = errors.Wrap(err, fmt.Sprintf("host %s, %v", c.Host.Spec.Address, err.Error()))
 	}
 
 	status = &opsv1.HostStatus{

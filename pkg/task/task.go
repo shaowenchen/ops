@@ -30,11 +30,11 @@ func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr
 	if err != nil {
 		return err
 	}
-	logger.Info.Println("> Run Task ", t.GetUniqueKey(), " on ", hc.Host.Spec.Address)
+	logger.Debug.Println("> Run Task ", t.GetUniqueKey(), " on ", hc.Host.Spec.Address)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
-		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
+		logger.Debug.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
 		s.When = RenderString(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
@@ -42,7 +42,7 @@ func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr
 			return err
 		}
 		if !result {
-			logger.Info.Println("Skip!")
+			logger.Debug.Println("Skip!")
 			continue
 		}
 		if err != nil {
@@ -56,7 +56,7 @@ func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr
 		allVars["status"] = stepStatus
 		logger.Debug.Println("Content: ", s.Content)
 		logger.Debug.Println("Status: ", stepStatus)
-		logger.Info.Println(stepOutput)
+		logger.Debug.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
 			logger.Error.Println(err)
@@ -74,11 +74,11 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 	if err != nil {
 		return err
 	}
-	logger.Info.Println("> Run Task ", t.GetUniqueKey(), " on Node ", node.Name)
+	logger.Debug.Println("> Run Task ", t.GetUniqueKey(), " on Node ", node.Name)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
-		logger.Info.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
+		logger.Debug.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
 		s.When = RenderString(s.When, allVars)
 		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
@@ -86,7 +86,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 			return err
 		}
 		if !result {
-			logger.Info.Println("Skip!")
+			logger.Debug.Println("Skip!")
 			continue
 		}
 		if err != nil {
@@ -109,7 +109,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 		allVars["status"] = stepStatus
 		logger.Debug.Println("Content: ", s.Content)
 		logger.Debug.Println("Status: ", stepStatus)
-		logger.Info.Println(stepOutput)
+		logger.Debug.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
 			logger.Error.Println(err)

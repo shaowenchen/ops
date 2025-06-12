@@ -288,7 +288,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	// if find host in cluster, and can connect
 	host, _ := kc.GetHost(opsconstants.OpsNamespace, tr.GetHost(t))
 	if host != nil && t.Spec.RuntimeImage == "" {
-		logger.Info.Println("use host credentials to run cluster task " + tr.Name)
+		logger.Debug.Println("use host credentials to run cluster task " + tr.Name)
 		return r.runTaskOnHost(logger, ctx, *kc.OpsClient, t, tr, host)
 	}
 	// else use pod to run task
