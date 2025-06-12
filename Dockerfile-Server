@@ -1,4 +1,4 @@
-FROM hubimage/builder-golang:1.23 as builder
+FROM hubimage/builder-golang:1.23 AS builder
 COPY . .
 RUN make build-server
 
@@ -11,4 +11,4 @@ COPY --from=builder /builder/bin/ops-server .
 COPY --from=builder /builder/default.toml .
 COPY --from=builder-web /builder/web/dist ./web/dist
 CMD ["./ops-server", "-c", "./default.toml"]
-Expose 80
+EXPOSE 80
