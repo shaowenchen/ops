@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
+	"net/http"
+	_ "net/http/pprof"
+
 	"github.com/gin-gonic/gin"
 	"github.com/shaowenchen/ops/pkg/server"
 	"github.com/shaowenchen/ops/web"
-	"net/http"
-	_ "net/http/pprof"
 )
 
 func init() {
@@ -19,7 +20,13 @@ func init() {
 }
 
 func main() {
-	r := gin.Default()
+	r := gin.New()
+
+	r.Use(gin.Recovery())
+	r.Use(gin.LoggerWithConfig(gin.LoggerConfig{
+		SkipPaths: []string{"/healthz", "/readyz"},
+	}))
+
 	gin.SetMode(server.GlobalConfig.Server.RunMode)
 	server.SetupRouter(r)
 	server.SetupRouteWithoutAuth(r)
