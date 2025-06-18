@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -118,6 +119,7 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 				for _, keyword := range obj.Spec.Keywords {
 					if strings.Contains(eventStrings, keyword) {
 						notification = true
+						logger.Info.Println(fmt.Printf("Event %s contains keyword %s", event.ID(), keyword))
 						break
 					}
 				}
