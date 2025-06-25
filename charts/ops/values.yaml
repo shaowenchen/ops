@@ -5,14 +5,14 @@
 replicaCount: 1
 
 image:
-  repository: registry.cn-beijing.aliyuncs.com/shaowenchen/ops-controller-manager
+  repository: registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-controller-manager
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 server:
   image:
-    repository: registry.cn-beijing.aliyuncs.com/shaowenchen/ops-server
+    repository: registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-server
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
