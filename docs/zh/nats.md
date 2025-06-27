@@ -238,7 +238,7 @@ nats --user=admin --password=${adminpassword} server report jetstream
 - 查看 stream 的 subjects
 
 ```bash
-nats --user=app --password=${adminpassword} stream subjects ops
+nats --user=app --password=${apppassword} stream subjects ops
 ```
 
 - 压力测试

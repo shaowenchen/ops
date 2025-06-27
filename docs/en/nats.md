@@ -236,7 +236,7 @@ This command displays information about the primary cluster, edge clusters, and 
 - View the subjects of a stream:
 
 ```bash
-nats --user=app --password=${adminpassword} stream subjects ops
+nats --user=app --password=${apppassword} stream subjects ops
 ```
 
 - Perform a benchmark:
