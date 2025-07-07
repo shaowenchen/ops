@@ -135,7 +135,7 @@ func (e EventKube) Readable(ce cloudevents.Event) string {
 	}
 	AppendField(result, "type", e.Type)
 	AppendField(result, "reason", e.Reason)
-	AppendField(result, "creationTimestamp", e.CreationTimestamp.Format("2006-01-02 15:04:05"))
+	AppendField(result, "timestamp", e.CreationTimestamp.Local().Format("2006-01-02 15:04:05"))
 	AppendField(result, "from", e.From)
 	AppendField(result, "message", e.Message)
 	return result.String()
