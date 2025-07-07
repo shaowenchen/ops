@@ -98,10 +98,24 @@ spec:
           requests:
             cpu: 100m
             memory: 258Mi
+        volumeMounts:
+          - name: timezone
+            mountPath: /etc/localtime
+            readOnly: true
+          - name: timezone-config
+            mountPath: /etc/timezone
+            readOnly: true
         env:
           - name: ACTIVE_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /etc/localtime
+        - name: timezone-config
+          hostPath:
+            path: /etc/timezone
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

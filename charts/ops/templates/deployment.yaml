@@ -55,6 +55,13 @@ spec:
               port: 8081
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: timezone
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: timezone-config
+              mountPath: /etc/timezone
+              readOnly: true
           env:
             - name: ACTIVE_NAMESPACE
               valueFrom:
@@ -66,6 +73,13 @@ spec:
               value: "default"
             - name: EVENT_ENDPOINT
               value: http://app:mypassword@nats-headless.ops-system.svc:4222
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /etc/localtime
+        - name: timezone-config
+          hostPath:
+            path: /etc/timezone
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
