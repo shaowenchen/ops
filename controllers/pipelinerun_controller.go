@@ -106,7 +106,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	cluster := r.isOtherCluster(pr)
 	if cluster != nil {
 		// send pr
-		logger.Info.Printf("Send PipelineRun %s to cluster %s", pr.Name, cluster.Name)
+		logger.Info.Printf("send pipelinerun %s to cluster %s", pr.Name, cluster.Name)
 		kc, err := opskube.NewClusterConnection(cluster)
 		if err != nil {
 			logger.Error.Println(err, "failed to create cluster connection")
