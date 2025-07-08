@@ -119,7 +119,7 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 				for _, keyword := range obj.Spec.Keywords {
 					if strings.Contains(eventStrings, keyword) {
 						notification = true
-						logger.Info.Println(fmt.Printf("Event %s contains keyword %s", event.ID(), keyword))
+						logger.Info.Println(fmt.Sprintf("Event %s contains keyword %s trigger eventhook %s", event.ID(), keyword, eventhook.ObjectMeta.Name))
 						break
 					}
 				}
