@@ -111,6 +111,7 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 		client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(subject)
 	}
 	for _, eventhook := range existingEventHooksList.Items {
+		logger.Info.Println(fmt.Sprintf("registry eventhook %s for subject %s", eventhook.ObjectMeta.Name, subject))
 		client.AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
 			eventStrings := opsevent.GetCloudEventReadable(event)
 			notification := true
@@ -119,7 +120,7 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 				for _, keyword := range obj.Spec.Keywords {
 					if strings.Contains(eventStrings, keyword) {
 						notification = true
-						logger.Info.Println(fmt.Sprintf("Event %s contains keyword %s trigger eventhook %s", event.ID(), keyword, eventhook.ObjectMeta.Name))
+						logger.Info.Println(fmt.Sprintf("event %s contains keyword %s trigger eventhook %s", event.ID(), keyword, eventhook.ObjectMeta.Name))
 						break
 					}
 				}
