@@ -124,8 +124,13 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 					}
 				}
 			}
-			if notification && opseventhook.NotificationMap[obj.Spec.Type] != nil {
-				go opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
+			if notification {
+				notif, ok := opseventhook.NotificationMap[obj.Spec.Type]
+				if !ok || notif == nil {
+					logger.Error.Println(fmt.Sprintf("eventhook %s type %s not found", obj.ObjectMeta.Name, obj.Spec.Type))
+					return
+				}
+				go notif.Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
 			}
 
 		})
