@@ -124,7 +124,7 @@ func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context
 					}
 				}
 			}
-			if notification {
+			if notification && opseventhook.NotificationMap[obj.Spec.Type] != nil {
 				go opseventhook.NotificationMap[obj.Spec.Type].Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
 			}
 
