@@ -73,7 +73,6 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	logger.Info.Println("Reconcile EventHooks: ", req.NamespacedName.String())
 	r.update(logger, ctx, obj)
 	return ctrl.Result{}, nil
 }
