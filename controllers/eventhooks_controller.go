@@ -35,25 +35,38 @@ import (
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opseventhook "github.com/shaowenchen/ops/pkg/eventhook"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
 // EventHooksReconciler reconciles a EventHooks object
 type EventHooksReconciler struct {
 	client.Client
-	Scheme                      *runtime.Scheme
-	subjectEventBusMapMutex     sync.RWMutex
-	subjectEventBusMap          map[string]opsevent.EventBus
-	objSubjectMapMutex          sync.RWMutex
-	objSubjectMap               map[string]string
-	subjectSubscriptCancelMutex sync.RWMutex
-	subjectSubscriptCancel      map[string]context.CancelFunc
+	Scheme                  *runtime.Scheme
+	subjectEventBusMapMutex sync.RWMutex
+	subjectEventBusMap      map[string]opsevent.EventBus
+	subjectCancelMap        map[string]context.CancelFunc
+	subjectCancelMapMutex   sync.RWMutex
+	objSubjectMap           map[types.NamespacedName]string
+	objSubjectMapMutex      sync.RWMutex
 }
 
-//+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/finalizers,verbs=update
+func (r *EventHooksReconciler) init() {
+	if r.subjectEventBusMap == nil {
+		r.subjectEventBusMap = make(map[string]opsevent.EventBus)
+	}
+	if r.subjectCancelMap == nil {
+		r.subjectCancelMap = make(map[string]context.CancelFunc)
+	}
+	if r.objSubjectMap == nil {
+		r.objSubjectMap = make(map[types.NamespacedName]string)
+	}
+}
 
+// +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/finalizers,verbs=update
 func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.init()
 	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
@@ -65,114 +78,118 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	obj := &opsv1.EventHooks{}
 	err := r.Get(ctx, req.NamespacedName, obj)
 
-	// If delete, stop watch and exit the goroutine
 	if apierrors.IsNotFound(err) {
-		return ctrl.Result{}, r.delete(logger, ctx, req.NamespacedName)
+		if subject, ok := r.objSubjectMap[req.NamespacedName]; ok {
+			err = r.updateSubject(logger, ctx, req.Namespace, subject)
+			if err != nil {
+				r.objSubjectMapMutex.Lock()
+				defer r.objSubjectMapMutex.Unlock()
+				delete(r.objSubjectMap, req.NamespacedName)
+			}
+		}
+		return ctrl.Result{}, err
 	}
+
+	// record for delete object and stop watch
+	r.objSubjectMapMutex.Lock()
+	defer r.objSubjectMapMutex.Unlock()
+
+	r.objSubjectMap[req.NamespacedName] = obj.Spec.Subject
 
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	r.update(logger, ctx, obj)
+	r.updateSubject(logger, ctx, obj.Namespace, obj.Spec.Subject)
 	return ctrl.Result{}, nil
 }
 
-func (r *EventHooksReconciler) update(logger *opslog.Logger, ctx context.Context, obj *opsv1.EventHooks) error {
+func (r *EventHooksReconciler) stopSubject(logger *opslog.Logger, ctx context.Context, namespace, subject string) {
+	if subject == "" {
+		return
+	}
 	r.subjectEventBusMapMutex.Lock()
-	if obj.Spec.Subject == "" {
+	if busClient, ok := r.subjectEventBusMap[subject]; ok {
+		busClient.Close(ctx)
+		delete(r.subjectEventBusMap, subject)
+	}
+	r.subjectEventBusMapMutex.Unlock()
+	r.subjectCancelMapMutex.Lock()
+	if cancel, ok := r.subjectCancelMap[subject]; ok {
+		cancel()
+		delete(r.subjectCancelMap, subject)
+	}
+	r.subjectCancelMapMutex.Unlock()
+}
+
+func (r *EventHooksReconciler) updateSubject(logger *opslog.Logger, ctx context.Context, namespace, subject string) error {
+	if subject == "" {
+		logger.Info.Println(fmt.Sprintf("eventhook subject is empty, skip"))
 		return nil
 	}
-	subject := obj.Spec.Subject
-	if r.subjectEventBusMap == nil {
-		r.subjectEventBusMap = make(map[string]opsevent.EventBus)
-	}
-	if r.objSubjectMap == nil {
-		r.objSubjectMap = make(map[string]string)
-	}
-	if r.subjectSubscriptCancel == nil {
-		r.subjectSubscriptCancel = make(map[string]context.CancelFunc)
-	}
-	if _, ok := r.objSubjectMap[obj.Name]; !ok {
-		r.objSubjectMap[obj.Name] = subject
-	}
+
 	existingEventHooksList := &opsv1.EventHooksList{}
 	listOpts := []client.ListOption{
-		client.InNamespace(obj.Namespace),
+		client.InNamespace(namespace),
 		client.MatchingFields{".spec.subject": subject},
 	}
 	if err := r.List(ctx, existingEventHooksList, listOpts...); err != nil {
+		logger.Error.Println(fmt.Sprintf("failed to list eventhooks with subject %s: %v", subject, err))
 		return err
 	}
-	client := opsevent.EventBus{}
-	if _, ok := r.subjectEventBusMap[subject]; ok {
-		client = r.subjectEventBusMap[subject]
-	} else {
-		client.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(subject)
+	if len(existingEventHooksList.Items) == 0 {
+		r.stopSubject(logger, ctx, namespace, subject)
+		return nil
 	}
-	for _, eventhook := range existingEventHooksList.Items {
-		logger.Info.Println(fmt.Sprintf("registry eventhook %s for subject %s", eventhook.ObjectMeta.Name, subject))
-		client.AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
-			eventStrings := opsevent.GetCloudEventReadable(event)
-			notification := true
-			if len(eventhook.Spec.Keywords) > 0 {
-				notification = false
-				for _, keyword := range obj.Spec.Keywords {
-					if strings.Contains(eventStrings, keyword) {
-						notification = true
-						logger.Info.Println(fmt.Sprintf("event %s contains keyword %s trigger eventhook %s", event.ID(), keyword, eventhook.ObjectMeta.Name))
-						break
-					}
-				}
-			}
-			if notification {
-				notif, ok := opseventhook.NotificationMap[obj.Spec.Type]
-				if !ok || notif == nil {
-					logger.Error.Println(fmt.Sprintf("eventhook %s type %s not found", obj.ObjectMeta.Name, obj.Spec.Type))
-					return
-				}
-				go notif.Post(obj.Spec.URL, obj.Spec.Options, eventStrings, obj.Spec.Additional)
-			}
+	busClient := opsevent.EventBus{}
+	busClient.WithEndpoint(os.Getenv("EVENT_ENDPOINT")).WithSubject(subject)
+	r.subjectEventBusMap[subject] = busClient
 
-		})
-		r.subjectEventBusMap[eventhook.Name] = client
-	}
-	r.subjectEventBusMapMutex.Unlock()
-
-	r.subjectSubscriptCancelMutex.Lock()
-	if cancle, ok := r.subjectSubscriptCancel[subject]; ok {
-		cancle()
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	r.subjectSubscriptCancel[subject] = cancel
-	r.subjectSubscriptCancelMutex.Unlock()
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				client.Subscribe(ctx)
-			}
+	var b strings.Builder
+	for i, item := range existingEventHooksList.Items {
+		b.WriteString(item.Name)
+		if i < len(existingEventHooksList.Items)-1 {
+			b.WriteString(",")
 		}
-	}()
+	}
+	logger.Info.Println(fmt.Sprintf("eventhook [%s] watch subject %s", b.String(), subject))
+	busClient.AddConsumerFunc(func(ctx context.Context, event cloudevents.Event) {
+		for _, eventhook := range existingEventHooksList.Items {
+			r.checkEventAndHandle(logger, ctx, event, eventhook)
+		}
+	})
+	// start subscription
+	ctx, cancel := context.WithCancel(context.TODO())
+	r.subjectCancelMapMutex.Lock()
+	defer r.subjectCancelMapMutex.Unlock()
+	if existingCancel, ok := r.subjectCancelMap[subject]; ok {
+		existingCancel()
+	}
+	r.subjectCancelMap[subject] = cancel
+	go busClient.Subscribe(ctx)
 	return nil
 }
 
-func (r *EventHooksReconciler) delete(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {
-	if r.objSubjectMap == nil {
-		return nil
+func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx context.Context, event cloudevents.Event, eventhook opsv1.EventHooks) {
+	eventStrings := opsevent.GetCloudEventReadable(event)
+	notification := true
+	if len(eventhook.Spec.Keywords) > 0 {
+		notification = false
+		for _, keyword := range eventhook.Spec.Keywords {
+			if strings.Contains(eventStrings, keyword) {
+				notification = true
+				logger.Info.Println(fmt.Sprintf("event %s contains keyword %s trigger eventhook %s", event.ID(), keyword, eventhook.ObjectMeta.Name))
+				break
+			}
+		}
 	}
-	if subject, ok := r.objSubjectMap[namespacedName.Name]; ok {
-		r.update(logger, ctx, &opsv1.EventHooks{
-			Spec: opsv1.EventHooksSpec{
-				Subject: subject,
-			},
-		})
-		r.objSubjectMapMutex.Lock()
-		delete(r.objSubjectMap, namespacedName.Name)
-		r.objSubjectMapMutex.Unlock()
+	if notification {
+		notif, ok := opseventhook.NotificationMap[eventhook.Spec.Type]
+		if !ok || notif == nil {
+			logger.Error.Println(fmt.Sprintf("eventhook %s type %s not found", eventhook.ObjectMeta.Name, eventhook.Spec.Type))
+			return
+		}
+		go notif.Post(eventhook.Spec.URL, eventhook.Spec.Options, eventStrings, eventhook.Spec.Additional)
 	}
-	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -192,5 +209,7 @@ func (r *EventHooksReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&opsv1.EventHooks{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: opsconstants.MaxResourceConcurrentReconciles}).
 		Complete(r)
 }
