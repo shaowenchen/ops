@@ -134,13 +134,23 @@ func isEventsV1Available(c client.Client) bool {
 }
 
 func GetEventKube(v1e *eventsv1.Event) (ek *opsevent.EventKube) {
-	ek = &opsevent.EventKube{
-		Type:              v1e.Type,
-		Reason:            v1e.Reason,
-		CreationTimestamp: v1e.CreationTimestamp.Time,
-		Message:           v1e.Note,
+	var eventTime time.Time = v1e.EventTime.Time
+	if !v1e.EventTime.IsZero() {
+		eventTime = v1e.EventTime.Time
+	} else if !v1e.DeprecatedLastTimestamp.IsZero() {
+		eventTime = v1e.DeprecatedLastTimestamp.Time
+	} else if !v1e.DeprecatedFirstTimestamp.IsZero() {
+		eventTime = v1e.DeprecatedFirstTimestamp.Time
+	} else {
+		eventTime = v1e.CreationTimestamp.Time
 	}
-	if v1e.ManagedFields != nil && len(v1e.ManagedFields) > 0 {
+	ek = &opsevent.EventKube{
+		Type:      v1e.Type,
+		Reason:    v1e.Reason,
+		EventTime: eventTime,
+		Message:   v1e.Note,
+	}
+	if len(v1e.ManagedFields) > 0 {
 		for _, mf := range v1e.ManagedFields {
 			ek.From = mf.Manager + ek.From
 		}

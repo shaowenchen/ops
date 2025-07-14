@@ -113,11 +113,11 @@ func (e EventTaskRunReport) Readable(ce cloudevents.Event) string {
 }
 
 type EventKube struct {
-	Type              string    `json:"type,omitempty" yaml:"type,omitempty"`
-	Reason            string    `json:"reason,omitempty" yaml:"reason,omitempty"`
-	CreationTimestamp time.Time `json:"creationTimestamp,omitempty" yaml:"creationTimestamp,omitempty"`
-	From              string    `json:"from,omitempty" yaml:"from,omitempty"`
-	Message           string    `json:"message,omitempty" yaml:"message,omitempty"`
+	Type      string    `json:"type,omitempty" yaml:"type,omitempty"`
+	Reason    string    `json:"reason,omitempty" yaml:"reason,omitempty"`
+	EventTime time.Time `json:"eventTime,omitempty" yaml:"eventTime,omitempty"`
+	From      string    `json:"from,omitempty" yaml:"from,omitempty"`
+	Message   string    `json:"message,omitempty" yaml:"message,omitempty"`
 }
 
 func (e EventKube) Readable(ce cloudevents.Event) string {
@@ -135,7 +135,7 @@ func (e EventKube) Readable(ce cloudevents.Event) string {
 	}
 	AppendField(result, "type", e.Type)
 	AppendField(result, "reason", e.Reason)
-	AppendField(result, "timestamp", e.CreationTimestamp.Local().Format("2006-01-02 15:04:05"))
+	AppendField(result, "timestamp", e.EventTime.Local().Format("2006-01-02 15:04:05"))
 	AppendField(result, "from", e.From)
 	AppendField(result, "message", e.Message)
 	return result.String()
