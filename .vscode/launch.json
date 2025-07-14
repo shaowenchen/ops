@@ -11,7 +11,7 @@
       "mode": "debug",
       "cwd": "${workspaceFolder}",
       "program": "cmd/cli/main.go",
-      "args": ["task", "-f", "./tasks/collect-gpu-log.yaml", "-i", "/Users/shaowenchen/.kube/config", "--nodename", "dev-control-plane"],
+      "args": ["task", "-f", ".test/task-test.yaml", "-i", "/Users/shaowenchen/.kube/config", "--nodename", "dev-control-plane"],
       // "args": ["create", "task", "-i", "get-osstatus.yaml"],
       // "args": ["create", "cluster", "--name", "dev", "-i", "~/.kube/config"],
       "env": {}

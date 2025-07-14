@@ -20,7 +20,6 @@ var taskOpt option.TaskOption
 var hostOpt option.HostOption
 var kubeOpt option.KubeOption
 var inventory string
-var verbose string
 
 var TaskCmd = &cobra.Command{
 	Use:                "task",
@@ -28,7 +27,7 @@ var TaskCmd = &cobra.Command{
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		taskOpt = parseArgs(args)
-		logger := log.NewLogger().SetVerbose(verbose).SetStd().SetFile().Build()
+		logger := log.NewLogger().SetVerbose("debug").SetStd().SetFile().Build()
 		if len(taskOpt.FilePath) == 0 {
 			logger.Error.Println("--filepath is must provided")
 			return
@@ -37,15 +36,17 @@ var TaskCmd = &cobra.Command{
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
-		inventoryType := utils.GetInventoryType(kubeOpt.NodeName)
+		inventoryType := utils.GetInventoryType(inventory)
 		tasks, err := opstask.ReadTaskYaml(utils.GetTaskAbsoluteFilePath(taskOpt.Proxy, taskOpt.FilePath))
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
-		if inventoryType == constants.InventoryTypeHosts {
+		taskOpt.Variables["nodename"] = kubeOpt.NodeName
+		switch inventoryType {
+		case constants.InventoryTypeHosts:
 			HostTask(context.Background(), logger, tasks, taskOpt, hostOpt, inventory)
-		} else if inventoryType == constants.InventoryTypeKubernetes {
+		case constants.InventoryTypeKubernetes:
 			KubeTask(context.Background(), logger, tasks, taskOpt, kubeOpt, inventory)
 		}
 	},
@@ -128,8 +129,6 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				taskOption.FilePath = fieldValue
 			} else if fieldName == "proxy" {
 				taskOption.Proxy = fieldValue
-			} else if fieldName == "verbose" || fieldName == "v" {
-				verbose = fieldValue
 			} else if fieldName == "nodename" {
 				kubeOpt.NodeName = fieldValue
 			} else if fieldName == "opsnamespace" {

@@ -30,7 +30,7 @@ func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr
 	if err != nil {
 		return err
 	}
-	logger.Debug.Println("> Run Task ", t.GetUniqueKey(), " on ", hc.Host.Spec.Address)
+	logger.Debug.Println("> Run Task", t.GetUniqueKey(), "on", hc.Host.Spec.Address)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
@@ -54,8 +54,6 @@ func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr
 		tr.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, stepStatus)
 		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["status"] = stepStatus
-		logger.Debug.Println("Content: ", s.Content)
-		logger.Debug.Println("Status: ", stepStatus)
 		logger.Debug.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {
@@ -74,7 +72,7 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 	if err != nil {
 		return err
 	}
-	logger.Debug.Println("> Run Task ", t.GetUniqueKey(), " on Node ", node.Name)
+	logger.Debug.Println("> Run Task", t.GetUniqueKey(), "on Node", node.Name)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariables(sp, allVars)
@@ -107,8 +105,6 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 		tr.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, stepStatus)
 		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["status"] = stepStatus
-		logger.Debug.Println("Content: ", s.Content)
-		logger.Debug.Println("Status: ", stepStatus)
 		logger.Debug.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
 		if err != nil {

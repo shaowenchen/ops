@@ -28,13 +28,14 @@ var ShellCmd = &cobra.Command{
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventory = utils.GetAbsoluteFilePath(inventory)
-		inventoryType := utils.GetInventoryType(kubeOpt.NodeName)
+		inventoryType := utils.GetInventoryType(inventory)
 		if utils.IsExistsFile(shellOpt.Content) {
 			shellOpt.Content, _ = utils.ReadFile(shellOpt.Content)
 		}
-		if inventoryType == constants.InventoryTypeKubernetes {
+		switch inventoryType {
+		case constants.InventoryTypeKubernetes:
 			KubeShell(context.Background(), logger, shellOpt, kubeOpt, inventory)
-		} else if inventoryType == constants.InventoryTypeHosts {
+		case constants.InventoryTypeHosts:
 			HostShell(context.Background(), logger, shellOpt, hostOpt, inventory)
 		}
 	},
