@@ -209,7 +209,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	// only run script
 	if len(hosts) > 0 && t.OnlyScript() {
 		for _, h := range hosts {
-			logger.Info.Println(fmt.Sprintf("run task %s on host %s", t.GetUniqueKey(), t.Spec.Host))
+			logger.Info.Printf("run task %s on host %s", t.GetUniqueKey(), t.Spec.Host)
 			err = r.runTaskOnHost(cliLogger, ctx, r.Client, t, tr, &h)
 			if err != nil {
 				logger.Error.Println(err)
@@ -218,7 +218,8 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 		}
 	} else {
 		cluster := opsv1.NewCurrentCluster()
-		logger.Info.Println(fmt.Sprintf("run task %s on cluster %s", t.GetUniqueKey(), cluster.Name))
+
+		logger.Info.Printf("run task %s on cluster %s", t.GetUniqueKey(), cluster.Name)
 		err = r.runTaskOnKube(cliLogger, ctx, t, tr, &cluster)
 		if err != nil {
 			logger.Error.Println(err)
@@ -313,7 +314,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 		kubeOpt.NodeName = opsconstants.AnyWorker
 	}
 	nodes, err := opskube.GetNodes(ctx, logger, kc.Client, kubeOpt)
-	if err != nil || len(nodes) == 0 {
+	if err != nil {
 		r.commitStatus(logger, ctx, tr, opsconstants.StatusFailed)
 		return err
 	}

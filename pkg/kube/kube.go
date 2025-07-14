@@ -142,7 +142,6 @@ func GetNodes(ctx context.Context, logger *opslog.Logger, client *kubernetes.Cli
 		nodeList = nodes.Items
 	}
 	if len(nodeList) == 0 {
-		err = errors.New("no node found")
 		return
 	}
 	randomIndex := rand.Intn(len(nodeList))
