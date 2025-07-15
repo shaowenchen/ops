@@ -82,7 +82,7 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					if !ok {
 						return
 					}
-					if v1e.CreationTimestamp.Sub(time.Now().Add(-120*time.Second)) > 0 {
+					if getEventTime(v1e).Sub(time.Now().Add(-120*time.Second)) > 0 {
 						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
 					}
 				},
@@ -91,14 +91,18 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					if !ok {
 						return
 					}
-					opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+					if getEventTime(v1e).Sub(time.Now().Add(-120*time.Second)) > 0 {
+						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+					}
 				},
 				DeleteFunc: func(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
 					v1e, ok := e.Object.(*eventsv1.Event)
 					if !ok {
 						return
 					}
-					opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+					if getEventTime(v1e).Sub(time.Now().Add(-120*time.Second)) > 0 {
+						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+					}
 				},
 			},
 		).
@@ -134,16 +138,7 @@ func isEventsV1Available(c client.Client) bool {
 }
 
 func GetEventKube(v1e *eventsv1.Event) (ek *opsevent.EventKube) {
-	var eventTime time.Time = v1e.EventTime.Time
-	if !v1e.EventTime.IsZero() {
-		eventTime = v1e.EventTime.Time
-	} else if !v1e.DeprecatedLastTimestamp.IsZero() {
-		eventTime = v1e.DeprecatedLastTimestamp.Time
-	} else if !v1e.DeprecatedFirstTimestamp.IsZero() {
-		eventTime = v1e.DeprecatedFirstTimestamp.Time
-	} else {
-		eventTime = v1e.CreationTimestamp.Time
-	}
+	eventTime := getEventTime(v1e)
 	ek = &opsevent.EventKube{
 		Type:      v1e.Type,
 		Reason:    v1e.Reason,
@@ -154,6 +149,23 @@ func GetEventKube(v1e *eventsv1.Event) (ek *opsevent.EventKube) {
 		for _, mf := range v1e.ManagedFields {
 			ek.From = mf.Manager + ek.From
 		}
+	}
+	return
+}
+
+func getEventTime(v1e *eventsv1.Event) (eventTime time.Time) {
+	if !v1e.EventTime.IsZero() {
+		eventTime = v1e.EventTime.Time
+	} else if v1e.DeletionTimestamp != nil {
+		eventTime = v1e.DeletionTimestamp.Time
+	} else if !v1e.DeprecatedLastTimestamp.IsZero() {
+		eventTime = v1e.DeprecatedLastTimestamp.Time
+	} else if !v1e.DeprecatedFirstTimestamp.IsZero() {
+		eventTime = v1e.DeprecatedFirstTimestamp.Time
+	} else if !v1e.CreationTimestamp.IsZero() {
+		eventTime = v1e.CreationTimestamp.Time
+	} else {
+		eventTime = time.Now()
 	}
 	return
 }
