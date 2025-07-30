@@ -62,7 +62,7 @@ func SetupRouter(r *gin.Engine) {
 	{
 		v1Summary.GET("", GetSummary)
 	}
-	v1Events := r.Group("/api/v1/events").Use(AuthMiddleware())
+	v1Events := r.Group("/api/v1/events").Use()
 	{
 		v1Events.GET("", ListEvents)
 		v1Events.GET("/:event", GetEvents)
