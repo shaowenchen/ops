@@ -299,7 +299,9 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 		if latestTrOuput != "" {
 			latestTrOuputArr := strings.Split(latestTrOuput, ":")
 			if len(latestTrOuputArr) == 2 {
-				pr.Spec.Variables[latestTrOuputArr[0]] = latestTrOuputArr[1]
+				key := strings.TrimSpace(latestTrOuputArr[0])
+				value := strings.TrimSpace(latestTrOuputArr[1])
+				pr.Spec.Variables[key] = value
 			}
 		}
 
