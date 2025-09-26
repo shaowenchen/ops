@@ -21,9 +21,6 @@ const LabelOpsTaskValue = "true"
 const LabelOpsServerKey = "app.kubernetes.io/name"
 const LabelOpsServerValue = "ops"
 
-const LabelCopilotPipelineEnabledKey = "ops/copilot"
-const LabelCopilotPipelineEnabledValue = "enabled"
-
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
 const DefaultRuntimeImage = "registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04"

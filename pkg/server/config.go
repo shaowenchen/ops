@@ -14,7 +14,6 @@ var GlobalConfig = &ConfigOptions{}
 
 type ConfigOptions struct {
 	Server  ServerOptions        `mapstructure:"server"`
-	Copilot option.CopilotOption `mapstructure:"copilot"`
 	Event   EventOption          `mapstructure:"event"`
 }
 

@@ -62,13 +62,6 @@ loginStore.check();
         </el-col>
         <el-col :span="8">
             <el-card shadow="hover" class="card">
-                <router-link to="/copilot" class="card-link">
-                    <div class="card-title">Copilot</div>
-                </router-link>
-            </el-card>
-        </el-col>
-        <el-col :span="8">
-            <el-card shadow="hover" class="card">
                 <router-link to="/events" class="card-link">
                     <div class="card-title">Events</div>
                 </router-link>

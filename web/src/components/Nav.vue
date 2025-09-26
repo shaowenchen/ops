@@ -29,7 +29,6 @@ export default {
         return {
             navList: [
                 { navItem: 'Home', path: '/', icon: 'el-icon-house' },
-                { navItem: 'Copilot', path: '/copilot', icon: 'el-icon-s-custom' },
                 { navItem: 'Hosts', path: '/hosts', icon: 'el-icon-s-platform' },
                 { navItem: 'Clusters', path: '/clusters', icon: 'el-icon-s-help' },
                 { navItem: 'Tasks', path: '/tasks', icon: 'el-icon-s-check' },

@@ -716,7 +716,6 @@ func listPipelines(c *gin.Context, labels map[string]string) (pagination Paginat
 // @Router /api/v1/namespaces/{namespace}/pipelinetools [get]
 func ListPipelineTools(c *gin.Context) {
 	labels := map[string]string{
-		opsconstants.LabelCopilotPipelineEnabledKey: opsconstants.LabelCopilotPipelineEnabledValue,
 	}
 	objs, err := listPipelines(c, labels)
 	if err != nil {

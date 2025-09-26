@@ -29,7 +29,7 @@ Ops 是一个运维工具项目。它的目标是提供一个简单的运维工�
 
 ![](images/ops-component.png)
 
-- ops-cli，是可以单独使用的命令行工具，辅助运维人员在命令行终端完成一些自动化的运维工作，包含一个 copilot 子命令，能够借助 LLM 自动调用 Ops 的 Task 任务解决问题
+- ops-cli，是可以单独使用的命令行工具，辅助运维人员在命令行终端完成一些自动化的运维工作
 - ops-server 一个 HTTP 服务，用于提供 HTTP API，提供有一个 Dashboard 的界面
 - ops-controller，以 Operator 的形式管理主机、集群、任务、流水线等资源
 

@@ -49,11 +49,6 @@ func SetupRouter(r *gin.Engine) {
 		v1Pipelineruns.POST("/sync", CreatePipelineRunSync)
 		v1Pipelineruns.GET("/:pipelinerun", GetPipelineRun)
 	}
-	v1Copilot := r.Group("/api/v1/copilot").Use(AuthMiddleware())
-	{
-		v1Copilot.POST("", PostCopilot)
-		v1Copilot.POST("/plain", PostCopilotPlain)
-	}
 	v1Login := r.Group("/api/v1/login").Use(AuthMiddleware())
 	{
 		v1Login.GET("/check", LoginCheck)

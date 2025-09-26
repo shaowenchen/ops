@@ -27,7 +27,7 @@ The core components of Ops are built around objects that represent hosts, cluste
 
 ### **Components**
 
-1. **ops-cli**: A command-line tool that assists system administrators with automation tasks. It includes a `copilot` subcommand that utilizes LLM (Large Language Models) to automatically trigger Ops tasks and solve issues.
+1. **ops-cli**: A command-line tool that assists system administrators with automation tasks.
 2. **ops-server**: An HTTP service that provides RESTful APIs and a Dashboard interface for managing and monitoring tasks and resources.
 3. **ops-controller**: A Kubernetes Operator that manages hosts, clusters, tasks, pipelines, and other resources in the Kubernetes environment.
 

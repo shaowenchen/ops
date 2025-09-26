@@ -28,27 +28,3 @@ ops-server 是一个 HTTP 服务，提供了一些 RESTful API，用于对外提
 
 ![](images/taskruns.png)
 
-## Copilot
-
-- 在 Ops Server 添加必要的变量
-
-```yaml
-- name: SERVER_TOKEN
-  value: ops
-- name: COPILOT_ENDPOINT
-  value: https://llmapi.xxx.com/v1
-- name: COPILOT_KEY
-  value: sk-xxx
-- name: COPILOT_OPSSERVER
-  value: http://myops-server.ops-system.svc
-- name: COPILOT_OPSTOKEN
-  value: ops
-```
-
-其中 `COPILOT_ENDPOINT`、`COPILOT_KEY` 配置与 OpenAI API 兼容的推理接口; `COPILOT_OPSSERVER`、`COPILOT_OPSTOKEN` 是 Ops Server 的地址和 Token。
-
-- 使用 Copilot
-
-![](images/web-copilot.png)
-
-直接输入文本，发送相关消息即可。
