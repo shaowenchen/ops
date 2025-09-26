@@ -61,7 +61,7 @@ func ListSubjects(url, streamName, search string) (results []string, err error) 
 		return nil, fmt.Errorf("failed to create JetStream context: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	stream, err := js.Stream(ctx, streamName)
