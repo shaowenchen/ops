@@ -7,7 +7,6 @@ import (
 	"github.com/shaowenchen/ops/cmd/cli/copilot"
 	"github.com/shaowenchen/ops/cmd/cli/create"
 	"github.com/shaowenchen/ops/cmd/cli/file"
-	"github.com/shaowenchen/ops/cmd/cli/mcp"
 	"github.com/shaowenchen/ops/cmd/cli/shell"
 	"github.com/shaowenchen/ops/cmd/cli/task"
 	"github.com/shaowenchen/ops/cmd/cli/upgrade"
@@ -17,7 +16,6 @@ import (
 
 func Execute() {
 	RootCmd.AddCommand(file.FileCmd)
-	RootCmd.AddCommand(mcp.McpCmd)
 	RootCmd.AddCommand(shell.ShellCmd)
 	RootCmd.AddCommand(create.CreateCmd)
 	RootCmd.AddCommand(task.TaskCmd)

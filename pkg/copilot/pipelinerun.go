@@ -2,7 +2,6 @@ package copilot
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opslog "github.com/shaowenchen/ops/pkg/log"
@@ -229,89 +226,4 @@ func (m *PipelineRunsManager) makeRequest(endpoint, token, uri, method string, p
 	defer resp.Body.Close()
 
 	return io.ReadAll(resp.Body)
-}
-
-func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger, s *server.MCPServer) error {
-	pipelines, err := m.GetPipelines()
-	if err != nil {
-		return err
-	}
-	for _, pipeline := range pipelines {
-		var toolOptions = make([]mcp.ToolOption, 0)
-		for key, variable := range pipeline.Spec.Variables {
-			if variable.Value != "" {
-				variable.Default = variable.Value
-			}
-			toolOptions = append(toolOptions, mcp.WithString(key,
-				mcp.Required(),
-				mcp.Description(variable.Desc),
-				mcp.Enum(variable.Enums...),
-				mcp.DefaultString(variable.Default),
-				mcp.Pattern(variable.Regex),
-			))
-		}
-		mcpTool := mcp.NewTool(pipeline.Name, toolOptions...)
-		s.AddTool(mcpTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			variables := make(map[string]string)
-			// Todo: fix
-			// for key, value := range request.Params.Arguments {
-			// 	variables[key] = value.(string)
-			// }
-			pipelines, err := m.GetPipelines()
-			if err != nil {
-				return mcp.NewToolResultText(err.Error()), nil
-			}
-			output := ""
-			for _, pipeline := range pipelines {
-				if pipeline.Name == request.Params.Name {
-					pipelinerun := opsv1.NewPipelineRun(&pipeline)
-					pipelinerun.Spec.Variables = variables
-					err := m.Run(logger, pipelinerun)
-					if err != nil {
-						logger.Error.Println(err)
-						return mcp.NewToolResultText(err.Error()), nil
-					}
-					output = m.PrintMarkdownPipelineRuns(pipelinerun)
-				}
-			}
-			return mcp.NewToolResultText(output), nil
-		})
-	}
-	return nil
-}
-
-func (m *PipelineRunsManager) AddMcpResources(logger *opslog.Logger, s *server.MCPServer) error {
-	clusterRes := mcp.NewResource(
-		"clusters://all",
-		"all available clusters",
-		mcp.WithResourceDescription("clusters are the kubernetes clusters"),
-		mcp.WithMIMEType("text/markdown"),
-	)
-
-	s.AddResource(clusterRes, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      "clusters://all",
-				MIMEType: "text/markdown",
-				Text:     string(m.PrintMarkdownClusters()),
-			},
-		}, nil
-	})
-	pipelineRes := mcp.NewResource(
-		"pipelines://all",
-		"all available pipelines",
-		mcp.WithResourceDescription("pipelines provide standard ops procedures"),
-		mcp.WithMIMEType("text/markdown"),
-	)
-
-	s.AddResource(pipelineRes, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      "pipelines://all",
-				MIMEType: "text/markdown",
-				Text:     string(m.PrintMarkdownPipelines()),
-			},
-		}, nil
-	})
-	return nil
 }

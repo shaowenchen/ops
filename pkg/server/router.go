@@ -67,31 +67,6 @@ func SetupRouter(r *gin.Engine) {
 		v1Events.GET("", ListEvents)
 		v1Events.GET("/:event", GetEvents)
 	}
-	v1MCP := r.Group("/api/v1/mcp").Use(AuthMiddleware())
-	{
-		sseHandler := func(c *gin.Context) {
-			c.Writer.Header().Set("Content-Type", "text/event-stream")
-			c.Writer.Header().Set("Cache-Control", "no-cache")
-			c.Writer.Header().Set("Connection", "keep-alive")
-			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-			c.Writer.Header().Set("X-Accel-Buffering", "no")
-			c.Writer.Header().Set("Transfer-Encoding", "chunked")
-			sseServer, err := NewSingletonMCPServer("debug",
-				GlobalConfig.Copilot.OpsServer,
-				GlobalConfig.Copilot.OpsToken,
-				"/api/v1/mcp")
-			if err != nil {
-				c.String(500, "Failed to initialize SSE server: %v", err)
-				return
-			}
-			sseServer.ServeHTTP(c.Writer, c.Request)
-			if c.Writer.Status() != 200 {
-				c.String(c.Writer.Status(), "SSE connection terminated with status: %d", c.Writer.Status())
-			}
-		}
-		v1MCP.GET("/sse", sseHandler)
-		v1MCP.POST("/message", sseHandler)
-	}
 }
 
 func SetupRouteWithoutAuth(r *gin.Engine) {
