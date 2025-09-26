@@ -253,9 +253,10 @@ func (m *PipelineRunsManager) AddMcpTools(logger *opslog.Logger, s *server.MCPSe
 		mcpTool := mcp.NewTool(pipeline.Name, toolOptions...)
 		s.AddTool(mcpTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			variables := make(map[string]string)
-			for key, value := range request.Params.Arguments {
-				variables[key] = value.(string)
-			}
+			// Todo: fix
+			// for key, value := range request.Params.Arguments {
+			// 	variables[key] = value.(string)
+			// }
 			pipelines, err := m.GetPipelines()
 			if err != nil {
 				return mcp.NewToolResultText(err.Error()), nil

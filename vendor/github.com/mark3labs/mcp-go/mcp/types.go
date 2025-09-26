@@ -1,9 +1,14 @@
-// Package mcp defines the core types and interfaces for the Model Control Protocol (MCP).
+// Package mcp defines the core types and interfaces for the Model Context Protocol (MCP).
 // MCP is a protocol for communication between LLM-powered applications and their supporting services.
 package mcp
 
 import (
 	"encoding/json"
+	"fmt"
+	"maps"
+	"strconv"
+
+	"net/http"
 
 	"github.com/yosida95/uritemplate/v3"
 )
@@ -11,41 +16,63 @@ import (
 type MCPMethod string
 
 const (
-	// Initiates connection and negotiates protocol capabilities.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/lifecycle/#initialization
+	// MethodInitialize initiates connection and negotiates protocol capabilities.
+	// https://modelcontextprotocol.io/specification/2024-11-05/basic/lifecycle/#initialization
 	MethodInitialize MCPMethod = "initialize"
 
-	// Verifies connection liveness between client and server.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/utilities/ping/
+	// MethodPing verifies connection liveness between client and server.
+	// https://modelcontextprotocol.io/specification/2024-11-05/basic/utilities/ping/
 	MethodPing MCPMethod = "ping"
 
-	// Lists all available server resources.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/server/resources/
+	// MethodResourcesList lists all available server resources.
+	// https://modelcontextprotocol.io/specification/2024-11-05/server/resources/
 	MethodResourcesList MCPMethod = "resources/list"
 
-	// Provides URI templates for constructing resource URIs.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/server/resources/
+	// MethodResourcesTemplatesList provides URI templates for constructing resource URIs.
+	// https://modelcontextprotocol.io/specification/2024-11-05/server/resources/
 	MethodResourcesTemplatesList MCPMethod = "resources/templates/list"
 
-	// Retrieves content of a specific resource by URI.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/server/resources/
+	// MethodResourcesRead retrieves content of a specific resource by URI.
+	// https://modelcontextprotocol.io/specification/2024-11-05/server/resources/
 	MethodResourcesRead MCPMethod = "resources/read"
 
-	// Lists all available prompt templates.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/
+	// MethodPromptsList lists all available prompt templates.
+	// https://modelcontextprotocol.io/specification/2024-11-05/server/prompts/
 	MethodPromptsList MCPMethod = "prompts/list"
 
-	// Retrieves a specific prompt template with filled parameters.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/
+	// MethodPromptsGet retrieves a specific prompt template with filled parameters.
+	// https://modelcontextprotocol.io/specification/2024-11-05/server/prompts/
 	MethodPromptsGet MCPMethod = "prompts/get"
 
-	// Lists all available executable tools.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/server/tools/
+	// MethodToolsList lists all available executable tools.
+	// https://modelcontextprotocol.io/specification/2024-11-05/server/tools/
 	MethodToolsList MCPMethod = "tools/list"
 
-	// Invokes a specific tool with provided parameters.
-	// https://spec.modelcontextprotocol.io/specification/2024-11-05/server/tools/
+	// MethodToolsCall invokes a specific tool with provided parameters.
+	// https://modelcontextprotocol.io/specification/2024-11-05/server/tools/
 	MethodToolsCall MCPMethod = "tools/call"
+
+	// MethodSetLogLevel configures the minimum log level for client
+	// https://modelcontextprotocol.io/specification/2025-03-26/server/utilities/logging
+	MethodSetLogLevel MCPMethod = "logging/setLevel"
+
+	// MethodElicitationCreate requests additional information from the user during interactions.
+	// https://modelcontextprotocol.io/docs/concepts/elicitation
+	MethodElicitationCreate MCPMethod = "elicitation/create"
+
+	// MethodNotificationResourcesListChanged notifies when the list of available resources changes.
+	// https://modelcontextprotocol.io/specification/2025-03-26/server/resources#list-changed-notification
+	MethodNotificationResourcesListChanged = "notifications/resources/list_changed"
+
+	MethodNotificationResourceUpdated = "notifications/resources/updated"
+
+	// MethodNotificationPromptsListChanged notifies when the list of available prompt templates changes.
+	// https://modelcontextprotocol.io/specification/2025-03-26/server/prompts#list-changed-notification
+	MethodNotificationPromptsListChanged = "notifications/prompts/list_changed"
+
+	// MethodNotificationToolsListChanged notifies when the list of available tools changes.
+	// https://spec.modelcontextprotocol.io/specification/2024-11-05/server/tools/list_changed/
+	MethodNotificationToolsListChanged = "notifications/tools/list_changed"
 )
 
 type URITemplate struct {
@@ -53,7 +80,7 @@ type URITemplate struct {
 }
 
 func (t *URITemplate) MarshalJSON() ([]byte, error) {
-	return json.Marshal(t.Template.Raw())
+	return json.Marshal(t.Raw())
 }
 
 func (t *URITemplate) UnmarshalJSON(data []byte) error {
@@ -72,36 +99,86 @@ func (t *URITemplate) UnmarshalJSON(data []byte) error {
 /* JSON-RPC types */
 
 // JSONRPCMessage represents either a JSONRPCRequest, JSONRPCNotification, JSONRPCResponse, or JSONRPCError
-type JSONRPCMessage interface{}
+type JSONRPCMessage any
 
 // LATEST_PROTOCOL_VERSION is the most recent version of the MCP protocol.
-const LATEST_PROTOCOL_VERSION = "2024-11-05"
+const LATEST_PROTOCOL_VERSION = "2025-06-18"
+
+// ValidProtocolVersions lists all known valid MCP protocol versions.
+var ValidProtocolVersions = []string{
+	LATEST_PROTOCOL_VERSION,
+	"2025-03-26",
+	"2024-11-05",
+}
 
 // JSONRPC_VERSION is the version of JSON-RPC used by MCP.
 const JSONRPC_VERSION = "2.0"
 
 // ProgressToken is used to associate progress notifications with the original request.
-type ProgressToken interface{}
+type ProgressToken any
 
 // Cursor is an opaque token used to represent a cursor for pagination.
 type Cursor string
 
-type Request struct {
-	Method string `json:"method"`
-	Params struct {
-		Meta *struct {
-			// If specified, the caller is requesting out-of-band progress
-			// notifications for this request (as represented by
-			// notifications/progress). The value of this parameter is an
-			// opaque token that will be attached to any subsequent
-			// notifications. The receiver is not obligated to provide these
-			// notifications.
-			ProgressToken ProgressToken `json:"progressToken,omitempty"`
-		} `json:"_meta,omitempty"`
-	} `json:"params,omitempty"`
+// Meta is metadata attached to a request's parameters. This can include fields
+// formally defined by the protocol or other arbitrary data.
+type Meta struct {
+	// If specified, the caller is requesting out-of-band progress
+	// notifications for this request (as represented by
+	// notifications/progress). The value of this parameter is an
+	// opaque token that will be attached to any subsequent
+	// notifications. The receiver is not obligated to provide these
+	// notifications.
+	ProgressToken ProgressToken
+
+	// AdditionalFields are any fields present in the Meta that are not
+	// otherwise defined in the protocol.
+	AdditionalFields map[string]any
 }
 
-type Params map[string]interface{}
+func (m *Meta) MarshalJSON() ([]byte, error) {
+	raw := make(map[string]any)
+	if m.ProgressToken != nil {
+		raw["progressToken"] = m.ProgressToken
+	}
+	maps.Copy(raw, m.AdditionalFields)
+
+	return json.Marshal(raw)
+}
+
+func (m *Meta) UnmarshalJSON(data []byte) error {
+	raw := make(map[string]any)
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	m.ProgressToken = raw["progressToken"]
+	delete(raw, "progressToken")
+	m.AdditionalFields = raw
+	return nil
+}
+
+func NewMetaFromMap(m map[string]any) *Meta {
+	progressToken := m["progressToken"]
+	if progressToken != nil {
+		delete(m, "progressToken")
+	}
+
+	return &Meta{
+		ProgressToken:    progressToken,
+		AdditionalFields: m,
+	}
+}
+
+type Request struct {
+	Method string        `json:"method"`
+	Params RequestParams `json:"params,omitempty"`
+}
+
+type RequestParams struct {
+	Meta *Meta `json:"_meta,omitempty"`
+}
+
+type Params map[string]any
 
 type Notification struct {
 	Method string             `json:"method"`
@@ -111,16 +188,16 @@ type Notification struct {
 type NotificationParams struct {
 	// This parameter name is reserved by MCP to allow clients and
 	// servers to attach additional metadata to their notifications.
-	Meta map[string]interface{} `json:"_meta,omitempty"`
+	Meta map[string]any `json:"_meta,omitempty"`
 
 	// Additional fields can be added to this map
-	AdditionalFields map[string]interface{} `json:"-"`
+	AdditionalFields map[string]any `json:"-"`
 }
 
 // MarshalJSON implements custom JSON marshaling
 func (p NotificationParams) MarshalJSON() ([]byte, error) {
 	// Create a map to hold all fields
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 
 	// Add Meta if it exists
 	if p.Meta != nil {
@@ -141,24 +218,24 @@ func (p NotificationParams) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements custom JSON unmarshaling
 func (p *NotificationParams) UnmarshalJSON(data []byte) error {
 	// Create a map to hold all fields
-	var m map[string]interface{}
+	var m map[string]any
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
 
 	// Initialize maps if they're nil
 	if p.Meta == nil {
-		p.Meta = make(map[string]interface{})
+		p.Meta = make(map[string]any)
 	}
 	if p.AdditionalFields == nil {
-		p.AdditionalFields = make(map[string]interface{})
+		p.AdditionalFields = make(map[string]any)
 	}
 
 	// Process all fields
 	for k, v := range m {
 		if k == "_meta" {
 			// Handle Meta field
-			if meta, ok := v.(map[string]interface{}); ok {
+			if meta, ok := v.(map[string]any); ok {
 				p.Meta = meta
 			}
 		} else {
@@ -173,18 +250,86 @@ func (p *NotificationParams) UnmarshalJSON(data []byte) error {
 type Result struct {
 	// This result property is reserved by the protocol to allow clients and
 	// servers to attach additional metadata to their responses.
-	Meta map[string]interface{} `json:"_meta,omitempty"`
+	Meta *Meta `json:"_meta,omitempty"`
 }
 
 // RequestId is a uniquely identifying ID for a request in JSON-RPC.
 // It can be any JSON-serializable value, typically a number or string.
-type RequestId interface{}
+type RequestId struct {
+	value any
+}
+
+// NewRequestId creates a new RequestId with the given value
+func NewRequestId(value any) RequestId {
+	return RequestId{value: value}
+}
+
+// Value returns the underlying value of the RequestId
+func (r RequestId) Value() any {
+	return r.value
+}
+
+// String returns a string representation of the RequestId
+func (r RequestId) String() string {
+	switch v := r.value.(type) {
+	case string:
+		return "string:" + v
+	case int64:
+		return "int64:" + strconv.FormatInt(v, 10)
+	case float64:
+		if v == float64(int64(v)) {
+			return "int64:" + strconv.FormatInt(int64(v), 10)
+		}
+		return "float64:" + strconv.FormatFloat(v, 'f', -1, 64)
+	case nil:
+		return "<nil>"
+	default:
+		return "unknown:" + fmt.Sprintf("%v", v)
+	}
+}
+
+// IsNil returns true if the RequestId is nil
+func (r RequestId) IsNil() bool {
+	return r.value == nil
+}
+
+func (r RequestId) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.value)
+}
+
+func (r *RequestId) UnmarshalJSON(data []byte) error {
+
+	if string(data) == "null" {
+		r.value = nil
+		return nil
+	}
+
+	// Try unmarshaling as string first
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		r.value = s
+		return nil
+	}
+
+	// JSON numbers are unmarshaled as float64 in Go
+	var f float64
+	if err := json.Unmarshal(data, &f); err == nil {
+		if f == float64(int64(f)) {
+			r.value = int64(f)
+		} else {
+			r.value = f
+		}
+		return nil
+	}
+
+	return fmt.Errorf("invalid request id: %s", string(data))
+}
 
 // JSONRPCRequest represents a request that expects a response.
 type JSONRPCRequest struct {
-	JSONRPC string      `json:"jsonrpc"`
-	ID      RequestId   `json:"id"`
-	Params  interface{} `json:"params,omitempty"`
+	JSONRPC string    `json:"jsonrpc"`
+	ID      RequestId `json:"id"`
+	Params  any       `json:"params,omitempty"`
 	Request
 }
 
@@ -196,9 +341,9 @@ type JSONRPCNotification struct {
 
 // JSONRPCResponse represents a successful (non-error) response to a request.
 type JSONRPCResponse struct {
-	JSONRPC string      `json:"jsonrpc"`
-	ID      RequestId   `json:"id"`
-	Result  interface{} `json:"result"`
+	JSONRPC string    `json:"jsonrpc"`
+	ID      RequestId `json:"id"`
+	Result  any       `json:"result"`
 }
 
 // JSONRPCError represents a non-successful (error) response to a request.
@@ -213,7 +358,7 @@ type JSONRPCError struct {
 		Message string `json:"message"`
 		// Additional information about the error. The value of this member
 		// is defined by the sender (e.g. detailed error information, nested errors etc.).
-		Data interface{} `json:"data,omitempty"`
+		Data any `json:"data,omitempty"`
 	} `json:"error"`
 }
 
@@ -224,6 +369,11 @@ const (
 	METHOD_NOT_FOUND = -32601
 	INVALID_PARAMS   = -32602
 	INTERNAL_ERROR   = -32603
+)
+
+// MCP error codes
+const (
+	RESOURCE_NOT_FOUND = -32002
 )
 
 /* Empty result */
@@ -246,17 +396,19 @@ type EmptyResult Result
 // A client MUST NOT attempt to cancel its `initialize` request.
 type CancelledNotification struct {
 	Notification
-	Params struct {
-		// The ID of the request to cancel.
-		//
-		// This MUST correspond to the ID of a request previously issued
-		// in the same direction.
-		RequestId RequestId `json:"requestId"`
+	Params CancelledNotificationParams `json:"params"`
+}
 
-		// An optional string describing the reason for the cancellation. This MAY
-		// be logged or presented to the user.
-		Reason string `json:"reason,omitempty"`
-	} `json:"params"`
+type CancelledNotificationParams struct {
+	// The ID of the request to cancel.
+	//
+	// This MUST correspond to the ID of a request previously issued
+	// in the same direction.
+	RequestId RequestId `json:"requestId"`
+
+	// An optional string describing the reason for the cancellation. This MAY
+	// be logged or presented to the user.
+	Reason string `json:"reason,omitempty"`
 }
 
 /* Initialization */
@@ -265,13 +417,16 @@ type CancelledNotification struct {
 // connects, asking it to begin initialization.
 type InitializeRequest struct {
 	Request
-	Params struct {
-		// The latest version of the Model Context Protocol that the client supports.
-		// The client MAY decide to support older versions as well.
-		ProtocolVersion string             `json:"protocolVersion"`
-		Capabilities    ClientCapabilities `json:"capabilities"`
-		ClientInfo      Implementation     `json:"clientInfo"`
-	} `json:"params"`
+	Params InitializeParams `json:"params"`
+	Header http.Header      `json:"-"`
+}
+
+type InitializeParams struct {
+	// The latest version of the Model Context Protocol that the client supports.
+	// The client MAY decide to support older versions as well.
+	ProtocolVersion string             `json:"protocolVersion"`
+	Capabilities    ClientCapabilities `json:"capabilities"`
+	ClientInfo      Implementation     `json:"clientInfo"`
 }
 
 // InitializeResult is sent after receiving an initialize request from the
@@ -303,7 +458,7 @@ type InitializedNotification struct {
 // client can define its own, additional capabilities.
 type ClientCapabilities struct {
 	// Experimental, non-standard capabilities that the client supports.
-	Experimental map[string]interface{} `json:"experimental,omitempty"`
+	Experimental map[string]any `json:"experimental,omitempty"`
 	// Present if the client supports listing roots.
 	Roots *struct {
 		// Whether the client supports notifications for changes to the roots list.
@@ -311,6 +466,8 @@ type ClientCapabilities struct {
 	} `json:"roots,omitempty"`
 	// Present if the client supports sampling from an LLM.
 	Sampling *struct{} `json:"sampling,omitempty"`
+	// Present if the client supports elicitation requests from the server.
+	Elicitation *struct{} `json:"elicitation,omitempty"`
 }
 
 // ServerCapabilities represents capabilities that a server may support. Known
@@ -318,7 +475,7 @@ type ClientCapabilities struct {
 // server can define its own, additional capabilities.
 type ServerCapabilities struct {
 	// Experimental, non-standard capabilities that the server supports.
-	Experimental map[string]interface{} `json:"experimental,omitempty"`
+	Experimental map[string]any `json:"experimental,omitempty"`
 	// Present if the server supports sending log messages to the client.
 	Logging *struct{} `json:"logging,omitempty"`
 	// Present if the server offers any prompt templates.
@@ -334,11 +491,15 @@ type ServerCapabilities struct {
 		// list.
 		ListChanged bool `json:"listChanged,omitempty"`
 	} `json:"resources,omitempty"`
+	// Present if the server supports sending sampling requests to clients.
+	Sampling *struct{} `json:"sampling,omitempty"`
 	// Present if the server offers any tools to call.
 	Tools *struct {
 		// Whether this server supports notifications for changes to the tool list.
 		ListChanged bool `json:"listChanged,omitempty"`
 	} `json:"tools,omitempty"`
+	// Present if the server supports elicitation requests to the client.
+	Elicitation *struct{} `json:"elicitation,omitempty"`
 }
 
 // Implementation describes the name and version of an MCP implementation.
@@ -354,6 +515,7 @@ type Implementation struct {
 // or else may be disconnected.
 type PingRequest struct {
 	Request
+	Header http.Header `json:"-"`
 }
 
 /* Progress notifications */
@@ -362,27 +524,34 @@ type PingRequest struct {
 // receiver of a progress update for a long-running request.
 type ProgressNotification struct {
 	Notification
-	Params struct {
-		// The progress token which was given in the initial request, used to
-		// associate this notification with the request that is proceeding.
-		ProgressToken ProgressToken `json:"progressToken"`
-		// The progress thus far. This should increase every time progress is made,
-		// even if the total is unknown.
-		Progress float64 `json:"progress"`
-		// Total number of items to process (or total progress required), if known.
-		Total float64 `json:"total,omitempty"`
-	} `json:"params"`
+	Params ProgressNotificationParams `json:"params"`
+}
+
+type ProgressNotificationParams struct {
+	// The progress token which was given in the initial request, used to
+	// associate this notification with the request that is proceeding.
+	ProgressToken ProgressToken `json:"progressToken"`
+	// The progress thus far. This should increase every time progress is made,
+	// even if the total is unknown.
+	Progress float64 `json:"progress"`
+	// Total number of items to process (or total progress required), if known.
+	Total float64 `json:"total,omitempty"`
+	// Message related to progress. This should provide relevant human-readable
+	// progress information.
+	Message string `json:"message,omitempty"`
 }
 
 /* Pagination */
 
 type PaginatedRequest struct {
 	Request
-	Params struct {
-		// An opaque token representing the current pagination position.
-		// If provided, the server should return results starting after this cursor.
-		Cursor Cursor `json:"cursor,omitempty"`
-	} `json:"params,omitempty"`
+	Params PaginatedParams `json:"params,omitempty"`
+}
+
+type PaginatedParams struct {
+	// An opaque token representing the current pagination position.
+	// If provided, the server should return results starting after this cursor.
+	Cursor Cursor `json:"cursor,omitempty"`
 }
 
 type PaginatedResult struct {
@@ -399,6 +568,7 @@ type PaginatedResult struct {
 // the server has.
 type ListResourcesRequest struct {
 	PaginatedRequest
+	Header http.Header `json:"-"`
 }
 
 // ListResourcesResult is the server's response to a resources/list request
@@ -412,6 +582,7 @@ type ListResourcesResult struct {
 // resource templates the server has.
 type ListResourceTemplatesRequest struct {
 	PaginatedRequest
+	Header http.Header `json:"-"`
 }
 
 // ListResourceTemplatesResult is the server's response to a
@@ -425,13 +596,16 @@ type ListResourceTemplatesResult struct {
 // specific resource URI.
 type ReadResourceRequest struct {
 	Request
-	Params struct {
-		// The URI of the resource to read. The URI can use any protocol; it is up
-		// to the server how to interpret it.
-		URI string `json:"uri"`
-		// Arguments to pass to the resource handler
-		Arguments map[string]interface{} `json:"arguments,omitempty"`
-	} `json:"params"`
+	Header http.Header        `json:"-"`
+	Params ReadResourceParams `json:"params"`
+}
+
+type ReadResourceParams struct {
+	// The URI of the resource to read. The URI can use any protocol; it is up
+	// to the server how to interpret it.
+	URI string `json:"uri"`
+	// Arguments to pass to the resource handler
+	Arguments map[string]any `json:"arguments,omitempty"`
 }
 
 // ReadResourceResult is the server's response to a resources/read request
@@ -453,11 +627,14 @@ type ResourceListChangedNotification struct {
 // notifications from the server whenever a particular resource changes.
 type SubscribeRequest struct {
 	Request
-	Params struct {
-		// The URI of the resource to subscribe to. The URI can use any protocol; it
-		// is up to the server how to interpret it.
-		URI string `json:"uri"`
-	} `json:"params"`
+	Params SubscribeParams `json:"params"`
+	Header http.Header     `json:"-"`
+}
+
+type SubscribeParams struct {
+	// The URI of the resource to subscribe to. The URI can use any protocol; it
+	// is up to the server how to interpret it.
+	URI string `json:"uri"`
 }
 
 // UnsubscribeRequest is sent from the client to request cancellation of
@@ -465,10 +642,13 @@ type SubscribeRequest struct {
 // resources/subscribe request.
 type UnsubscribeRequest struct {
 	Request
-	Params struct {
-		// The URI of the resource to unsubscribe from.
-		URI string `json:"uri"`
-	} `json:"params"`
+	Params UnsubscribeParams `json:"params"`
+	Header http.Header       `json:"-"`
+}
+
+type UnsubscribeParams struct {
+	// The URI of the resource to unsubscribe from.
+	URI string `json:"uri"`
 }
 
 // ResourceUpdatedNotification is a notification from the server to the client,
@@ -476,16 +656,19 @@ type UnsubscribeRequest struct {
 // should only be sent if the client previously sent a resources/subscribe request.
 type ResourceUpdatedNotification struct {
 	Notification
-	Params struct {
-		// The URI of the resource that has been updated. This might be a sub-
-		// resource of the one that the client actually subscribed to.
-		URI string `json:"uri"`
-	} `json:"params"`
+	Params ResourceUpdatedNotificationParams `json:"params"`
+}
+type ResourceUpdatedNotificationParams struct {
+	// The URI of the resource that has been updated. This might be a sub-
+	// resource of the one that the client actually subscribed to.
+	URI string `json:"uri"`
 }
 
 // Resource represents a known resource that the server is capable of reading.
 type Resource struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta `json:"_meta,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 	// A human-readable name for this resource.
@@ -501,10 +684,17 @@ type Resource struct {
 	MIMEType string `json:"mimeType,omitempty"`
 }
 
+// GetName returns the name of the resource.
+func (r Resource) GetName() string {
+	return r.Name
+}
+
 // ResourceTemplate represents a template description for resources available
 // on the server.
 type ResourceTemplate struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta `json:"_meta,omitempty"`
 	// A URI template (according to RFC 6570) that can be used to construct
 	// resource URIs.
 	URITemplate *URITemplate `json:"uriTemplate"`
@@ -522,6 +712,11 @@ type ResourceTemplate struct {
 	MIMEType string `json:"mimeType,omitempty"`
 }
 
+// GetName returns the name of the resourceTemplate.
+func (rt ResourceTemplate) GetName() string {
+	return rt.Name
+}
+
 // ResourceContents represents the contents of a specific resource or sub-
 // resource.
 type ResourceContents interface {
@@ -529,6 +724,8 @@ type ResourceContents interface {
 }
 
 type TextResourceContents struct {
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta `json:"_meta,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 	// The MIME type of this resource, if known.
@@ -541,6 +738,8 @@ type TextResourceContents struct {
 func (TextResourceContents) isResourceContents() {}
 
 type BlobResourceContents struct {
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta `json:"_meta,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 	// The MIME type of this resource, if known.
@@ -557,12 +756,15 @@ func (BlobResourceContents) isResourceContents() {}
 // adjust logging.
 type SetLevelRequest struct {
 	Request
-	Params struct {
-		// The level of logging that the client wants to receive from the server.
-		// The server should send all logs at this level and higher (i.e., more severe) to
-		// the client as notifications/logging/message.
-		Level LoggingLevel `json:"level"`
-	} `json:"params"`
+	Params SetLevelParams `json:"params"`
+	Header http.Header    `json:"-"`
+}
+
+type SetLevelParams struct {
+	// The level of logging that the client wants to receive from the server.
+	// The server should send all logs at this level and higher (i.e., more severe) to
+	// the client as notifications/logging/message.
+	Level LoggingLevel `json:"level"`
 }
 
 // LoggingMessageNotification is a notification of a log message passed from
@@ -570,15 +772,17 @@ type SetLevelRequest struct {
 // the server MAY decide which messages to send automatically.
 type LoggingMessageNotification struct {
 	Notification
-	Params struct {
-		// The severity of this log message.
-		Level LoggingLevel `json:"level"`
-		// An optional name of the logger issuing this message.
-		Logger string `json:"logger,omitempty"`
-		// The data to be logged, such as a string message or an object. Any JSON
-		// serializable type is allowed here.
-		Data interface{} `json:"data"`
-	} `json:"params"`
+	Params LoggingMessageNotificationParams `json:"params"`
+}
+
+type LoggingMessageNotificationParams struct {
+	// The severity of this log message.
+	Level LoggingLevel `json:"level"`
+	// An optional name of the logger issuing this message.
+	Logger string `json:"logger,omitempty"`
+	// The data to be logged, such as a string message or an object. Any JSON
+	// serializable type is allowed here.
+	Data any `json:"data"`
 }
 
 // LoggingLevel represents the severity of a log message.
@@ -598,7 +802,76 @@ const (
 	LoggingLevelEmergency LoggingLevel = "emergency"
 )
 
+var levelToInt = map[LoggingLevel]int{
+	LoggingLevelDebug:     0,
+	LoggingLevelInfo:      1,
+	LoggingLevelNotice:    2,
+	LoggingLevelWarning:   3,
+	LoggingLevelError:     4,
+	LoggingLevelCritical:  5,
+	LoggingLevelAlert:     6,
+	LoggingLevelEmergency: 7,
+}
+
+func (l LoggingLevel) ShouldSendTo(minLevel LoggingLevel) bool {
+	ia, oka := levelToInt[l]
+	ib, okb := levelToInt[minLevel]
+	if !oka || !okb {
+		return false
+	}
+	return ia >= ib
+}
+
+/* Elicitation */
+
+// ElicitationRequest is a request from the server to the client to request additional
+// information from the user during an interaction.
+type ElicitationRequest struct {
+	Request
+	Params ElicitationParams `json:"params"`
+}
+
+// ElicitationParams contains the parameters for an elicitation request.
+type ElicitationParams struct {
+	// A human-readable message explaining what information is being requested and why.
+	Message string `json:"message"`
+	// A JSON Schema defining the expected structure of the user's response.
+	RequestedSchema any `json:"requestedSchema"`
+}
+
+// ElicitationResult represents the result of an elicitation request.
+type ElicitationResult struct {
+	Result
+	ElicitationResponse
+}
+
+// ElicitationResponse represents the user's response to an elicitation request.
+type ElicitationResponse struct {
+	// Action indicates whether the user accepted, declined, or cancelled.
+	Action ElicitationResponseAction `json:"action"`
+	// Content contains the user's response data if they accepted.
+	// Should conform to the requestedSchema from the ElicitationRequest.
+	Content any `json:"content,omitempty"`
+}
+
+// ElicitationResponseAction indicates how the user responded to an elicitation request.
+type ElicitationResponseAction string
+
+const (
+	// ElicitationResponseActionAccept indicates the user provided the requested information.
+	ElicitationResponseActionAccept ElicitationResponseAction = "accept"
+	// ElicitationResponseActionDecline indicates the user explicitly declined to provide information.
+	ElicitationResponseActionDecline ElicitationResponseAction = "decline"
+	// ElicitationResponseActionCancel indicates the user cancelled without making a choice.
+	ElicitationResponseActionCancel ElicitationResponseAction = "cancel"
+)
+
 /* Sampling */
+
+const (
+	// MethodSamplingCreateMessage allows servers to request LLM completions from clients
+	MethodSamplingCreateMessage MCPMethod = "sampling/createMessage"
+)
 
 // CreateMessageRequest is a request from the server to sample an LLM via the
 // client. The client has full discretion over which model to select. The client
@@ -606,16 +879,18 @@ const (
 // the request (human in the loop) and decide whether to approve it.
 type CreateMessageRequest struct {
 	Request
-	Params struct {
-		Messages         []SamplingMessage `json:"messages"`
-		ModelPreferences *ModelPreferences `json:"modelPreferences,omitempty"`
-		SystemPrompt     string            `json:"systemPrompt,omitempty"`
-		IncludeContext   string            `json:"includeContext,omitempty"`
-		Temperature      float64           `json:"temperature,omitempty"`
-		MaxTokens        int               `json:"maxTokens"`
-		StopSequences    []string          `json:"stopSequences,omitempty"`
-		Metadata         interface{}       `json:"metadata,omitempty"`
-	} `json:"params"`
+	CreateMessageParams `json:"params"`
+}
+
+type CreateMessageParams struct {
+	Messages         []SamplingMessage `json:"messages"`
+	ModelPreferences *ModelPreferences `json:"modelPreferences,omitempty"`
+	SystemPrompt     string            `json:"systemPrompt,omitempty"`
+	IncludeContext   string            `json:"includeContext,omitempty"`
+	Temperature      float64           `json:"temperature,omitempty"`
+	MaxTokens        int               `json:"maxTokens"`
+	StopSequences    []string          `json:"stopSequences,omitempty"`
+	Metadata         any               `json:"metadata,omitempty"`
 }
 
 // CreateMessageResult is the client's response to a sampling/create_message
@@ -633,28 +908,30 @@ type CreateMessageResult struct {
 
 // SamplingMessage describes a message issued to or received from an LLM API.
 type SamplingMessage struct {
-	Role    Role        `json:"role"`
-	Content interface{} `json:"content"` // Can be TextContent or ImageContent
+	Role    Role `json:"role"`
+	Content any  `json:"content"` // Can be TextContent, ImageContent or AudioContent
+}
+
+type Annotations struct {
+	// Describes who the intended customer of this object or data is.
+	//
+	// It can include multiple entries to indicate content useful for multiple
+	// audiences (e.g., `["user", "assistant"]`).
+	Audience []Role `json:"audience,omitempty"`
+
+	// Describes how important this data is for operating the server.
+	//
+	// A value of 1 means "most important," and indicates that the data is
+	// effectively required, while 0 means "least important," and indicates that
+	// the data is entirely optional.
+	Priority float64 `json:"priority,omitempty"`
 }
 
 // Annotated is the base for objects that include optional annotations for the
 // client. The client can use annotations to inform how objects are used or
 // displayed
 type Annotated struct {
-	Annotations *struct {
-		// Describes who the intended customer of this object or data is.
-		//
-		// It can include multiple entries to indicate content useful for multiple
-		// audiences (e.g., `["user", "assistant"]`).
-		Audience []Role `json:"audience,omitempty"`
-
-		// Describes how important this data is for operating the server.
-		//
-		// A value of 1 means "most important," and indicates that the data is
-		// effectively required, while 0 means "least important," and indicates that
-		// the data is entirely optional.
-		Priority float64 `json:"priority,omitempty"`
-	} `json:"annotations,omitempty"`
+	Annotations *Annotations `json:"annotations,omitempty"`
 }
 
 type Content interface {
@@ -665,6 +942,8 @@ type Content interface {
 // It must have Type set to "text".
 type TextContent struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta  `json:"_meta,omitempty"`
 	Type string `json:"type"` // Must be "text"
 	// The text content of the message.
 	Text string `json:"text"`
@@ -676,6 +955,8 @@ func (TextContent) isContent() {}
 // It must have Type set to "image".
 type ImageContent struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta  `json:"_meta,omitempty"`
 	Type string `json:"type"` // Must be "image"
 	// The base64-encoded image data.
 	Data string `json:"data"`
@@ -685,12 +966,45 @@ type ImageContent struct {
 
 func (ImageContent) isContent() {}
 
+// AudioContent represents the contents of audio, embedded into a prompt or tool call result.
+// It must have Type set to "audio".
+type AudioContent struct {
+	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta  `json:"_meta,omitempty"`
+	Type string `json:"type"` // Must be "audio"
+	// The base64-encoded audio data.
+	Data string `json:"data"`
+	// The MIME type of the audio. Different providers may support different audio types.
+	MIMEType string `json:"mimeType"`
+}
+
+func (AudioContent) isContent() {}
+
+// ResourceLink represents a link to a resource that the client can access.
+type ResourceLink struct {
+	Annotated
+	Type string `json:"type"` // Must be "resource_link"
+	// The URI of the resource.
+	URI string `json:"uri"`
+	// The name of the resource.
+	Name string `json:"name"`
+	// The description of the resource.
+	Description string `json:"description"`
+	// The MIME type of the resource.
+	MIMEType string `json:"mimeType"`
+}
+
+func (ResourceLink) isContent() {}
+
 // EmbeddedResource represents the contents of a resource, embedded into a prompt or tool call result.
 //
 // It is up to the client how best to render embedded resources for the
 // benefit of the LLM and/or the user.
 type EmbeddedResource struct {
 	Annotated
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta     *Meta            `json:"_meta,omitempty"`
 	Type     string           `json:"type"`
 	Resource ResourceContents `json:"resource"`
 }
@@ -758,15 +1072,18 @@ type ModelHint struct {
 // CompleteRequest is a request from the client to the server, to ask for completion options.
 type CompleteRequest struct {
 	Request
-	Params struct {
-		Ref      interface{} `json:"ref"` // Can be PromptReference or ResourceReference
-		Argument struct {
-			// The name of the argument
-			Name string `json:"name"`
-			// The value of the argument to use for completion matching.
-			Value string `json:"value"`
-		} `json:"argument"`
-	} `json:"params"`
+	Params CompleteParams `json:"params"`
+	Header http.Header    `json:"-"`
+}
+
+type CompleteParams struct {
+	Ref      any `json:"ref"` // Can be PromptReference or ResourceReference
+	Argument struct {
+		// The name of the argument
+		Name string `json:"name"`
+		// The value of the argument to use for completion matching.
+		Value string `json:"value"`
+	} `json:"argument"`
 }
 
 // CompleteResult is the server's response to a completion/complete request
@@ -809,6 +1126,7 @@ type PromptReference struct {
 // structure or access specific locations that the client has permission to read from.
 type ListRootsRequest struct {
 	Request
+	Header http.Header `json:"-"`
 }
 
 // ListRootsResult is the client's response to a roots/list request from the server.
@@ -821,6 +1139,8 @@ type ListRootsResult struct {
 
 // Root represents a root directory or file that the server can operate on.
 type Root struct {
+	// Meta is a metadata object that is reserved by MCP for storing additional information.
+	Meta *Meta `json:"_meta,omitempty"`
 	// The URI identifying the root. This *must* start with file:// for now.
 	// This restriction may be relaxed in future versions of the protocol to allow
 	// other URI schemes.
@@ -839,22 +1159,67 @@ type RootsListChangedNotification struct {
 	Notification
 }
 
-/* Client messages */
 // ClientRequest represents any request that can be sent from client to server.
-type ClientRequest interface{}
+type ClientRequest any
 
 // ClientNotification represents any notification that can be sent from client to server.
-type ClientNotification interface{}
+type ClientNotification any
 
 // ClientResult represents any result that can be sent from client to server.
-type ClientResult interface{}
+type ClientResult any
 
-/* Server messages */
 // ServerRequest represents any request that can be sent from server to client.
-type ServerRequest interface{}
+type ServerRequest any
 
 // ServerNotification represents any notification that can be sent from server to client.
-type ServerNotification interface{}
+type ServerNotification any
 
 // ServerResult represents any result that can be sent from server to client.
-type ServerResult interface{}
+type ServerResult any
+
+type Named interface {
+	GetName() string
+}
+
+// MarshalJSON implements custom JSON marshaling for Content interface
+func MarshalContent(content Content) ([]byte, error) {
+	return json.Marshal(content)
+}
+
+// UnmarshalContent implements custom JSON unmarshaling for Content interface
+func UnmarshalContent(data []byte) (Content, error) {
+	var raw map[string]any
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	contentType, ok := raw["type"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid type field")
+	}
+
+	switch contentType {
+	case ContentTypeText:
+		var content TextContent
+		err := json.Unmarshal(data, &content)
+		return content, err
+	case ContentTypeImage:
+		var content ImageContent
+		err := json.Unmarshal(data, &content)
+		return content, err
+	case ContentTypeAudio:
+		var content AudioContent
+		err := json.Unmarshal(data, &content)
+		return content, err
+	case ContentTypeLink:
+		var content ResourceLink
+		err := json.Unmarshal(data, &content)
+		return content, err
+	case ContentTypeResource:
+		var content EmbeddedResource
+		err := json.Unmarshal(data, &content)
+		return content, err
+	default:
+		return nil, fmt.Errorf("unknown content type: %s", contentType)
+	}
+}
