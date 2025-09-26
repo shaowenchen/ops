@@ -40,7 +40,6 @@ func SetupRouter(r *gin.Engine) {
 		v1Pipelines.GET("/:pipeline", GetPipeline)
 		v1Pipelines.PUT("/:pipeline", PutPipeline)
 		v1Pipelines.DELETE("/:pipeline", DeletePipeline)
-		v1Pipelines.GET("tools", ListPipelineTools)
 	}
 	v1Pipelineruns := r.Group("/api/v1/namespaces/:namespace/pipelineruns").Use(AuthMiddleware())
 	{
@@ -48,11 +47,6 @@ func SetupRouter(r *gin.Engine) {
 		v1Pipelineruns.POST("", CreatePipelineRun)
 		v1Pipelineruns.POST("/sync", CreatePipelineRunSync)
 		v1Pipelineruns.GET("/:pipelinerun", GetPipelineRun)
-	}
-	v1Copilot := r.Group("/api/v1/copilot").Use(AuthMiddleware())
-	{
-		v1Copilot.POST("", PostCopilot)
-		v1Copilot.POST("/plain", PostCopilotPlain)
 	}
 	v1Login := r.Group("/api/v1/login").Use(AuthMiddleware())
 	{

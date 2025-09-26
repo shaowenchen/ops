@@ -6,16 +6,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/shaowenchen/ops/pkg/option"
 	"github.com/spf13/viper"
 )
 
 var GlobalConfig = &ConfigOptions{}
 
 type ConfigOptions struct {
-	Server  ServerOptions        `mapstructure:"server"`
-	Copilot option.CopilotOption `mapstructure:"copilot"`
-	Event   EventOption          `mapstructure:"event"`
+	Server ServerOptions `mapstructure:"server"`
+	Event  EventOption   `mapstructure:"event"`
 }
 
 type ServerOptions struct {

@@ -17,8 +17,6 @@ limitations under the License.
 package v1
 
 import (
-	openai "github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -145,44 +143,7 @@ func (obj *Pipeline) MergeVersion(merge *Pipeline) *Pipeline {
 	return obj
 }
 
-func (obj *Pipeline) GetTool(clusters []Cluster) openai.Tool {
-	parmerters := jsonschema.Definition{
-		Type:       "object",
-		Properties: map[string]jsonschema.Definition{},
-		Required:   []string{},
-	}
-
-	clusterList := []string{}
-	for _, v := range clusters {
-		clusterList = append(clusterList, v.Name)
-	}
-
-	for key, v := range obj.Spec.Variables {
-		if key == "cluster" {
-			v.Enums = clusterList
-		}
-		parmerters.Properties[key] = jsonschema.Definition{
-			Type:        jsonschema.DataType("string"),
-			Description: v.Desc,
-			Enum:        v.Enums,
-		}
-		if v.Required {
-			parmerters.Required = append(parmerters.Required, key)
-		}
-	}
-	tool := openai.Tool{
-		Type: "function",
-		Function: &openai.FunctionDefinition{
-			Name:        obj.Name,
-			Description: obj.Spec.Desc,
-			Parameters:  parmerters,
-		},
-	}
-	return tool
-}
-
-//+kubebuilder:object:root=true
-
+// +kubebuilder:object:root=true
 // PipelineList contains a list of Pipeline
 type PipelineList struct {
 	metav1.TypeMeta `json:",inline" yaml:",inline"`

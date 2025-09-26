@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sashabaranov/go-openai"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
@@ -632,18 +631,10 @@ func ListTasks(c *gin.Context) {
 // @Param page query int false "page"
 // @Param page_size query int false "page_size"
 // @Param search query string false "search"
+// @Param labels_selector query string false "labels_selector"
 // @Success 200
 // @Router /api/v1/namespaces/{namespace}/pipelines [get]
 func ListPipelines(c *gin.Context) {
-	objs, err := listPipelines(c, nil)
-	if err != nil {
-		showError(c, err.Error())
-		return
-	}
-	showData(c, objs)
-}
-
-func listPipelines(c *gin.Context, labels map[string]string) (pagination Pagination[opsv1.Pipeline], err error) {
 	type Params struct {
 		Namespace      string `uri:"namespace"`
 		Page           uint   `form:"page"`
@@ -655,7 +646,7 @@ func listPipelines(c *gin.Context, labels map[string]string) (pagination Paginat
 		PageSize: 10,
 		Page:     1,
 	}
-	err = c.ShouldBindUri(&req)
+	err := c.ShouldBindUri(&req)
 	if err != nil {
 		return
 	}
@@ -664,9 +655,7 @@ func listPipelines(c *gin.Context, labels map[string]string) (pagination Paginat
 		return
 	}
 	// labels
-	if labels == nil {
-		labels = make(map[string]string)
-	}
+	labels := make(map[string]string)
 	labelSelectorKeyValues := strings.Split(req.LabelsSelector, ",")
 	for i := range labelSelectorKeyValues {
 		keyValue := strings.Split(labelSelectorKeyValues[i], "=")
@@ -702,49 +691,7 @@ func listPipelines(c *gin.Context, labels map[string]string) (pagination Paginat
 	} else {
 		newPipelineList = pipelineList.Items
 	}
-	return paginator[opsv1.Pipeline](newPipelineList, req.PageSize, req.Page), nil
-}
-
-// @Summary List Pipeline Tools
-// @Tags Pipeline Tools
-// @Accept json
-// @Produce json
-// @Param namespace path string true "namespace"
-// @Param page query int false "page"
-// @Param page_size query int false "page_size"
-// @Success 200
-// @Router /api/v1/namespaces/{namespace}/pipelinetools [get]
-func ListPipelineTools(c *gin.Context) {
-	labels := map[string]string{
-		opsconstants.LabelCopilotPipelineEnabledKey: opsconstants.LabelCopilotPipelineEnabledValue,
-	}
-	objs, err := listPipelines(c, labels)
-	if err != nil {
-		showError(c, err.Error())
-		return
-	}
-	// get clusters
-	client, err := getRuntimeClient("")
-	if err != nil {
-		showError(c, err.Error())
-		return
-	}
-	clusters := opsv1.ClusterList{}
-	err = client.List(context.TODO(), &clusters)
-	if err != nil {
-		return
-	}
-	// build tools
-	objs2 := Pagination[openai.Tool]{
-		PageSize: objs.PageSize,
-		Page:     objs.Page,
-		List:     make([]openai.Tool, 0),
-		Total:    objs.Total,
-	}
-	for i := range objs.List {
-		objs2.List = append(objs2.List, objs.List[i].GetTool(clusters.Items))
-	}
-	showData(c, objs2)
+	showData(c, paginator[opsv1.Pipeline](newPipelineList, req.PageSize, req.Page))
 }
 
 // @Summary Get TaskRun

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shaowenchen/ops/cmd/cli/copilot"
 	"github.com/shaowenchen/ops/cmd/cli/create"
 	"github.com/shaowenchen/ops/cmd/cli/file"
 	"github.com/shaowenchen/ops/cmd/cli/shell"
@@ -19,7 +18,6 @@ func Execute() {
 	RootCmd.AddCommand(shell.ShellCmd)
 	RootCmd.AddCommand(create.CreateCmd)
 	RootCmd.AddCommand(task.TaskCmd)
-	RootCmd.AddCommand(copilot.CopilotCmd)
 	RootCmd.AddCommand(version.VersionCmd)
 	RootCmd.AddCommand(upgrade.UpgradeCmd)
 	if err := RootCmd.Execute(); err != nil {
