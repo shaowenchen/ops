@@ -33,29 +33,27 @@ export adminpassword=mypassword
 export apppassword=mypassword
 ```
 
-- set nats server name
-
-```bash
-export natsservername=need-to-be-unique
-```
-
 - Generate `nats-values.yaml`:
 
 ```bash
 cat <<EOF > nats-values.yaml
 config:
+  jetstream:
+    enabled: true
+    fileStore:
+      enabled: false
+      dir: /data
+    memoryStore:
+      enabled: true
+      maxSize: 1Gi
+    pvc:
+      enabled: false
+      storageClassName: my-sc
+  cluster:
+    enabled: true
   leafnodes:
     enabled: true
-    merge:
-      remotes:
-        - urls:
-          - nats://admin:${adminpassword}@${natsendpoint}
-          account: SYS
-        - urls:
-          - nats://app:${apppassword}@${natsendpoint}
-          account: APP
   merge:
-    server_name: ${natsservername}
     accounts:
       SYS:
         users:
@@ -69,22 +67,22 @@ config:
     system_account: SYS
 container:
   image:
-    repository: registry.cn-beijing.aliyuncs.com/opshub/nats
+    repository: nats
     tag: 2.10.20-alpine
 natsBox:
   container:
     image:
-      repository: registry.cn-beijing.aliyuncs.com/opshub/natsio-nats-box
+      repository: nats-box
       tag: 0.14.5
 reloader:
   enabled: true
   image:
-    repository: registry.cn-beijing.aliyuncs.com/opshub/natsio-nats-server-config-reloader
+    repository: natsio/nats-server-config-reloader
     tag: 0.15.1
 EOF
 ```
 
-The data is persisted in memory. To store it on disk, enable the `fileStore` configuration.
+Data is persisted in memory. To store it on disk, you need to configure `fileStore`.
 
 - Install NATS:
 
@@ -132,6 +130,12 @@ helm repo update
 export natsendpoint=x.x.x.x:32222
 ```
 
+- Set the NATS server name:
+
+```bash
+export natsservername=need-to-be-unique
+```
+
 - Generate `nats-values.yaml`:
 
 Note that the `server_name` must be unique for each cluster; otherwise, duplicate connection issues will arise.
@@ -150,7 +154,7 @@ config:
           - nats://app:${apppassword}@${natsendpoint}
           account: APP
   merge:
-    server_name: need-to-be-unique
+    server_name: ${natsservername}
     accounts:
       SYS:
         users:
@@ -169,7 +173,7 @@ container:
 natsBox:
   container:
     image:
-      repository: natsio/nats-box
+      repository: nats-box
       tag: 0.14.5
 reloader:
   enabled: true

@@ -90,6 +90,7 @@ func (e EventWebhook) Readable(ce cloudevents.Event) string {
 
 type EventTaskRunReport struct {
 	Host      string `json:"host,omitempty" yaml:"host,omitempty"`
+	Target    string `json:"target,omitempty" yaml:"target,omitempty"`
 	Kind      string `json:"kind,omitempty" yaml:"kind,omitempty"`
 	Threshold string `json:"threshold,omitempty" yaml:"threshold,omitempty"`
 	Operator  string `json:"operator,omitempty" yaml:"operator,omitempty"`

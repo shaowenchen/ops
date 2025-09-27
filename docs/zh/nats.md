@@ -67,17 +67,17 @@ config:
     system_account: SYS
 container:
   image:
-    repository: registry.cn-beijing.aliyuncs.com/opshub/nats
+    repository: nats
     tag: 2.10.20-alpine
 natsBox:
   container:
     image:
-      repository: registry.cn-beijing.aliyuncs.com/opshub/nats-box
+      repository: nats-box
       tag: 0.14.5
 reloader:
   enabled: true
   image:
-    repository: registry.cn-beijing.aliyuncs.com/opshub/natsio-nats-server-config-reloader
+    repository: natsio/nats-server-config-reloader
     tag: 0.15.1
 EOF
 ```
@@ -166,17 +166,17 @@ config:
     system_account: SYS
 container:
   image:
-    repository: registry.cn-beijing.aliyuncs.com/opshub/nats
+    repository: nats
     tag: 2.10.20-alpine
 natsBox:
   container:
     image:
-      repository: registry.cn-beijing.aliyuncs.com/opshub/natsio-nats-box
+      repository: natsio/nats-box
       tag: 0.14.5
 reloader:
   enabled: true
   image:
-    repository: registry.cn-beijing.aliyuncs.com/opshub/natsio-nats-server-config-reloader
+    repository: natsio/nats-server-config-reloader
     tag: 0.15.1
 EOF
 ```

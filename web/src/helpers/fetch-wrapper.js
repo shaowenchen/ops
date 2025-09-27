@@ -10,7 +10,7 @@ export const fetchWrapper = {
 };
 
 function request(method) {
-  return (url, body) => {
+  return (url, body, signal) => {
     const requestOptions = {
       method,
       headers: {},
@@ -19,6 +19,9 @@ function request(method) {
     if (body) {
       requestOptions.headers["Content-Type"] = "application/json";
       requestOptions.body = JSON.stringify(body);
+    }
+    if (signal) {
+      requestOptions.signal = signal;
     }
     const loginStore = useLoginStore();
     const token = loginStore.get();

@@ -14,9 +14,11 @@ export const useEventsStore = defineStore({
       );
       return analysis.data;
     },
-    async list(search, page_size = 10, page = 1) {
+    async list(search, page_size = 10, page = 1, signal = null) {
       const analysis = await fetchWrapper.get(
-        `/api/v1/events?page_size=${page_size}&page=${page}&search=${search}`
+        `/api/v1/events?page_size=${page_size}&page=${page}&search=${search}`,
+        null,
+        signal
       );
       return analysis.data;
     },
