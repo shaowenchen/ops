@@ -1,8 +1,7 @@
 <script setup>
-import { useEventsStore } from '@/stores';
-import { ref, watch } from 'vue';
+import { useEventsStore, useLoginStore } from '@/stores';
 import { formatObject } from '@/utils/common';
-import { useLoginStore } from "@/stores";
+import { ref, watch } from 'vue';
 
 var loginStore = useLoginStore();
 loginStore.check();
@@ -28,19 +27,34 @@ const allFields = [
 var selectedFields = ref(['event.id', 'subject', 'event.type', 'event.time']);
 
 const filteredSubjects = ref([]);
+let controller = null;
 
 async function fetchSubjects(query) {
+    if (controller) {
+        controller.abort();
+    }
+    controller = new AbortController();
+
     if (!query) {
         query = "";
     }
     const store = useEventsStore();
-    const res = await store.list(query, "9999", "1");
-    filteredSubjects.value = [];
-    if (!res.list) {
-        return;
-    }
-    for (let i = 0; i < res.list.length; i++) {
-        filteredSubjects.value.push({ value: res.list[i], label: res.list[i] });
+    try {
+        const res = await store.list(query, "9999", "1", controller.signal);
+        filteredSubjects.value = [];
+        if (!res.list) {
+            return;
+        }
+        filteredSubjects.value = res.list.map(item => ({
+            value: item,
+            label: item
+        }));
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log('request aborted');
+            return;
+        }
+        console.error('error:', error);
     }
 }
 

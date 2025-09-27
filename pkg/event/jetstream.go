@@ -69,7 +69,10 @@ func ListSubjects(url, streamName, search string) (results []string, err error) 
 		return nil, fmt.Errorf("failed to retrieve stream: %w", err)
 	}
 
-	info, err := stream.Info(ctx, jetstream.WithSubjectFilter(">"))
+	info, err := stream.Info(
+		ctx,
+		jetstream.WithSubjectFilter(">"),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve stream info: %w", err)
 	}
