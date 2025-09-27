@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  ops:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-09-27T01:21:15.493743756Z"
+    description: A Helm chart for Ops
+    digest: 742b4dd37cdd24e48f6923ab351d356f96963c4a4a42ecf00fd88ba215890cc4
+    home: https://www.chenshaowen.com/ops
+    icon: https://www.chenshaowen.com/ops/logo.png
+    maintainers:
+    - email: mail@chenshaowen.com
+      name: shaowenchen
+    name: ops
+    sources:
+    - https://github.com/shaowenchen/ops
+    type: application
+    urls:
+    - https://www.chenshaowen.com/ops/charts/ops-2.0.0.tgz
+    version: 2.0.0
+generated: "2025-09-27T01:21:15.492945736Z"
