@@ -12,10 +12,12 @@ import (
 )
 
 type EventController struct {
-	Kind string `json:"kind,omitempty" yaml:"kind,omitempty"`
+	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Kind    string `json:"kind,omitempty" yaml:"kind,omitempty"`
 }
 
 type EventHost struct {
+	Cluster  string           `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Address  string           `json:"address,omitempty" yaml:"address,omitempty"`
 	Port     int              `json:"port,omitempty" yaml:"port,omitempty"`
 	Username string           `json:"username,omitempty" yaml:"username,omitempty"`
@@ -24,7 +26,7 @@ type EventHost struct {
 
 func (e EventHost) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
-	AppendCluser(result, ce)
+	AppendCluster(result, ce, e.Cluster)
 	AppendField(result, "address", e.Address)
 	AppendField(result, "hostname", e.Status.Hostname)
 	AppendField(result, "diskUsagePercent", e.Status.DiskUsagePercent)
@@ -33,13 +35,14 @@ func (e EventHost) Readable(ce cloudevents.Event) string {
 }
 
 type EventCluster struct {
-	Server string              `json:"server,omitempty" yaml:"server,omitempty" `
-	Status opsv1.ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
+	Cluster string              `json:"cluster,omitempty" yaml:"cluster,omitempty" `
+	Server  string              `json:"server,omitempty" yaml:"server,omitempty" `
+	Status  opsv1.ClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 func (e EventCluster) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
-	AppendCluser(result, ce)
+	AppendCluster(result, ce, e.Cluster)
 	AppendField(result, "server", e.Server)
 	AppendField(result, "version", e.Status.Version)
 	AppendField(result, "certNotAfterDays", fmt.Sprintf("%d", e.Status.CertNotAfterDays))
@@ -49,10 +52,12 @@ func (e EventCluster) Readable(ce cloudevents.Event) string {
 
 type EventTask struct {
 	opsv1.TaskSpec
-	Status opsv1.TaskStatus `json:"status,omitempty" yaml:"status,omitempty"`
+	Cluster string           `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Status  opsv1.TaskStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type EventTaskRun struct {
+	Cluster   string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	TaskRef   string            `json:"taskRef"`
 	Desc      string            `json:"desc"`
 	Variables map[string]string `json:"variables"`
@@ -61,10 +66,12 @@ type EventTaskRun struct {
 
 type EventPipeline struct {
 	opsv1.PipelineSpec
-	Status opsv1.PipelineStatus `json:"status,omitempty" yaml:"status,omitempty"`
+	Cluster string               `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Status  opsv1.PipelineStatus `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type EventPipelineRun struct {
+	Cluster     string            `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	PipelineRef string            `json:"pipelineRef"`
 	Desc        string            `json:"desc"`
 	Variables   map[string]string `json:"variables"`
@@ -72,6 +79,7 @@ type EventPipelineRun struct {
 }
 
 type EventWebhook struct {
+	Cluster    string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Content    string `json:"content,omitempty" yaml:"content,omitempty"`
 	Source     string `json:"source,omitempty" yaml:"source,omitempty"`
 	WebhookUrl string `json:"webhookUrl,omitempty" yaml:"webhookUrl,omitempty"`
@@ -80,7 +88,7 @@ type EventWebhook struct {
 
 func (e EventWebhook) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
-	AppendCluser(result, ce)
+	AppendCluster(result, ce, e.Cluster)
 	AppendField(result, "content", e.Content)
 	AppendField(result, "source", e.Source)
 	AppendField(result, "webhookUrl", e.WebhookUrl)
@@ -89,8 +97,8 @@ func (e EventWebhook) Readable(ce cloudevents.Event) string {
 }
 
 type EventTaskRunReport struct {
+	Cluster   string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Host      string `json:"host,omitempty" yaml:"host,omitempty"`
-	Target    string `json:"target,omitempty" yaml:"target,omitempty"`
 	Kind      string `json:"kind,omitempty" yaml:"kind,omitempty"`
 	Threshold string `json:"threshold,omitempty" yaml:"threshold,omitempty"`
 	Operator  string `json:"operator,omitempty" yaml:"operator,omitempty"`
@@ -101,7 +109,7 @@ type EventTaskRunReport struct {
 
 func (e EventTaskRunReport) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
-	AppendCluser(result, ce)
+	AppendCluster(result, ce, e.Cluster)
 	AppendField(result, `host`, e.Host)
 	AppendField(result, `kind`, e.Kind)
 	AppendField(result, `threshold`, e.Threshold)
@@ -114,6 +122,7 @@ func (e EventTaskRunReport) Readable(ce cloudevents.Event) string {
 }
 
 type EventKube struct {
+	Cluster   string    `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Type      string    `json:"type,omitempty" yaml:"type,omitempty"`
 	Reason    string    `json:"reason,omitempty" yaml:"reason,omitempty"`
 	EventTime time.Time `json:"eventTime,omitempty" yaml:"eventTime,omitempty"`
@@ -191,32 +200,34 @@ func builderEvent(data interface{}) (cloudevents.Event, error) {
 	e.SetType(eventType)
 	err := e.SetData(cloudevents.ApplicationJSON, data)
 	// add extension
-	e.SetExtension(opsconstants.Cluster, cluster)
+	e.SetExtension(opsconstants.ClusterLower, cluster)
 	return e, err
 }
 
 func GetCloudEventReadable(ce cloudevents.Event) string {
-	if ce.Type() == opsconstants.Host {
+	ceType := ce.Type()
+	switch ceType {
+	case opsconstants.Host:
 		data := &EventHost{}
 		ce.DataAs(data)
 		return data.Readable(ce)
-	} else if ce.Type() == opsconstants.Cluster {
+	case opsconstants.Cluster:
 		data := &EventCluster{}
 		ce.DataAs(data)
 		return data.Readable(ce)
-	} else if ce.Type() == opsconstants.Webhook {
+	case opsconstants.Webhook:
 		data := &EventWebhook{}
 		ce.DataAs(data)
 		return data.Readable(ce)
-	} else if ce.Type() == opsconstants.TaskRunReport {
+	case opsconstants.TaskRunReport:
 		data := &EventTaskRunReport{}
 		ce.DataAs(data)
 		return data.Readable(ce)
-	} else if ce.Type() == opsconstants.Kube {
+	case opsconstants.Kube:
 		data := &EventKube{}
 		ce.DataAs(data)
 		return data.Readable(ce)
-	} else {
+	default:
 		return string(ce.Data())
 	}
 }

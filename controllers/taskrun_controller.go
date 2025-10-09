@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -52,6 +53,7 @@ type TaskRunReconciler struct {
 	client.Client
 	Scheme            *runtime.Scheme
 	crontabMap        map[string]cron.EntryID
+	crontabMapMutex   sync.RWMutex
 	cron              *cron.Cron
 	clearCron         *cron.Cron
 	opsserverEndpoint string
@@ -126,9 +128,12 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 }
 
 func (r *TaskRunReconciler) deleteCronTab(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {
-	_, ok := r.crontabMap[namespacedName.String()]
+	r.crontabMapMutex.Lock()
+	defer r.crontabMapMutex.Unlock()
+
+	entryID, ok := r.crontabMap[namespacedName.String()]
 	if ok {
-		r.cron.Remove(r.crontabMap[namespacedName.String()])
+		r.cron.Remove(entryID)
 		delete(r.crontabMap, namespacedName.String())
 		logger.Info.Println(fmt.Sprintf("clear ticker for taskrun %s", namespacedName.String()))
 	}
@@ -139,11 +144,17 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 	if objRun.Spec.Crontab == "" {
 		return
 	}
+
+	r.crontabMapMutex.RLock()
 	_, ok := r.crontabMap[objRun.GetUniqueKey()]
+	r.crontabMapMutex.RUnlock()
+
 	if ok {
 		return
 	}
+
 	logger.Info.Println(fmt.Sprintf("add ticker for taskrun %s", objRun.GetUniqueKey()))
+
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBias)) * time.Second)
 		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.GetUniqueKey()))
@@ -163,11 +174,15 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 		}
 		r.run(logger, ctx, obj, objRun)
 	})
+
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
+
+	r.crontabMapMutex.Lock()
 	r.crontabMap[objRun.GetUniqueKey()] = id
+	r.crontabMapMutex.Unlock()
 }
 
 func (r *TaskRunReconciler) registerClearCron() {

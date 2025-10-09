@@ -2,8 +2,10 @@ package event
 
 import (
 	"fmt"
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"strings"
+
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
 
 func AppendField(result *strings.Builder, label, value string) {
@@ -13,10 +15,10 @@ func AppendField(result *strings.Builder, label, value string) {
 	result.WriteString(fmt.Sprintf("%s: %s \n", label, value))
 }
 
-func AppendCluser(result *strings.Builder, ce cloudevents.Event) {
-	clusterInterface, _ := ce.Context.GetExtension("cluster")
-	cluster, _ := clusterInterface.(string)
-	if cluster != "" {
-		AppendField(result, "cluster", cluster)
+func AppendCluster(result *strings.Builder, ce cloudevents.Event, cluster string) {
+	if cluster == "" {
+		clusterInterface, _ := ce.Context.GetExtension(opsconstants.ClusterLower)
+		cluster, _ = clusterInterface.(string)
 	}
+	AppendField(result, "cluster", cluster)
 }
