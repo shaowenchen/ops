@@ -26,7 +26,7 @@ var clusterCmd = &cobra.Command{
 		defer cancel()
 		err := CreateCluster(ctx, logger, cClusterOpt, cInventory)
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Printf("%s", err.Error())
 			return
 		}
 	},
