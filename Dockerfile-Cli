@@ -1,10 +1,10 @@
-FROM hubimage/builder-golang:1.24 AS builder
+FROM shaowenchen/builder-golang:1.24 AS builder
 WORKDIR /workspace
 COPY . .
 RUN make cli
 RUN git clone https://github.com/shaowenchen/ops-manifests
 
-FROM hubimage/runtime-ubuntu:22.04
+FROM shaowenchen/runtime-ubuntu:22.04
 WORKDIR /
 COPY --from=builder /workspace/bin/opscli /usr/local/bin/opscli
 COPY --from=builder /workspace/ops-manifests/* /root/.ops/

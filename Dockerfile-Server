@@ -1,12 +1,12 @@
-FROM hubimage/builder-golang:1.24 AS builder
+FROM shaowenchen/builder-golang:1.24 AS builder
 COPY . .
 RUN make build-server
 
-FROM hubimage/builder-node:18 AS builder-web
+FROM shaowenchen/builder-node:18 AS builder-web
 COPY . .
 RUN make build-web
 
-FROM hubimage/runtime-ubuntu:22.04
+FROM shaowenchen/runtime-ubuntu:22.04
 COPY --from=builder /builder/bin/ops-server .
 COPY --from=builder /builder/default.toml .
 COPY --from=builder-web /builder/web/dist ./web/dist
