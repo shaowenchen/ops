@@ -43,6 +43,7 @@ help: ## Display this help.
 ##@ Development
 
 swagger-docs:
+	go install github.com/swaggo/swag/cmd/swag@latest
 	swag init --parseDependency --parseInternal -g ./cmd/server/main.go -o swagger
 
 .PHONY: manifests

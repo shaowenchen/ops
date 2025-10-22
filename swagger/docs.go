@@ -515,6 +515,12 @@ const docTemplate = `{
                         "description": "search",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "labels_selector",
+                        "name": "labels_selector",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -653,46 +659,6 @@ const docTemplate = `{
                         "name": "pipeline",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api/v1/namespaces/{namespace}/pipelinetools": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pipeline Tools"
-                ],
-                "summary": "List Pipeline Tools",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "namespace",
-                        "name": "namespace",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "page",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "page_size",
-                        "name": "page_size",
-                        "in": "query"
                     }
                 ],
                 "responses": {

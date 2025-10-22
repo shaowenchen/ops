@@ -761,6 +761,10 @@ paths:
         in: query
         name: search
         type: string
+      - description: labels_selector
+        in: query
+        name: labels_selector
+        type: string
       produces:
       - application/json
       responses:
@@ -860,32 +864,6 @@ paths:
       summary: Get Pipeline
       tags:
       - Pipelines
-  /api/v1/namespaces/{namespace}/pipelinetools:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: namespace
-        in: path
-        name: namespace
-        required: true
-        type: string
-      - description: page
-        in: query
-        name: page
-        type: integer
-      - description: page_size
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: List Pipeline Tools
-      tags:
-      - Pipeline Tools
   /api/v1/namespaces/{namespace}/taskruns:
     get:
       consumes:
