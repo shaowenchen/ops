@@ -138,10 +138,22 @@ func (e EventKube) Readable(ce cloudevents.Event) string {
 	subject = strings.TrimPrefix(subject, "ops.")
 	subject = strings.TrimSuffix(subject, ".event")
 	parts := strings.Split(subject, ".")
-	for i := 0; i < len(parts)-1; i += 2 {
-		key := strings.TrimRight(parts[i], "s")
-		value := parts[i+1]
-		AppendField(result, key, value)
+	for index := 0; index < len(parts); index++ {
+		part := parts[index]
+		if strings.HasSuffix(part, "s") && index < len(parts)-1 {
+			key := strings.TrimRight(part, "s")
+			value := parts[index+1]
+			index1 := index + 2
+			for index1 < len(parts) {
+				if strings.HasSuffix(parts[index1], "s") {
+					break
+				}
+				value += "." + parts[index1]
+				index1++
+			}
+			AppendField(result, key, value)
+			index = index1 - 1
+		}
 	}
 	AppendField(result, "type", e.Type)
 	AppendField(result, "reason", e.Reason)
