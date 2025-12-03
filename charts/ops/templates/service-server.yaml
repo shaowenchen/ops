@@ -25,3 +25,4 @@ spec:
   {{- end }}
   selector:
     {{- include "ops.serverSelectorLabels" . | nindent 4 }}
+

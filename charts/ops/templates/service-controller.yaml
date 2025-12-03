@@ -1,0 +1,24 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ops.fullname" . }}-controller-metrics
+  labels:
+    {{- include "ops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+    control-plane: controller-manager
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
+spec:
+  ports:
+    - name: metrics
+      port: 8080
+      protocol: TCP
+      targetPort: metrics
+  selector:
+    {{- include "ops.selectorLabels" . | nindent 4 }}
+    control-plane: controller-manager
+{{- end }}
+
