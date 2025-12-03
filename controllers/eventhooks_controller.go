@@ -30,6 +30,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"time"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
@@ -37,7 +39,6 @@ import (
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"time"
 )
 
 // EventHooksReconciler reconciles a EventHooks object
@@ -187,18 +188,23 @@ func (r *EventHooksReconciler) updateSubject(logger *opslog.Logger, ctx context.
 
 func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx context.Context, event cloudevents.Event, eventhook opsv1.EventHooks) {
 	eventStrings := opsevent.GetCloudEventReadable(event)
-	notification := true
+
+	// If no keywords are configured, trigger all events
+	// Otherwise, check if any keyword matches the event
+	shouldTrigger := true
 	if len(eventhook.Spec.Keywords) > 0 {
-		notification = false
+		// Keywords are configured, need to check for match
+		shouldTrigger = false
 		for _, keyword := range eventhook.Spec.Keywords {
 			if strings.Contains(eventStrings, keyword) {
-				notification = true
+				shouldTrigger = true
 				logger.Info.Println(fmt.Sprintf("event %s contains keyword %s trigger eventhook %s", event.ID(), keyword, eventhook.ObjectMeta.Name))
 				break
 			}
 		}
 	}
-	if notification {
+
+	if shouldTrigger {
 		notif, ok := opseventhook.NotificationMap[eventhook.Spec.Type]
 		if !ok || notif == nil {
 			logger.Error.Println(fmt.Sprintf("eventhook %s type %s not found", eventhook.ObjectMeta.Name, eventhook.Spec.Type))
