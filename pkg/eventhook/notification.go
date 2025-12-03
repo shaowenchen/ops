@@ -36,13 +36,22 @@ type XiezuoBody struct {
 }
 
 func (xiezuo *XiezuoPost) Post(url string, options map[string]string, data string, addtional string) error {
-	data = data + addtional
-	msg := XiezuoBody{}
-	msg.Msgtype = "text"
-	msg.Text.Content = data
-	json, _ := json.Marshal(msg)
+	// if data is XiezuoBody, just post it
+	sendJson := "{}"
+	var tryXiezuoBody XiezuoBody
+	err := json.Unmarshal([]byte(data), &tryXiezuoBody)
+	if err == nil && tryXiezuoBody.Msgtype != "" {
+		sendJson = data
+	} else {
+		data = data + addtional
+		msg := XiezuoBody{}
+		msg.Msgtype = "text"
+		msg.Text.Content = data
+		sendJsonBytes, _ := json.Marshal(msg)
+		sendJson = string(sendJsonBytes)
+	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(json)))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(sendJson)))
 	if err != nil {
 		return err
 	}
