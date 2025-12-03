@@ -2,21 +2,24 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "ops.fullname" . }}-server-metrics
+  name: {{ include "ops.fullname" . }}-controller-metrics
   labels:
     {{- include "ops.labels" . | nindent 4 }}
     app.kubernetes.io/component: metrics
     app.kubernetes.io/part-of: ops
+    control-plane: controller-manager
 spec:
   selector:
     matchLabels:
-      {{- include "ops.labels" . | nindent 6 }}
-      app.kubernetes.io/component: server
+      control-plane: controller-manager
   endpoints:
-    - port: metrics
-      path: /metrics
-      scheme: http
+    - path: /metrics
+      port: https
+      scheme: https
       interval: 30s
       scrapeTimeout: 10s
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      tlsConfig:
+        insecureSkipVerify: true
 {{- end }}
 

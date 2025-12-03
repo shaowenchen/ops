@@ -1,4 +1,4 @@
-# Prometheus ServiceMonitor for Ops Server
+# Prometheus ServiceMonitor for Ops Server (Metrics)
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -22,4 +22,3 @@ spec:
     matchLabels:
       app.kubernetes.io/name: ops
       app.kubernetes.io/component: server
-
