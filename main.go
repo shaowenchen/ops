@@ -37,6 +37,7 @@ import (
 
 	crdv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/controllers"
+	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -73,6 +74,9 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	// Initialize controller metrics
+	opsmetrics.InitController()
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,

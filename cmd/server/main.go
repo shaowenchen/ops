@@ -23,8 +23,8 @@ func init() {
 }
 
 func main() {
-	// Initialize metrics
-	metrics.Init()
+	// Initialize server metrics
+	metrics.InitServer()
 
 	// Set server info
 	metrics.ServerInfo.WithLabelValues("unknown", "unknown").Set(1)

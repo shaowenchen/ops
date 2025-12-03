@@ -191,9 +191,9 @@ var (
 	)
 )
 
-// Init initializes metrics and registers them with the controller-runtime metrics registry
-func Init() {
-	// Register all metrics with the controller-runtime metrics registry
+// InitController initializes and registers controller-specific metrics
+// with the controller-runtime metrics registry
+func InitController() {
 	metrics.Registry.MustRegister(
 		ControllerReconcileTotal,
 		ControllerReconcileDuration,
@@ -204,6 +204,13 @@ func Init() {
 		PipelineRunDuration,
 		HostConnectionStatus,
 		ClusterHealthStatus,
+	)
+}
+
+// InitServer initializes and registers server-specific metrics
+// with the controller-runtime metrics registry
+func InitServer() {
+	metrics.Registry.MustRegister(
 		HTTPRequestsTotal,
 		HTTPRequestDuration,
 		HTTPRequestSize,
