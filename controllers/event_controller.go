@@ -22,6 +22,7 @@ import (
 
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
+	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	corev1 "k8s.io/api/core/v1"
 	eventsv1 "k8s.io/api/events/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -54,7 +55,21 @@ type EventReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
-func (r *EventReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *EventReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	startTime := time.Now()
+	controllerName := "Event"
+
+	// Record metrics
+	defer func() {
+		duration := time.Since(startTime)
+		resultStr := "success"
+		if err != nil {
+			resultStr = "error"
+			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
+		}
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+	}()
+
 	return ctrl.Result{}, nil
 }
 

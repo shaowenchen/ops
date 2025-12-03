@@ -35,7 +35,9 @@ import (
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opseventhook "github.com/shaowenchen/ops/pkg/eventhook"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"time"
 )
 
 // EventHooksReconciler reconciles a EventHooks object
@@ -65,7 +67,21 @@ func (r *EventHooksReconciler) init() {
 // +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/finalizers,verbs=update
-func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	startTime := time.Now()
+	controllerName := "EventHooks"
+
+	// Record metrics
+	defer func() {
+		duration := time.Since(startTime)
+		resultStr := "success"
+		if err != nil {
+			resultStr = "error"
+			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
+		}
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+	}()
+
 	r.init()
 	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
@@ -76,7 +92,7 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		logger.SetVerbose("debug").Build()
 	}
 	obj := &opsv1.EventHooks{}
-	err := r.Get(ctx, req.NamespacedName, obj)
+	err = r.Get(ctx, req.NamespacedName, obj)
 
 	if apierrors.IsNotFound(err) {
 		if subject, ok := r.objSubjectMap[req.NamespacedName]; ok {

@@ -1,0 +1,25 @@
+# Prometheus ServiceMonitor for Ops Server
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/name: servicemonitor
+    app.kubernetes.io/instance: ops-server-metrics-monitor
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/created-by: ops
+    app.kubernetes.io/part-of: ops
+    app.kubernetes.io/managed-by: kustomize
+  name: ops-server-metrics-monitor
+  namespace: ops-system
+spec:
+  endpoints:
+    - path: /metrics
+      port: metrics
+      scheme: http
+      interval: 30s
+      scrapeTimeout: 10s
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ops
+      app.kubernetes.io/component: server
+

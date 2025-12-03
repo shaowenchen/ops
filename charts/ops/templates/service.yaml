@@ -4,6 +4,11 @@ metadata:
   name: {{ include "ops.fullname" . }}-server
   labels:
     {{- include "ops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+    prometheus.io/path: "/metrics"
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -11,6 +16,12 @@ spec:
       targetPort: 80
       protocol: TCP
       name: http
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: metrics
+  {{- if eq .Values.service.type "NodePort" }}
   type: NodePort
+  {{- end }}
   selector:
     {{- include "ops.serverSelectorLabels" . | nindent 4 }}

@@ -18,12 +18,15 @@ package controllers
 
 import (
 	"context"
+	"time"
+
 	"github.com/google/go-cmp/cmp"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -54,6 +57,20 @@ type PipelineReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	startTime := time.Now()
+	controllerName := "Pipeline"
+
+	// Record metrics
+	defer func() {
+		duration := time.Since(startTime)
+		resultStr := "success"
+		if err != nil {
+			resultStr = "error"
+			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
+		}
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+	}()
+
 	// default to reconcile all namespace, if ACTIVE_NAMESPACE is set, only reconcile ACTIVE_NAMESPACE
 	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {

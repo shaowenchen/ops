@@ -29,6 +29,7 @@ import (
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opshost "github.com/shaowenchen/ops/pkg/host"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,7 +61,21 @@ type HostReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
-func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	startTime := time.Now()
+	controllerName := "Host"
+
+	// Record metrics
+	defer func() {
+		duration := time.Since(startTime)
+		resultStr := "success"
+		if err != nil {
+			resultStr = "error"
+			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
+		}
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+	}()
+
 	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
@@ -70,7 +85,7 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		logger.SetVerbose("debug").Build()
 	}
 	h := &opsv1.Host{}
-	err := r.Get(ctx, req.NamespacedName, h)
+	err = r.Get(ctx, req.NamespacedName, h)
 
 	//if delete, stop ticker
 	if apierrors.IsNotFound(err) {
@@ -83,6 +98,10 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	// add timeticker
 	r.addTimeTicker(logger, ctx, h)
+
+	// Record host connection status
+	connected := h.Status.HeartStatus == opsconstants.StatusSuccessed
+	opsmetrics.SetHostConnectionStatus(h.Namespace, h.Name, connected)
 
 	return ctrl.Result{}, nil
 }

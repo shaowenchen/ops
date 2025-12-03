@@ -29,6 +29,7 @@ import (
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -60,6 +61,20 @@ type ClusterReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	startTime := time.Now()
+	controllerName := "Cluster"
+
+	// Record metrics
+	defer func() {
+		duration := time.Since(startTime)
+		resultStr := "success"
+		if err != nil {
+			resultStr = "error"
+			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
+		}
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+	}()
+
 	actionNs := opsconstants.GetEnvActiveNamespace()
 	if actionNs != "" && actionNs != req.Namespace {
 		return ctrl.Result{}, nil
@@ -83,6 +98,11 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	r.addTimeTicker(logger, ctx, c)
 	// sync tasks and pipelines
 	r.syncResource(logger, ctx, c)
+
+	// Record cluster health status
+	healthy := c.IsHealthy()
+	opsmetrics.SetClusterHealthStatus(c.Namespace, c.Name, healthy)
+
 	return ctrl.Result{}, nil
 }
 

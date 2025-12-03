@@ -31,6 +31,7 @@ import (
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -67,7 +68,21 @@ type PipelineRunReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
-func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	startTime := time.Now()
+	controllerName := "PipelineRun"
+
+	// Record metrics
+	defer func() {
+		duration := time.Since(startTime)
+		resultStr := "success"
+		if err != nil {
+			resultStr = "error"
+			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
+		}
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+	}()
+
 	// start clear cron
 	r.registerClearCron()
 	// only reconcile active namespace
@@ -88,7 +103,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	pr := &opsv1.PipelineRun{}
-	err := r.Client.Get(ctx, req.NamespacedName, pr)
+	err = r.Client.Get(ctx, req.NamespacedName, pr)
 
 	if apierrors.IsNotFound(err) {
 		r.deleteCronTab(logger, ctx, req.NamespacedName)
@@ -406,6 +421,7 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, pr *opsv1.PipelineRun, prstatus string, taskName, taskRef string, trStatus *opsv1.TaskRunStatus) (err error) {
+	oldStatus := pr.Status.RunStatus
 	for retries := 0; retries < CommitStatusMaxRetries; retries++ {
 		latestPr := &opsv1.PipelineRun{}
 		err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.GetNamespace(), Name: pr.GetName()}, latestPr)
@@ -422,6 +438,15 @@ func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.
 		}
 		err = r.Client.Status().Update(ctx, latestPr)
 		if err == nil {
+			// Record PipelineRun status change metrics
+			if oldStatus != latestPr.Status.RunStatus && opsconstants.IsFinishedStatus(latestPr.Status.RunStatus) {
+				opsmetrics.RecordPipelineRun(latestPr.Namespace, latestPr.Status.RunStatus)
+				// Calculate duration if we have start time
+				if latestPr.Status.StartTime != nil {
+					duration := time.Since(latestPr.Status.StartTime.Time)
+					opsmetrics.RecordPipelineRunDuration(latestPr.Namespace, latestPr.Spec.PipelineRef, duration)
+				}
+			}
 			return
 		}
 		if !apierrors.IsConflict(err) {

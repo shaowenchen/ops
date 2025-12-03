@@ -32,6 +32,7 @@ import (
 	opshost "github.com/shaowenchen/ops/pkg/host"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
+	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
 	opsoption "github.com/shaowenchen/ops/pkg/option"
 	opstask "github.com/shaowenchen/ops/pkg/task"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
@@ -72,7 +73,21 @@ type TaskRunReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
-func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	startTime := time.Now()
+	controllerName := "TaskRun"
+
+	// Record metrics
+	defer func() {
+		duration := time.Since(startTime)
+		resultStr := "success"
+		if err != nil {
+			resultStr = "error"
+			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
+		}
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+	}()
+
 	// start clear cron
 	r.registerClearCron()
 	// only reconcile active namespace
@@ -94,7 +109,7 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// get taskrun
 	tr := &opsv1.TaskRun{}
-	err := r.Client.Get(ctx, req.NamespacedName, tr)
+	err = r.Client.Get(ctx, req.NamespacedName, tr)
 	if apierrors.IsNotFound(err) {
 		r.deleteCronTab(logger, ctx, req.NamespacedName)
 		return ctrl.Result{}, nil
@@ -386,11 +401,22 @@ func (r *TaskRunReconciler) getOpsServerEndpoint(namespace string) string {
 }
 
 func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Context, tr *opsv1.TaskRun, status string) (err error) {
+	oldStatus := tr.Status.RunStatus
 	if status != "" {
 		tr.Status.RunStatus = status
 	}
 	if tr.Status.RunStatus == opsconstants.StatusRunning {
 		tr.Status.StartTime = &metav1.Time{Time: time.Now()}
+	}
+
+	// Record TaskRun status change metrics
+	if oldStatus != tr.Status.RunStatus && opsconstants.IsFinishedStatus(tr.Status.RunStatus) {
+		opsmetrics.RecordTaskRun(tr.Namespace, tr.Status.RunStatus)
+		// Calculate duration if we have start time
+		if tr.Status.StartTime != nil {
+			duration := time.Since(tr.Status.StartTime.Time)
+			opsmetrics.RecordTaskRunDuration(tr.Namespace, tr.Spec.TaskRef, duration)
+		}
 	}
 
 	for retries := 0; retries < CommitStatusMaxRetries; retries++ {

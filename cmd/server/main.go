@@ -4,8 +4,11 @@ import (
 	"flag"
 	"net/http"
 	_ "net/http/pprof"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/shaowenchen/ops/pkg/metrics"
 	"github.com/shaowenchen/ops/pkg/server"
 	"github.com/shaowenchen/ops/web"
 )
@@ -20,14 +23,37 @@ func init() {
 }
 
 func main() {
+	// Initialize metrics
+	metrics.Init()
+
+	// Set server info
+	metrics.ServerInfo.WithLabelValues("unknown", "unknown").Set(1)
+
+	// Start uptime tracking
+	startTime := time.Now()
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			metrics.ServerUptime.Set(time.Since(startTime).Seconds())
+		}
+	}()
+
 	r := gin.New()
 
 	r.Use(gin.Recovery())
 	r.Use(gin.LoggerWithConfig(gin.LoggerConfig{
-		SkipPaths: []string{"/healthz", "/readyz"},
+		SkipPaths: []string{"/healthz", "/readyz", "/metrics"},
 	}))
 
+	// Add Prometheus metrics middleware
+	r.Use(metrics.PrometheusMiddleware())
+
 	gin.SetMode(server.GlobalConfig.Server.RunMode)
+
+	// Add metrics endpoint
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
 	server.SetupRouter(r)
 	server.SetupRouteWithoutAuth(r)
 	server.SetHealthzRouter(r)
