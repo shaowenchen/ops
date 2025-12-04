@@ -3,14 +3,14 @@ kind: Deployment
 metadata:
   name: {{ include "ops.fullname" . }}
   labels:
-    {{- include "ops.labels" . | nindent 4 }}
+    {{- include "ops.controllerLabels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "ops.selectorLabels" . | nindent 6 }}
+      {{- include "ops.controllerSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,8 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "ops.selectorLabels" . | nindent 8 }}
-        control-plane: controller-manager
+        {{- include "ops.controllerSelectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -50,13 +49,19 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: http
               port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /readyz
-              port: http
               port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -68,15 +73,19 @@ spec:
               readOnly: true
           env:
             - name: ACTIVE_NAMESPACE
+              {{- if .Values.controller.env.activeNamespace }}
+              value: {{ .Values.controller.env.activeNamespace | quote }}
+              {{- else }}
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+              {{- end }}
             - name: DEFAULT_RUNTIME_IMAGE
-              value: registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04
+              value: {{ .Values.controller.env.defaultRuntimeImage | quote }}
             - name: EVENT_CLUSTER
-              value: "default"
+              value: {{ .Values.controller.env.eventCluster | quote }}
             - name: EVENT_ENDPOINT
-              value: http://app:mypassword@nats-headless.ops-system.svc:4222
+              value: {{ .Values.controller.env.eventEndpoint | quote }}
       volumes:
         - name: timezone
           hostPath:

@@ -4,16 +4,12 @@ kind: ServiceMonitor
 metadata:
   name: {{ include "ops.fullname" . }}-controller-metrics
   labels:
-    {{- include "ops.labels" . | nindent 4 }}
-    app.kubernetes.io/component: metrics
+    {{- include "ops.controllerMetricsLabels" . | nindent 4 }}
     app.kubernetes.io/part-of: ops
-    control-plane: controller-manager
 spec:
   selector:
     matchLabels:
-      {{- include "ops.labels" . | nindent 6 }}
-      app.kubernetes.io/component: metrics
-      control-plane: controller-manager
+      {{- include "ops.controllerMetricsSelectorLabels" . | nindent 6 }}
   endpoints:
     - path: /metrics
       port: metrics

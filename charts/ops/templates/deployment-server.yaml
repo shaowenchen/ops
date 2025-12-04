@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "ops.fullname" . }}-server
   labels:
-    {{- include "ops.labels" . | nindent 4 }}
+    {{- include "ops.serverLabels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -19,7 +19,6 @@ spec:
       {{- end }}
       labels:
         {{- include "ops.serverSelectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: server
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -44,15 +43,25 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: http
               port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /readyz
-              port: http
               port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
+            {{- if .Values.server.resources }}
+            {{- toYaml .Values.server.resources | nindent 12 }}
+            {{- else }}
             {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
           volumeMounts:
             - name: timezone
               mountPath: /etc/localtime
@@ -62,9 +71,9 @@ spec:
               readOnly: true
           env:
             - name: EVENT_CLUSTER
-              value: "default"
+              value: {{ .Values.server.env.eventCluster | quote }}
             - name: EVENT_ENDPOINT
-              value: http://app:mypassword@nats-headless.ops-system.svc:4222
+              value: {{ .Values.server.env.eventEndpoint | quote }}
       volumes:
         - name: timezone
           hostPath:

@@ -4,9 +4,7 @@ kind: Service
 metadata:
   name: {{ include "ops.fullname" . }}-controller-metrics
   labels:
-    {{- include "ops.labels" . | nindent 4 }}
-    app.kubernetes.io/component: metrics
-    control-plane: controller-manager
+    {{- include "ops.controllerMetricsLabels" . | nindent 4 }}
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8080"
@@ -18,7 +16,6 @@ spec:
       protocol: TCP
       targetPort: metrics
   selector:
-    {{- include "ops.selectorLabels" . | nindent 4 }}
-    control-plane: controller-manager
+    {{- include "ops.controllerSelectorLabels" . | nindent 4 }}
 {{- end }}
 

@@ -3,8 +3,7 @@ kind: Service
 metadata:
   name: {{ include "ops.fullname" . }}-server
   labels:
-    {{- include "ops.labels" . | nindent 4 }}
-    app.kubernetes.io/component: server
+    {{- include "ops.serverLabels" . | nindent 4 }}
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "80"

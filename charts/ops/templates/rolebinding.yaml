@@ -2,10 +2,11 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  labels:
-{{ include "ops.labels" . | indent 4 }}
-  name: {{ template "ops.fullname" . }}-leader-election-rolebinding
+  name: {{ include "ops.fullname" . }}-leader-election-rolebinding
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rbac
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

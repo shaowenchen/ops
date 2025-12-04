@@ -31,7 +31,7 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Common labels
+Common labels - used for all resources
 */}}
 {{- define "ops.labels" -}}
 helm.sh/chart: {{ include "ops.chart" . }}
@@ -43,7 +43,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Selector labels
+Selector labels - core labels for resource selection
 */}}
 {{- define "ops.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "ops.name" . }}
@@ -51,11 +51,80 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Server Selector labels
+Controller selector labels - for controller resources
+*/}}
+{{- define "ops.controllerSelectorLabels" -}}
+{{ include "ops.selectorLabels" . }}
+app.kubernetes.io/component: controller
+control-plane: controller-manager
+{{- end }}
+
+{{/*
+Server selector labels - for server resources
 */}}
 {{- define "ops.serverSelectorLabels" -}}
 app.kubernetes.io/name: {{ include "ops.name" . }}-server
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: server
+{{- end }}
+
+{{/*
+Controller labels - for controller resources metadata
+*/}}
+{{- define "ops.controllerLabels" -}}
+{{ include "ops.labels" . }}
+app.kubernetes.io/component: controller
+control-plane: controller-manager
+{{- end }}
+
+{{/*
+Server labels - for server resources metadata
+*/}}
+{{- define "ops.serverLabels" -}}
+{{ include "ops.labels" . }}
+app.kubernetes.io/component: server
+{{- end }}
+
+{{/*
+Metrics labels - for metrics resources metadata
+*/}}
+{{- define "ops.metricsLabels" -}}
+{{ include "ops.labels" . }}
+app.kubernetes.io/component: metrics
+{{- end }}
+
+{{/*
+Controller metrics labels - for controller metrics resources
+*/}}
+{{- define "ops.controllerMetricsLabels" -}}
+{{ include "ops.labels" . }}
+app.kubernetes.io/component: metrics
+control-plane: controller-manager
+{{- end }}
+
+{{/*
+Server metrics labels - for server metrics resources
+*/}}
+{{- define "ops.serverMetricsLabels" -}}
+{{ include "ops.labels" . }}
+app.kubernetes.io/component: metrics
+{{- end }}
+
+{{/*
+Controller metrics selector labels - for ServiceMonitor to match controller metrics Service
+*/}}
+{{- define "ops.controllerMetricsSelectorLabels" -}}
+{{ include "ops.selectorLabels" . }}
+app.kubernetes.io/component: metrics
+control-plane: controller-manager
+{{- end }}
+
+{{/*
+Server metrics selector labels - for ServiceMonitor to match server metrics Service
+*/}}
+{{- define "ops.serverMetricsSelectorLabels" -}}
+{{ include "ops.selectorLabels" . }}
+app.kubernetes.io/component: server
 {{- end }}
 
 {{/*

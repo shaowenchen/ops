@@ -4,6 +4,7 @@ metadata:
   name: "{{ include "ops.fullname" . }}-test-connection"
   labels:
     {{- include "ops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
   annotations:
     "helm.sh/hook": test
 spec:

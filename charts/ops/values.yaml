@@ -2,28 +2,40 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Number of replicas for controller and server
 replicaCount: 1
 
+# Controller image configuration
 image:
   repository: registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-controller-manager
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
+# Server image configuration
 server:
   image:
     repository: registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-server
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
+  # Server resource configuration (overrides global resources if set)
+  resources: {}
 
+# Image pull secrets
 imagePullSecrets: []
+
+# Name override for the chart
 nameOverride: ""
+
+# Full name override for the chart
 fullnameOverride: ""
 
+# RBAC configuration
 rbac:
   create: true
 
+# Service account configuration
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -33,22 +45,27 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# Pod annotations
 podAnnotations: {}
 
+# Pod security context
 podSecurityContext:
   {}
   # fsGroup: 2000
 
+# Container security context
 securityContext:
   capabilities:
     drop:
       - ALL
   runAsNonRoot: true
 
+# Service configuration
 service:
   type: ClusterIP
   port: 80
 
+# Ingress configuration
 ingress:
   enabled: false
   className: ""
@@ -66,6 +83,7 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+# Resource limits and requests for controller and server
 resources:
   limits:
     cpu: 1000m
@@ -74,17 +92,43 @@ resources:
     cpu: 500m
     memory: 1024Mi
 
+# Horizontal Pod Autoscaler configuration
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
+# Node selector
 nodeSelector: {}
 
+# Tolerations
 tolerations: []
 
+# Affinity rules
 affinity: {}
 
+# Prometheus monitoring configuration
 prometheus:
   enabled: true
+
+# Environment variables for controller
+controller:
+  env:
+    # Active namespace for processing CRDs (empty means all namespaces)
+    activeNamespace: ""
+    # Default runtime image for tasks
+    defaultRuntimeImage: "registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04"
+    # Event cluster name
+    eventCluster: "default"
+    # Event endpoint (NATS)
+    eventEndpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
+
+# Environment variables for server
+server:
+  env:
+    # Event cluster name
+    eventCluster: "default"
+    # Event endpoint (NATS)
+    eventEndpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
