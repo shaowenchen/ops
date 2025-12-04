@@ -70,17 +70,16 @@ func (r *EventHooksReconciler) init() {
 // +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/finalizers,verbs=update
 func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	startTime := time.Now()
-	controllerName := "EventHooks"
 
-	// Record metrics
+	// Record EventHooks metrics
 	defer func() {
 		duration := time.Since(startTime)
 		resultStr := "success"
 		if err != nil {
 			resultStr = "error"
-			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
+			opsmetrics.RecordEventHooksReconcileError(req.Namespace, "reconcile_error")
 		}
-		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+		opsmetrics.RecordEventHooksReconcile(req.Namespace, resultStr, duration)
 	}()
 
 	r.init()
@@ -187,6 +186,7 @@ func (r *EventHooksReconciler) updateSubject(logger *opslog.Logger, ctx context.
 }
 
 func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx context.Context, event cloudevents.Event, eventhook opsv1.EventHooks) {
+	startTime := time.Now()
 	eventStrings := opsevent.GetCloudEventReadable(event)
 
 	// If no keywords are configured, trigger all events
@@ -208,9 +208,23 @@ func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx co
 		notif, ok := opseventhook.NotificationMap[eventhook.Spec.Type]
 		if !ok || notif == nil {
 			logger.Error.Println(fmt.Sprintf("eventhook %s type %s not found", eventhook.ObjectMeta.Name, eventhook.Spec.Type))
+			opsmetrics.RecordEventHooksEventProcessed(eventhook.Namespace, eventhook.Name, "error")
+			duration := time.Since(startTime)
+			opsmetrics.RecordEventHooksEventProcessDuration(eventhook.Namespace, eventhook.Name, duration)
 			return
 		}
-		go notif.Post(eventhook.Spec.URL, eventhook.Spec.Options, eventStrings, eventhook.Spec.Additional)
+		// Record event processing metrics
+		go func() {
+			processStartTime := time.Now()
+			notif.Post(eventhook.Spec.URL, eventhook.Spec.Options, eventStrings, eventhook.Spec.Additional)
+			duration := time.Since(processStartTime)
+			opsmetrics.RecordEventHooksEventProcessDuration(eventhook.Namespace, eventhook.Name, duration)
+			opsmetrics.RecordEventHooksEventProcessed(eventhook.Namespace, eventhook.Name, "success")
+		}()
+	} else {
+		opsmetrics.RecordEventHooksEventProcessed(eventhook.Namespace, eventhook.Name, "skipped")
+		duration := time.Since(startTime)
+		opsmetrics.RecordEventHooksEventProcessDuration(eventhook.Namespace, eventhook.Name, duration)
 	}
 }
 

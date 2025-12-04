@@ -21,7 +21,304 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "ops_controller_resource_memory_alloc_bytes",
+          "legendFormat": "Memory Allocated",
+          "refId": "A"
+        },
+        {
+          "expr": "ops_controller_resource_memory_sys_bytes",
+          "legendFormat": "Memory from OS",
+          "refId": "B"
+        }
+      ],
+      "title": "Resource: Memory Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "ops_controller_resource_goroutines",
+          "legendFormat": "Goroutines",
+          "refId": "A"
+        }
+      ],
+      "title": "Resource: Goroutines",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "ops_controller_resource_gc_cpu_fraction",
+          "legendFormat": "GC CPU Fraction",
+          "refId": "A"
+        }
+      ],
+      "title": "Resource: GC CPU Fraction",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "sum"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "rate(ops_controller_resource_gc_cycles_total[5m])",
+          "legendFormat": "GC Cycles Rate",
+          "refId": "A"
+        }
+      ],
+      "title": "Resource: GC Cycles Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -67,9 +364,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 16
       },
-      "id": 1,
+      "id": 5,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "max"],
@@ -88,13 +385,13 @@
           "refId": "A"
         }
       ],
-      "title": "Controller Reconcile Rate",
+      "title": "Controller: Reconcile Rate",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -119,9 +416,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 0
+        "y": 16
       },
-      "id": 2,
+      "id": 6,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -147,13 +444,13 @@
           "refId": "B"
         }
       ],
-      "title": "Controller Reconcile Duration (p95/p99)",
+      "title": "Controller: Reconcile Duration (p95/p99)",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -199,9 +496,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 24
       },
-      "id": 3,
+      "id": 7,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "sum"],
@@ -220,13 +517,13 @@
           "refId": "A"
         }
       ],
-      "title": "Controller Reconcile Errors",
+      "title": "Controller: Reconcile Errors",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -272,9 +569,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 24
       },
-      "id": 4,
+      "id": 8,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "sum"],
@@ -288,18 +585,18 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_taskrun_total[5m])",
+          "expr": "rate(ops_controller_taskrun_total[5m])",
           "legendFormat": "{{namespace}} - {{status}}",
           "refId": "A"
         }
       ],
-      "title": "TaskRun Rate by Status",
+      "title": "Controller: TaskRun Rate by Status",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -324,9 +621,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 32
       },
-      "id": 5,
+      "id": 9,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -342,18 +639,18 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(ops_taskrun_duration_seconds_bucket[5m]))",
+          "expr": "histogram_quantile(0.95, rate(ops_controller_taskrun_duration_seconds_bucket[5m]))",
           "legendFormat": "{{namespace}} - {{task_name}} (p95)",
           "refId": "A"
         }
       ],
-      "title": "TaskRun Execution Duration (p95)",
+      "title": "Controller: TaskRun Execution Duration (p95)",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -399,9 +696,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 32
       },
-      "id": 6,
+      "id": 10,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "sum"],
@@ -415,18 +712,18 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_pipelinerun_total[5m])",
+          "expr": "rate(ops_controller_pipelinerun_total[5m])",
           "legendFormat": "{{namespace}} - {{status}}",
           "refId": "A"
         }
       ],
-      "title": "PipelineRun Rate by Status",
+      "title": "Controller: PipelineRun Rate by Status",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -451,9 +748,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 40
       },
-      "id": 7,
+      "id": 11,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -469,18 +766,18 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(ops_pipelinerun_duration_seconds_bucket[5m]))",
+          "expr": "histogram_quantile(0.95, rate(ops_controller_pipelinerun_duration_seconds_bucket[5m]))",
           "legendFormat": "{{namespace}} - {{pipeline_name}} (p95)",
           "refId": "A"
         }
       ],
-      "title": "PipelineRun Execution Duration (p95)",
+      "title": "Controller: PipelineRun Execution Duration (p95)",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -525,9 +822,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 40
       },
-      "id": 8,
+      "id": 12,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
@@ -543,18 +840,18 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "ops_host_connection_status",
+          "expr": "ops_controller_host_connection_status",
           "legendFormat": "{{namespace}} - {{host_name}}",
           "refId": "A"
         }
       ],
-      "title": "Host Connection Status",
+      "title": "Controller: Host Connection Status",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "ops"
       },
       "fieldConfig": {
         "defaults": {
@@ -599,9 +896,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 48
       },
-      "id": 9,
+      "id": 13,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
@@ -617,12 +914,344 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "ops_cluster_health_status",
+          "expr": "ops_controller_cluster_health_status",
           "legendFormat": "{{namespace}} - {{cluster_name}}",
           "refId": "A"
         }
       ],
-      "title": "Cluster Health Status",
+      "title": "Controller: Cluster Health Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 56
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "rate(ops_eventhooks_reconcile_total[5m])",
+          "legendFormat": "{{namespace}} - {{result}}",
+          "refId": "A"
+        }
+      ],
+      "title": "EventHooks: Reconcile Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 56
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(ops_eventhooks_reconcile_duration_seconds_bucket[5m]))",
+          "legendFormat": "{{namespace}} (p95)",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(ops_eventhooks_reconcile_duration_seconds_bucket[5m]))",
+          "legendFormat": "{{namespace}} (p99)",
+          "refId": "B"
+        }
+      ],
+      "title": "EventHooks: Reconcile Duration (p95/p99)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 64
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "sum"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "rate(ops_eventhooks_reconcile_errors_total[5m])",
+          "legendFormat": "{{namespace}} - {{error_type}}",
+          "refId": "A"
+        }
+      ],
+      "title": "EventHooks: Reconcile Errors",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 64
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "sum"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "rate(ops_eventhooks_event_processed_total[5m])",
+          "legendFormat": "{{namespace}} - {{eventhook_name}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "EventHooks: Event Processed Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ops"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 72
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(ops_eventhooks_event_process_duration_seconds_bucket[5m]))",
+          "legendFormat": "{{namespace}} - {{eventhook_name}} (p95)",
+          "refId": "A"
+        }
+      ],
+      "title": "EventHooks: Event Process Duration (p95)",
       "type": "stat"
     }
   ],
@@ -635,12 +1264,12 @@
       {
         "current": {
           "selected": false,
-          "text": "Prometheus",
-          "value": "Prometheus"
+          "text": "ops",
+          "value": "ops"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "$datasource"
+          "uid": "ops"
         },
         "definition": "prometheus",
         "hide": 0,
@@ -665,6 +1294,5 @@
   "timezone": "",
   "title": "Ops Controller Metrics",
   "uid": "ops-controller-metrics",
-  "version": 1
+  "version": 2
 }
-

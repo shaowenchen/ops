@@ -8,10 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	ctrlmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"github.com/shaowenchen/ops/pkg/metrics"
 	"github.com/shaowenchen/ops/pkg/server"
 	"github.com/shaowenchen/ops/web"
+	ctrlmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 func init() {

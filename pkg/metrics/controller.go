@@ -68,3 +68,28 @@ func SetClusterHealthStatus(namespace, clusterName string, healthy bool) {
 	}
 	ClusterHealthStatus.WithLabelValues(namespace, clusterName).Set(value)
 }
+
+// ============================================================================
+// EventHooks 指标记录函数
+// ============================================================================
+
+// RecordEventHooksReconcile records an EventHooks reconcile operation
+func RecordEventHooksReconcile(namespace, result string, duration time.Duration) {
+	EventHooksReconcileTotal.WithLabelValues(namespace, result).Inc()
+	EventHooksReconcileDuration.WithLabelValues(namespace).Observe(duration.Seconds())
+}
+
+// RecordEventHooksReconcileError records an EventHooks reconcile error
+func RecordEventHooksReconcileError(namespace, errorType string) {
+	EventHooksReconcileErrors.WithLabelValues(namespace, errorType).Inc()
+}
+
+// RecordEventHooksEventProcessed records a processed event
+func RecordEventHooksEventProcessed(namespace, eventhookName, status string) {
+	EventHooksEventProcessedTotal.WithLabelValues(namespace, eventhookName, status).Inc()
+}
+
+// RecordEventHooksEventProcessDuration records event processing duration
+func RecordEventHooksEventProcessDuration(namespace, eventhookName string, duration time.Duration) {
+	EventHooksEventProcessDuration.WithLabelValues(namespace, eventhookName).Observe(duration.Seconds())
+}
