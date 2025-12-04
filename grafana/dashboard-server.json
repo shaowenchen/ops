@@ -83,7 +83,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_http_requests_total[5m])",
+          "expr": "rate(ops_server_http_requests_total[5m])",
           "legendFormat": "{{method}} {{path}} {{status_code}}",
           "refId": "A"
         }
@@ -137,12 +137,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(ops_http_request_duration_seconds_bucket[5m]))",
+          "expr": "histogram_quantile(0.95, rate(ops_server_http_request_duration_seconds_bucket[5m]))",
           "legendFormat": "{{method}} {{path}} (p95)",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.99, rate(ops_http_request_duration_seconds_bucket[5m]))",
+          "expr": "histogram_quantile(0.99, rate(ops_server_http_request_duration_seconds_bucket[5m]))",
           "legendFormat": "{{method}} {{path}} (p99)",
           "refId": "B"
         }
@@ -215,7 +215,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_http_request_size_bytes[5m])",
+          "expr": "rate(ops_server_http_request_size_bytes[5m])",
           "legendFormat": "{{method}} {{path}}",
           "refId": "A"
         }
@@ -288,7 +288,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_http_response_size_bytes[5m])",
+          "expr": "rate(ops_server_http_response_size_bytes[5m])",
           "legendFormat": "{{method}} {{path}} {{status_code}}",
           "refId": "A"
         }
@@ -361,7 +361,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_api_requests_total[5m])",
+          "expr": "rate(ops_server_api_requests_total[5m])",
           "legendFormat": "{{endpoint}} - {{namespace}} - {{status}}",
           "refId": "A"
         }
@@ -415,7 +415,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(ops_api_request_duration_seconds_bucket[5m]))",
+          "expr": "histogram_quantile(0.95, rate(ops_server_api_request_duration_seconds_bucket[5m]))",
           "legendFormat": "{{endpoint}} - {{namespace}} (p95)",
           "refId": "A"
         }
@@ -488,7 +488,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_api_errors_total[5m])",
+          "expr": "rate(ops_server_api_errors_total[5m])",
           "legendFormat": "{{endpoint}} - {{namespace}} - {{error_type}}",
           "refId": "A"
         }
@@ -615,7 +615,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum by (status_code) (rate(ops_http_requests_total[5m]))",
+          "expr": "sum by (status_code) (rate(ops_server_http_requests_total[5m]))",
           "legendFormat": "{{status_code}}",
           "refId": "A"
         }

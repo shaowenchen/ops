@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	ctrlmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"github.com/shaowenchen/ops/pkg/metrics"
 	"github.com/shaowenchen/ops/pkg/server"
 	"github.com/shaowenchen/ops/web"
@@ -52,7 +53,9 @@ func main() {
 	gin.SetMode(server.GlobalConfig.Server.RunMode)
 
 	// Add metrics endpoint
-	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	r.GET("/metrics", gin.WrapH(promhttp.HandlerFor(ctrlmetrics.Registry, promhttp.HandlerOpts{
+		ErrorHandling: promhttp.HTTPErrorOnError,
+	})))
 
 	server.SetupRouter(r)
 	server.SetupRouteWithoutAuth(r)

@@ -109,7 +109,7 @@ var (
 	// HTTPRequestsTotal is a counter for HTTP requests
 	HTTPRequestsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ops_http_requests_total",
+			Name: "ops_server_http_requests_total",
 			Help: "Total number of HTTP requests",
 		},
 		[]string{"method", "path", "status_code"},
@@ -118,7 +118,7 @@ var (
 	// HTTPRequestDuration is a histogram for HTTP request duration
 	HTTPRequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "ops_http_request_duration_seconds",
+			Name:    "ops_server_http_request_duration_seconds",
 			Help:    "Duration of HTTP requests in seconds",
 			Buckets: prometheus.ExponentialBuckets(0.001, 2, 12), // 1ms to ~2s
 		},
@@ -128,7 +128,7 @@ var (
 	// HTTPRequestSize is a histogram for HTTP request body size
 	HTTPRequestSize = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "ops_http_request_size_bytes",
+			Name:    "ops_server_http_request_size_bytes",
 			Help:    "Size of HTTP request body in bytes",
 			Buckets: prometheus.ExponentialBuckets(100, 10, 7), // 100B to ~1GB
 		},
@@ -138,7 +138,7 @@ var (
 	// HTTPResponseSize is a histogram for HTTP response body size
 	HTTPResponseSize = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "ops_http_response_size_bytes",
+			Name:    "ops_server_http_response_size_bytes",
 			Help:    "Size of HTTP response body in bytes",
 			Buckets: prometheus.ExponentialBuckets(100, 10, 7), // 100B to ~1GB
 		},
@@ -148,7 +148,7 @@ var (
 	// APIRequestsTotal is a counter for API requests
 	APIRequestsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ops_api_requests_total",
+			Name: "ops_server_api_requests_total",
 			Help: "Total number of API requests",
 		},
 		[]string{"endpoint", "namespace", "status"},
@@ -157,7 +157,7 @@ var (
 	// APIRequestDuration is a histogram for API request duration
 	APIRequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "ops_api_request_duration_seconds",
+			Name:    "ops_server_api_request_duration_seconds",
 			Help:    "Duration of API requests in seconds",
 			Buckets: prometheus.ExponentialBuckets(0.001, 2, 12), // 1ms to ~2s
 		},
@@ -167,7 +167,7 @@ var (
 	// APIErrorsTotal is a counter for API errors
 	APIErrorsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ops_api_errors_total",
+			Name: "ops_server_api_errors_total",
 			Help: "Total number of API errors",
 		},
 		[]string{"endpoint", "namespace", "error_type"},
