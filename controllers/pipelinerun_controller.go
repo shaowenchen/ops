@@ -98,7 +98,7 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		r.crontabMap = make(map[string]cron.EntryID)
 	}
 	if r.cron == nil {
-		r.cron = cron.New()
+		r.cron = cron.New(cron.WithLocation(time.Local))
 		r.cron.Start()
 	}
 
@@ -271,7 +271,7 @@ func (r *PipelineRunReconciler) registerClearCron() {
 	if r.clearCron != nil {
 		return
 	}
-	r.clearCron = cron.New()
+	r.clearCron = cron.New(cron.WithLocation(time.Local))
 	r.clearCron.AddFunc(opsconstants.ClearCronTab, func() {
 		objs := &opsv1.PipelineRunList{}
 		err := r.Client.List(context.Background(), objs)
