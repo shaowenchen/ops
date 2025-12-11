@@ -191,7 +191,12 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	// run
-	err = r.run(logger, ctx, p, pr)
+	if pr.Spec.Crontab == "" {
+		err = r.run(logger, ctx, p, pr)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 	// send event
 	err = opsevent.FactoryPipelineRun(pr.Namespace, pr.Name).Publish(ctx, pr)
 	return ctrl.Result{}, err

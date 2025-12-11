@@ -134,11 +134,14 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 		}
 		return ctrl.Result{}, nil
 	}
-
-	err = r.run(logger, ctx, t, tr)
-	if err != nil {
-		return ctrl.Result{}, err
+	if tr.Spec.Crontab == "" {
+		err = r.run(logger, ctx, t, tr)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
+	// send event
+	err = opsevent.FactoryTaskRun(tr.Namespace, tr.Name, opsconstants.Status).Publish(ctx, tr)
 	return ctrl.Result{}, nil
 }
 
