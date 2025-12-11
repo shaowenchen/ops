@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -49,10 +50,11 @@ const CommitStatusMaxRetries = 5
 // PipelineRunReconciler reconciles a PipelineRun object
 type PipelineRunReconciler struct {
 	client.Client
-	Scheme     *runtime.Scheme
-	crontabMap map[string]cron.EntryID
-	cron       *cron.Cron
-	clearCron  *cron.Cron
+	Scheme          *runtime.Scheme
+	crontabMap      map[string]cron.EntryID
+	crontabMapMutex sync.RWMutex
+	cron            *cron.Cron
+	clearCron       *cron.Cron
 }
 
 //+kubebuilder:rbac:groups=crd.chenshaowen.com,resources=pipelineruns,verbs=get;list;watch;create;update;patch;delete
@@ -226,50 +228,81 @@ func (r *PipelineRunReconciler) isOtherCluster(pr *opsv1.PipelineRun) *opsv1.Clu
 }
 
 func (r *PipelineRunReconciler) deleteCronTab(logger *opslog.Logger, ctx context.Context, namespacedName types.NamespacedName) error {
-	_, ok := r.crontabMap[namespacedName.String()]
+	r.crontabMapMutex.Lock()
+	defer r.crontabMapMutex.Unlock()
+
+	entryID, ok := r.crontabMap[namespacedName.String()]
 	if ok {
-		r.cron.Remove(r.crontabMap[namespacedName.String()])
+		r.cron.Remove(entryID)
 		delete(r.crontabMap, namespacedName.String())
-		logger.Info.Println(fmt.Sprintf("clear ticker for taskrun %s", namespacedName.String()))
+		logger.Info.Println(fmt.Sprintf("clear ticker for pipelinerun %s", namespacedName.String()))
 	}
 	return nil
 }
 
 func (r *PipelineRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Context, objRun *opsv1.PipelineRun) {
+	key := objRun.GetUniqueKey()
+
+	// if crontab is empty, remove existing cron if any
 	if objRun.Spec.Crontab == "" {
+		r.crontabMapMutex.Lock()
+		entryID, ok := r.crontabMap[key]
+		if ok {
+			r.cron.Remove(entryID)
+			delete(r.crontabMap, key)
+			logger.Info.Println(fmt.Sprintf("clear ticker for pipelinerun %s (crontab is empty)", key))
+		}
+		r.crontabMapMutex.Unlock()
 		return
 	}
-	_, ok := r.crontabMap[objRun.GetUniqueKey()]
-	if ok {
-		return
+
+	// check if cron already exists
+	r.crontabMapMutex.Lock()
+	oldEntryID, exists := r.crontabMap[key]
+	if exists {
+		// remove old cron entry if exists
+		r.cron.Remove(oldEntryID)
+		delete(r.crontabMap, key)
+		logger.Info.Println(fmt.Sprintf("remove old ticker for pipelinerun %s (crontab updated)", key))
 	}
+	r.crontabMapMutex.Unlock()
+
+	logger.Info.Println(fmt.Sprintf("add ticker for pipelinerun %s with crontab %s", key, objRun.Spec.Crontab))
+
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBias)) * time.Second)
-		logger.Info.Println(fmt.Sprintf("ticker pipelinerun %s", objRun.Name))
-		if objRun.Status.RunStatus == opsconstants.StatusEmpty || objRun.Status.RunStatus == opsconstants.StatusRunning {
+		// create a new PipelineRun object to avoid using stale data
+		currentPr := &opsv1.PipelineRun{}
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, currentPr)
+		if err != nil {
+			logger.Error.Println(err)
+			return
+		}
+		logger.Info.Println(fmt.Sprintf("ticker pipelinerun %s, status: %s", currentPr.GetUniqueKey(), currentPr.Status.RunStatus))
+		// only skip if currently running, allow empty status (first cron trigger) and finished status (re-run)
+		if currentPr.Status.RunStatus == opsconstants.StatusRunning {
+			logger.Info.Println(fmt.Sprintf("skip pipelinerun %s: already running", currentPr.GetUniqueKey()))
 			return
 		}
 		// clear pipelinerun status
-		objRun.Status = opsv1.PipelineRunStatus{}
-		r.commitStatus(logger, ctx, objRun, "", "", "", nil)
-		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
-		if err != nil {
-			logger.Error.Println(err)
-			return
-		}
+		currentPr.Status = opsv1.PipelineRunStatus{}
+		r.commitStatus(logger, ctx, currentPr, "", "", "", nil)
 		obj := &opsv1.Pipeline{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.PipelineRef}, obj)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: currentPr.Namespace, Name: currentPr.Spec.PipelineRef}, obj)
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
-		r.run(logger, ctx, obj, objRun)
+		r.run(logger, ctx, obj, currentPr)
 	})
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
-	r.crontabMap[objRun.GetUniqueKey()] = id
+
+	r.crontabMapMutex.Lock()
+	r.crontabMap[key] = id
+	r.crontabMapMutex.Unlock()
 }
 
 func (r *PipelineRunReconciler) registerClearCron() {

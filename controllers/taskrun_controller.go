@@ -159,38 +159,56 @@ func (r *TaskRunReconciler) deleteCronTab(logger *opslog.Logger, ctx context.Con
 }
 
 func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Context, objRun *opsv1.TaskRun) {
+	key := objRun.GetUniqueKey()
+
+	// if crontab is empty, remove existing cron if any
 	if objRun.Spec.Crontab == "" {
+		r.crontabMapMutex.Lock()
+		entryID, ok := r.crontabMap[key]
+		if ok {
+			r.cron.Remove(entryID)
+			delete(r.crontabMap, key)
+			logger.Info.Println(fmt.Sprintf("clear ticker for taskrun %s (crontab is empty)", key))
+		}
+		r.crontabMapMutex.Unlock()
 		return
 	}
 
-	r.crontabMapMutex.RLock()
-	_, ok := r.crontabMap[objRun.GetUniqueKey()]
-	r.crontabMapMutex.RUnlock()
-
-	if ok {
-		return
+	// check if cron already exists
+	r.crontabMapMutex.Lock()
+	oldEntryID, exists := r.crontabMap[key]
+	if exists {
+		// remove old cron entry if exists
+		r.cron.Remove(oldEntryID)
+		delete(r.crontabMap, key)
+		logger.Info.Println(fmt.Sprintf("remove old ticker for taskrun %s (crontab updated)", key))
 	}
+	r.crontabMapMutex.Unlock()
 
-	logger.Info.Println(fmt.Sprintf("add ticker for taskrun %s", objRun.GetUniqueKey()))
+	logger.Info.Println(fmt.Sprintf("add ticker for taskrun %s with crontab %s", key, objRun.Spec.Crontab))
 
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBias)) * time.Second)
-		logger.Info.Println(fmt.Sprintf("ticker taskrun %s", objRun.GetUniqueKey()))
-		if objRun.Status.RunStatus == opsconstants.StatusEmpty || objRun.Status.RunStatus == opsconstants.StatusRunning {
-			return
-		}
-		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, objRun)
+		// create a new TaskRun object to avoid using stale data
+		currentTr := &opsv1.TaskRun{}
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, currentTr)
 		if err != nil {
 			logger.Error.Println(err)
+			return
+		}
+		logger.Info.Println(fmt.Sprintf("ticker taskrun %s, status: %s", currentTr.GetUniqueKey(), currentTr.Status.RunStatus))
+		// only skip if currently running, allow empty status (first cron trigger) and finished status (re-run)
+		if currentTr.Status.RunStatus == opsconstants.StatusRunning {
+			logger.Info.Println(fmt.Sprintf("skip taskrun %s: already running", currentTr.GetUniqueKey()))
 			return
 		}
 		obj := &opsv1.Task{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Spec.TaskRef}, obj)
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: currentTr.Namespace, Name: currentTr.Spec.TaskRef}, obj)
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
-		r.run(logger, ctx, obj, objRun)
+		r.run(logger, ctx, obj, currentTr)
 	})
 
 	if err != nil {
@@ -199,7 +217,7 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 	}
 
 	r.crontabMapMutex.Lock()
-	r.crontabMap[objRun.GetUniqueKey()] = id
+	r.crontabMap[key] = id
 	r.crontabMapMutex.Unlock()
 }
 
