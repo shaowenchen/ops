@@ -451,6 +451,10 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 				if latestTr.Spec.Crontab != "" {
 					opsmetrics.RecordScheduledTaskStatusChange("TaskRun", latestTr.Namespace, latestTr.Name, latestTr.Spec.Crontab, oldStatus, latestTr.Status.RunStatus)
 				}
+				// Record TaskRef usage
+				if latestTr.Spec.TaskRef != "" {
+					opsmetrics.RecordTaskRefUsage(latestTr.Namespace, latestTr.Spec.TaskRef, latestTr.Status.RunStatus)
+				}
 			}
 			//need to improve
 			time.Sleep(3 * time.Second)

@@ -65,6 +65,26 @@ func RecordScheduledTaskStatusChange(resourceType, namespace, resourceName, cron
 }
 
 // ============================================================================
+// TaskRef and PipelineRef usage metrics recording functions
+// ============================================================================
+
+// RecordTaskRefUsage records TaskRef usage in TaskRun
+func RecordTaskRefUsage(namespace, taskRef, status string) {
+	if status == "" {
+		status = "Empty"
+	}
+	TaskRefUsageTotal.WithLabelValues(namespace, taskRef, status).Inc()
+}
+
+// RecordPipelineRefUsage records PipelineRef usage in PipelineRun
+func RecordPipelineRefUsage(namespace, pipelineRef, status string) {
+	if status == "" {
+		status = "Empty"
+	}
+	PipelineRefUsageTotal.WithLabelValues(namespace, pipelineRef, status).Inc()
+}
+
+// ============================================================================
 // EventHooks metrics recording functions
 // ============================================================================
 

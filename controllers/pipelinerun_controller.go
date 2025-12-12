@@ -483,6 +483,10 @@ func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.
 				if latestPr.Spec.Crontab != "" {
 					opsmetrics.RecordScheduledTaskStatusChange("PipelineRun", latestPr.Namespace, latestPr.Name, latestPr.Spec.Crontab, oldStatus, latestPr.Status.RunStatus)
 				}
+				// Record PipelineRef usage
+				if latestPr.Spec.PipelineRef != "" {
+					opsmetrics.RecordPipelineRefUsage(latestPr.Namespace, latestPr.Spec.PipelineRef, latestPr.Status.RunStatus)
+				}
 			}
 			return
 		}

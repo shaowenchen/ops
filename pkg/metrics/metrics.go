@@ -76,6 +76,24 @@ var (
 		[]string{"resource_type", "namespace", "resource_name", "crontab", "from_status", "to_status"},
 	)
 
+	// TaskRefUsageTotal is a counter for TaskRef usage in TaskRun
+	TaskRefUsageTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ops_controller_taskref_usage_total",
+			Help: "Total number of TaskRef usage in TaskRun",
+		},
+		[]string{"namespace", "taskref", "status"},
+	)
+
+	// PipelineRefUsageTotal is a counter for PipelineRef usage in PipelineRun
+	PipelineRefUsageTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ops_controller_pipelineref_usage_total",
+			Help: "Total number of PipelineRef usage in PipelineRun",
+		},
+		[]string{"namespace", "pipelineref", "status"},
+	)
+
 	// ============================================================================
 	// EventHooks metrics
 	// ============================================================================
@@ -278,6 +296,8 @@ func InitController() {
 		ControllerReconcileErrors,
 		CRDResourceStatusChangeTotal,
 		ScheduledTaskStatusChangeTotal,
+		TaskRefUsageTotal,
+		PipelineRefUsageTotal,
 	)
 
 	// EventHooks metrics
