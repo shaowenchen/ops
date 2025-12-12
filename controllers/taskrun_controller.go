@@ -430,16 +430,6 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		tr.Status.StartTime = &metav1.Time{Time: time.Now()}
 	}
 
-	// Record TaskRun status change metrics
-	if oldStatus != tr.Status.RunStatus && opsconstants.IsFinishedStatus(tr.Status.RunStatus) {
-		opsmetrics.RecordTaskRun(tr.Namespace, tr.Status.RunStatus)
-		// Calculate duration if we have start time
-		if tr.Status.StartTime != nil {
-			duration := time.Since(tr.Status.StartTime.Time)
-			opsmetrics.RecordTaskRunDuration(tr.Namespace, tr.Spec.TaskRef, duration)
-		}
-	}
-
 	for retries := 0; retries < CommitStatusMaxRetries; retries++ {
 		latestTr := &opsv1.TaskRun{}
 		err = r.Client.Get(ctx, types.NamespacedName{Namespace: tr.GetNamespace(), Name: tr.GetName()}, latestTr)
@@ -454,6 +444,14 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		latestTr.Status = tr.Status
 		err = r.Client.Status().Update(ctx, latestTr)
 		if err == nil {
+			// Record CRD resource status change metrics - record every status change
+			if oldStatus != latestTr.Status.RunStatus {
+				opsmetrics.RecordCRDResourceStatusChange("TaskRun", "TaskRun", latestTr.Namespace, latestTr.Name, oldStatus, latestTr.Status.RunStatus)
+				// Record scheduled task status change if this is a scheduled task (has Crontab)
+				if latestTr.Spec.Crontab != "" {
+					opsmetrics.RecordScheduledTaskStatusChange("TaskRun", latestTr.Namespace, latestTr.Name, latestTr.Spec.Crontab, oldStatus, latestTr.Status.RunStatus)
+				}
+			}
 			//need to improve
 			time.Sleep(3 * time.Second)
 			return

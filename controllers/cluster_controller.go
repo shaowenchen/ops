@@ -99,10 +99,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	// sync tasks and pipelines
 	r.syncResource(logger, ctx, c)
 
-	// Record cluster health status
-	healthy := c.IsHealthy()
-	opsmetrics.SetClusterHealthStatus(c.Namespace, c.Name, healthy)
-
 	return ctrl.Result{}, nil
 }
 
@@ -217,6 +213,7 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		logger.Error.Println(err, "failed to get last cluster")
 		return
 	}
+	oldStatus := lastC.Status.HeartStatus
 	if overrideStatus != nil {
 		lastC.Status = *overrideStatus
 	}
@@ -225,7 +222,12 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	}
 	lastC.Status.HeartTime = &metav1.Time{Time: time.Now()}
 	err = r.Client.Status().Update(ctx, lastC)
-	if err != nil {
+	if err == nil {
+		// Record CRD resource status change metrics - record every status change
+		if oldStatus != lastC.Status.HeartStatus {
+			opsmetrics.RecordCRDResourceStatusChange("Cluster", "Cluster", lastC.Namespace, lastC.Name, oldStatus, lastC.Status.HeartStatus)
+		}
+	} else {
 		logger.Error.Println(err, "update cluster status error")
 	}
 	return

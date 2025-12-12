@@ -99,10 +99,6 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	// add timeticker
 	r.addTimeTicker(logger, ctx, h)
 
-	// Record host connection status
-	connected := h.Status.HeartStatus == opsconstants.StatusSuccessed
-	opsmetrics.SetHostConnectionStatus(h.Namespace, h.Name, connected)
-
 	return ctrl.Result{}, nil
 }
 
@@ -227,6 +223,7 @@ func (r *HostReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 		logger.Error.Println(err, "failed to get last host")
 		return
 	}
+	oldStatus := lastH.Status.HeartStatus
 	if overrideStatus != nil {
 		lastH.Status = *overrideStatus
 	}
@@ -235,7 +232,12 @@ func (r *HostReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 	}
 	lastH.Status.HeartTime = &metav1.Time{Time: time.Now()}
 	err = r.Client.Status().Update(ctx, lastH)
-	if err != nil {
+	if err == nil {
+		// Record CRD resource status change metrics - record every status change
+		if oldStatus != lastH.Status.HeartStatus {
+			opsmetrics.RecordCRDResourceStatusChange("Host", "Host", lastH.Namespace, lastH.Name, oldStatus, lastH.Status.HeartStatus)
+		}
+	} else {
 		logger.Error.Println(err, "update host status error")
 	}
 	return

@@ -476,13 +476,12 @@ func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.
 		}
 		err = r.Client.Status().Update(ctx, latestPr)
 		if err == nil {
-			// Record PipelineRun status change metrics
-			if oldStatus != latestPr.Status.RunStatus && opsconstants.IsFinishedStatus(latestPr.Status.RunStatus) {
-				opsmetrics.RecordPipelineRun(latestPr.Namespace, latestPr.Status.RunStatus)
-				// Calculate duration if we have start time
-				if latestPr.Status.StartTime != nil {
-					duration := time.Since(latestPr.Status.StartTime.Time)
-					opsmetrics.RecordPipelineRunDuration(latestPr.Namespace, latestPr.Spec.PipelineRef, duration)
+			// Record CRD resource status change metrics - record every status change
+			if oldStatus != latestPr.Status.RunStatus {
+				opsmetrics.RecordCRDResourceStatusChange("PipelineRun", "PipelineRun", latestPr.Namespace, latestPr.Name, oldStatus, latestPr.Status.RunStatus)
+				// Record scheduled task status change if this is a scheduled task (has Crontab)
+				if latestPr.Spec.Crontab != "" {
+					opsmetrics.RecordScheduledTaskStatusChange("PipelineRun", latestPr.Namespace, latestPr.Name, latestPr.Spec.Crontab, oldStatus, latestPr.Status.RunStatus)
 				}
 			}
 			return

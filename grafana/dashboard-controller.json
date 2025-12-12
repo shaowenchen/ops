@@ -59,7 +59,7 @@
               }
             ]
           },
-          "unit": "bytes"
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -72,304 +72,7 @@
       "id": 1,
       "options": {
         "legend": {
-          "calcs": ["lastNotNull", "max"],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "ops_controller_resource_memory_alloc_bytes",
-          "legendFormat": "Memory Allocated",
-          "refId": "A"
-        },
-        {
-          "expr": "ops_controller_resource_memory_sys_bytes",
-          "legendFormat": "Memory from OS",
-          "refId": "B"
-        }
-      ],
-      "title": "Resource: Memory Usage",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 2,
-      "options": {
-        "legend": {
-          "calcs": ["lastNotNull", "max"],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "ops_controller_resource_goroutines",
-          "legendFormat": "Goroutines",
-          "refId": "A"
-        }
-      ],
-      "title": "Resource: Goroutines",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": ["lastNotNull", "max"],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "ops_controller_resource_gc_cpu_fraction",
-          "legendFormat": "GC CPU Fraction",
-          "refId": "A"
-        }
-      ],
-      "title": "Resource: GC CPU Fraction",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
-      "id": 4,
-      "options": {
-        "legend": {
           "calcs": ["lastNotNull", "sum"],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "rate(ops_controller_resource_gc_cycles_total[5m])",
-          "legendFormat": "GC Cycles Rate",
-          "refId": "A"
-        }
-      ],
-      "title": "Resource: GC Cycles Rate",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "ops"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 5,
-      "options": {
-        "legend": {
-          "calcs": ["lastNotNull", "max"],
           "displayMode": "table",
           "placement": "bottom"
         },
@@ -416,9 +119,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 0
       },
-      "id": 6,
+      "id": 2,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -496,9 +199,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 8
       },
-      "id": 7,
+      "id": 3,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "sum"],
@@ -569,9 +272,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 8
       },
-      "id": 8,
+      "id": 4,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "sum"],
@@ -585,67 +288,13 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_controller_taskrun_total[5m])",
-          "legendFormat": "{{namespace}} - {{status}}",
+          "expr": "rate(ops_controller_crd_resource_status_change_total[5m])",
+          "legendFormat": "{{controller}} - {{resource_type}} - {{namespace}} - {{resource_name}} - {{from_status}} -> {{to_status}}",
           "refId": "A"
         }
       ],
-      "title": "Controller: TaskRun Rate by Status",
+      "title": "CRD Resource: Status Change Rate",
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 32
-      },
-      "id": 9,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, rate(ops_controller_taskrun_duration_seconds_bucket[5m]))",
-          "legendFormat": "{{namespace}} - {{task_name}} (p95)",
-          "refId": "A"
-        }
-      ],
-      "title": "Controller: TaskRun Execution Duration (p95)",
-      "type": "stat"
     },
     {
       "datasource": {
@@ -694,9 +343,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 32
+        "w": 24,
+        "x": 0,
+        "y": 16
       },
       "id": 10,
       "options": {
@@ -712,215 +361,13 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_controller_pipelinerun_total[5m])",
-          "legendFormat": "{{namespace}} - {{status}}",
+          "expr": "rate(ops_controller_scheduled_task_status_change_total[5m])",
+          "legendFormat": "{{resource_type}} - {{namespace}} - {{resource_name}} ({{crontab}}) - {{from_status}} -> {{to_status}}",
           "refId": "A"
         }
       ],
-      "title": "Controller: PipelineRun Rate by Status",
+      "title": "Scheduled Task: Status Change Rate (TaskRun/PipelineRun with Crontab)",
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 40
-      },
-      "id": 11,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, rate(ops_controller_pipelinerun_duration_seconds_bucket[5m]))",
-          "legendFormat": "{{namespace}} - {{pipeline_name}} (p95)",
-          "refId": "A"
-        }
-      ],
-      "title": "Controller: PipelineRun Execution Duration (p95)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "Disconnected"
-                },
-                "1": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "Connected"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 40
-      },
-      "id": 12,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "ops_controller_host_connection_status",
-          "legendFormat": "{{namespace}} - {{host_name}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Controller: Host Connection Status",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "Unhealthy"
-                },
-                "1": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "Healthy"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 48
-      },
-      "id": 13,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "expr": "ops_controller_cluster_health_status",
-          "legendFormat": "{{namespace}} - {{cluster_name}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Controller: Cluster Health Status",
-      "type": "stat"
     },
     {
       "datasource": {
@@ -971,9 +418,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 56
+        "y": 24
       },
-      "id": 14,
+      "id": 5,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "max"],
@@ -987,7 +434,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_eventhooks_reconcile_total[5m])",
+          "expr": "rate(ops_controller_eventhooks_reconcile_total[5m])",
           "legendFormat": "{{namespace}} - {{result}}",
           "refId": "A"
         }
@@ -1023,9 +470,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 56
+        "y": 24
       },
-      "id": 15,
+      "id": 6,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -1041,12 +488,12 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(ops_eventhooks_reconcile_duration_seconds_bucket[5m]))",
+          "expr": "histogram_quantile(0.95, rate(ops_controller_eventhooks_reconcile_duration_seconds_bucket[5m]))",
           "legendFormat": "{{namespace}} (p95)",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.99, rate(ops_eventhooks_reconcile_duration_seconds_bucket[5m]))",
+          "expr": "histogram_quantile(0.99, rate(ops_controller_eventhooks_reconcile_duration_seconds_bucket[5m]))",
           "legendFormat": "{{namespace}} (p99)",
           "refId": "B"
         }
@@ -1103,9 +550,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 64
+        "y": 32
       },
-      "id": 16,
+      "id": 7,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "sum"],
@@ -1119,7 +566,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_eventhooks_reconcile_errors_total[5m])",
+          "expr": "rate(ops_controller_eventhooks_reconcile_errors_total[5m])",
           "legendFormat": "{{namespace}} - {{error_type}}",
           "refId": "A"
         }
@@ -1176,9 +623,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 64
+        "y": 32
       },
-      "id": 17,
+      "id": 8,
       "options": {
         "legend": {
           "calcs": ["lastNotNull", "sum"],
@@ -1192,7 +639,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "rate(ops_eventhooks_event_processed_total[5m])",
+          "expr": "rate(ops_controller_eventhooks_event_processed_total[5m])",
           "legendFormat": "{{namespace}} - {{eventhook_name}} - {{status}}",
           "refId": "A"
         }
@@ -1228,9 +675,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 72
+        "y": 40
       },
-      "id": 18,
+      "id": 9,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -1246,7 +693,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(ops_eventhooks_event_process_duration_seconds_bucket[5m]))",
+          "expr": "histogram_quantile(0.95, rate(ops_controller_eventhooks_event_process_duration_seconds_bucket[5m]))",
           "legendFormat": "{{namespace}} - {{eventhook_name}} (p95)",
           "refId": "A"
         }

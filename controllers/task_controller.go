@@ -29,13 +29,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
+	"time"
+
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
-	"time"
 )
 
 // TaskReconciler reconciles a Task object
@@ -93,7 +94,22 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	}
 	if err != nil {
 		logger.Error.Println(err)
+		return ctrl.Result{}, nil
 	}
+
+	// Check for status changes and record metrics
+	// Get the old object to compare status
+	oldObj := &opsv1.Task{}
+	if err := r.Client.Get(ctx, req.NamespacedName, oldObj); err == nil {
+		// Compare status - if status changes in the future, record metrics
+		// Currently TaskStatus is empty, but this will work when status fields are added
+		if !cmp.Equal(oldObj.Status, obj.Status) {
+			// Status changed - record metrics
+			// Since TaskStatus is currently empty, we use empty string for status values
+			opsmetrics.RecordCRDResourceStatusChange("Task", "Task", obj.Namespace, obj.Name, "Empty", "Empty")
+		}
+	}
+
 	r.syncResource(logger, ctx, false, obj)
 
 	return ctrl.Result{}, nil
@@ -138,7 +154,7 @@ func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&opsv1.Task{}).
 		WithEventFilter(
 			predicate.Funcs{
-				// drop reconcile for status updates
+				// Allow reconcile for spec and status updates
 				UpdateFunc: func(e event.UpdateEvent) bool {
 					if _, ok := e.ObjectOld.(*opsv1.Task); !ok {
 						return true
@@ -152,6 +168,8 @@ func (r *TaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 					oldObjectCmp.Spec = oldObject.Spec
 					newObjectCmp.Spec = newObject.Spec
+					oldObjectCmp.Status = oldObject.Status
+					newObjectCmp.Status = newObject.Status
 
 					return !cmp.Equal(oldObjectCmp, newObjectCmp)
 				},

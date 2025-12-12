@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/go-cmp/cmp"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -104,6 +105,19 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			}
 		}
 		return ctrl.Result{}, err
+	}
+
+	// Check for status changes and record metrics
+	// Get the old object to compare status
+	oldObj := &opsv1.EventHooks{}
+	if err := r.Get(ctx, req.NamespacedName, oldObj); err == nil {
+		// Compare status - if status changes in the future, record metrics
+		// Currently EventHooksStatus is empty, but this will work when status fields are added
+		if !cmp.Equal(oldObj.Status, obj.Status) {
+			// Status changed - record metrics
+			// Since EventHooksStatus is currently empty, we use empty string for status values
+			opsmetrics.RecordCRDResourceStatusChange("EventHooks", "EventHooks", obj.Namespace, obj.Name, "Empty", "Empty")
+		}
 	}
 
 	// record for delete object and stop watch

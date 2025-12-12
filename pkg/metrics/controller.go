@@ -31,46 +31,41 @@ func RecordReconcileError(controller, namespace, errorType string) {
 	ControllerReconcileErrors.WithLabelValues(controller, namespace, errorType).Inc()
 }
 
-// RecordTaskRun records a TaskRun operation
-func RecordTaskRun(namespace, status string) {
-	TaskRunTotal.WithLabelValues(namespace, status).Inc()
-}
+// ============================================================================
+// CRD resource status change metrics recording functions
+// ============================================================================
 
-// RecordTaskRunDuration records TaskRun execution duration
-func RecordTaskRunDuration(namespace, taskName string, duration time.Duration) {
-	TaskRunDuration.WithLabelValues(namespace, taskName).Observe(duration.Seconds())
-}
-
-// RecordPipelineRun records a PipelineRun operation
-func RecordPipelineRun(namespace, status string) {
-	PipelineRunTotal.WithLabelValues(namespace, status).Inc()
-}
-
-// RecordPipelineRunDuration records PipelineRun execution duration
-func RecordPipelineRunDuration(namespace, pipelineName string, duration time.Duration) {
-	PipelineRunDuration.WithLabelValues(namespace, pipelineName).Observe(duration.Seconds())
-}
-
-// SetHostConnectionStatus sets the host connection status
-func SetHostConnectionStatus(namespace, hostName string, connected bool) {
-	value := 0.0
-	if connected {
-		value = 1.0
+// RecordCRDResourceStatusChange records a CRD resource status change
+func RecordCRDResourceStatusChange(controller, resourceType, namespace, resourceName, fromStatus, toStatus string) {
+	if fromStatus == "" {
+		fromStatus = "Empty"
 	}
-	HostConnectionStatus.WithLabelValues(namespace, hostName).Set(value)
-}
-
-// SetClusterHealthStatus sets the cluster health status
-func SetClusterHealthStatus(namespace, clusterName string, healthy bool) {
-	value := 0.0
-	if healthy {
-		value = 1.0
+	if toStatus == "" {
+		toStatus = "Empty"
 	}
-	ClusterHealthStatus.WithLabelValues(namespace, clusterName).Set(value)
+	CRDResourceStatusChangeTotal.WithLabelValues(controller, resourceType, namespace, resourceName, fromStatus, toStatus).Inc()
 }
 
 // ============================================================================
-// EventHooks 指标记录函数
+// Scheduled task status change metrics recording functions
+// ============================================================================
+
+// RecordScheduledTaskStatusChange records a scheduled task (TaskRun/PipelineRun with Crontab) status change
+func RecordScheduledTaskStatusChange(resourceType, namespace, resourceName, crontab, fromStatus, toStatus string) {
+	if fromStatus == "" {
+		fromStatus = "Empty"
+	}
+	if toStatus == "" {
+		toStatus = "Empty"
+	}
+	if crontab == "" {
+		crontab = "N/A"
+	}
+	ScheduledTaskStatusChangeTotal.WithLabelValues(resourceType, namespace, resourceName, crontab, fromStatus, toStatus).Inc()
+}
+
+// ============================================================================
+// EventHooks metrics recording functions
 // ============================================================================
 
 // RecordEventHooksReconcile records an EventHooks reconcile operation

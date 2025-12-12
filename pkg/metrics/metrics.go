@@ -26,59 +26,7 @@ import (
 
 var (
 	// ============================================================================
-	// 基本的资源使用指标（内存、CPU、协程、网络等）
-	// ============================================================================
-
-	// ControllerMemoryAllocBytes is a gauge for memory allocated in bytes
-	ControllerMemoryAllocBytes = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "ops_controller_resource_memory_alloc_bytes",
-			Help: "Memory allocated in bytes",
-		},
-	)
-
-	// ControllerMemoryTotalAllocBytes is a counter for total memory allocated in bytes
-	ControllerMemoryTotalAllocBytes = prometheus.NewCounter(
-		prometheus.CounterOpts{
-			Name: "ops_controller_resource_memory_total_alloc_bytes_total",
-			Help: "Total memory allocated in bytes",
-		},
-	)
-
-	// ControllerMemorySysBytes is a gauge for memory obtained from OS in bytes
-	ControllerMemorySysBytes = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "ops_controller_resource_memory_sys_bytes",
-			Help: "Memory obtained from OS in bytes",
-		},
-	)
-
-	// ControllerGoroutines is a gauge for number of goroutines
-	ControllerGoroutines = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "ops_controller_resource_goroutines",
-			Help: "Number of goroutines",
-		},
-	)
-
-	// ControllerGCCPUFraction is a gauge for fraction of CPU time used by GC
-	ControllerGCCPUFraction = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "ops_controller_resource_gc_cpu_fraction",
-			Help: "Fraction of CPU time used by GC",
-		},
-	)
-
-	// ControllerNumGC is a counter for number of GC cycles
-	ControllerNumGC = prometheus.NewCounter(
-		prometheus.CounterOpts{
-			Name: "ops_controller_resource_gc_cycles_total",
-			Help: "Number of GC cycles",
-		},
-	)
-
-	// ============================================================================
-	// 控制器指标（Task、TaskRun、Pipeline、PipelineRun 等）
+	// Controller metrics (Task, TaskRun, Pipeline, PipelineRun, etc.)
 	// ============================================================================
 
 	// ControllerReconcileTotal is a counter for the total number of reconcile operations
@@ -109,70 +57,33 @@ var (
 		[]string{"controller", "namespace", "error_type"},
 	)
 
-	// TaskRunTotal is a counter for TaskRun operations
-	TaskRunTotal = prometheus.NewCounterVec(
+	// CRDResourceStatusChangeTotal is a counter for CRD resource status changes
+	// Records status changes for all CRD resources (TaskRun, PipelineRun, Cluster, Host, etc.)
+	CRDResourceStatusChangeTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ops_controller_taskrun_total",
-			Help: "Total number of TaskRun operations",
+			Name: "ops_controller_crd_resource_status_change_total",
+			Help: "Total number of CRD resource status changes",
 		},
-		[]string{"namespace", "status"},
+		[]string{"controller", "resource_type", "namespace", "resource_name", "from_status", "to_status"},
 	)
 
-	// TaskRunDuration is a histogram for TaskRun execution duration
-	TaskRunDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_controller_taskrun_duration_seconds",
-			Help:    "Duration of TaskRun execution in seconds",
-			Buckets: prometheus.ExponentialBuckets(1, 2, 15), // 1s to ~9 hours
-		},
-		[]string{"namespace", "task_name"},
-	)
-
-	// PipelineRunTotal is a counter for PipelineRun operations
-	PipelineRunTotal = prometheus.NewCounterVec(
+	// ScheduledTaskStatusChangeTotal is a counter for scheduled task (TaskRun/PipelineRun with Crontab) status changes
+	ScheduledTaskStatusChangeTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ops_controller_pipelinerun_total",
-			Help: "Total number of PipelineRun operations",
+			Name: "ops_controller_scheduled_task_status_change_total",
+			Help: "Total number of scheduled task status changes (TaskRun/PipelineRun with Crontab)",
 		},
-		[]string{"namespace", "status"},
-	)
-
-	// PipelineRunDuration is a histogram for PipelineRun execution duration
-	PipelineRunDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_controller_pipelinerun_duration_seconds",
-			Help:    "Duration of PipelineRun execution in seconds",
-			Buckets: prometheus.ExponentialBuckets(1, 2, 15), // 1s to ~9 hours
-		},
-		[]string{"namespace", "pipeline_name"},
-	)
-
-	// HostConnectionStatus is a gauge for host connection status
-	HostConnectionStatus = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "ops_controller_host_connection_status",
-			Help: "Host connection status (1 = connected, 0 = disconnected)",
-		},
-		[]string{"namespace", "host_name"},
-	)
-
-	// ClusterHealthStatus is a gauge for cluster health status
-	ClusterHealthStatus = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "ops_controller_cluster_health_status",
-			Help: "Cluster health status (1 = healthy, 0 = unhealthy)",
-		},
-		[]string{"namespace", "cluster_name"},
+		[]string{"resource_type", "namespace", "resource_name", "crontab", "from_status", "to_status"},
 	)
 
 	// ============================================================================
-	// EventHooks 指标
+	// EventHooks metrics
 	// ============================================================================
 
 	// EventHooksReconcileTotal is a counter for the total number of EventHooks reconcile operations
 	EventHooksReconcileTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ops_eventhooks_reconcile_total",
+			Name: "ops_controller_eventhooks_reconcile_total",
 			Help: "Total number of EventHooks reconcile operations",
 		},
 		[]string{"namespace", "result"},
@@ -181,7 +92,7 @@ var (
 	// EventHooksReconcileDuration is a histogram for EventHooks reconcile operation duration
 	EventHooksReconcileDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "ops_eventhooks_reconcile_duration_seconds",
+			Name:    "ops_controller_eventhooks_reconcile_duration_seconds",
 			Help:    "Duration of EventHooks reconcile operations in seconds",
 			Buckets: prometheus.ExponentialBuckets(0.001, 2, 10), // 1ms to ~1s
 		},
@@ -191,7 +102,7 @@ var (
 	// EventHooksReconcileErrors is a counter for EventHooks reconcile errors
 	EventHooksReconcileErrors = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ops_eventhooks_reconcile_errors_total",
+			Name: "ops_controller_eventhooks_reconcile_errors_total",
 			Help: "Total number of EventHooks reconcile errors",
 		},
 		[]string{"namespace", "error_type"},
@@ -200,7 +111,7 @@ var (
 	// EventHooksEventProcessedTotal is a counter for processed events
 	EventHooksEventProcessedTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ops_eventhooks_event_processed_total",
+			Name: "ops_controller_eventhooks_event_processed_total",
 			Help: "Total number of events processed by EventHooks",
 		},
 		[]string{"namespace", "eventhook_name", "status"},
@@ -209,7 +120,7 @@ var (
 	// EventHooksEventProcessDuration is a histogram for event processing duration
 	EventHooksEventProcessDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "ops_eventhooks_event_process_duration_seconds",
+			Name:    "ops_controller_eventhooks_event_process_duration_seconds",
 			Help:    "Duration of event processing in seconds",
 			Buckets: prometheus.ExponentialBuckets(0.001, 2, 12), // 1ms to ~2s
 		},
@@ -217,7 +128,7 @@ var (
 	)
 
 	// ============================================================================
-	// Server 基础资源指标（CPU、内存、IO、协程等）
+	// Server basic resource metrics (CPU, memory, IO, goroutines, etc.)
 	// ============================================================================
 
 	// ServerMemoryAllocBytes is a gauge for server memory allocated in bytes
@@ -269,7 +180,7 @@ var (
 	)
 
 	// ============================================================================
-	// Server 服务吞吐指标（状态码、QPS 等经典指标）
+	// Server throughput metrics (status codes, QPS, etc.)
 	// ============================================================================
 
 	// HTTPRequestsTotal is a counter for HTTP requests
@@ -360,30 +271,16 @@ var (
 // InitController initializes and registers controller-specific metrics
 // with the controller-runtime metrics registry
 func InitController() {
-	// 基本的资源使用指标
-	metrics.Registry.MustRegister(
-		ControllerMemoryAllocBytes,
-		ControllerMemoryTotalAllocBytes,
-		ControllerMemorySysBytes,
-		ControllerGoroutines,
-		ControllerGCCPUFraction,
-		ControllerNumGC,
-	)
-
-	// 控制器指标（Task、TaskRun、Pipeline、PipelineRun 等）
+	// Controller metrics
 	metrics.Registry.MustRegister(
 		ControllerReconcileTotal,
 		ControllerReconcileDuration,
 		ControllerReconcileErrors,
-		TaskRunTotal,
-		TaskRunDuration,
-		PipelineRunTotal,
-		PipelineRunDuration,
-		HostConnectionStatus,
-		ClusterHealthStatus,
+		CRDResourceStatusChangeTotal,
+		ScheduledTaskStatusChangeTotal,
 	)
 
-	// EventHooks 指标
+	// EventHooks metrics
 	metrics.Registry.MustRegister(
 		EventHooksReconcileTotal,
 		EventHooksReconcileDuration,
@@ -391,15 +288,12 @@ func InitController() {
 		EventHooksEventProcessedTotal,
 		EventHooksEventProcessDuration,
 	)
-
-	// 启动资源使用指标的定期更新
-	go updateResourceMetrics()
 }
 
 // InitServer initializes and registers server-specific metrics
 // with the controller-runtime metrics registry
 func InitServer() {
-	// Server 基础资源指标
+	// Server basic resource metrics
 	metrics.Registry.MustRegister(
 		ServerMemoryAllocBytes,
 		ServerMemoryTotalAllocBytes,
@@ -409,7 +303,7 @@ func InitServer() {
 		ServerNumGC,
 	)
 
-	// Server 服务吞吐指标
+	// Server throughput metrics
 	metrics.Registry.MustRegister(
 		HTTPRequestsTotal,
 		HTTPRequestDuration,
@@ -422,53 +316,8 @@ func InitServer() {
 		ServerUptime,
 	)
 
-	// 启动 server 资源使用指标的定期更新
+	// Start periodic update of server resource usage metrics
 	go updateServerResourceMetrics()
-}
-
-// updateResourceMetrics periodically updates resource usage metrics for controller
-func updateResourceMetrics() {
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
-
-	var lastNumGC uint32
-	var lastPauseTotalNs uint64
-	var lastTotalAlloc uint64
-
-	for range ticker.C {
-		var m runtime.MemStats
-		runtime.ReadMemStats(&m)
-
-		// Update memory metrics
-		ControllerMemoryAllocBytes.Set(float64(m.Alloc))
-
-		// Update total alloc (cumulative counter)
-		if m.TotalAlloc > lastTotalAlloc {
-			ControllerMemoryTotalAllocBytes.Add(float64(m.TotalAlloc - lastTotalAlloc))
-			lastTotalAlloc = m.TotalAlloc
-		}
-
-		ControllerMemorySysBytes.Set(float64(m.Sys))
-
-		// Update goroutine count
-		ControllerGoroutines.Set(float64(runtime.NumGoroutine()))
-
-		// Update GC metrics
-		if m.NumGC > lastNumGC {
-			ControllerNumGC.Add(float64(m.NumGC - lastNumGC))
-			lastNumGC = m.NumGC
-		}
-
-		// Calculate GC CPU fraction
-		if m.PauseTotalNs > lastPauseTotalNs {
-			pauseDelta := float64(m.PauseTotalNs - lastPauseTotalNs)
-			// Approximate CPU fraction: pause time / (10 seconds * 1e9 nanoseconds)
-			// This is a rough estimate since we don't have exact CPU time
-			cpuFraction := pauseDelta / (10.0 * 1e9)
-			ControllerGCCPUFraction.Set(cpuFraction)
-			lastPauseTotalNs = m.PauseTotalNs
-		}
-	}
 }
 
 // updateServerResourceMetrics periodically updates resource usage metrics for server

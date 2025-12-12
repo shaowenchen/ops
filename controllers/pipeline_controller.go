@@ -91,8 +91,22 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 		return ctrl.Result{}, nil
 	}
 	if err != nil {
-		return ctrl.Result{}, err
+		return ctrl.Result{}, nil
 	}
+
+	// Check for status changes and record metrics
+	// Get the old object to compare status
+	oldObj := &opsv1.Pipeline{}
+	if err := r.Client.Get(ctx, req.NamespacedName, oldObj); err == nil {
+		// Compare status - if status changes in the future, record metrics
+		// Currently PipelineStatus is empty, but this will work when status fields are added
+		if !cmp.Equal(oldObj.Status, obj.Status) {
+			// Status changed - record metrics
+			// Since PipelineStatus is currently empty, we use empty string for status values
+			opsmetrics.RecordCRDResourceStatusChange("Pipeline", "Pipeline", obj.Namespace, obj.Name, "Empty", "Empty")
+		}
+	}
+
 	// filled variables
 	changed := r.filledVariables(logger, ctx, obj)
 	if changed {
@@ -205,7 +219,7 @@ func (r *PipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&opsv1.Pipeline{}).
 		WithEventFilter(
 			predicate.Funcs{
-				// drop reconcile for status updates
+				// Allow reconcile for spec and status updates
 				UpdateFunc: func(e event.UpdateEvent) bool {
 					if _, ok := e.ObjectOld.(*opsv1.Pipeline); !ok {
 						return true
@@ -219,6 +233,8 @@ func (r *PipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 					oldObjectCmp.Spec = oldObject.Spec
 					newObjectCmp.Spec = newObject.Spec
+					oldObjectCmp.Status = oldObject.Status
+					newObjectCmp.Status = newObject.Status
 
 					return !cmp.Equal(oldObjectCmp, newObjectCmp)
 				},
