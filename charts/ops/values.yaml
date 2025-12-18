@@ -21,6 +21,11 @@ server:
     tag: "latest"
   # Server resource configuration (overrides global resources if set)
   resources: {}
+  env:
+    # Event cluster name
+    eventCluster: "default"
+    # Event endpoint (NATS)
+    eventEndpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
 
 # Image pull secrets
 imagePullSecrets: []
@@ -125,10 +130,3 @@ controller:
     # Event endpoint (NATS)
     eventEndpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
 
-# Environment variables for server
-server:
-  env:
-    # Event cluster name
-    eventCluster: "default"
-    # Event endpoint (NATS)
-    eventEndpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
