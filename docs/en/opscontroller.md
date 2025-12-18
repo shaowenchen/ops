@@ -51,9 +51,15 @@ You can customize the installation using `--set` flags:
 helm install myops ops/ops --version 2.0.0 \
   --namespace ops-system \
   --create-namespace \
+  --set controller.image.repository="shaowenchen/ops-controller-manager" \
+  --set controller.image.pullPolicy="Always" \
+  --set controller.image.tag="latest" \
   --set controller.env.activeNamespace="ops-system" \
   --set controller.env.defaultRuntimeImage="ubuntu:22.04" \
   --set controller.replicaCount=2 \
+  --set server.image.repository="shaowenchen/ops-server" \
+  --set server.image.pullPolicy="Always" \
+  --set server.image.tag="latest" \
   --set server.replicaCount=2 \
   --set server.autoscaling.minReplicas=2 \
   --set server.autoscaling.maxReplicas=4 \
@@ -73,12 +79,20 @@ event:
 
 controller:
   replicaCount: 2
+  image:
+    repository: shaowenchen/ops-controller-manager
+    pullPolicy: Always
+    tag: "latest"
   env:
     activeNamespace: "ops-system"
     defaultRuntimeImage: "ubuntu:22.04"
 
 server:
   replicaCount: 2
+  image:
+    repository: shaowenchen/ops-server
+    pullPolicy: Always
+    tag: "latest"
   autoscaling:
     enabled: true
     minReplicas: 2

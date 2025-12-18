@@ -9,19 +9,27 @@ event:
   # Event endpoint (NATS)
   endpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
 
-# Controller image configuration
-image:
-  repository: registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-controller-manager
-  pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+# Controller configuration
+controller:
+  # Number of replicas for controller
+  replicaCount: 2
+  image:
+    repository: shaowenchen/ops-controller-manager
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  env:
+    # Active namespace for processing CRDs (empty means all namespaces)
+    activeNamespace: "ops-system"
+    # Default runtime image for tasks
+    defaultRuntimeImage: "ubuntu:22.04"
 
-# Server image configuration
+# Server configuration
 server:
   # Number of replicas for server
   replicaCount: 2
   image:
-    repository: registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-server
+    repository: shaowenchen/ops-server
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
@@ -130,13 +138,4 @@ affinity: {}
 prometheus:
   enabled: true
 
-# Environment variables for controller
-controller:
-  # Number of replicas for controller
-  replicaCount: 2
-  env:
-    # Active namespace for processing CRDs (empty means all namespaces)
-    activeNamespace: "ops-system"
-    # Default runtime image for tasks
-    defaultRuntimeImage: "ubuntu:22.04"
 

@@ -31,8 +31,14 @@ Installation with custom values:
 helm install myops ops/ops --version 2.0.0 \
   --namespace ops-system \
   --create-namespace \
+  --set controller.image.repository="shaowenchen/ops-controller-manager" \
+  --set controller.image.pullPolicy="Always" \
+  --set controller.image.tag="latest" \
   --set controller.env.activeNamespace="ops-system" \
   --set controller.env.defaultRuntimeImage="ubuntu:22.04" \
+  --set server.image.repository="shaowenchen/ops-server" \
+  --set server.image.pullPolicy="Always" \
+  --set server.image.tag="latest" \
   --set event.cluster="mycluster" \
   --set event.endpoint="http://app:password@nats-headless.ops-system.svc:4222"
 ```
@@ -51,21 +57,43 @@ Installation with values file:
 ```bash
 # Create a custom values file
 cat > my-values.yaml <<EOF
-replicaCount: 2
+event:
+  cluster: "mycluster"
+  endpoint: "http://app:password@nats-headless.ops-system.svc:4222"
 controller:
+  replicaCount: 2
+  image:
+    repository: shaowenchen/ops-controller-manager
+    pullPolicy: Always
+    tag: "latest"
   env:
     activeNamespace: "ops-system"
-    eventEndpoint: "http://app:password@nats-headless.ops-system.svc:4222"
+    defaultRuntimeImage: "ubuntu:22.04"
 server:
-  env:
-    eventEndpoint: "http://app:password@nats-headless.ops-system.svc:4222"
+  replicaCount: 2
+  image:
+    repository: shaowenchen/ops-server
+    pullPolicy: Always
+    tag: "latest"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 80
 resources:
   limits:
-    cpu: 2000m
-    memory: 4096Mi
-  requests:
     cpu: 1000m
-    memory: 2048Mi
+    memory: 1024Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
 prometheus:
   enabled: true
 EOF
@@ -85,19 +113,27 @@ The following table lists the configurable parameters and their default values:
 | `event.cluster` | Event cluster name (shared by controller and server) | `default` |
 | `event.endpoint` | NATS event endpoint (shared by controller and server) | `http://app:mypassword@nats-headless.ops-system.svc:4222` |
 | `controller.replicaCount` | Number of replicas for controller | `2` |
+| `controller.image.repository` | Controller image repository | `shaowenchen/ops-controller-manager` |
+| `controller.image.tag` | Controller image tag | `latest` |
+| `controller.image.pullPolicy` | Controller image pull policy | `Always` |
 | `controller.env.activeNamespace` | Active namespace for processing CRDs (empty = all namespaces) | `ops-system` |
 | `controller.env.defaultRuntimeImage` | Default runtime image for tasks | `ubuntu:22.04` |
 | `server.replicaCount` | Number of replicas for server | `2` |
+| `server.image.repository` | Server image repository | `shaowenchen/ops-server` |
+| `server.image.tag` | Server image tag | `latest` |
+| `server.image.pullPolicy` | Server image pull policy | `Always` |
+| `server.resources.limits.cpu` | Server CPU limit | `500m` |
+| `server.resources.limits.memory` | Server memory limit | `512Mi` |
+| `server.resources.requests.cpu` | Server CPU request | `500m` |
+| `server.resources.requests.memory` | Server memory request | `512Mi` |
 | `server.autoscaling.enabled` | Enable HPA for server | `true` |
 | `server.autoscaling.minReplicas` | Minimum replicas for server HPA | `2` |
 | `server.autoscaling.maxReplicas` | Maximum replicas for server HPA | `4` |
 | `server.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization for server HPA | `80` |
-| `image.repository` | Controller image repository | `registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-controller-manager` |
-| `image.tag` | Controller image tag | `latest` |
-| `image.pullPolicy` | Image pull policy | `Always` |
-| `server.image.repository` | Server image repository | `registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-server` |
-| `server.image.tag` | Server image tag | `latest` |
-| `server.image.pullPolicy` | Server image pull policy | `Always` |
+| `resources.limits.cpu` | Global CPU limit (for controller) | `1000m` |
+| `resources.limits.memory` | Global memory limit (for controller) | `1024Mi` |
+| `resources.requests.cpu` | Global CPU request (for controller) | `500m` |
+| `resources.requests.memory` | Global memory request (for controller) | `512Mi` |
 | `service.type` | Kubernetes service type | `ClusterIP` |
 | `service.port` | Service port | `80` |
 | `ingress.enabled` | Enable ingress | `false` |
@@ -130,8 +166,8 @@ When `prometheus.enabled` is set to `true`, the chart creates:
 
 ### Metrics Endpoints
 
-- Controller: `http://<release-name>-ops-controller-metrics:80/metrics`
-- Server: `http://<release-name>-ops-server:80/metrics`
+- Controller: `http://<release-name>-ops-controller-metrics:9090/metrics`
+- Server: `http://<release-name>-ops-server:9090/metrics`
 
 ## Upgrading
 
@@ -183,12 +219,12 @@ kubectl get servicemonitor -n ops-system
 
 ```bash
 # Controller metrics
-kubectl port-forward -n ops-system svc/<release-name>-ops-controller-metrics 8080:80
-curl http://localhost:8080/metrics
+kubectl port-forward -n ops-system svc/<release-name>-ops-controller-metrics 9090:9090
+curl http://localhost:9090/metrics
 
 # Server metrics
-kubectl port-forward -n ops-system svc/<release-name>-ops-server 8080:80
-curl http://localhost:8080/metrics
+kubectl port-forward -n ops-system svc/<release-name>-ops-server 9090:9090
+curl http://localhost:9090/metrics
 ```
 
 ## Additional Resources
