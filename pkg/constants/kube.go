@@ -23,8 +23,8 @@ const LabelOpsServerValue = "ops"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
-const DefaultRuntimeImage = "registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04"
-const OpsCliRuntimeImage = "registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-cli:latest"
+const DefaultRuntimeImage = "ubuntu:22.04"
+const OpsCliRuntimeImage = "shaowenchen/ops-cli:latest"
 
 const SyncResourceStatusHeatSeconds = 60 * 5
 const SyncResourceRandomBiasSeconds = 60 * 2

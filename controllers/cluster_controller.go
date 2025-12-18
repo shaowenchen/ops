@@ -61,18 +61,16 @@ type ClusterReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	startTime := time.Now()
 	controllerName := "Cluster"
 
 	// Record metrics
 	defer func() {
-		duration := time.Since(startTime)
 		resultStr := "success"
 		if err != nil {
 			resultStr = "error"
 			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
 		}
-		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr)
 	}()
 
 	actionNs := opsconstants.GetEnvActiveNamespace()
@@ -94,6 +92,8 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// Record Cluster info metrics on every reconcile
+	opsmetrics.RecordClusterInfo(c.Namespace, c.Name, c.Spec.Server, c.Status.Version)
 	// add timeticker
 	r.addTimeTicker(logger, ctx, c)
 	// sync tasks and pipelines
@@ -213,7 +213,7 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		logger.Error.Println(err, "failed to get last cluster")
 		return
 	}
-	oldStatus := lastC.Status.HeartStatus
+	_ = lastC.Status.HeartStatus // oldStatus reserved for future use
 	if overrideStatus != nil {
 		lastC.Status = *overrideStatus
 	}
@@ -223,10 +223,8 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	lastC.Status.HeartTime = &metav1.Time{Time: time.Now()}
 	err = r.Client.Status().Update(ctx, lastC)
 	if err == nil {
-		// Record CRD resource status change metrics - record every status change
-		if oldStatus != lastC.Status.HeartStatus {
-			opsmetrics.RecordCRDResourceStatusChange("Cluster", "Cluster", lastC.Namespace, lastC.Name, oldStatus, lastC.Status.HeartStatus)
-		}
+		// Record Cluster info metrics
+		opsmetrics.RecordClusterInfo(lastC.Namespace, lastC.Name, lastC.Spec.Server, lastC.Status.Version)
 	} else {
 		logger.Error.Println(err, "update cluster status error")
 	}

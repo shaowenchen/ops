@@ -6,7 +6,7 @@ metadata:
     {{- include "ops.controllerLabels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.controller.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
@@ -30,7 +30,7 @@ spec:
       containers:
         - args:
           - --health-probe-bind-address=:8081
-          - --metrics-bind-address=:8080
+          - --metrics-bind-address=:9090
           - --leader-elect
           command:
           - /app/ops-controller-manager
@@ -44,7 +44,7 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
             - name: metrics
-              containerPort: 8080
+              containerPort: 9090
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -83,9 +83,9 @@ spec:
             - name: DEFAULT_RUNTIME_IMAGE
               value: {{ .Values.controller.env.defaultRuntimeImage | quote }}
             - name: EVENT_CLUSTER
-              value: {{ .Values.controller.env.eventCluster | quote }}
+              value: {{ .Values.event.cluster | quote }}
             - name: EVENT_ENDPOINT
-              value: {{ .Values.controller.env.eventEndpoint | quote }}
+              value: {{ .Values.event.endpoint | quote }}
       volumes:
         - name: timezone
           hostPath:
@@ -97,10 +97,18 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
       affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    {{- include "ops.controllerSelectorLabels" . | nindent 20 }}
+                topologyKey: kubernetes.io/hostname
+        {{- with .Values.affinity }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

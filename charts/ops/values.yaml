@@ -2,8 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Number of replicas for controller and server
-replicaCount: 1
+# Global event configuration (shared by controller and server)
+event:
+  # Event cluster name
+  cluster: "default"
+  # Event endpoint (NATS)
+  endpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
 
 # Controller image configuration
 image:
@@ -14,19 +18,27 @@ image:
 
 # Server image configuration
 server:
+  # Number of replicas for server
+  replicaCount: 2
   image:
     repository: registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-server
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
   # Server resource configuration (overrides global resources if set)
-  resources: {}
-  env:
-    # Event cluster name
-    eventCluster: "default"
-    # Event endpoint (NATS)
-    eventEndpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
-
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  # Server HPA configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 80
 # Image pull secrets
 imagePullSecrets: []
 
@@ -92,10 +104,10 @@ ingress:
 resources:
   limits:
     cpu: 1000m
-    memory: 2048Mi
+    memory: 1024Mi
   requests:
     cpu: 500m
-    memory: 1024Mi
+    memory: 512Mi
 
 # Horizontal Pod Autoscaler configuration
 autoscaling:
@@ -120,13 +132,11 @@ prometheus:
 
 # Environment variables for controller
 controller:
+  # Number of replicas for controller
+  replicaCount: 2
   env:
     # Active namespace for processing CRDs (empty means all namespaces)
-    activeNamespace: ""
+    activeNamespace: "ops-system"
     # Default runtime image for tasks
-    defaultRuntimeImage: "registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04"
-    # Event cluster name
-    eventCluster: "default"
-    # Event endpoint (NATS)
-    eventEndpoint: "http://app:mypassword@nats-headless.ops-system.svc:4222"
+    defaultRuntimeImage: "ubuntu:22.04"
 

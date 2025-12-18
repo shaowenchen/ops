@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -57,18 +56,16 @@ type PipelineReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	startTime := time.Now()
 	controllerName := "Pipeline"
 
 	// Record metrics
 	defer func() {
-		duration := time.Since(startTime)
 		resultStr := "success"
 		if err != nil {
 			resultStr = "error"
 			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
 		}
-		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr)
 	}()
 
 	// default to reconcile all namespace, if ACTIVE_NAMESPACE is set, only reconcile ACTIVE_NAMESPACE
@@ -94,18 +91,8 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 		return ctrl.Result{}, nil
 	}
 
-	// Check for status changes and record metrics
-	// Get the old object to compare status
-	oldObj := &opsv1.Pipeline{}
-	if err := r.Client.Get(ctx, req.NamespacedName, oldObj); err == nil {
-		// Compare status - if status changes in the future, record metrics
-		// Currently PipelineStatus is empty, but this will work when status fields are added
-		if !cmp.Equal(oldObj.Status, obj.Status) {
-			// Status changed - record metrics
-			// Since PipelineStatus is currently empty, we use empty string for status values
-			opsmetrics.RecordCRDResourceStatusChange("Pipeline", "Pipeline", obj.Namespace, obj.Name, "Empty", "Empty")
-		}
-	}
+	// Record Pipeline info metrics on every reconcile
+	opsmetrics.RecordPipelineInfo(obj.Namespace, obj.Name, obj.Spec.Desc)
 
 	// filled variables
 	changed := r.filledVariables(logger, ctx, obj)

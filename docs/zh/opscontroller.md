@@ -55,9 +55,14 @@ helm install myops ops/ops --version 2.0.0 --namespace ops-system --create-names
 helm install myops ops/ops --version 2.0.0 \
   --namespace ops-system \
   --create-namespace \
-  --set controller.env.eventEndpoint="http://app:password@nats-headless.ops-system.svc:4222" \
-  --set replicaCount=2 \
-  --set resources.limits.memory=4096Mi
+  --set controller.env.activeNamespace="ops-system" \
+  --set controller.env.defaultRuntimeImage="ubuntu:22.04" \
+  --set controller.replicaCount=2 \
+  --set server.replicaCount=2 \
+  --set server.autoscaling.minReplicas=2 \
+  --set server.autoscaling.maxReplicas=4 \
+  --set event.cluster="mycluster" \
+  --set event.endpoint="http://app:password@nats-headless.ops-system.svc:4222"
 ```
 
 **使用 values 文件安装：**
@@ -66,34 +71,26 @@ helm install myops ops/ops --version 2.0.0 \
 
 ```yaml
 # my-values.yaml
-replicaCount: 2
+event:
+  cluster: "mycluster"
+  endpoint: "http://app:password@nats-headless.ops-system.svc:4222"
 
 controller:
+  replicaCount: 2
   env:
     activeNamespace: "ops-system"
-    eventEndpoint: "http://app:password@nats-headless.ops-system.svc:4222"
-    defaultRuntimeImage: "registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04"
+    defaultRuntimeImage: "ubuntu:22.04"
 
 server:
-  env:
-    eventEndpoint: "http://app:password@nats-headless.ops-system.svc:4222"
-
-resources:
-  limits:
-    cpu: 2000m
-    memory: 4096Mi
-  requests:
-    cpu: 1000m
-    memory: 2048Mi
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 80
 
 prometheus:
   enabled: true
-
-autoscaling:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
 ```
 
 然后使用 values 文件安装：

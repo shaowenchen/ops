@@ -17,6 +17,7 @@ limitations under the License.
 package metrics
 
 import (
+	"os"
 	"runtime"
 	"time"
 
@@ -24,9 +25,179 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
+// PodName is the name of the current pod, used as a label in metrics
+var PodName string
+
+func init() {
+	PodName = os.Getenv("HOSTNAME")
+	if PodName == "" {
+		PodName = "unknown"
+	}
+}
+
 var (
 	// ============================================================================
-	// Controller metrics (Task, TaskRun, Pipeline, PipelineRun, etc.)
+	// Resource Info metrics - expose all non-time fields for each resource
+	// ============================================================================
+
+	// TaskInfo records Task resource info
+	TaskInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_task_info",
+			Help: "Task resource info",
+		},
+		[]string{"pod", "namespace", "name", "desc", "host", "runtime_image"},
+	)
+
+	// PipelineInfo records Pipeline resource info
+	PipelineInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_pipeline_info",
+			Help: "Pipeline resource info",
+		},
+		[]string{"pod", "namespace", "name", "desc"},
+	)
+
+	// HostInfo records Host resource info (static fields only)
+	HostInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_host_info",
+			Help: "Host resource info",
+		},
+		[]string{"pod", "namespace", "name", "address", "hostname", "distribution", "arch"},
+	)
+
+	// ClusterInfo records Cluster resource info (static fields only)
+	ClusterInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_cluster_info",
+			Help: "Cluster resource info",
+		},
+		[]string{"pod", "namespace", "name", "server", "version"},
+	)
+
+	// EventHooksInfo records EventHooks resource info
+	EventHooksInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_eventhooks_info",
+			Help: "EventHooks resource info",
+		},
+		[]string{"pod", "namespace", "name", "type", "subject", "url"},
+	)
+
+	// ============================================================================
+	// TaskRun/PipelineRun metrics - track running status, start/end time, duration
+	// ============================================================================
+
+	// TaskRunInfo records TaskRun resource info with all fields
+	TaskRunInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_taskrun_info",
+			Help: "TaskRun resource info",
+		},
+		[]string{"pod", "namespace", "name", "taskref", "crontab", "status"},
+	)
+
+	// TaskRunStartTime records TaskRun start time (unix timestamp)
+	TaskRunStartTime = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_taskrun_start_time",
+			Help: "TaskRun start time as unix timestamp",
+		},
+		[]string{"pod", "namespace", "name", "taskref"},
+	)
+
+	// TaskRunEndTime records TaskRun end time (unix timestamp)
+	TaskRunEndTime = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_taskrun_end_time",
+			Help: "TaskRun end time as unix timestamp",
+		},
+		[]string{"pod", "namespace", "name", "taskref"},
+	)
+
+	// TaskRunDurationSeconds records TaskRun duration in seconds
+	TaskRunDurationSeconds = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_taskrun_duration_seconds",
+			Help: "TaskRun duration in seconds",
+		},
+		[]string{"pod", "namespace", "name", "taskref", "status"},
+	)
+
+	// PipelineRunInfo records PipelineRun resource info with all fields
+	PipelineRunInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_pipelinerun_info",
+			Help: "PipelineRun resource info",
+		},
+		[]string{"pod", "namespace", "name", "pipelineref", "crontab", "status"},
+	)
+
+	// PipelineRunStartTime records PipelineRun start time (unix timestamp)
+	PipelineRunStartTime = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_pipelinerun_start_time",
+			Help: "PipelineRun start time as unix timestamp",
+		},
+		[]string{"pod", "namespace", "name", "pipelineref"},
+	)
+
+	// PipelineRunEndTime records PipelineRun end time (unix timestamp)
+	PipelineRunEndTime = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_pipelinerun_end_time",
+			Help: "PipelineRun end time as unix timestamp",
+		},
+		[]string{"pod", "namespace", "name", "pipelineref"},
+	)
+
+	// PipelineRunDurationSeconds records PipelineRun duration in seconds
+	PipelineRunDurationSeconds = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_pipelinerun_duration_seconds",
+			Help: "PipelineRun duration in seconds",
+		},
+		[]string{"pod", "namespace", "name", "pipelineref", "status"},
+	)
+
+	// ============================================================================
+	// Task/Pipeline run count metrics
+	// ============================================================================
+
+	// TaskRefRunTotal is a counter for TaskRef run count
+	TaskRefRunTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ops_controller_taskref_run_total",
+			Help: "Total number of TaskRef runs",
+		},
+		[]string{"pod", "namespace", "taskref", "status"},
+	)
+
+	// PipelineRefRunTotal is a counter for PipelineRef run count
+	PipelineRefRunTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ops_controller_pipelineref_run_total",
+			Help: "Total number of PipelineRef runs",
+		},
+		[]string{"pod", "namespace", "pipelineref", "status"},
+	)
+
+	// ============================================================================
+	// EventHooks trigger metrics
+	// ============================================================================
+
+	// EventHooksTriggerTotal records EventHooks trigger count (only successful triggers)
+	EventHooksTriggerTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ops_controller_eventhooks_trigger_total",
+			Help: "Total number of successful EventHooks triggers",
+		},
+		[]string{"pod", "namespace", "eventhook_name", "keyword", "event_id"},
+	)
+
+	// ============================================================================
+	// Controller reconcile metrics
 	// ============================================================================
 
 	// ControllerReconcileTotal is a counter for the total number of reconcile operations
@@ -35,17 +206,7 @@ var (
 			Name: "ops_controller_reconcile_total",
 			Help: "Total number of reconcile operations",
 		},
-		[]string{"controller", "namespace", "result"},
-	)
-
-	// ControllerReconcileDuration is a histogram for reconcile operation duration
-	ControllerReconcileDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_controller_reconcile_duration_seconds",
-			Help:    "Duration of reconcile operations in seconds",
-			Buckets: prometheus.ExponentialBuckets(0.001, 2, 10), // 1ms to ~1s
-		},
-		[]string{"controller", "namespace"},
+		[]string{"pod", "controller", "namespace", "result"},
 	)
 
 	// ControllerReconcileErrors is a counter for reconcile errors
@@ -54,151 +215,42 @@ var (
 			Name: "ops_controller_reconcile_errors_total",
 			Help: "Total number of reconcile errors",
 		},
-		[]string{"controller", "namespace", "error_type"},
-	)
-
-	// CRDResourceStatusChangeTotal is a counter for CRD resource status changes
-	// Records status changes for all CRD resources (TaskRun, PipelineRun, Cluster, Host, etc.)
-	CRDResourceStatusChangeTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_crd_resource_status_change_total",
-			Help: "Total number of CRD resource status changes",
-		},
-		[]string{"controller", "resource_type", "namespace", "resource_name", "from_status", "to_status"},
-	)
-
-	// ScheduledTaskStatusChangeTotal is a counter for scheduled task (TaskRun/PipelineRun with Crontab) status changes
-	ScheduledTaskStatusChangeTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_scheduled_task_status_change_total",
-			Help: "Total number of scheduled task status changes (TaskRun/PipelineRun with Crontab)",
-		},
-		[]string{"resource_type", "namespace", "resource_name", "crontab", "from_status", "to_status"},
-	)
-
-	// TaskRefUsageTotal is a counter for TaskRef usage in TaskRun
-	TaskRefUsageTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_taskref_usage_total",
-			Help: "Total number of TaskRef usage in TaskRun",
-		},
-		[]string{"namespace", "taskref", "status"},
-	)
-
-	// PipelineRefUsageTotal is a counter for PipelineRef usage in PipelineRun
-	PipelineRefUsageTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_pipelineref_usage_total",
-			Help: "Total number of PipelineRef usage in PipelineRun",
-		},
-		[]string{"namespace", "pipelineref", "status"},
+		[]string{"pod", "controller", "namespace", "error_type"},
 	)
 
 	// ============================================================================
-	// EventHooks metrics
-	// ============================================================================
-
-	// EventHooksReconcileTotal is a counter for the total number of EventHooks reconcile operations
-	EventHooksReconcileTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_eventhooks_reconcile_total",
-			Help: "Total number of EventHooks reconcile operations",
-		},
-		[]string{"namespace", "result"},
-	)
-
-	// EventHooksReconcileDuration is a histogram for EventHooks reconcile operation duration
-	EventHooksReconcileDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_controller_eventhooks_reconcile_duration_seconds",
-			Help:    "Duration of EventHooks reconcile operations in seconds",
-			Buckets: prometheus.ExponentialBuckets(0.001, 2, 10), // 1ms to ~1s
-		},
-		[]string{"namespace"},
-	)
-
-	// EventHooksReconcileErrors is a counter for EventHooks reconcile errors
-	EventHooksReconcileErrors = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_eventhooks_reconcile_errors_total",
-			Help: "Total number of EventHooks reconcile errors",
-		},
-		[]string{"namespace", "error_type"},
-	)
-
-	// EventHooksEventProcessedTotal is a counter for processed events
-	EventHooksEventProcessedTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_eventhooks_event_processed_total",
-			Help: "Total number of events processed by EventHooks",
-		},
-		[]string{"namespace", "eventhook_name", "status"},
-	)
-
-	// EventHooksEventProcessDuration is a histogram for event processing duration
-	EventHooksEventProcessDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_controller_eventhooks_event_process_duration_seconds",
-			Help:    "Duration of event processing in seconds",
-			Buckets: prometheus.ExponentialBuckets(0.001, 2, 12), // 1ms to ~2s
-		},
-		[]string{"namespace", "eventhook_name"},
-	)
-
-	// ============================================================================
-	// Server basic resource metrics (CPU, memory, IO, goroutines, etc.)
+	// Server basic resource metrics
 	// ============================================================================
 
 	// ServerMemoryAllocBytes is a gauge for server memory allocated in bytes
-	ServerMemoryAllocBytes = prometheus.NewGauge(
+	ServerMemoryAllocBytes = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_server_resource_memory_alloc_bytes",
 			Help: "Server memory allocated in bytes",
 		},
-	)
-
-	// ServerMemoryTotalAllocBytes is a counter for server total memory allocated in bytes
-	ServerMemoryTotalAllocBytes = prometheus.NewCounter(
-		prometheus.CounterOpts{
-			Name: "ops_server_resource_memory_total_alloc_bytes_total",
-			Help: "Server total memory allocated in bytes",
-		},
+		[]string{"pod"},
 	)
 
 	// ServerMemorySysBytes is a gauge for server memory obtained from OS in bytes
-	ServerMemorySysBytes = prometheus.NewGauge(
+	ServerMemorySysBytes = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_server_resource_memory_sys_bytes",
 			Help: "Server memory obtained from OS in bytes",
 		},
+		[]string{"pod"},
 	)
 
 	// ServerGoroutines is a gauge for server number of goroutines
-	ServerGoroutines = prometheus.NewGauge(
+	ServerGoroutines = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_server_resource_goroutines",
 			Help: "Server number of goroutines",
 		},
-	)
-
-	// ServerGCCPUFraction is a gauge for server fraction of CPU time used by GC
-	ServerGCCPUFraction = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "ops_server_resource_gc_cpu_fraction",
-			Help: "Server fraction of CPU time used by GC",
-		},
-	)
-
-	// ServerNumGC is a counter for server number of GC cycles
-	ServerNumGC = prometheus.NewCounter(
-		prometheus.CounterOpts{
-			Name: "ops_server_resource_gc_cycles_total",
-			Help: "Server number of GC cycles",
-		},
+		[]string{"pod"},
 	)
 
 	// ============================================================================
-	// Server throughput metrics (status codes, QPS, etc.)
+	// Server throughput metrics
 	// ============================================================================
 
 	// HTTPRequestsTotal is a counter for HTTP requests
@@ -207,37 +259,7 @@ var (
 			Name: "ops_server_throughput_http_requests_total",
 			Help: "Total number of HTTP requests",
 		},
-		[]string{"method", "path", "status_code"},
-	)
-
-	// HTTPRequestDuration is a histogram for HTTP request duration
-	HTTPRequestDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_server_throughput_http_request_duration_seconds",
-			Help:    "Duration of HTTP requests in seconds",
-			Buckets: prometheus.ExponentialBuckets(0.001, 2, 12), // 1ms to ~2s
-		},
-		[]string{"method", "path", "status_code"},
-	)
-
-	// HTTPRequestSize is a histogram for HTTP request body size
-	HTTPRequestSize = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_server_throughput_http_request_size_bytes",
-			Help:    "Size of HTTP request body in bytes",
-			Buckets: prometheus.ExponentialBuckets(100, 10, 7), // 100B to ~1GB
-		},
-		[]string{"method", "path"},
-	)
-
-	// HTTPResponseSize is a histogram for HTTP response body size
-	HTTPResponseSize = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_server_throughput_http_response_size_bytes",
-			Help:    "Size of HTTP response body in bytes",
-			Buckets: prometheus.ExponentialBuckets(100, 10, 7), // 100B to ~1GB
-		},
-		[]string{"method", "path", "status_code"},
+		[]string{"pod", "method", "path", "status_code"},
 	)
 
 	// APIRequestsTotal is a counter for API requests
@@ -246,17 +268,7 @@ var (
 			Name: "ops_server_throughput_api_requests_total",
 			Help: "Total number of API requests",
 		},
-		[]string{"endpoint", "namespace", "status"},
-	)
-
-	// APIRequestDuration is a histogram for API request duration
-	APIRequestDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "ops_server_throughput_api_request_duration_seconds",
-			Help:    "Duration of API requests in seconds",
-			Buckets: prometheus.ExponentialBuckets(0.001, 2, 12), // 1ms to ~2s
-		},
-		[]string{"endpoint", "namespace"},
+		[]string{"pod", "endpoint", "namespace", "status"},
 	)
 
 	// APIErrorsTotal is a counter for API errors
@@ -265,7 +277,7 @@ var (
 			Name: "ops_server_throughput_api_errors_total",
 			Help: "Total number of API errors",
 		},
-		[]string{"endpoint", "namespace", "error_type"},
+		[]string{"pod", "endpoint", "namespace", "error_type"},
 	)
 
 	// ServerInfo is a gauge for server information
@@ -274,63 +286,73 @@ var (
 			Name: "ops_server_info",
 			Help: "Server information",
 		},
-		[]string{"version", "build_date"},
+		[]string{"pod", "version", "build_date"},
 	)
 
 	// ServerUptime is a gauge for server uptime
-	ServerUptime = prometheus.NewGauge(
+	ServerUptime = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_server_uptime_seconds",
 			Help: "Server uptime in seconds",
 		},
+		[]string{"pod"},
 	)
 )
 
 // InitController initializes and registers controller-specific metrics
-// with the controller-runtime metrics registry
 func InitController() {
-	// Controller metrics
+	// Resource info metrics
 	metrics.Registry.MustRegister(
-		ControllerReconcileTotal,
-		ControllerReconcileDuration,
-		ControllerReconcileErrors,
-		CRDResourceStatusChangeTotal,
-		ScheduledTaskStatusChangeTotal,
-		TaskRefUsageTotal,
-		PipelineRefUsageTotal,
+		TaskInfo,
+		PipelineInfo,
+		HostInfo,
+		ClusterInfo,
+		EventHooksInfo,
+	)
+
+	// TaskRun/PipelineRun metrics
+	metrics.Registry.MustRegister(
+		TaskRunInfo,
+		TaskRunStartTime,
+		TaskRunEndTime,
+		TaskRunDurationSeconds,
+		PipelineRunInfo,
+		PipelineRunStartTime,
+		PipelineRunEndTime,
+		PipelineRunDurationSeconds,
+	)
+
+	// Run count metrics
+	metrics.Registry.MustRegister(
+		TaskRefRunTotal,
+		PipelineRefRunTotal,
 	)
 
 	// EventHooks metrics
 	metrics.Registry.MustRegister(
-		EventHooksReconcileTotal,
-		EventHooksReconcileDuration,
-		EventHooksReconcileErrors,
-		EventHooksEventProcessedTotal,
-		EventHooksEventProcessDuration,
+		EventHooksTriggerTotal,
+	)
+
+	// Controller reconcile metrics
+	metrics.Registry.MustRegister(
+		ControllerReconcileTotal,
+		ControllerReconcileErrors,
 	)
 }
 
 // InitServer initializes and registers server-specific metrics
-// with the controller-runtime metrics registry
 func InitServer() {
 	// Server basic resource metrics
 	metrics.Registry.MustRegister(
 		ServerMemoryAllocBytes,
-		ServerMemoryTotalAllocBytes,
 		ServerMemorySysBytes,
 		ServerGoroutines,
-		ServerGCCPUFraction,
-		ServerNumGC,
 	)
 
 	// Server throughput metrics
 	metrics.Registry.MustRegister(
 		HTTPRequestsTotal,
-		HTTPRequestDuration,
-		HTTPRequestSize,
-		HTTPResponseSize,
 		APIRequestsTotal,
-		APIRequestDuration,
 		APIErrorsTotal,
 		ServerInfo,
 		ServerUptime,
@@ -345,42 +367,128 @@ func updateServerResourceMetrics() {
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
-	var lastNumGC uint32
-	var lastPauseTotalNs uint64
-	var lastTotalAlloc uint64
-
 	for range ticker.C {
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)
 
-		// Update memory metrics
-		ServerMemoryAllocBytes.Set(float64(m.Alloc))
-
-		// Update total alloc (cumulative counter)
-		if m.TotalAlloc > lastTotalAlloc {
-			ServerMemoryTotalAllocBytes.Add(float64(m.TotalAlloc - lastTotalAlloc))
-			lastTotalAlloc = m.TotalAlloc
-		}
-
-		ServerMemorySysBytes.Set(float64(m.Sys))
-
-		// Update goroutine count
-		ServerGoroutines.Set(float64(runtime.NumGoroutine()))
-
-		// Update GC metrics
-		if m.NumGC > lastNumGC {
-			ServerNumGC.Add(float64(m.NumGC - lastNumGC))
-			lastNumGC = m.NumGC
-		}
-
-		// Calculate GC CPU fraction
-		if m.PauseTotalNs > lastPauseTotalNs {
-			pauseDelta := float64(m.PauseTotalNs - lastPauseTotalNs)
-			// Approximate CPU fraction: pause time / (10 seconds * 1e9 nanoseconds)
-			// This is a rough estimate since we don't have exact CPU time
-			cpuFraction := pauseDelta / (10.0 * 1e9)
-			ServerGCCPUFraction.Set(cpuFraction)
-			lastPauseTotalNs = m.PauseTotalNs
-		}
+		ServerMemoryAllocBytes.WithLabelValues(PodName).Set(float64(m.Alloc))
+		ServerMemorySysBytes.WithLabelValues(PodName).Set(float64(m.Sys))
+		ServerGoroutines.WithLabelValues(PodName).Set(float64(runtime.NumGoroutine()))
 	}
+}
+
+// ============================================================================
+// Resource info recording functions
+// ============================================================================
+
+// RecordTaskInfo records Task resource info
+func RecordTaskInfo(namespace, name, desc, host, runtimeImage string) {
+	TaskInfo.WithLabelValues(PodName, namespace, name, desc, host, runtimeImage).Set(1)
+}
+
+// RecordPipelineInfo records Pipeline resource info
+func RecordPipelineInfo(namespace, name, desc string) {
+	PipelineInfo.WithLabelValues(PodName, namespace, name, desc).Set(1)
+}
+
+// RecordHostInfo records Host resource info (static fields only)
+func RecordHostInfo(namespace, name, address, hostname, distribution, arch string) {
+	HostInfo.WithLabelValues(PodName, namespace, name, address, hostname, distribution, arch).Set(1)
+}
+
+// RecordClusterInfo records Cluster resource info (static fields only)
+func RecordClusterInfo(namespace, name, server, version string) {
+	ClusterInfo.WithLabelValues(PodName, namespace, name, server, version).Set(1)
+}
+
+// RecordEventHooksInfo records EventHooks resource info
+func RecordEventHooksInfo(namespace, name, eventType, subject, url string) {
+	EventHooksInfo.WithLabelValues(PodName, namespace, name, eventType, subject, url).Set(1)
+}
+
+// ============================================================================
+// TaskRun/PipelineRun recording functions
+// ============================================================================
+
+// RecordTaskRunInfo records TaskRun resource info
+func RecordTaskRunInfo(namespace, name, taskref, crontab, status string) {
+	TaskRunInfo.WithLabelValues(PodName, namespace, name, taskref, crontab, status).Set(1)
+}
+
+// RecordTaskRunStart records TaskRun start time
+func RecordTaskRunStart(namespace, name, taskref string, startTime float64) {
+	TaskRunStartTime.WithLabelValues(PodName, namespace, name, taskref).Set(startTime)
+}
+
+// RecordTaskRunEnd records TaskRun end time and duration
+func RecordTaskRunEnd(namespace, name, taskref, status string, endTime, durationSeconds float64) {
+	TaskRunEndTime.WithLabelValues(PodName, namespace, name, taskref).Set(endTime)
+	TaskRunDurationSeconds.WithLabelValues(PodName, namespace, name, taskref, status).Set(durationSeconds)
+}
+
+// RecordPipelineRunInfo records PipelineRun resource info
+func RecordPipelineRunInfo(namespace, name, pipelineref, crontab, status string) {
+	PipelineRunInfo.WithLabelValues(PodName, namespace, name, pipelineref, crontab, status).Set(1)
+}
+
+// RecordPipelineRunStart records PipelineRun start time
+func RecordPipelineRunStart(namespace, name, pipelineref string, startTime float64) {
+	PipelineRunStartTime.WithLabelValues(PodName, namespace, name, pipelineref).Set(startTime)
+}
+
+// RecordPipelineRunEnd records PipelineRun end time and duration
+func RecordPipelineRunEnd(namespace, name, pipelineref, status string, endTime, durationSeconds float64) {
+	PipelineRunEndTime.WithLabelValues(PodName, namespace, name, pipelineref).Set(endTime)
+	PipelineRunDurationSeconds.WithLabelValues(PodName, namespace, name, pipelineref, status).Set(durationSeconds)
+}
+
+// ============================================================================
+// Run count recording functions
+// ============================================================================
+
+// RecordTaskRefRun records TaskRef run count
+func RecordTaskRefRun(namespace, taskref, status string) {
+	TaskRefRunTotal.WithLabelValues(PodName, namespace, taskref, status).Inc()
+}
+
+// RecordPipelineRefRun records PipelineRef run count
+func RecordPipelineRefRun(namespace, pipelineref, status string) {
+	PipelineRefRunTotal.WithLabelValues(PodName, namespace, pipelineref, status).Inc()
+}
+
+// ============================================================================
+// EventHooks recording functions
+// ============================================================================
+
+// RecordEventHooksTrigger records EventHooks trigger (only successful triggers)
+func RecordEventHooksTrigger(namespace, eventhookName, keyword, eventID string) {
+	EventHooksTriggerTotal.WithLabelValues(PodName, namespace, eventhookName, keyword, eventID).Inc()
+}
+
+// ============================================================================
+// Controller reconcile recording functions
+// ============================================================================
+
+// RecordReconcile records a reconcile operation
+func RecordReconcile(controller, namespace, result string) {
+	ControllerReconcileTotal.WithLabelValues(PodName, controller, namespace, result).Inc()
+}
+
+// RecordReconcileError records a reconcile error
+func RecordReconcileError(controller, namespace, errorType string) {
+	ControllerReconcileErrors.WithLabelValues(PodName, controller, namespace, errorType).Inc()
+}
+
+// ============================================================================
+// Server metrics recording functions
+// ============================================================================
+
+// RecordServerInfo records server info
+func RecordServerInfo(version, buildDate string) {
+	ServerInfo.WithLabelValues(PodName, version, buildDate).Set(1)
+}
+
+// RecordServerUptime records server uptime
+func RecordServerUptime(uptimeSeconds float64) {
+	ServerUptime.WithLabelValues(PodName).Set(uptimeSeconds)
 }

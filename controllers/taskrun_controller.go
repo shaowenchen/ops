@@ -74,18 +74,16 @@ type TaskRunReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	startTime := time.Now()
 	controllerName := "TaskRun"
 
 	// Record metrics
 	defer func() {
-		duration := time.Since(startTime)
 		resultStr := "success"
 		if err != nil {
 			resultStr = "error"
 			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
 		}
-		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr)
 	}()
 
 	// start clear cron
@@ -446,14 +444,14 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		if err == nil {
 			// Record CRD resource status change metrics - record every status change
 			if oldStatus != latestTr.Status.RunStatus {
-				opsmetrics.RecordCRDResourceStatusChange("TaskRun", "TaskRun", latestTr.Namespace, latestTr.Name, oldStatus, latestTr.Status.RunStatus)
+				opsmetrics.RecordTaskRunInfo(latestTr.Namespace, latestTr.Name, latestTr.Spec.TaskRef, latestTr.Spec.Crontab, latestTr.Status.RunStatus)
 				// Record scheduled task status change if this is a scheduled task (has Crontab)
 				if latestTr.Spec.Crontab != "" {
-					opsmetrics.RecordScheduledTaskStatusChange("TaskRun", latestTr.Namespace, latestTr.Name, latestTr.Spec.Crontab, oldStatus, latestTr.Status.RunStatus)
+					opsmetrics.RecordTaskRunInfo(latestTr.Namespace, latestTr.Name, latestTr.Spec.TaskRef, latestTr.Spec.Crontab, latestTr.Status.RunStatus)
 				}
 				// Record TaskRef usage
 				if latestTr.Spec.TaskRef != "" {
-					opsmetrics.RecordTaskRefUsage(latestTr.Namespace, latestTr.Spec.TaskRef, latestTr.Status.RunStatus)
+					opsmetrics.RecordTaskRefRun(latestTr.Namespace, latestTr.Spec.TaskRef, latestTr.Status.RunStatus)
 				}
 			}
 			//need to improve

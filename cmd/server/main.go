@@ -28,7 +28,7 @@ func main() {
 	metrics.InitServer()
 
 	// Set server info
-	metrics.ServerInfo.WithLabelValues("unknown", "unknown").Set(1)
+	metrics.RecordServerInfo("unknown", "unknown")
 
 	// Start uptime tracking
 	startTime := time.Now()
@@ -36,7 +36,7 @@ func main() {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
-			metrics.ServerUptime.Set(time.Since(startTime).Seconds())
+			metrics.RecordServerUptime(time.Since(startTime).Seconds())
 		}
 	}()
 
@@ -52,10 +52,14 @@ func main() {
 
 	gin.SetMode(server.GlobalConfig.Server.RunMode)
 
-	// Add metrics endpoint
-	r.GET("/metrics", gin.WrapH(promhttp.HandlerFor(ctrlmetrics.Registry, promhttp.HandlerOpts{
-		ErrorHandling: promhttp.HTTPErrorOnError,
-	})))
+	// Start metrics server on port 9090
+	go func() {
+		metricsRouter := gin.New()
+		metricsRouter.GET("/metrics", gin.WrapH(promhttp.HandlerFor(ctrlmetrics.Registry, promhttp.HandlerOpts{
+			ErrorHandling: promhttp.HTTPErrorOnError,
+		})))
+		metricsRouter.Run(":9090")
+	}()
 
 	server.SetupRouter(r)
 	server.SetupRouteWithoutAuth(r)

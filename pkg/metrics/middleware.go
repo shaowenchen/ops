@@ -18,7 +18,6 @@ package metrics
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,44 +25,28 @@ import (
 // PrometheusMiddleware returns a Gin middleware for collecting HTTP metrics
 func PrometheusMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		start := time.Now()
 		path := c.FullPath()
 		if path == "" {
 			path = c.Request.URL.Path
 		}
 
-		// Record request size
-		if c.Request.ContentLength > 0 {
-			HTTPRequestSize.WithLabelValues(c.Request.Method, path).Observe(float64(c.Request.ContentLength))
-		}
-
 		// Process request
 		c.Next()
-
-		// Calculate duration
-		duration := time.Since(start)
 
 		// Get status code
 		statusCode := strconv.Itoa(c.Writer.Status())
 
 		// Record metrics
-		HTTPRequestsTotal.WithLabelValues(c.Request.Method, path, statusCode).Inc()
-		HTTPRequestDuration.WithLabelValues(c.Request.Method, path, statusCode).Observe(duration.Seconds())
-
-		// Record response size
-		if c.Writer.Size() > 0 {
-			HTTPResponseSize.WithLabelValues(c.Request.Method, path, statusCode).Observe(float64(c.Writer.Size()))
-		}
+		HTTPRequestsTotal.WithLabelValues(PodName, c.Request.Method, path, statusCode).Inc()
 	}
 }
 
 // RecordAPIRequest records an API request
-func RecordAPIRequest(endpoint, namespace, status string, duration time.Duration) {
-	APIRequestsTotal.WithLabelValues(endpoint, namespace, status).Inc()
-	APIRequestDuration.WithLabelValues(endpoint, namespace).Observe(duration.Seconds())
+func RecordAPIRequest(endpoint, namespace, status string) {
+	APIRequestsTotal.WithLabelValues(PodName, endpoint, namespace, status).Inc()
 }
 
 // RecordAPIError records an API error
 func RecordAPIError(endpoint, namespace, errorType string) {
-	APIErrorsTotal.WithLabelValues(endpoint, namespace, errorType).Inc()
+	APIErrorsTotal.WithLabelValues(PodName, endpoint, namespace, errorType).Inc()
 }

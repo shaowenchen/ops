@@ -5,8 +5,8 @@ metadata:
   labels:
     {{- include "ops.serverLabels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  {{- if not .Values.server.autoscaling.enabled }}
+  replicas: {{ .Values.server.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
@@ -38,7 +38,7 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
             - name: metrics
-              containerPort: 80
+              containerPort: 9090
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -71,9 +71,9 @@ spec:
               readOnly: true
           env:
             - name: EVENT_CLUSTER
-              value: {{ .Values.server.env.eventCluster | quote }}
+              value: {{ .Values.event.cluster | quote }}
             - name: EVENT_ENDPOINT
-              value: {{ .Values.server.env.eventEndpoint | quote }}
+              value: {{ .Values.event.endpoint | quote }}
       volumes:
         - name: timezone
           hostPath:

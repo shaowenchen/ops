@@ -71,18 +71,16 @@ type PipelineRunReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	startTime := time.Now()
 	controllerName := "PipelineRun"
 
 	// Record metrics
 	defer func() {
-		duration := time.Since(startTime)
 		resultStr := "success"
 		if err != nil {
 			resultStr = "error"
 			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
 		}
-		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr)
 	}()
 
 	// start clear cron
@@ -478,14 +476,14 @@ func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.
 		if err == nil {
 			// Record CRD resource status change metrics - record every status change
 			if oldStatus != latestPr.Status.RunStatus {
-				opsmetrics.RecordCRDResourceStatusChange("PipelineRun", "PipelineRun", latestPr.Namespace, latestPr.Name, oldStatus, latestPr.Status.RunStatus)
+				opsmetrics.RecordPipelineRunInfo(latestPr.Namespace, latestPr.Name, latestPr.Spec.PipelineRef, latestPr.Spec.Crontab, latestPr.Status.RunStatus)
 				// Record scheduled task status change if this is a scheduled task (has Crontab)
 				if latestPr.Spec.Crontab != "" {
-					opsmetrics.RecordScheduledTaskStatusChange("PipelineRun", latestPr.Namespace, latestPr.Name, latestPr.Spec.Crontab, oldStatus, latestPr.Status.RunStatus)
+					opsmetrics.RecordPipelineRunInfo(latestPr.Namespace, latestPr.Name, latestPr.Spec.PipelineRef, latestPr.Spec.Crontab, latestPr.Status.RunStatus)
 				}
 				// Record PipelineRef usage
 				if latestPr.Spec.PipelineRef != "" {
-					opsmetrics.RecordPipelineRefUsage(latestPr.Namespace, latestPr.Spec.PipelineRef, latestPr.Status.RunStatus)
+					opsmetrics.RecordPipelineRefRun(latestPr.Namespace, latestPr.Spec.PipelineRef, latestPr.Status.RunStatus)
 				}
 			}
 			return

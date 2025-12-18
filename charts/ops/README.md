@@ -31,9 +31,20 @@ Installation with custom values:
 helm install myops ops/ops --version 2.0.0 \
   --namespace ops-system \
   --create-namespace \
-  --set controller.env.eventEndpoint="http://app:password@nats-headless.ops-system.svc:4222" \
-  --set replicaCount=2
+  --set controller.env.activeNamespace="ops-system" \
+  --set controller.env.defaultRuntimeImage="ubuntu:22.04" \
+  --set event.cluster="mycluster" \
+  --set event.endpoint="http://app:password@nats-headless.ops-system.svc:4222"
 ```
+
+### Key Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `EVENT_CLUSTER` | The cluster name for event identification | `mycluster` |
+| `EVENT_ENDPOINT` | NATS server endpoint with credentials | `http://app:password@nats-headless.ops-system.svc:4222` |
+| `ACTIVE_NAMESPACE` | Namespace to watch (empty = all namespaces) | `ops-system` |
+| `DEFAULT_RUNTIME_IMAGE` | Default image for task execution | `ubuntu:22.04` |
 
 Installation with values file:
 
@@ -71,7 +82,16 @@ The following table lists the configurable parameters and their default values:
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `replicaCount` | Number of replicas for controller and server | `1` |
+| `event.cluster` | Event cluster name (shared by controller and server) | `default` |
+| `event.endpoint` | NATS event endpoint (shared by controller and server) | `http://app:mypassword@nats-headless.ops-system.svc:4222` |
+| `controller.replicaCount` | Number of replicas for controller | `2` |
+| `controller.env.activeNamespace` | Active namespace for processing CRDs (empty = all namespaces) | `ops-system` |
+| `controller.env.defaultRuntimeImage` | Default runtime image for tasks | `ubuntu:22.04` |
+| `server.replicaCount` | Number of replicas for server | `2` |
+| `server.autoscaling.enabled` | Enable HPA for server | `true` |
+| `server.autoscaling.minReplicas` | Minimum replicas for server HPA | `2` |
+| `server.autoscaling.maxReplicas` | Maximum replicas for server HPA | `4` |
+| `server.autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization for server HPA | `80` |
 | `image.repository` | Controller image repository | `registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-ops-controller-manager` |
 | `image.tag` | Controller image tag | `latest` |
 | `image.pullPolicy` | Image pull policy | `Always` |
@@ -81,21 +101,7 @@ The following table lists the configurable parameters and their default values:
 | `service.type` | Kubernetes service type | `ClusterIP` |
 | `service.port` | Service port | `80` |
 | `ingress.enabled` | Enable ingress | `false` |
-| `resources.limits.cpu` | CPU limit | `1000m` |
-| `resources.limits.memory` | Memory limit | `2048Mi` |
-| `resources.requests.cpu` | CPU request | `500m` |
-| `resources.requests.memory` | Memory request | `1024Mi` |
-| `autoscaling.enabled` | Enable HPA | `false` |
-| `autoscaling.minReplicas` | Minimum replicas for HPA | `1` |
-| `autoscaling.maxReplicas` | Maximum replicas for HPA | `100` |
-| `autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization | `80` |
 | `prometheus.enabled` | Enable Prometheus monitoring | `true` |
-| `controller.env.activeNamespace` | Active namespace for processing CRDs (empty = all namespaces) | `""` |
-| `controller.env.defaultRuntimeImage` | Default runtime image for tasks | `registry.cn-beijing.aliyuncs.com/opshub/ubuntu:22.04` |
-| `controller.env.eventCluster` | Event cluster name | `default` |
-| `controller.env.eventEndpoint` | NATS event endpoint | `http://app:mypassword@nats-headless.ops-system.svc:4222` |
-| `server.env.eventCluster` | Event cluster name | `default` |
-| `server.env.eventEndpoint` | NATS event endpoint | `http://app:mypassword@nats-headless.ops-system.svc:4222` |
 
 ## Components
 
@@ -124,7 +130,7 @@ When `prometheus.enabled` is set to `true`, the chart creates:
 
 ### Metrics Endpoints
 
-- Controller: `http://<release-name>-ops-controller-metrics:8080/metrics`
+- Controller: `http://<release-name>-ops-controller-metrics:80/metrics`
 - Server: `http://<release-name>-ops-server:80/metrics`
 
 ## Upgrading
@@ -177,7 +183,7 @@ kubectl get servicemonitor -n ops-system
 
 ```bash
 # Controller metrics
-kubectl port-forward -n ops-system svc/<release-name>-ops-controller-metrics 8080:8080
+kubectl port-forward -n ops-system svc/<release-name>-ops-controller-metrics 8080:80
 curl http://localhost:8080/metrics
 
 # Server metrics

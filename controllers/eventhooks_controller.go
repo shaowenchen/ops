@@ -24,14 +24,11 @@ import (
 	"sync"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/google/go-cmp/cmp"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -70,17 +67,15 @@ func (r *EventHooksReconciler) init() {
 // +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=crd.chenshaowen.com,resources=eventhooks/finalizers,verbs=update
 func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	startTime := time.Now()
-
+	controllerName := "EventHooks"
 	// Record EventHooks metrics
 	defer func() {
-		duration := time.Since(startTime)
 		resultStr := "success"
 		if err != nil {
 			resultStr = "error"
-			opsmetrics.RecordEventHooksReconcileError(req.Namespace, "reconcile_error")
+			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
 		}
-		opsmetrics.RecordEventHooksReconcile(req.Namespace, resultStr, duration)
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr)
 	}()
 
 	r.init()
@@ -107,18 +102,8 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	// Check for status changes and record metrics
-	// Get the old object to compare status
-	oldObj := &opsv1.EventHooks{}
-	if err := r.Get(ctx, req.NamespacedName, oldObj); err == nil {
-		// Compare status - if status changes in the future, record metrics
-		// Currently EventHooksStatus is empty, but this will work when status fields are added
-		if !cmp.Equal(oldObj.Status, obj.Status) {
-			// Status changed - record metrics
-			// Since EventHooksStatus is currently empty, we use empty string for status values
-			opsmetrics.RecordCRDResourceStatusChange("EventHooks", "EventHooks", obj.Namespace, obj.Name, "Empty", "Empty")
-		}
-	}
+	// Record EventHooks info metrics
+	opsmetrics.RecordEventHooksInfo(obj.Namespace, obj.Name, obj.Spec.Type, obj.Spec.Subject, obj.Spec.URL)
 
 	// record for delete object and stop watch
 	r.objSubjectMapMutex.Lock()
@@ -200,7 +185,6 @@ func (r *EventHooksReconciler) updateSubject(logger *opslog.Logger, ctx context.
 }
 
 func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx context.Context, event cloudevents.Event, eventhook opsv1.EventHooks) {
-	startTime := time.Now()
 	eventStrings := opsevent.GetCloudEventReadable(event)
 
 	// If no keywords are configured, trigger all events
@@ -218,27 +202,28 @@ func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx co
 		}
 	}
 
+	// Find matched keyword for metrics
+	matchedKeyword := ""
+	if len(eventhook.Spec.Keywords) > 0 {
+		for _, keyword := range eventhook.Spec.Keywords {
+			if strings.Contains(eventStrings, keyword) {
+				matchedKeyword = keyword
+				break
+			}
+		}
+	}
+
 	if shouldTrigger {
 		notif, ok := opseventhook.NotificationMap[eventhook.Spec.Type]
 		if !ok || notif == nil {
 			logger.Error.Println(fmt.Sprintf("eventhook %s type %s not found", eventhook.ObjectMeta.Name, eventhook.Spec.Type))
-			opsmetrics.RecordEventHooksEventProcessed(eventhook.Namespace, eventhook.Name, "error")
-			duration := time.Since(startTime)
-			opsmetrics.RecordEventHooksEventProcessDuration(eventhook.Namespace, eventhook.Name, duration)
 			return
 		}
-		// Record event processing metrics
+		// Record event processing metrics only on success
 		go func() {
-			processStartTime := time.Now()
 			notif.Post(eventhook.Spec.URL, eventhook.Spec.Options, eventStrings, eventhook.Spec.Additional)
-			duration := time.Since(processStartTime)
-			opsmetrics.RecordEventHooksEventProcessDuration(eventhook.Namespace, eventhook.Name, duration)
-			opsmetrics.RecordEventHooksEventProcessed(eventhook.Namespace, eventhook.Name, "success")
+			opsmetrics.RecordEventHooksTrigger(eventhook.Namespace, eventhook.Name, matchedKeyword, event.ID())
 		}()
-	} else {
-		opsmetrics.RecordEventHooksEventProcessed(eventhook.Namespace, eventhook.Name, "skipped")
-		duration := time.Since(startTime)
-		opsmetrics.RecordEventHooksEventProcessDuration(eventhook.Namespace, eventhook.Name, duration)
 	}
 }
 

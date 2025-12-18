@@ -62,18 +62,16 @@ type HostReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	startTime := time.Now()
 	controllerName := "Host"
 
 	// Record metrics
 	defer func() {
-		duration := time.Since(startTime)
 		resultStr := "success"
 		if err != nil {
 			resultStr = "error"
 			opsmetrics.RecordReconcileError(controllerName, req.Namespace, "reconcile_error")
 		}
-		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr, duration)
+		opsmetrics.RecordReconcile(controllerName, req.Namespace, resultStr)
 	}()
 
 	actionNs := opsconstants.GetEnvActiveNamespace()
@@ -96,6 +94,8 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		return ctrl.Result{}, err
 	}
 
+	// Record Host info metrics on every reconcile
+	opsmetrics.RecordHostInfo(h.Namespace, h.Name, h.Spec.Address, h.Status.Hostname, h.Status.Distribution, h.Status.Arch)
 	// add timeticker
 	r.addTimeTicker(logger, ctx, h)
 
@@ -223,7 +223,7 @@ func (r *HostReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 		logger.Error.Println(err, "failed to get last host")
 		return
 	}
-	oldStatus := lastH.Status.HeartStatus
+	_ = lastH.Status.HeartStatus // oldStatus reserved for future use
 	if overrideStatus != nil {
 		lastH.Status = *overrideStatus
 	}
@@ -233,10 +233,8 @@ func (r *HostReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 	lastH.Status.HeartTime = &metav1.Time{Time: time.Now()}
 	err = r.Client.Status().Update(ctx, lastH)
 	if err == nil {
-		// Record CRD resource status change metrics - record every status change
-		if oldStatus != lastH.Status.HeartStatus {
-			opsmetrics.RecordCRDResourceStatusChange("Host", "Host", lastH.Namespace, lastH.Name, oldStatus, lastH.Status.HeartStatus)
-		}
+		// Record Host info metrics
+		opsmetrics.RecordHostInfo(lastH.Namespace, lastH.Name, lastH.Spec.Address, lastH.Status.Hostname, lastH.Status.Distribution, lastH.Status.Arch)
 	} else {
 		logger.Error.Println(err, "update host status error")
 	}
