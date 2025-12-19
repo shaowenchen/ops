@@ -69,7 +69,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"})",
+          "expr": "count(ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"})",
           "legendFormat": "Task",
           "refId": "A"
         }
@@ -126,7 +126,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"})",
+          "expr": "count(ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"})",
           "legendFormat": "Pipeline",
           "refId": "A"
         }
@@ -157,6 +157,49 @@
         },
         "overrides": []
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Total"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host Successed"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Successed"
+              }
+            ]
+          }
+        ]
+      },
       "gridPos": {
         "h": 4,
         "w": 4,
@@ -183,12 +226,21 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"})",
+          "expr": "count(ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"})",
           "legendFormat": "Host",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\",status=\"Successed\"})",
+          "legendFormat": "Host Successed",
+          "refId": "B"
         }
       ],
-      "title": "Host Count",
+      "title": "Host",
       "type": "stat"
     },
     {
@@ -213,6 +265,49 @@
           }
         },
         "overrides": []
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cluster"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Total"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cluster Successed"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Successed"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 4,
@@ -240,12 +335,21 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"})",
+          "expr": "count(ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"})",
           "legendFormat": "Cluster",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\",status=\"Successed\"})",
+          "legendFormat": "Cluster Successed",
+          "refId": "B"
         }
       ],
-      "title": "Cluster Count",
+      "title": "Cluster",
       "type": "stat"
     },
     {
@@ -258,16 +362,14 @@
           "color": {
             "mode": "palette-classic"
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          }
+          "custom": {
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          },
+          "mappings": []
         },
         "overrides": []
       },
@@ -279,16 +381,18 @@
       },
       "id": 5,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
+        "displayLabels": ["name", "value", "percent"],
+        "legend": {
+          "displayMode": "visible",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["value", "percent"]
         },
-        "textMode": "auto"
+        "pieType": "pie",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "10.0.0",
       "targets": [
@@ -297,13 +401,22 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\",status=\"Running\"})",
-          "legendFormat": "Running TaskRun",
+          "expr": "count(ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\",status=\"Running\"})",
+          "legendFormat": "Running",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}) - count(ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\",status=\"Running\"})",
+          "legendFormat": "Other",
+          "refId": "B"
         }
       ],
-      "title": "Running TaskRun",
-      "type": "stat"
+      "title": "TaskRun",
+      "type": "piechart"
     },
     {
       "datasource": {
@@ -315,16 +428,14 @@
           "color": {
             "mode": "palette-classic"
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          }
+          "custom": {
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          },
+          "mappings": []
         },
         "overrides": []
       },
@@ -336,8 +447,275 @@
       },
       "id": 6,
       "options": {
+        "displayLabels": ["name", "value", "percent"],
+        "legend": {
+          "displayMode": "visible",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["value", "percent"]
+        },
+        "pieType": "pie",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\",status=\"Running\"})",
+          "legendFormat": "Running",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}) - count(ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\",status=\"Running\"})",
+          "legendFormat": "Other",
+          "refId": "B"
+        }
+      ],
+      "title": "PipelineRun",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 2
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "rate(ops_controller_resource_cpu_usage_seconds_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}[5m])",
+          "legendFormat": "CPU Usage (cores)",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 2
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "ops_controller_resource_memory_usage_bytes{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
+          "legendFormat": "Memory Usage",
+          "refId": "A"
+        }
+      ],
+      "title": "Memory Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "ops_controller_resource_goroutines{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
+          "legendFormat": "Goroutines",
+          "refId": "A"
+        }
+      ],
+      "title": "Goroutines",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 7,
+      "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -354,12 +732,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\",status=\"Running\"})",
-          "legendFormat": "Running PipelineRun",
+          "expr": "ops_controller_uptime_seconds{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
+          "legendFormat": "Uptime",
           "refId": "A"
         }
       ],
-      "title": "Running PipelineRun",
+      "title": "Controller Uptime",
       "type": "stat"
     },
     {
@@ -368,7 +746,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 14
       },
       "id": 101,
       "panels": [],
@@ -409,7 +787,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 15
       },
       "id": 7,
       "options": {
@@ -429,7 +807,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -446,15 +824,28 @@
               "Value": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "desc": 1,
+              "host": 2,
+              "runtime_image": 3
+            },
             "renameByName": {
-              "desc": "描述",
-              "host": "主机",
-              "name": "名称",
-              "namespace": "命名空间",
-              "runtime_image": "运行时镜像"
+              "name": "name",
+              "desc": "desc",
+              "host": "host",
+              "runtime_image": "runtime_image"
             }
           }
         }
@@ -495,9 +886,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 6
+        "y": 15
       },
-      "id": 8,
+      "id": 10,
       "options": {
         "cellHeight": "sm",
         "footer": {
@@ -515,7 +906,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -532,13 +923,24 @@
               "Value": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "desc": 1
+            },
             "renameByName": {
-              "desc": "描述",
-              "name": "名称",
-              "namespace": "命名空间"
+              "name": "name",
+              "desc": "desc"
             }
           }
         }
@@ -579,9 +981,9 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 23
       },
-      "id": 9,
+      "id": 11,
       "options": {
         "cellHeight": "sm",
         "footer": {
@@ -599,7 +1001,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -616,23 +1018,44 @@
               "Value": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "address": 1,
+              "hostname": 2,
+              "distribution": 3,
+              "arch": 4,
+              "status": 5,
+              "cpu_total": 6,
+              "mem_total": 7,
+              "disk_total": 8,
+              "accelerator_vendor": 9,
+              "accelerator_model": 10,
+              "accelerator_count": 11
+            },
             "renameByName": {
-              "accelerator_count": "加速卡数量",
-              "accelerator_model": "加速卡型号",
-              "accelerator_vendor": "加速卡厂商",
-              "address": "地址",
-              "arch": "架构",
-              "cpu_total": "CPU",
-              "disk_total": "磁盘",
-              "distribution": "系统",
-              "heart_status": "状态",
-              "hostname": "主机名",
-              "mem_total": "内存",
-              "name": "名称",
-              "namespace": "命名空间"
+              "name": "name",
+              "address": "address",
+              "hostname": "hostname",
+              "distribution": "distribution",
+              "arch": "arch",
+              "status": "status",
+              "cpu_total": "cpu_total",
+              "mem_total": "mem_total",
+              "disk_total": "disk_total",
+              "accelerator_vendor": "accelerator_vendor",
+              "accelerator_model": "accelerator_model",
+              "accelerator_count": "accelerator_count"
             }
           }
         }
@@ -693,7 +1116,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -710,18 +1133,38 @@
               "Value": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "server": 1,
+              "version": 2,
+              "status": 3,
+              "node": 4,
+              "pod_count": 5,
+              "running_pod": 6,
+              "cert_not_after_days": 7,
+              "heart_time": 8
+            },
             "renameByName": {
-              "heart_status": "状态",
-              "name": "名称",
-              "namespace": "命名空间",
-              "node": "节点数",
-              "pod": "Pod总数",
-              "running_pod": "运行Pod",
-              "server": "服务器",
-              "version": "版本"
+              "name": "name",
+              "server": "server",
+              "version": "version",
+              "status": "status",
+              "node": "node",
+              "pod_count": "pod_count",
+              "running_pod": "running_pod",
+              "cert_not_after_days": "cert_not_after_days",
+              "heart_time": "heart_time"
             }
           }
         }
@@ -734,7 +1177,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 39
       },
       "id": 102,
       "panels": [],
@@ -795,7 +1238,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -812,15 +1255,28 @@
               "Value": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "taskref": 1,
+              "crontab": 2,
+              "status": 3
+            },
             "renameByName": {
-              "crontab": "定时",
-              "name": "名称",
-              "namespace": "命名空间",
-              "status": "状态",
-              "taskref": "TaskRef"
+              "name": "name",
+              "taskref": "taskref",
+              "crontab": "crontab",
+              "status": "status"
             }
           }
         }
@@ -881,7 +1337,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -898,15 +1354,28 @@
               "Value": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "pipelineref": 1,
+              "crontab": 2,
+              "status": 3
+            },
             "renameByName": {
-              "crontab": "定时",
-              "name": "名称",
-              "namespace": "命名空间",
-              "pipelineref": "PipelineRef",
-              "status": "状态"
+              "name": "name",
+              "pipelineref": "pipelineref",
+              "crontab": "crontab",
+              "status": "status"
             }
           }
         }
@@ -963,7 +1432,7 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "运行时长"
+            "displayName": "Duration"
           }
         ]
       },
@@ -974,7 +1443,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_taskrun_duration_seconds{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_taskrun_duration_seconds{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -990,15 +1459,28 @@
               "Time": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "taskref": 1,
+              "status": 2,
+              "Duration": 3
+            },
             "renameByName": {
-              "Value": "运行时长",
-              "name": "名称",
-              "namespace": "命名空间",
-              "status": "状态",
-              "taskref": "TaskRef"
+              "name": "name",
+              "taskref": "taskref",
+              "status": "status",
+              "Value": "Duration"
             }
           }
         }
@@ -1055,7 +1537,7 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "运行时长"
+            "displayName": "Duration"
           }
         ]
       },
@@ -1066,7 +1548,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_pipelinerun_duration_seconds{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_pipelinerun_duration_seconds{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1082,33 +1564,33 @@
               "Time": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "pipelineref": 1,
+              "status": 2,
+              "Duration": 3
+            },
             "renameByName": {
-              "Value": "运行时长",
-              "name": "名称",
-              "namespace": "命名空间",
-              "pipelineref": "PipelineRef",
-              "status": "状态"
+              "name": "name",
+              "pipelineref": "pipelineref",
+              "status": "status",
+              "Value": "Duration"
             }
           }
         }
       ],
       "type": "table"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 47
-      },
-      "id": 103,
-      "panels": [],
-      "title": "Run Statistics",
-      "type": "row"
     },
     {
       "datasource": {
@@ -1159,7 +1641,7 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "次数"
+            "displayName": "Count"
           }
         ]
       },
@@ -1170,7 +1652,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_taskref_run_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_taskref_run_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1186,14 +1668,26 @@
               "Time": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "taskref": 0,
+              "status": 1,
+              "Count": 2
+            },
             "renameByName": {
-              "Value": "次数",
-              "namespace": "命名空间",
-              "status": "状态",
-              "taskref": "TaskRef"
+              "taskref": "taskref",
+              "status": "status",
+              "Value": "Count"
             }
           }
         }
@@ -1249,7 +1743,7 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "次数"
+            "displayName": "Count"
           }
         ]
       },
@@ -1260,7 +1754,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_pipelineref_run_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_pipelineref_run_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1276,14 +1770,26 @@
               "Time": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "pipelineref": 0,
+              "status": 1,
+              "Count": 2
+            },
             "renameByName": {
-              "Value": "次数",
-              "namespace": "命名空间",
-              "pipelineref": "PipelineRef",
-              "status": "状态"
+              "pipelineref": "pipelineref",
+              "status": "status",
+              "Value": "Count"
             }
           }
         }
@@ -1357,7 +1863,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_eventhooks_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_eventhooks_info{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1374,15 +1880,28 @@
               "Value": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "name": 0,
+              "type": 1,
+              "subject": 2,
+              "url": 3
+            },
             "renameByName": {
-              "name": "名称",
-              "namespace": "命名空间",
-              "subject": "主题",
-              "type": "类型",
-              "url": "URL"
+              "name": "name",
+              "type": "type",
+              "subject": "subject",
+              "url": "url"
             }
           }
         }
@@ -1438,7 +1957,7 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "次数"
+            "displayName": "Count"
           }
         ]
       },
@@ -1449,7 +1968,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_eventhooks_trigger_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=\"$pod\"}",
+          "expr": "ops_controller_eventhooks_trigger_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1465,16 +1984,30 @@
               "Time": true,
               "__name__": true,
               "instance": true,
-              "job": true
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "namespace": true,
+              "pod": true,
+              "cluster": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "eventhook_name": 0,
+              "keyword": 1,
+              "event_id": 2,
+              "status": 3,
+              "Count": 4
+            },
             "renameByName": {
-              "Value": "次数",
-              "event_id": "事件ID",
-              "eventhook_name": "EventHook",
-              "keyword": "关键字",
-              "namespace": "命名空间",
-              "status": "状态"
+              "eventhook_name": "eventhook_name",
+              "keyword": "keyword",
+              "event_id": "event_id",
+              "status": "status",
+              "Value": "Count"
             }
           }
         }
@@ -1515,7 +2048,7 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(ops_controller_task_info, cluster)",
+        "definition": "label_values(ops_controller_info, cluster)",
         "hide": 0,
         "includeAll": false,
         "label": "cluster",
@@ -1523,7 +2056,7 @@
         "name": "cluster",
         "options": [],
         "query": {
-          "query": "label_values(ops_controller_task_info, cluster)",
+          "query": "label_values(ops_controller_info, cluster)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
@@ -1542,7 +2075,7 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(ops_controller_task_info, namespace)",
+        "definition": "label_values(ops_controller_info, namespace)",
         "hide": 0,
         "includeAll": false,
         "label": "namespace",
@@ -1550,7 +2083,7 @@
         "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(ops_controller_task_info, namespace)",
+          "query": "label_values(ops_controller_info, namespace)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
@@ -1569,15 +2102,15 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(ops_controller_reconcile_total{cluster=\"$cluster\",namespace=\"$namespace\"}, pod)",
+        "definition": "label_values(ops_controller_info{cluster=\"$cluster\",namespace=\"$namespace\"}, pod)",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "pod",
-        "multi": false,
+        "multi": true,
         "name": "pod",
         "options": [],
         "query": {
-          "query": "label_values(ops_controller_reconcile_total{cluster=\"$cluster\",namespace=\"$namespace\"}, pod)",
+          "query": "label_values(ops_controller_info{cluster=\"$cluster\",namespace=\"$namespace\"}, pod)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,

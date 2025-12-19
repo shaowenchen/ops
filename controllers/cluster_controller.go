@@ -93,7 +93,15 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 		return ctrl.Result{}, err
 	}
 	// Record Cluster info metrics on every reconcile
-	opsmetrics.RecordClusterInfo(c.Namespace, c.Name, c.Spec.Server, c.Status.Version)
+	status := c.Status.HeartStatus
+	if status == "" {
+		status = "Unknown"
+	}
+	heartTime := ""
+	if c.Status.HeartTime != nil {
+		heartTime = c.Status.HeartTime.Format(time.RFC3339)
+	}
+	opsmetrics.RecordClusterInfo(c.Namespace, c.Name, c.Spec.Server, c.Status.Version, status, c.Status.Node, c.Status.Pod, c.Status.RunningPod, c.Status.CertNotAfterDays, heartTime)
 	// add timeticker
 	r.addTimeTicker(logger, ctx, c)
 	// sync tasks and pipelines
@@ -224,7 +232,15 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	err = r.Client.Status().Update(ctx, lastC)
 	if err == nil {
 		// Record Cluster info metrics
-		opsmetrics.RecordClusterInfo(lastC.Namespace, lastC.Name, lastC.Spec.Server, lastC.Status.Version)
+		status := lastC.Status.HeartStatus
+		if status == "" {
+			status = "Unknown"
+		}
+		heartTime := ""
+		if lastC.Status.HeartTime != nil {
+			heartTime = lastC.Status.HeartTime.Format(time.RFC3339)
+		}
+		opsmetrics.RecordClusterInfo(lastC.Namespace, lastC.Name, lastC.Spec.Server, lastC.Status.Version, status, lastC.Status.Node, lastC.Status.Pod, lastC.Status.RunningPod, lastC.Status.CertNotAfterDays, heartTime)
 	} else {
 		logger.Error.Println(err, "update cluster status error")
 	}

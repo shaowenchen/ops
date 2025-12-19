@@ -59,15 +59,25 @@ These metrics expose resource information during each reconcile.
 | `ops_controller_reconcile_total` | controller, namespace, result | Total number of reconcile operations |
 | `ops_controller_reconcile_errors_total` | controller, namespace, error_type | Total number of reconcile errors |
 
+### Controller Resource Metrics
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `ops_controller_resource_goroutines` | pod | Controller number of goroutines |
+| `ops_controller_resource_cpu_usage_seconds_total` | pod | Controller CPU usage in seconds (cumulative, read from cgroup) |
+| `ops_controller_resource_memory_usage_bytes` | pod | Controller memory usage in bytes (read from cgroup) |
+| `ops_controller_uptime_seconds` | pod | Controller uptime in seconds |
+| `ops_controller_info` | pod, version, build_date | Controller information |
+
 ## Server Metrics
 
 ### Resource Metrics
 
 | Metric | Labels | Description |
 |--------|--------|-------------|
-| `ops_server_resource_memory_alloc_bytes` | - | Server memory allocated in bytes |
-| `ops_server_resource_memory_sys_bytes` | - | Server memory obtained from OS in bytes |
-| `ops_server_resource_goroutines` | - | Server number of goroutines |
+| `ops_server_resource_goroutines` | pod | Server number of goroutines |
+| `ops_server_resource_cpu_usage_seconds_total` | pod | Server CPU usage in seconds (cumulative, read from cgroup) |
+| `ops_server_resource_memory_usage_bytes` | pod | Server memory usage in bytes (read from cgroup) |
 
 ### Throughput Metrics
 
@@ -81,8 +91,8 @@ These metrics expose resource information during each reconcile.
 
 | Metric | Labels | Description |
 |--------|--------|-------------|
-| `ops_server_info` | version, build_date | Server information |
-| `ops_server_uptime_seconds` | - | Server uptime in seconds |
+| `ops_server_info` | pod, version, build_date | Server information |
+| `ops_server_uptime_seconds` | pod | Server uptime in seconds |
 
 ## Example Queries
 
@@ -114,5 +124,29 @@ sum by (eventhook_name, keyword) (ops_controller_eventhooks_trigger_total)
 
 ```promql
 ops_controller_taskrun_duration_seconds
+```
+
+### Get Controller CPU usage rate
+
+```promql
+rate(ops_controller_resource_cpu_usage_seconds_total{pod="xxx"}[5m])
+```
+
+### Get Controller memory usage
+
+```promql
+ops_controller_resource_memory_usage_bytes{pod="xxx"}
+```
+
+### Get Server CPU usage rate
+
+```promql
+rate(ops_server_resource_cpu_usage_seconds_total{pod="xxx"}[5m])
+```
+
+### Get Server memory usage
+
+```promql
+ops_server_resource_memory_usage_bytes{pod="xxx"}
 ```
 

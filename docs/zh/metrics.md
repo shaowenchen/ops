@@ -59,15 +59,25 @@ Ops 暴露 Prometheus 指标用于监控 controller 和 server 组件。
 | `ops_controller_reconcile_total` | controller, namespace, result | reconcile 操作总次数 |
 | `ops_controller_reconcile_errors_total` | controller, namespace, error_type | reconcile 错误总次数 |
 
+### Controller 资源指标
+
+| 指标 | 标签 | 描述 |
+|------|------|------|
+| `ops_controller_resource_goroutines` | pod | Controller goroutine 数量 |
+| `ops_controller_resource_cpu_usage_seconds_total` | pod | Controller CPU 使用量（秒，累计值，从 cgroup 读取） |
+| `ops_controller_resource_memory_usage_bytes` | pod | Controller 内存使用量（字节，从 cgroup 读取） |
+| `ops_controller_uptime_seconds` | pod | Controller 运行时间（秒） |
+| `ops_controller_info` | pod, version, build_date | Controller 信息 |
+
 ## Server 指标
 
 ### 资源指标
 
 | 指标 | 标签 | 描述 |
 |------|------|------|
-| `ops_server_resource_memory_alloc_bytes` | - | Server 已分配内存（字节） |
-| `ops_server_resource_memory_sys_bytes` | - | Server 从系统获取的内存（字节） |
-| `ops_server_resource_goroutines` | - | Server goroutine 数量 |
+| `ops_server_resource_goroutines` | pod | Server goroutine 数量 |
+| `ops_server_resource_cpu_usage_seconds_total` | pod | Server CPU 使用量（秒，累计值，从 cgroup 读取） |
+| `ops_server_resource_memory_usage_bytes` | pod | Server 内存使用量（字节，从 cgroup 读取） |
 
 ### 吞吐量指标
 
@@ -81,8 +91,8 @@ Ops 暴露 Prometheus 指标用于监控 controller 和 server 组件。
 
 | 指标 | 标签 | 描述 |
 |------|------|------|
-| `ops_server_info` | version, build_date | Server 信息 |
-| `ops_server_uptime_seconds` | - | Server 运行时间（秒） |
+| `ops_server_info` | pod, version, build_date | Server 信息 |
+| `ops_server_uptime_seconds` | pod | Server 运行时间（秒） |
 
 ## 查询示例
 
@@ -114,5 +124,29 @@ sum by (eventhook_name, keyword) (ops_controller_eventhooks_trigger_total)
 
 ```promql
 ops_controller_taskrun_duration_seconds
+```
+
+### 获取 Controller CPU 使用率
+
+```promql
+rate(ops_controller_resource_cpu_usage_seconds_total{pod="xxx"}[5m])
+```
+
+### 获取 Controller 内存使用量
+
+```promql
+ops_controller_resource_memory_usage_bytes{pod="xxx"}
+```
+
+### 获取 Server CPU 使用率
+
+```promql
+rate(ops_server_resource_cpu_usage_seconds_total{pod="xxx"}[5m])
+```
+
+### 获取 Server 内存使用量
+
+```promql
+ops_server_resource_memory_usage_bytes{pod="xxx"}
 ```
 

@@ -17,6 +17,7 @@ limitations under the License.
 package metrics
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"time"
@@ -64,7 +65,7 @@ var (
 			Name: "ops_controller_host_info",
 			Help: "Host resource info",
 		},
-		[]string{"pod", "namespace", "name", "address", "hostname", "distribution", "arch"},
+		[]string{"pod", "namespace", "name", "address", "hostname", "distribution", "arch", "status"},
 	)
 
 	// ClusterInfo records Cluster resource info (static fields only)
@@ -73,7 +74,7 @@ var (
 			Name: "ops_controller_cluster_info",
 			Help: "Cluster resource info",
 		},
-		[]string{"pod", "namespace", "name", "server", "version"},
+		[]string{"pod", "namespace", "name", "server", "version", "status", "node", "pod_count", "running_pod", "cert_not_after_days", "heart_time"},
 	)
 
 	// EventHooksInfo records EventHooks resource info
@@ -219,26 +220,57 @@ var (
 	)
 
 	// ============================================================================
-	// Server basic resource metrics
+	// Controller basic resource metrics
 	// ============================================================================
 
-	// ServerMemoryAllocBytes is a gauge for server memory allocated in bytes
-	ServerMemoryAllocBytes = prometheus.NewGaugeVec(
+	// ControllerGoroutines is a gauge for controller number of goroutines
+	ControllerGoroutines = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "ops_server_resource_memory_alloc_bytes",
-			Help: "Server memory allocated in bytes",
+			Name: "ops_controller_resource_goroutines",
+			Help: "Controller number of goroutines",
 		},
 		[]string{"pod"},
 	)
 
-	// ServerMemorySysBytes is a gauge for server memory obtained from OS in bytes
-	ServerMemorySysBytes = prometheus.NewGaugeVec(
+	// ControllerUptime is a gauge for controller uptime
+	ControllerUptime = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "ops_server_resource_memory_sys_bytes",
-			Help: "Server memory obtained from OS in bytes",
+			Name: "ops_controller_uptime_seconds",
+			Help: "Controller uptime in seconds",
 		},
 		[]string{"pod"},
 	)
+
+	// ControllerInfo is a gauge for controller information
+	ControllerInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_info",
+			Help: "Controller information",
+		},
+		[]string{"pod", "version", "build_date"},
+	)
+
+	// ControllerCPUUsage is a gauge for controller CPU usage (cumulative seconds)
+	ControllerCPUUsage = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_resource_cpu_usage_seconds_total",
+			Help: "Controller CPU usage in seconds (cumulative)",
+		},
+		[]string{"pod"},
+	)
+
+	// ControllerMemoryUsage is a gauge for controller memory usage in bytes
+	ControllerMemoryUsage = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_resource_memory_usage_bytes",
+			Help: "Controller memory usage in bytes",
+		},
+		[]string{"pod"},
+	)
+
+	// ============================================================================
+	// Server basic resource metrics
+	// ============================================================================
 
 	// ServerGoroutines is a gauge for server number of goroutines
 	ServerGoroutines = prometheus.NewGaugeVec(
@@ -297,6 +329,24 @@ var (
 		},
 		[]string{"pod"},
 	)
+
+	// ServerCPUUsage is a gauge for server CPU usage (cumulative seconds)
+	ServerCPUUsage = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_server_resource_cpu_usage_seconds_total",
+			Help: "Server CPU usage in seconds (cumulative)",
+		},
+		[]string{"pod"},
+	)
+
+	// ServerMemoryUsage is a gauge for server memory usage in bytes
+	ServerMemoryUsage = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_server_resource_memory_usage_bytes",
+			Help: "Server memory usage in bytes",
+		},
+		[]string{"pod"},
+	)
 )
 
 // InitController initializes and registers controller-specific metrics
@@ -338,15 +388,27 @@ func InitController() {
 		ControllerReconcileTotal,
 		ControllerReconcileErrors,
 	)
+
+	// Controller basic resource metrics
+	metrics.Registry.MustRegister(
+		ControllerGoroutines,
+		ControllerUptime,
+		ControllerInfo,
+		ControllerCPUUsage,
+		ControllerMemoryUsage,
+	)
+
+	// Start periodic update of controller resource usage metrics
+	go updateControllerResourceMetrics()
 }
 
 // InitServer initializes and registers server-specific metrics
 func InitServer() {
 	// Server basic resource metrics
 	metrics.Registry.MustRegister(
-		ServerMemoryAllocBytes,
-		ServerMemorySysBytes,
 		ServerGoroutines,
+		ServerCPUUsage,
+		ServerMemoryUsage,
 	)
 
 	// Server throughput metrics
@@ -362,18 +424,45 @@ func InitServer() {
 	go updateServerResourceMetrics()
 }
 
+// updateControllerResourceMetrics periodically updates resource usage metrics for controller
+func updateControllerResourceMetrics() {
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		// Update goroutines
+		ControllerGoroutines.WithLabelValues(PodName).Set(float64(runtime.NumGoroutine()))
+
+		// Update CPU usage (cumulative seconds)
+		if cpuUsage, err := GetCPUUsage(); err == nil {
+			ControllerCPUUsage.WithLabelValues(PodName).Set(cpuUsage)
+		}
+
+		// Update memory usage (bytes)
+		if memoryUsage, err := GetMemoryUsage(); err == nil {
+			ControllerMemoryUsage.WithLabelValues(PodName).Set(float64(memoryUsage))
+		}
+	}
+}
+
 // updateServerResourceMetrics periodically updates resource usage metrics for server
 func updateServerResourceMetrics() {
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		var m runtime.MemStats
-		runtime.ReadMemStats(&m)
-
-		ServerMemoryAllocBytes.WithLabelValues(PodName).Set(float64(m.Alloc))
-		ServerMemorySysBytes.WithLabelValues(PodName).Set(float64(m.Sys))
+		// Update goroutines
 		ServerGoroutines.WithLabelValues(PodName).Set(float64(runtime.NumGoroutine()))
+
+		// Update CPU usage (cumulative seconds)
+		if cpuUsage, err := GetCPUUsage(); err == nil {
+			ServerCPUUsage.WithLabelValues(PodName).Set(cpuUsage)
+		}
+
+		// Update memory usage (bytes)
+		if memoryUsage, err := GetMemoryUsage(); err == nil {
+			ServerMemoryUsage.WithLabelValues(PodName).Set(float64(memoryUsage))
+		}
 	}
 }
 
@@ -392,13 +481,20 @@ func RecordPipelineInfo(namespace, name, desc string) {
 }
 
 // RecordHostInfo records Host resource info (static fields only)
-func RecordHostInfo(namespace, name, address, hostname, distribution, arch string) {
-	HostInfo.WithLabelValues(PodName, namespace, name, address, hostname, distribution, arch).Set(1)
+func RecordHostInfo(namespace, name, address, hostname, distribution, arch, status string) {
+	HostInfo.WithLabelValues(PodName, namespace, name, address, hostname, distribution, arch, status).Set(1)
 }
 
 // RecordClusterInfo records Cluster resource info (static fields only)
-func RecordClusterInfo(namespace, name, server, version string) {
-	ClusterInfo.WithLabelValues(PodName, namespace, name, server, version).Set(1)
+func RecordClusterInfo(namespace, name, server, version, status string, node, podCount, runningPod int, certNotAfterDays int, heartTime string) {
+	nodeStr := fmt.Sprintf("%d", node)
+	podCountStr := fmt.Sprintf("%d", podCount)
+	runningPodStr := fmt.Sprintf("%d", runningPod)
+	certNotAfterDaysStr := fmt.Sprintf("%d", certNotAfterDays)
+	if heartTime == "" {
+		heartTime = "Unknown"
+	}
+	ClusterInfo.WithLabelValues(PodName, namespace, name, server, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr, heartTime).Set(1)
 }
 
 // RecordEventHooksInfo records EventHooks resource info
@@ -486,6 +582,16 @@ func RecordReconcileError(controller, namespace, errorType string) {
 // RecordServerInfo records server info
 func RecordServerInfo(version, buildDate string) {
 	ServerInfo.WithLabelValues(PodName, version, buildDate).Set(1)
+}
+
+// RecordControllerInfo records controller info
+func RecordControllerInfo(version, buildDate string) {
+	ControllerInfo.WithLabelValues(PodName, version, buildDate).Set(1)
+}
+
+// RecordControllerUptime records controller uptime
+func RecordControllerUptime(uptimeSeconds float64) {
+	ControllerUptime.WithLabelValues(PodName).Set(uptimeSeconds)
 }
 
 // RecordServerUptime records server uptime

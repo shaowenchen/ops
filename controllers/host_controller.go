@@ -95,7 +95,11 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	}
 
 	// Record Host info metrics on every reconcile
-	opsmetrics.RecordHostInfo(h.Namespace, h.Name, h.Spec.Address, h.Status.Hostname, h.Status.Distribution, h.Status.Arch)
+	status := h.Status.HeartStatus
+	if status == "" {
+		status = "Unknown"
+	}
+	opsmetrics.RecordHostInfo(h.Namespace, h.Name, h.Spec.Address, h.Status.Hostname, h.Status.Distribution, h.Status.Arch, status)
 	// add timeticker
 	r.addTimeTicker(logger, ctx, h)
 
@@ -234,7 +238,11 @@ func (r *HostReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 	err = r.Client.Status().Update(ctx, lastH)
 	if err == nil {
 		// Record Host info metrics
-		opsmetrics.RecordHostInfo(lastH.Namespace, lastH.Name, lastH.Spec.Address, lastH.Status.Hostname, lastH.Status.Distribution, lastH.Status.Arch)
+		status := lastH.Status.HeartStatus
+		if status == "" {
+			status = "Unknown"
+		}
+		opsmetrics.RecordHostInfo(lastH.Namespace, lastH.Name, lastH.Spec.Address, lastH.Status.Hostname, lastH.Status.Distribution, lastH.Status.Arch, status)
 	} else {
 		logger.Error.Println(err, "update host status error")
 	}

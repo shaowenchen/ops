@@ -21,6 +21,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -77,6 +78,19 @@ func main() {
 
 	// Initialize controller metrics
 	opsmetrics.InitController()
+
+	// Set controller info
+	opsmetrics.RecordControllerInfo("unknown", "unknown")
+
+	// Start uptime tracking
+	startTime := time.Now()
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			opsmetrics.RecordControllerUptime(time.Since(startTime).Seconds())
+		}
+	}()
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
