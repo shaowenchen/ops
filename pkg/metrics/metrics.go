@@ -74,7 +74,7 @@ var (
 			Name: "ops_controller_cluster_info",
 			Help: "Cluster resource info",
 		},
-		[]string{"pod", "namespace", "name", "server", "version", "status", "node", "pod_count", "running_pod", "cert_not_after_days", "heart_time"},
+		[]string{"pod", "namespace", "name", "server", "version", "status", "node", "pod_count", "running_pod", "cert_not_after_days"},
 	)
 
 	// EventHooksInfo records EventHooks resource info
@@ -486,15 +486,12 @@ func RecordHostInfo(namespace, name, address, hostname, distribution, arch, stat
 }
 
 // RecordClusterInfo records Cluster resource info (static fields only)
-func RecordClusterInfo(namespace, name, server, version, status string, node, podCount, runningPod int, certNotAfterDays int, heartTime string) {
+func RecordClusterInfo(namespace, name, server, version, status string, node, podCount, runningPod int, certNotAfterDays int) {
 	nodeStr := fmt.Sprintf("%d", node)
 	podCountStr := fmt.Sprintf("%d", podCount)
 	runningPodStr := fmt.Sprintf("%d", runningPod)
 	certNotAfterDaysStr := fmt.Sprintf("%d", certNotAfterDays)
-	if heartTime == "" {
-		heartTime = "Unknown"
-	}
-	ClusterInfo.WithLabelValues(PodName, namespace, name, server, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr, heartTime).Set(1)
+	ClusterInfo.WithLabelValues(PodName, namespace, name, server, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr).Set(1)
 }
 
 // RecordEventHooksInfo records EventHooks resource info

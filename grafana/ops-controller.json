@@ -1152,8 +1152,7 @@
               "node": 4,
               "pod_count": 5,
               "running_pod": 6,
-              "cert_not_after_days": 7,
-              "heart_time": 8
+              "cert_not_after_days": 7
             },
             "renameByName": {
               "name": "name",
@@ -1163,8 +1162,7 @@
               "node": "node",
               "pod_count": "pod_count",
               "running_pod": "running_pod",
-              "cert_not_after_days": "cert_not_after_days",
-              "heart_time": "heart_time"
+              "cert_not_after_days": "cert_not_after_days"
             }
           }
         }
