@@ -69,7 +69,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "expr": "count(count by (name) (ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1))",
           "legendFormat": "Task",
           "refId": "A"
         }
@@ -126,7 +126,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "expr": "count(count by (name) (ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1))",
           "legendFormat": "Pipeline",
           "refId": "A"
         }
@@ -208,7 +208,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "expr": "count(count by (name) (ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1))",
           "legendFormat": "Host",
           "refId": "A"
         },
@@ -217,7 +217,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"})",
+          "expr": "count(count by (name) (ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"} == 1))",
           "legendFormat": "Host Successed",
           "refId": "B"
         }
@@ -299,7 +299,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "expr": "count(count by (name) (ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1))",
           "legendFormat": "Cluster",
           "refId": "A"
         },
@@ -308,7 +308,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"})",
+          "expr": "count(count by (name) (ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"} == 1))",
           "legendFormat": "Cluster Successed",
           "refId": "B"
         }
@@ -365,7 +365,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"})",
+          "expr": "count(count by (name) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
           "legendFormat": "Running",
           "refId": "A"
         },
@@ -374,7 +374,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"}) - count(ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"})",
+          "expr": "count(count by (name) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)) - count(count by (name) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
           "legendFormat": "Other",
           "refId": "B"
         }
@@ -431,7 +431,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"})",
+          "expr": "count(count by (name) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
           "legendFormat": "Running",
           "refId": "A"
         },
@@ -440,7 +440,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"}) - count(ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"})",
+          "expr": "count(count by (name) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)) - count(count by (name) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
           "legendFormat": "Other",
           "refId": "B"
         }
@@ -506,8 +506,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "rate(ops_controller_resource_cpu_usage_seconds_total{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}[5m])",
-          "legendFormat": "CPU Usage (cores)",
+          "expr": "rate(ops_controller_resource_cpu_usage_seconds_total{cluster=\"$cluster\",namespace=\"$namespace\"}[5m])",
+          "legendFormat": "{{exported_pod}}-CPU Usage (cores)",
           "refId": "A"
         }
       ],
@@ -572,8 +572,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_resource_memory_usage_bytes{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
-          "legendFormat": "Memory Usage",
+          "expr": "ops_controller_resource_memory_usage_bytes{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "legendFormat": "{{exported_pod}}-Memory Usage",
           "refId": "A"
         }
       ],
@@ -638,8 +638,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_resource_goroutines{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
-          "legendFormat": "Goroutines",
+          "expr": "ops_controller_resource_goroutines{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "legendFormat": "{{exported_pod}}-Goroutines",
           "refId": "A"
         }
       ],
@@ -696,8 +696,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_uptime_seconds{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
-          "legendFormat": "Uptime",
+          "expr": "ops_controller_uptime_seconds{cluster=\"$cluster\",namespace=\"$namespace\"} and on(exported_pod) (ops_controller_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "legendFormat": "{{exported_pod}}-Uptime",
           "refId": "A"
         }
       ],
@@ -771,7 +771,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "group by (namespace, name, desc, host, runtime_image) (ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -792,36 +792,24 @@
               "endpoint": true,
               "exported_namespace": true,
               "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
-              "namespace": true,
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "desc": 1,
-              "host": 2,
-              "runtime_image": 3
-            },
-            "renameByName": {
-              "name": "name",
-              "desc": "desc",
-              "host": "host",
-              "runtime_image": "runtime_image"
+              "name": 0
             }
           }
         },
         {
-          "id": "groupBy",
+          "id": "organize",
           "options": {
-            "fields": {
-              "name": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            },
-            "mode": "data"
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
+            }
           }
         }
       ],
@@ -881,7 +869,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "group by (namespace, name, desc) (ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -902,32 +890,24 @@
               "endpoint": true,
               "exported_namespace": true,
               "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
-              "namespace": true,
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "desc": 1
-            },
-            "renameByName": {
-              "name": "name",
-              "desc": "desc"
+              "name": 0
             }
           }
         },
         {
-          "id": "groupBy",
+          "id": "organize",
           "options": {
-            "fields": {
-              "name": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            },
-            "mode": "data"
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
+            }
           }
         }
       ],
@@ -987,7 +967,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "group by (namespace, name, address, hostname, distribution, arch, status) (ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1008,52 +988,24 @@
               "endpoint": true,
               "exported_namespace": true,
               "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
-              "namespace": true,
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "address": 1,
-              "hostname": 2,
-              "distribution": 3,
-              "arch": 4,
-              "status": 5,
-              "cpu_total": 6,
-              "mem_total": 7,
-              "disk_total": 8,
-              "accelerator_vendor": 9,
-              "accelerator_model": 10,
-              "accelerator_count": 11
-            },
-            "renameByName": {
-              "name": "name",
-              "address": "address",
-              "hostname": "hostname",
-              "distribution": "distribution",
-              "arch": "arch",
-              "status": "status",
-              "cpu_total": "cpu_total",
-              "mem_total": "mem_total",
-              "disk_total": "disk_total",
-              "accelerator_vendor": "accelerator_vendor",
-              "accelerator_model": "accelerator_model",
-              "accelerator_count": "accelerator_count"
+              "name": 0
             }
           }
         },
         {
-          "id": "groupBy",
+          "id": "organize",
           "options": {
-            "fields": {
-              "name": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            },
-            "mode": "data"
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
+            }
           }
         }
       ],
@@ -1113,7 +1065,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "group by (namespace, name, server, version, status, node, pod_count, running_pod, cert_not_after_days) (ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1134,44 +1086,24 @@
               "endpoint": true,
               "exported_namespace": true,
               "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
-              "namespace": true,
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "server": 1,
-              "version": 2,
-              "status": 3,
-              "node": 4,
-              "pod_count": 5,
-              "running_pod": 6,
-              "cert_not_after_days": 7
-            },
-            "renameByName": {
-              "name": "name",
-              "server": "server",
-              "version": "version",
-              "status": "status",
-              "node": "node",
-              "pod_count": "pod_count",
-              "running_pod": "running_pod",
-              "cert_not_after_days": "cert_not_after_days"
+              "name": 0
             }
           }
         },
         {
-          "id": "groupBy",
+          "id": "organize",
           "options": {
-            "fields": {
-              "name": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            },
-            "mode": "data"
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
+            }
           }
         }
       ],
@@ -1244,7 +1176,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "group by (namespace, name, taskref, crontab, status) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1265,36 +1197,24 @@
               "endpoint": true,
               "exported_namespace": true,
               "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
-              "namespace": true,
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "taskref": 1,
-              "crontab": 2,
-              "status": 3
-            },
-            "renameByName": {
-              "name": "name",
-              "taskref": "taskref",
-              "crontab": "crontab",
-              "status": "status"
+              "name": 0
             }
           }
         },
         {
-          "id": "groupBy",
+          "id": "organize",
           "options": {
-            "fields": {
-              "name": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            },
-            "mode": "data"
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
+            }
           }
         }
       ],
@@ -1354,7 +1274,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "group by (namespace, name, pipelineref, crontab, status) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1375,36 +1295,24 @@
               "endpoint": true,
               "exported_namespace": true,
               "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
-              "namespace": true,
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "pipelineref": 1,
-              "crontab": 2,
-              "status": 3
-            },
-            "renameByName": {
-              "name": "name",
-              "pipelineref": "pipelineref",
-              "crontab": "crontab",
-              "status": "status"
+              "name": 0
             }
           }
         },
         {
-          "id": "groupBy",
+          "id": "organize",
           "options": {
-            "fields": {
-              "name": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            },
-            "mode": "data"
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
+            }
           }
         }
       ],
@@ -1490,6 +1398,8 @@
               "job": true,
               "endpoint": true,
               "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
@@ -1497,16 +1407,16 @@
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "taskref": 1,
-              "status": 2,
-              "Duration": 3
-            },
-            "renameByName": {
-              "name": "name",
-              "taskref": "taskref",
-              "status": "status",
-              "Value": "Duration"
+              "name": 0
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
             }
           }
         }
@@ -1593,6 +1503,8 @@
               "job": true,
               "endpoint": true,
               "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
@@ -1600,16 +1512,16 @@
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "pipelineref": 1,
-              "status": 2,
-              "Duration": 3
-            },
-            "renameByName": {
-              "name": "name",
-              "pipelineref": "pipelineref",
-              "status": "status",
-              "Value": "Duration"
+              "name": 0
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
             }
           }
         }
@@ -1676,7 +1588,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_taskref_run_total{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "ops_controller_taskrun_status_phase{cluster=\"$cluster\",namespace=\"$namespace\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1695,6 +1607,8 @@
               "job": true,
               "endpoint": true,
               "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
@@ -1702,14 +1616,16 @@
               "cluster": true
             },
             "indexByName": {
-              "taskref": 0,
-              "status": 1,
-              "Count": 2
-            },
-            "renameByName": {
-              "taskref": "taskref",
-              "status": "status",
-              "Value": "Count"
+              "name": 0
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
             }
           }
         }
@@ -1776,7 +1692,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_pipelineref_run_total{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "ops_controller_pipelinerun_status_phase{cluster=\"$cluster\",namespace=\"$namespace\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1795,6 +1711,8 @@
               "job": true,
               "endpoint": true,
               "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
@@ -1802,14 +1720,16 @@
               "cluster": true
             },
             "indexByName": {
-              "pipelineref": 0,
-              "status": 1,
-              "Count": 2
-            },
-            "renameByName": {
-              "pipelineref": "pipelineref",
-              "status": "status",
-              "Value": "Count"
+              "name": 0
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
             }
           }
         }
@@ -1883,7 +1803,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_eventhooks_info{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "group by (namespace, name, type, subject, url) (ops_controller_eventhooks_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1904,36 +1824,24 @@
               "endpoint": true,
               "exported_namespace": true,
               "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
-              "namespace": true,
               "cluster": true
             },
             "indexByName": {
-              "name": 0,
-              "type": 1,
-              "subject": 2,
-              "url": 3
-            },
-            "renameByName": {
-              "name": "name",
-              "type": "type",
-              "subject": "subject",
-              "url": "url"
+              "name": 0
             }
           }
         },
         {
-          "id": "groupBy",
+          "id": "organize",
           "options": {
-            "fields": {
-              "name": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            },
-            "mode": "data"
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
+            }
           }
         }
       ],
@@ -2018,6 +1926,8 @@
               "job": true,
               "endpoint": true,
               "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
               "prometheus": true,
               "prometheus_replica": true,
               "container": true,
@@ -2025,18 +1935,16 @@
               "cluster": true
             },
             "indexByName": {
-              "eventhook_name": 0,
-              "keyword": 1,
-              "event_id": 2,
-              "status": 3,
-              "Count": 4
-            },
-            "renameByName": {
-              "eventhook_name": "eventhook_name",
-              "keyword": "keyword",
-              "event_id": "event_id",
-              "status": "status",
-              "Value": "Count"
+              "name": 0
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "name": 0
             }
           }
         }
@@ -2113,33 +2021,6 @@
         "options": [],
         "query": {
           "query": "label_values(ops_controller_info, namespace)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "",
-          "value": ""
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${datasource}"
-        },
-        "definition": "label_values(ops_controller_info{cluster=\"$cluster\",namespace=\"$namespace\"}, exported_pod)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "exported_pod",
-        "multi": true,
-        "name": "exported_pod",
-        "options": [],
-        "query": {
-          "query": "label_values(ops_controller_info{cluster=\"$cluster\",namespace=\"$namespace\"}, exported_pod)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,

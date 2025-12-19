@@ -163,23 +163,23 @@ var (
 	)
 
 	// ============================================================================
-	// Task/Pipeline run count metrics
+	// Task/Pipeline run status phase metrics
 	// ============================================================================
 
-	// TaskRefRunTotal is a counter for TaskRef run count
-	TaskRefRunTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_taskref_run_total",
-			Help: "Total number of TaskRef runs",
+	// TaskRunStatusPhase records TaskRun status phase by taskref
+	TaskRunStatusPhase = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_taskrun_status_phase",
+			Help: "TaskRun status phase by taskref",
 		},
 		[]string{"namespace", "taskref", "status"},
 	)
 
-	// PipelineRefRunTotal is a counter for PipelineRef run count
-	PipelineRefRunTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_pipelineref_run_total",
-			Help: "Total number of PipelineRef runs",
+	// PipelineRunStatusPhase records PipelineRun status phase by pipelineref
+	PipelineRunStatusPhase = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_pipelinerun_status_phase",
+			Help: "PipelineRun status phase by pipelineref",
 		},
 		[]string{"namespace", "pipelineref", "status"},
 	)
@@ -372,10 +372,10 @@ func InitController() {
 		PipelineRunDurationSeconds,
 	)
 
-	// Run count metrics
+	// Run status phase metrics
 	metrics.Registry.MustRegister(
-		TaskRefRunTotal,
-		PipelineRefRunTotal,
+		TaskRunStatusPhase,
+		PipelineRunStatusPhase,
 	)
 
 	// EventHooks metrics
@@ -471,32 +471,37 @@ func updateServerResourceMetrics() {
 // ============================================================================
 
 // RecordTaskInfo records Task resource info
-func RecordTaskInfo(namespace, name, desc, host, runtimeImage string) {
-	TaskInfo.WithLabelValues(namespace, name, desc, host, runtimeImage).Set(1)
+// value: 1 for existing resource, 0 for deleted resource
+func RecordTaskInfo(namespace, name, desc, host, runtimeImage string, value float64) {
+	TaskInfo.WithLabelValues(namespace, name, desc, host, runtimeImage).Set(value)
 }
 
 // RecordPipelineInfo records Pipeline resource info
-func RecordPipelineInfo(namespace, name, desc string) {
-	PipelineInfo.WithLabelValues(namespace, name, desc).Set(1)
+// value: 1 for existing resource, 0 for deleted resource
+func RecordPipelineInfo(namespace, name, desc string, value float64) {
+	PipelineInfo.WithLabelValues(namespace, name, desc).Set(value)
 }
 
 // RecordHostInfo records Host resource info (static fields only)
-func RecordHostInfo(namespace, name, address, hostname, distribution, arch, status string) {
-	HostInfo.WithLabelValues(namespace, name, address, hostname, distribution, arch, status).Set(1)
+// value: 1 for existing resource, 0 for deleted resource
+func RecordHostInfo(namespace, name, address, hostname, distribution, arch, status string, value float64) {
+	HostInfo.WithLabelValues(namespace, name, address, hostname, distribution, arch, status).Set(value)
 }
 
 // RecordClusterInfo records Cluster resource info (static fields only)
-func RecordClusterInfo(namespace, name, server, version, status string, node, podCount, runningPod int, certNotAfterDays int) {
+// value: 1 for existing resource, 0 for deleted resource
+func RecordClusterInfo(namespace, name, server, version, status string, node, podCount, runningPod int, certNotAfterDays int, value float64) {
 	nodeStr := fmt.Sprintf("%d", node)
 	podCountStr := fmt.Sprintf("%d", podCount)
 	runningPodStr := fmt.Sprintf("%d", runningPod)
 	certNotAfterDaysStr := fmt.Sprintf("%d", certNotAfterDays)
-	ClusterInfo.WithLabelValues(namespace, name, server, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr).Set(1)
+	ClusterInfo.WithLabelValues(namespace, name, server, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr).Set(value)
 }
 
 // RecordEventHooksInfo records EventHooks resource info
-func RecordEventHooksInfo(namespace, name, eventType, subject, url string) {
-	EventHooksInfo.WithLabelValues(namespace, name, eventType, subject, url).Set(1)
+// value: 1 for existing resource, 0 for deleted resource
+func RecordEventHooksInfo(namespace, name, eventType, subject, url string, value float64) {
+	EventHooksInfo.WithLabelValues(namespace, name, eventType, subject, url).Set(value)
 }
 
 // ============================================================================
@@ -504,8 +509,9 @@ func RecordEventHooksInfo(namespace, name, eventType, subject, url string) {
 // ============================================================================
 
 // RecordTaskRunInfo records TaskRun resource info
-func RecordTaskRunInfo(namespace, name, taskref, crontab, status string) {
-	TaskRunInfo.WithLabelValues(namespace, name, taskref, crontab, status).Set(1)
+// value: 1 for existing resource, 0 for deleted resource
+func RecordTaskRunInfo(namespace, name, taskref, crontab, status string, value float64) {
+	TaskRunInfo.WithLabelValues(namespace, name, taskref, crontab, status).Set(value)
 }
 
 // RecordTaskRunStart records TaskRun start time
@@ -520,8 +526,9 @@ func RecordTaskRunEnd(namespace, name, taskref, status string, endTime, duration
 }
 
 // RecordPipelineRunInfo records PipelineRun resource info
-func RecordPipelineRunInfo(namespace, name, pipelineref, crontab, status string) {
-	PipelineRunInfo.WithLabelValues(namespace, name, pipelineref, crontab, status).Set(1)
+// value: 1 for existing resource, 0 for deleted resource
+func RecordPipelineRunInfo(namespace, name, pipelineref, crontab, status string, value float64) {
+	PipelineRunInfo.WithLabelValues(namespace, name, pipelineref, crontab, status).Set(value)
 }
 
 // RecordPipelineRunStart records PipelineRun start time
@@ -539,14 +546,26 @@ func RecordPipelineRunEnd(namespace, name, pipelineref, status string, endTime, 
 // Run count recording functions
 // ============================================================================
 
-// RecordTaskRefRun records TaskRef run count
-func RecordTaskRefRun(namespace, taskref, status string) {
-	TaskRefRunTotal.WithLabelValues(namespace, taskref, status).Inc()
+// RecordTaskRunStatusPhase records TaskRun status phase change
+// When status changes, it decrements the old status and increments the new status
+func RecordTaskRunStatusPhase(namespace, taskref, oldStatus, newStatus string) {
+	if oldStatus != "" && oldStatus != newStatus {
+		TaskRunStatusPhase.WithLabelValues(namespace, taskref, oldStatus).Dec()
+	}
+	if newStatus != "" {
+		TaskRunStatusPhase.WithLabelValues(namespace, taskref, newStatus).Inc()
+	}
 }
 
-// RecordPipelineRefRun records PipelineRef run count
-func RecordPipelineRefRun(namespace, pipelineref, status string) {
-	PipelineRefRunTotal.WithLabelValues(namespace, pipelineref, status).Inc()
+// RecordPipelineRunStatusPhase records PipelineRun status phase change
+// When status changes, it decrements the old status and increments the new status
+func RecordPipelineRunStatusPhase(namespace, pipelineref, oldStatus, newStatus string) {
+	if oldStatus != "" && oldStatus != newStatus {
+		PipelineRunStatusPhase.WithLabelValues(namespace, pipelineref, oldStatus).Dec()
+	}
+	if newStatus != "" {
+		PipelineRunStatusPhase.WithLabelValues(namespace, pipelineref, newStatus).Inc()
+	}
 }
 
 // ============================================================================

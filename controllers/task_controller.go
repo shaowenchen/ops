@@ -85,6 +85,8 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	if k8serrors.IsNotFound(err) {
 		obj.Namespace = req.Namespace
 		obj.Name = req.Name
+		// Record Task info metrics as deleted (value=0)
+		opsmetrics.RecordTaskInfo(obj.Namespace, obj.Name, "", "", "", 0)
 		r.syncResource(logger, ctx, true, obj)
 		return ctrl.Result{}, nil
 	}
@@ -93,8 +95,8 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		return ctrl.Result{}, nil
 	}
 
-	// Record Task info metrics on every reconcile
-	opsmetrics.RecordTaskInfo(obj.Namespace, obj.Name, obj.Spec.Desc, obj.Spec.Host, obj.Spec.RuntimeImage)
+	// Record Task info metrics on every reconcile (value=1 for existing resource)
+	opsmetrics.RecordTaskInfo(obj.Namespace, obj.Name, obj.Spec.Desc, obj.Spec.Host, obj.Spec.RuntimeImage, 1)
 
 	r.syncResource(logger, ctx, false, obj)
 

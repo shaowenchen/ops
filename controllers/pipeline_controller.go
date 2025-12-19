@@ -84,6 +84,8 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 	if apierrors.IsNotFound(err) {
 		obj.Namespace = req.Namespace
 		obj.Name = req.Name
+		// Record Pipeline info metrics as deleted (value=0)
+		opsmetrics.RecordPipelineInfo(obj.Namespace, obj.Name, "", 0)
 		r.syncResource(logger, ctx, true, obj)
 		return ctrl.Result{}, nil
 	}
@@ -91,8 +93,8 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 		return ctrl.Result{}, nil
 	}
 
-	// Record Pipeline info metrics on every reconcile
-	opsmetrics.RecordPipelineInfo(obj.Namespace, obj.Name, obj.Spec.Desc)
+	// Record Pipeline info metrics on every reconcile (value=1 for existing resource)
+	opsmetrics.RecordPipelineInfo(obj.Namespace, obj.Name, obj.Spec.Desc, 1)
 
 	// filled variables
 	changed := r.filledVariables(logger, ctx, obj)

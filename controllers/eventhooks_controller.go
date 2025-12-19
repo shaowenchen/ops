@@ -91,6 +91,8 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	err = r.Get(ctx, req.NamespacedName, obj)
 
 	if apierrors.IsNotFound(err) {
+		// Record EventHooks info metrics as deleted (value=0)
+		opsmetrics.RecordEventHooksInfo(req.Namespace, req.Name, "", "", "", 0)
 		if subject, ok := r.objSubjectMap[req.NamespacedName]; ok {
 			err = r.updateSubject(logger, ctx, req.Namespace, subject)
 			if err != nil {
@@ -102,8 +104,8 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	// Record EventHooks info metrics
-	opsmetrics.RecordEventHooksInfo(obj.Namespace, obj.Name, obj.Spec.Type, obj.Spec.Subject, obj.Spec.URL)
+	// Record EventHooks info metrics (value=1 for existing resource)
+	opsmetrics.RecordEventHooksInfo(obj.Namespace, obj.Name, obj.Spec.Type, obj.Spec.Subject, obj.Spec.URL, 1)
 
 	// record for delete object and stop watch
 	r.objSubjectMapMutex.Lock()

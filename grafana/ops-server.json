@@ -56,7 +56,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 12,
         "x": 0,
         "y": 1
       },
@@ -78,8 +78,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "rate(ops_server_resource_cpu_usage_seconds_total{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}[5m])",
-          "legendFormat": "CPU Usage (cores)",
+          "expr": "rate(ops_server_resource_cpu_usage_seconds_total{cluster=\"$cluster\",namespace=\"$namespace\"}[5m])",
+          "legendFormat": "{{exported_pod}}-CPU Usage (cores)",
           "refId": "A"
         }
       ],
@@ -122,8 +122,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 8,
+        "w": 12,
+        "x": 12,
         "y": 1
       },
       "id": 2,
@@ -144,8 +144,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_server_resource_memory_usage_bytes{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
-          "legendFormat": "Memory Usage",
+          "expr": "ops_server_resource_memory_usage_bytes{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "legendFormat": "{{exported_pod}}-Memory Usage",
           "refId": "A"
         }
       ],
@@ -188,9 +188,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 1
+        "w": 12,
+        "x": 0,
+        "y": 7
       },
       "id": 10,
       "options": {
@@ -210,8 +210,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_server_resource_goroutines{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
-          "legendFormat": "Goroutines",
+          "expr": "ops_server_resource_goroutines{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "legendFormat": "{{exported_pod}}-Goroutines",
           "refId": "A"
         }
       ],
@@ -244,9 +244,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 2
+        "w": 12,
+        "x": 12,
+        "y": 7
       },
       "id": 3,
       "options": {
@@ -268,8 +268,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_server_uptime_seconds{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
-          "legendFormat": "Uptime",
+          "expr": "ops_server_uptime_seconds{cluster=\"$cluster\",namespace=\"$namespace\"} and on(exported_pod) (ops_server_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "legendFormat": "{{exported_pod}}-Uptime",
           "refId": "A"
         }
       ],
@@ -282,7 +282,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 13
       },
       "id": 101,
       "panels": [],
@@ -327,7 +327,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 14
       },
       "id": 4,
       "options": {
@@ -396,7 +396,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 14
       },
       "id": 5,
       "options": {
@@ -462,7 +462,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 22
       },
       "id": 6,
       "options": {
@@ -706,33 +706,6 @@
         "options": [],
         "query": {
           "query": "label_values(ops_server_info, namespace)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "",
-          "value": ""
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${datasource}"
-        },
-        "definition": "label_values(ops_server_info{cluster=\"$cluster\",namespace=\"$namespace\"}, exported_pod)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "exported_pod",
-        "multi": true,
-        "name": "exported_pod",
-        "options": [],
-        "query": {
-          "query": "label_values(ops_server_info{cluster=\"$cluster\",namespace=\"$namespace\"}, exported_pod)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,

@@ -106,6 +106,8 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	err = r.Client.Get(ctx, req.NamespacedName, pr)
 
 	if apierrors.IsNotFound(err) {
+		// Record PipelineRun info metrics as deleted (value=0)
+		opsmetrics.RecordPipelineRunInfo(req.Namespace, req.Name, "", "", "", 0)
 		r.deleteCronTab(logger, ctx, req.NamespacedName)
 		return ctrl.Result{}, nil
 	}
@@ -474,16 +476,16 @@ func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.
 		}
 		err = r.Client.Status().Update(ctx, latestPr)
 		if err == nil {
-			// Record CRD resource status change metrics - record every status change
+			// Record CRD resource status change metrics - record every status change (value=1 for existing resource)
 			if oldStatus != latestPr.Status.RunStatus {
-				opsmetrics.RecordPipelineRunInfo(latestPr.Namespace, latestPr.Name, latestPr.Spec.PipelineRef, latestPr.Spec.Crontab, latestPr.Status.RunStatus)
+				opsmetrics.RecordPipelineRunInfo(latestPr.Namespace, latestPr.Name, latestPr.Spec.PipelineRef, latestPr.Spec.Crontab, latestPr.Status.RunStatus, 1)
 				// Record scheduled task status change if this is a scheduled task (has Crontab)
 				if latestPr.Spec.Crontab != "" {
-					opsmetrics.RecordPipelineRunInfo(latestPr.Namespace, latestPr.Name, latestPr.Spec.PipelineRef, latestPr.Spec.Crontab, latestPr.Status.RunStatus)
+					opsmetrics.RecordPipelineRunInfo(latestPr.Namespace, latestPr.Name, latestPr.Spec.PipelineRef, latestPr.Spec.Crontab, latestPr.Status.RunStatus, 1)
 				}
-				// Record PipelineRef usage
+				// Record PipelineRef status phase change (decrement old status, increment new status)
 				if latestPr.Spec.PipelineRef != "" {
-					opsmetrics.RecordPipelineRefRun(latestPr.Namespace, latestPr.Spec.PipelineRef, latestPr.Status.RunStatus)
+					opsmetrics.RecordPipelineRunStatusPhase(latestPr.Namespace, latestPr.Spec.PipelineRef, oldStatus, latestPr.Status.RunStatus)
 				}
 			}
 			return
