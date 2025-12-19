@@ -78,7 +78,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "rate(ops_server_resource_cpu_usage_seconds_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}[5m])",
+          "expr": "rate(ops_server_resource_cpu_usage_seconds_total{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}[5m])",
           "legendFormat": "CPU Usage (cores)",
           "refId": "A"
         }
@@ -144,7 +144,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_server_resource_memory_usage_bytes{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
+          "expr": "ops_server_resource_memory_usage_bytes{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
           "legendFormat": "Memory Usage",
           "refId": "A"
         }
@@ -210,7 +210,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_server_resource_goroutines{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
+          "expr": "ops_server_resource_goroutines{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
           "legendFormat": "Goroutines",
           "refId": "A"
         }
@@ -268,7 +268,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_server_uptime_seconds{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}",
+          "expr": "ops_server_uptime_seconds{cluster=\"$cluster\",namespace=\"$namespace\",exported_pod=~\"$exported_pod\"}",
           "legendFormat": "Uptime",
           "refId": "A"
         }
@@ -347,7 +347,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(rate(ops_server_throughput_http_requests_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}[5m]))",
+          "expr": "sum(rate(ops_server_throughput_http_requests_total{cluster=\"$cluster\",namespace=\"$namespace\"}[5m]))",
           "legendFormat": "Total QPS",
           "refId": "A"
         }
@@ -416,7 +416,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (status_code) (rate(ops_server_throughput_http_requests_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}[5m]))",
+          "expr": "sum by (status_code) (rate(ops_server_throughput_http_requests_total{cluster=\"$cluster\",namespace=\"$namespace\"}[5m]))",
           "legendFormat": "{{status_code}}",
           "refId": "A"
         }
@@ -482,7 +482,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (method, path, status_code) (rate(ops_server_throughput_http_requests_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}[5m]))",
+          "expr": "sum by (method, path, status_code) (rate(ops_server_throughput_http_requests_total{cluster=\"$cluster\",namespace=\"$namespace\"}[5m]))",
           "legendFormat": "{{method}} {{path}} [{{status_code}}]",
           "refId": "A"
         }
@@ -561,7 +561,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (endpoint, status) (rate(ops_server_throughput_api_requests_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}[5m]))",
+          "expr": "sum by (endpoint, status) (rate(ops_server_throughput_api_requests_total{cluster=\"$cluster\",namespace=\"$namespace\"}[5m]))",
           "legendFormat": "{{endpoint}} [{{status}}]",
           "refId": "A"
         }
@@ -627,7 +627,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (endpoint, error_type) (rate(ops_server_throughput_api_errors_total{cluster=\"$cluster\",namespace=\"$namespace\",pod=~\"$pod\"}[5m]))",
+          "expr": "sum by (endpoint, error_type) (rate(ops_server_throughput_api_errors_total{cluster=\"$cluster\",namespace=\"$namespace\"}[5m]))",
           "legendFormat": "{{endpoint}} [{{error_type}}]",
           "refId": "A"
         }
@@ -724,15 +724,15 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(ops_server_info{cluster=\"$cluster\",namespace=\"$namespace\"}, pod)",
+        "definition": "label_values(ops_server_info{cluster=\"$cluster\",namespace=\"$namespace\"}, exported_pod)",
         "hide": 0,
         "includeAll": true,
-        "label": "pod",
+        "label": "exported_pod",
         "multi": true,
-        "name": "pod",
+        "name": "exported_pod",
         "options": [],
         "query": {
-          "query": "label_values(ops_server_info{cluster=\"$cluster\",namespace=\"$namespace\"}, pod)",
+          "query": "label_values(ops_server_info{cluster=\"$cluster\",namespace=\"$namespace\"}, exported_pod)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,

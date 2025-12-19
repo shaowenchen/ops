@@ -37,16 +37,16 @@ func PrometheusMiddleware() gin.HandlerFunc {
 		statusCode := strconv.Itoa(c.Writer.Status())
 
 		// Record metrics
-		HTTPRequestsTotal.WithLabelValues(PodName, c.Request.Method, path, statusCode).Inc()
+		HTTPRequestsTotal.WithLabelValues(c.Request.Method, path, statusCode).Inc()
 	}
 }
 
 // RecordAPIRequest records an API request
 func RecordAPIRequest(endpoint, namespace, status string) {
-	APIRequestsTotal.WithLabelValues(PodName, endpoint, namespace, status).Inc()
+	APIRequestsTotal.WithLabelValues(endpoint, namespace, status).Inc()
 }
 
 // RecordAPIError records an API error
 func RecordAPIError(endpoint, namespace, errorType string) {
-	APIErrorsTotal.WithLabelValues(PodName, endpoint, namespace, errorType).Inc()
+	APIErrorsTotal.WithLabelValues(endpoint, namespace, errorType).Inc()
 }

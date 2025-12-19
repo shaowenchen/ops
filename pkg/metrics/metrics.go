@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
-// PodName is the name of the current pod, used as a label in metrics
+// PodName is the name of the current pod, used as exported_pod label in resource metrics
 var PodName string
 
 func init() {
@@ -47,7 +47,7 @@ var (
 			Name: "ops_controller_task_info",
 			Help: "Task resource info",
 		},
-		[]string{"pod", "namespace", "name", "desc", "host", "runtime_image"},
+		[]string{"namespace", "name", "desc", "host", "runtime_image"},
 	)
 
 	// PipelineInfo records Pipeline resource info
@@ -56,7 +56,7 @@ var (
 			Name: "ops_controller_pipeline_info",
 			Help: "Pipeline resource info",
 		},
-		[]string{"pod", "namespace", "name", "desc"},
+		[]string{"namespace", "name", "desc"},
 	)
 
 	// HostInfo records Host resource info (static fields only)
@@ -65,7 +65,7 @@ var (
 			Name: "ops_controller_host_info",
 			Help: "Host resource info",
 		},
-		[]string{"pod", "namespace", "name", "address", "hostname", "distribution", "arch", "status"},
+		[]string{"namespace", "name", "address", "hostname", "distribution", "arch", "status"},
 	)
 
 	// ClusterInfo records Cluster resource info (static fields only)
@@ -74,7 +74,7 @@ var (
 			Name: "ops_controller_cluster_info",
 			Help: "Cluster resource info",
 		},
-		[]string{"pod", "namespace", "name", "server", "version", "status", "node", "pod_count", "running_pod", "cert_not_after_days"},
+		[]string{"namespace", "name", "server", "version", "status", "node", "pod_count", "running_pod", "cert_not_after_days"},
 	)
 
 	// EventHooksInfo records EventHooks resource info
@@ -83,7 +83,7 @@ var (
 			Name: "ops_controller_eventhooks_info",
 			Help: "EventHooks resource info",
 		},
-		[]string{"pod", "namespace", "name", "type", "subject", "url"},
+		[]string{"namespace", "name", "type", "subject", "url"},
 	)
 
 	// ============================================================================
@@ -96,7 +96,7 @@ var (
 			Name: "ops_controller_taskrun_info",
 			Help: "TaskRun resource info",
 		},
-		[]string{"pod", "namespace", "name", "taskref", "crontab", "status"},
+		[]string{"namespace", "name", "taskref", "crontab", "status"},
 	)
 
 	// TaskRunStartTime records TaskRun start time (unix timestamp)
@@ -105,7 +105,7 @@ var (
 			Name: "ops_controller_taskrun_start_time",
 			Help: "TaskRun start time as unix timestamp",
 		},
-		[]string{"pod", "namespace", "name", "taskref"},
+		[]string{"namespace", "name", "taskref"},
 	)
 
 	// TaskRunEndTime records TaskRun end time (unix timestamp)
@@ -114,7 +114,7 @@ var (
 			Name: "ops_controller_taskrun_end_time",
 			Help: "TaskRun end time as unix timestamp",
 		},
-		[]string{"pod", "namespace", "name", "taskref"},
+		[]string{"namespace", "name", "taskref"},
 	)
 
 	// TaskRunDurationSeconds records TaskRun duration in seconds
@@ -123,7 +123,7 @@ var (
 			Name: "ops_controller_taskrun_duration_seconds",
 			Help: "TaskRun duration in seconds",
 		},
-		[]string{"pod", "namespace", "name", "taskref", "status"},
+		[]string{"namespace", "name", "taskref", "status"},
 	)
 
 	// PipelineRunInfo records PipelineRun resource info with all fields
@@ -132,7 +132,7 @@ var (
 			Name: "ops_controller_pipelinerun_info",
 			Help: "PipelineRun resource info",
 		},
-		[]string{"pod", "namespace", "name", "pipelineref", "crontab", "status"},
+		[]string{"namespace", "name", "pipelineref", "crontab", "status"},
 	)
 
 	// PipelineRunStartTime records PipelineRun start time (unix timestamp)
@@ -141,7 +141,7 @@ var (
 			Name: "ops_controller_pipelinerun_start_time",
 			Help: "PipelineRun start time as unix timestamp",
 		},
-		[]string{"pod", "namespace", "name", "pipelineref"},
+		[]string{"namespace", "name", "pipelineref"},
 	)
 
 	// PipelineRunEndTime records PipelineRun end time (unix timestamp)
@@ -150,7 +150,7 @@ var (
 			Name: "ops_controller_pipelinerun_end_time",
 			Help: "PipelineRun end time as unix timestamp",
 		},
-		[]string{"pod", "namespace", "name", "pipelineref"},
+		[]string{"namespace", "name", "pipelineref"},
 	)
 
 	// PipelineRunDurationSeconds records PipelineRun duration in seconds
@@ -159,7 +159,7 @@ var (
 			Name: "ops_controller_pipelinerun_duration_seconds",
 			Help: "PipelineRun duration in seconds",
 		},
-		[]string{"pod", "namespace", "name", "pipelineref", "status"},
+		[]string{"namespace", "name", "pipelineref", "status"},
 	)
 
 	// ============================================================================
@@ -172,7 +172,7 @@ var (
 			Name: "ops_controller_taskref_run_total",
 			Help: "Total number of TaskRef runs",
 		},
-		[]string{"pod", "namespace", "taskref", "status"},
+		[]string{"namespace", "taskref", "status"},
 	)
 
 	// PipelineRefRunTotal is a counter for PipelineRef run count
@@ -181,7 +181,7 @@ var (
 			Name: "ops_controller_pipelineref_run_total",
 			Help: "Total number of PipelineRef runs",
 		},
-		[]string{"pod", "namespace", "pipelineref", "status"},
+		[]string{"namespace", "pipelineref", "status"},
 	)
 
 	// ============================================================================
@@ -194,7 +194,7 @@ var (
 			Name: "ops_controller_eventhooks_trigger_total",
 			Help: "Total number of successful EventHooks triggers",
 		},
-		[]string{"pod", "namespace", "eventhook_name", "keyword", "event_id"},
+		[]string{"namespace", "eventhook_name", "keyword", "event_id"},
 	)
 
 	// ============================================================================
@@ -207,7 +207,7 @@ var (
 			Name: "ops_controller_reconcile_total",
 			Help: "Total number of reconcile operations",
 		},
-		[]string{"pod", "controller", "namespace", "result"},
+		[]string{"controller", "namespace", "result"},
 	)
 
 	// ControllerReconcileErrors is a counter for reconcile errors
@@ -216,7 +216,7 @@ var (
 			Name: "ops_controller_reconcile_errors_total",
 			Help: "Total number of reconcile errors",
 		},
-		[]string{"pod", "controller", "namespace", "error_type"},
+		[]string{"controller", "namespace", "error_type"},
 	)
 
 	// ============================================================================
@@ -229,7 +229,7 @@ var (
 			Name: "ops_controller_resource_goroutines",
 			Help: "Controller number of goroutines",
 		},
-		[]string{"pod"},
+		[]string{"exported_pod"},
 	)
 
 	// ControllerUptime is a gauge for controller uptime
@@ -238,7 +238,7 @@ var (
 			Name: "ops_controller_uptime_seconds",
 			Help: "Controller uptime in seconds",
 		},
-		[]string{"pod"},
+		[]string{"exported_pod"},
 	)
 
 	// ControllerInfo is a gauge for controller information
@@ -247,7 +247,7 @@ var (
 			Name: "ops_controller_info",
 			Help: "Controller information",
 		},
-		[]string{"pod", "version", "build_date"},
+		[]string{"exported_pod", "version", "build_date"},
 	)
 
 	// ControllerCPUUsage is a gauge for controller CPU usage (cumulative seconds)
@@ -256,7 +256,7 @@ var (
 			Name: "ops_controller_resource_cpu_usage_seconds_total",
 			Help: "Controller CPU usage in seconds (cumulative)",
 		},
-		[]string{"pod"},
+		[]string{"exported_pod"},
 	)
 
 	// ControllerMemoryUsage is a gauge for controller memory usage in bytes
@@ -265,7 +265,7 @@ var (
 			Name: "ops_controller_resource_memory_usage_bytes",
 			Help: "Controller memory usage in bytes",
 		},
-		[]string{"pod"},
+		[]string{"exported_pod"},
 	)
 
 	// ============================================================================
@@ -278,7 +278,7 @@ var (
 			Name: "ops_server_resource_goroutines",
 			Help: "Server number of goroutines",
 		},
-		[]string{"pod"},
+		[]string{"exported_pod"},
 	)
 
 	// ============================================================================
@@ -291,7 +291,7 @@ var (
 			Name: "ops_server_throughput_http_requests_total",
 			Help: "Total number of HTTP requests",
 		},
-		[]string{"pod", "method", "path", "status_code"},
+		[]string{"method", "path", "status_code"},
 	)
 
 	// APIRequestsTotal is a counter for API requests
@@ -300,7 +300,7 @@ var (
 			Name: "ops_server_throughput_api_requests_total",
 			Help: "Total number of API requests",
 		},
-		[]string{"pod", "endpoint", "namespace", "status"},
+		[]string{"endpoint", "namespace", "status"},
 	)
 
 	// APIErrorsTotal is a counter for API errors
@@ -309,7 +309,7 @@ var (
 			Name: "ops_server_throughput_api_errors_total",
 			Help: "Total number of API errors",
 		},
-		[]string{"pod", "endpoint", "namespace", "error_type"},
+		[]string{"endpoint", "namespace", "error_type"},
 	)
 
 	// ServerInfo is a gauge for server information
@@ -318,7 +318,7 @@ var (
 			Name: "ops_server_info",
 			Help: "Server information",
 		},
-		[]string{"pod", "version", "build_date"},
+		[]string{"exported_pod", "version", "build_date"},
 	)
 
 	// ServerUptime is a gauge for server uptime
@@ -327,7 +327,7 @@ var (
 			Name: "ops_server_uptime_seconds",
 			Help: "Server uptime in seconds",
 		},
-		[]string{"pod"},
+		[]string{"exported_pod"},
 	)
 
 	// ServerCPUUsage is a gauge for server CPU usage (cumulative seconds)
@@ -336,7 +336,7 @@ var (
 			Name: "ops_server_resource_cpu_usage_seconds_total",
 			Help: "Server CPU usage in seconds (cumulative)",
 		},
-		[]string{"pod"},
+		[]string{"exported_pod"},
 	)
 
 	// ServerMemoryUsage is a gauge for server memory usage in bytes
@@ -345,7 +345,7 @@ var (
 			Name: "ops_server_resource_memory_usage_bytes",
 			Help: "Server memory usage in bytes",
 		},
-		[]string{"pod"},
+		[]string{"exported_pod"},
 	)
 )
 
@@ -472,17 +472,17 @@ func updateServerResourceMetrics() {
 
 // RecordTaskInfo records Task resource info
 func RecordTaskInfo(namespace, name, desc, host, runtimeImage string) {
-	TaskInfo.WithLabelValues(PodName, namespace, name, desc, host, runtimeImage).Set(1)
+	TaskInfo.WithLabelValues(namespace, name, desc, host, runtimeImage).Set(1)
 }
 
 // RecordPipelineInfo records Pipeline resource info
 func RecordPipelineInfo(namespace, name, desc string) {
-	PipelineInfo.WithLabelValues(PodName, namespace, name, desc).Set(1)
+	PipelineInfo.WithLabelValues(namespace, name, desc).Set(1)
 }
 
 // RecordHostInfo records Host resource info (static fields only)
 func RecordHostInfo(namespace, name, address, hostname, distribution, arch, status string) {
-	HostInfo.WithLabelValues(PodName, namespace, name, address, hostname, distribution, arch, status).Set(1)
+	HostInfo.WithLabelValues(namespace, name, address, hostname, distribution, arch, status).Set(1)
 }
 
 // RecordClusterInfo records Cluster resource info (static fields only)
@@ -491,12 +491,12 @@ func RecordClusterInfo(namespace, name, server, version, status string, node, po
 	podCountStr := fmt.Sprintf("%d", podCount)
 	runningPodStr := fmt.Sprintf("%d", runningPod)
 	certNotAfterDaysStr := fmt.Sprintf("%d", certNotAfterDays)
-	ClusterInfo.WithLabelValues(PodName, namespace, name, server, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr).Set(1)
+	ClusterInfo.WithLabelValues(namespace, name, server, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr).Set(1)
 }
 
 // RecordEventHooksInfo records EventHooks resource info
 func RecordEventHooksInfo(namespace, name, eventType, subject, url string) {
-	EventHooksInfo.WithLabelValues(PodName, namespace, name, eventType, subject, url).Set(1)
+	EventHooksInfo.WithLabelValues(namespace, name, eventType, subject, url).Set(1)
 }
 
 // ============================================================================
@@ -505,34 +505,34 @@ func RecordEventHooksInfo(namespace, name, eventType, subject, url string) {
 
 // RecordTaskRunInfo records TaskRun resource info
 func RecordTaskRunInfo(namespace, name, taskref, crontab, status string) {
-	TaskRunInfo.WithLabelValues(PodName, namespace, name, taskref, crontab, status).Set(1)
+	TaskRunInfo.WithLabelValues(namespace, name, taskref, crontab, status).Set(1)
 }
 
 // RecordTaskRunStart records TaskRun start time
 func RecordTaskRunStart(namespace, name, taskref string, startTime float64) {
-	TaskRunStartTime.WithLabelValues(PodName, namespace, name, taskref).Set(startTime)
+	TaskRunStartTime.WithLabelValues(namespace, name, taskref).Set(startTime)
 }
 
 // RecordTaskRunEnd records TaskRun end time and duration
 func RecordTaskRunEnd(namespace, name, taskref, status string, endTime, durationSeconds float64) {
-	TaskRunEndTime.WithLabelValues(PodName, namespace, name, taskref).Set(endTime)
-	TaskRunDurationSeconds.WithLabelValues(PodName, namespace, name, taskref, status).Set(durationSeconds)
+	TaskRunEndTime.WithLabelValues(namespace, name, taskref).Set(endTime)
+	TaskRunDurationSeconds.WithLabelValues(namespace, name, taskref, status).Set(durationSeconds)
 }
 
 // RecordPipelineRunInfo records PipelineRun resource info
 func RecordPipelineRunInfo(namespace, name, pipelineref, crontab, status string) {
-	PipelineRunInfo.WithLabelValues(PodName, namespace, name, pipelineref, crontab, status).Set(1)
+	PipelineRunInfo.WithLabelValues(namespace, name, pipelineref, crontab, status).Set(1)
 }
 
 // RecordPipelineRunStart records PipelineRun start time
 func RecordPipelineRunStart(namespace, name, pipelineref string, startTime float64) {
-	PipelineRunStartTime.WithLabelValues(PodName, namespace, name, pipelineref).Set(startTime)
+	PipelineRunStartTime.WithLabelValues(namespace, name, pipelineref).Set(startTime)
 }
 
 // RecordPipelineRunEnd records PipelineRun end time and duration
 func RecordPipelineRunEnd(namespace, name, pipelineref, status string, endTime, durationSeconds float64) {
-	PipelineRunEndTime.WithLabelValues(PodName, namespace, name, pipelineref).Set(endTime)
-	PipelineRunDurationSeconds.WithLabelValues(PodName, namespace, name, pipelineref, status).Set(durationSeconds)
+	PipelineRunEndTime.WithLabelValues(namespace, name, pipelineref).Set(endTime)
+	PipelineRunDurationSeconds.WithLabelValues(namespace, name, pipelineref, status).Set(durationSeconds)
 }
 
 // ============================================================================
@@ -541,12 +541,12 @@ func RecordPipelineRunEnd(namespace, name, pipelineref, status string, endTime, 
 
 // RecordTaskRefRun records TaskRef run count
 func RecordTaskRefRun(namespace, taskref, status string) {
-	TaskRefRunTotal.WithLabelValues(PodName, namespace, taskref, status).Inc()
+	TaskRefRunTotal.WithLabelValues(namespace, taskref, status).Inc()
 }
 
 // RecordPipelineRefRun records PipelineRef run count
 func RecordPipelineRefRun(namespace, pipelineref, status string) {
-	PipelineRefRunTotal.WithLabelValues(PodName, namespace, pipelineref, status).Inc()
+	PipelineRefRunTotal.WithLabelValues(namespace, pipelineref, status).Inc()
 }
 
 // ============================================================================
@@ -555,7 +555,7 @@ func RecordPipelineRefRun(namespace, pipelineref, status string) {
 
 // RecordEventHooksTrigger records EventHooks trigger (only successful triggers)
 func RecordEventHooksTrigger(namespace, eventhookName, keyword, eventID string) {
-	EventHooksTriggerTotal.WithLabelValues(PodName, namespace, eventhookName, keyword, eventID).Inc()
+	EventHooksTriggerTotal.WithLabelValues(namespace, eventhookName, keyword, eventID).Inc()
 }
 
 // ============================================================================
@@ -564,12 +564,12 @@ func RecordEventHooksTrigger(namespace, eventhookName, keyword, eventID string) 
 
 // RecordReconcile records a reconcile operation
 func RecordReconcile(controller, namespace, result string) {
-	ControllerReconcileTotal.WithLabelValues(PodName, controller, namespace, result).Inc()
+	ControllerReconcileTotal.WithLabelValues(controller, namespace, result).Inc()
 }
 
 // RecordReconcileError records a reconcile error
 func RecordReconcileError(controller, namespace, errorType string) {
-	ControllerReconcileErrors.WithLabelValues(PodName, controller, namespace, errorType).Inc()
+	ControllerReconcileErrors.WithLabelValues(controller, namespace, errorType).Inc()
 }
 
 // ============================================================================
