@@ -6,7 +6,7 @@
 
 - **CICD Clusters**: Building 2k+ daily for CICD clusters.
 - **Global Clusters**: Managing 40+ clusters overseas.
-- **AI Computing Clusters**: Managing 5+ AI computing clusters.
+- **AI Computing Clusters**: Managing 20+ AI computing clusters.
 - **Architecture Support**: Supporting both ARM and X86 architectures.
 
 ### **Design Overview**
