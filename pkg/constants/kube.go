@@ -18,8 +18,8 @@ const LabelOpsTaskKey = "ops/task"
 
 const LabelOpsTaskValue = "true"
 
-const LabelOpsServerKey = "app.kubernetes.io/name"
-const LabelOpsServerValue = "ops"
+const LabelOpsServerKey = "app.kubernetes.io/component"
+const LabelOpsServerValue = "server"
 
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 

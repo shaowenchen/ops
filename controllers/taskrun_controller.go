@@ -297,12 +297,21 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 
 func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Context, client client.Client, t *opsv1.Task, tr *opsv1.TaskRun, h *opsv1.Host) (err error) {
 	// fill variables
+	if tr.Spec.Variables == nil {
+		tr.Spec.Variables = make(map[string]string)
+	}
 	vars := tr.Spec.Variables
 	vars["TASK"] = t.Name
 	vars["TASKRUN"] = tr.Name
 	vars["HOSTNAME"] = h.GetHostname()
 	vars["NAMESPACE"] = tr.Namespace
-	vars["OPSSERVER_ENDPOINT"] = r.getOpsServerEndpoint(t.Namespace)
+	opsserverEndpoint := r.getOpsServerEndpoint(logger, t.Namespace)
+	if opsserverEndpoint != "" {
+		vars["OPSSERVER_ENDPOINT"] = opsserverEndpoint
+		logger.Debug.Printf("injected OPSSERVER_ENDPOINT: %s", opsserverEndpoint)
+	} else {
+		logger.Info.Println("failed to get OPSSERVER_ENDPOINT, variable not set")
+	}
 	vars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
 
 	// insert host labels
@@ -371,10 +380,19 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	}
 	r.commitStatus(logger, ctx, tr, opsconstants.StatusRunning)
 	for _, node := range nodes {
+		if tr.Spec.Variables == nil {
+			tr.Spec.Variables = make(map[string]string)
+		}
 		vars := tr.Spec.Variables
 		vars["HOSTNAME"] = node.Name
 		vars["NAMESPACE"] = tr.Namespace
-		vars["OPSSERVER_ENDPOINT"] = r.getOpsServerEndpoint(t.Namespace)
+		opsserverEndpoint := r.getOpsServerEndpoint(logger, t.Namespace)
+		if opsserverEndpoint != "" {
+			vars["OPSSERVER_ENDPOINT"] = opsserverEndpoint
+			logger.Debug.Printf("injected OPSSERVER_ENDPOINT: %s", opsserverEndpoint)
+		} else {
+			logger.Info.Println("failed to get OPSSERVER_ENDPOINT, variable not set")
+		}
 		vars["TASK"] = t.Name
 		vars["TASKRUN"] = tr.Name
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
@@ -385,7 +403,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	return
 }
 
-func (r *TaskRunReconciler) getOpsServerEndpoint(namespace string) string {
+func (r *TaskRunReconciler) getOpsServerEndpoint(logger *opslog.Logger, namespace string) string {
 	// get app.kubernetes.io/name service under current namespace
 	// if svc no nodeport, set to nodeport
 	// get nodeport address and node ip address and return
@@ -403,21 +421,51 @@ func (r *TaskRunReconciler) getOpsServerEndpoint(namespace string) string {
 		LabelSelector: labelSelector,
 	}
 
-	r.List(context.Background(), serviceList, listOptions)
+	err := r.List(context.Background(), serviceList, listOptions)
+	if err != nil {
+		if logger != nil {
+			logger.Error.Printf("failed to list services for OPSSERVER_ENDPOINT: %v", err)
+		}
+		return ""
+	}
 	if len(serviceList.Items) == 0 {
+		if logger != nil {
+			logger.Info.Printf("no service found with label %s=%s in namespace %s", opsconstants.LabelOpsServerKey, opsconstants.LabelOpsServerValue, namespace)
+		}
 		return ""
 	}
 	svc := serviceList.Items[0]
 	if svc.Spec.Type != corev1.ServiceTypeNodePort {
+		if logger != nil {
+			logger.Info.Printf("service %s/%s is not NodePort type (current type: %s), cannot get OPSSERVER_ENDPOINT", svc.Namespace, svc.Name, svc.Spec.Type)
+		}
+		return ""
+	}
+	if len(svc.Spec.Ports) == 0 {
+		if logger != nil {
+			logger.Info.Printf("service %s/%s has no ports configured", svc.Namespace, svc.Name)
+		}
 		return ""
 	}
 	// get node
 	anyWorker, err := opsutils.GetAnyReadyNodesByReconcileClient(r.Client)
 	if err != nil {
+		if logger != nil {
+			logger.Error.Printf("failed to get ready node for OPSSERVER_ENDPOINT: %v", err)
+		}
 		return ""
 	}
 	nodeIp := opsutils.GetNodeInternalIp(anyWorker)
+	if nodeIp == "" {
+		if logger != nil {
+			logger.Info.Printf("node %s has no internal IP", anyWorker.Name)
+		}
+		return ""
+	}
 	r.opsserverEndpoint = fmt.Sprintf("http://%s:%d", nodeIp, svc.Spec.Ports[0].NodePort)
+	if logger != nil {
+		logger.Info.Printf("OPSSERVER_ENDPOINT resolved: %s", r.opsserverEndpoint)
+	}
 	return r.opsserverEndpoint
 }
 
