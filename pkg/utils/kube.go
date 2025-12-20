@@ -207,26 +207,34 @@ func GetAllNodesByReconcileClient(client runtimeClient.Client) (nodes *corev1.No
 }
 
 func GetAllReadyNodesByClient(client *kubernetes.Clientset) (nodes *corev1.NodeList, err error) {
-	nodes, err = GetAllNodesByClient(client)
+	allNodes, err := GetAllNodesByClient(client)
 	if err != nil {
 		return
 	}
-	for i, node := range nodes.Items {
-		if !IsNodeReady(&node) {
-			nodes.Items = append(nodes.Items[:i], nodes.Items[i+1:]...)
+	nodes = &corev1.NodeList{
+		TypeMeta: allNodes.TypeMeta,
+		ListMeta: allNodes.ListMeta,
+	}
+	for _, node := range allNodes.Items {
+		if IsNodeReady(&node) {
+			nodes.Items = append(nodes.Items, node)
 		}
 	}
 	return
 }
 
 func GetAllReadyNodesByReconcileClient(client runtimeClient.Client) (nodes *corev1.NodeList, err error) {
-	nodes, err = GetAllNodesByReconcileClient(client)
+	allNodes, err := GetAllNodesByReconcileClient(client)
 	if err != nil {
 		return
 	}
-	for i, node := range nodes.Items {
-		if !IsNodeReady(&node) {
-			nodes.Items = append(nodes.Items[:i], nodes.Items[i+1:]...)
+	nodes = &corev1.NodeList{
+		TypeMeta: allNodes.TypeMeta,
+		ListMeta: allNodes.ListMeta,
+	}
+	for _, node := range allNodes.Items {
+		if IsNodeReady(&node) {
+			nodes.Items = append(nodes.Items, node)
 		}
 	}
 	return
