@@ -65,19 +65,21 @@ func detectCGroupVersion() CGroupVersion {
 func findCGroupPath() (string, error) {
 	version := detectCGroupVersion()
 
-	// For cgroup v2, try to find path from /proc/self/cgroup
-	if version == CGroupV2 {
-		cgroupFile := "/proc/self/cgroup"
-		data, err := os.ReadFile(cgroupFile)
-		if err != nil {
-			// Fallback to root cgroup
+	cgroupFile := "/proc/self/cgroup"
+	data, err := os.ReadFile(cgroupFile)
+	if err != nil {
+		if version == CGroupV2 {
 			return cgroupV2Path, nil
 		}
+		return "", fmt.Errorf("failed to read cgroup file: %w", err)
+	}
 
-		scanner := bufio.NewScanner(strings.NewReader(string(data)))
-		for scanner.Scan() {
-			line := scanner.Text()
-			// For cgroup v2, format is: 0::/path
+	scanner := bufio.NewScanner(strings.NewReader(string(data)))
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// For cgroup v2, format is: 0::/path
+		if version == CGroupV2 {
 			if strings.HasPrefix(line, "0::") {
 				parts := strings.Split(line, ":")
 				if len(parts) >= 3 {
@@ -90,18 +92,93 @@ func findCGroupPath() (string, error) {
 					}
 				}
 			}
+		} else if version == CGroupV1 {
+			// For cgroup v1, format is: hierarchyID:controllers:path
+			// We need to find the line with cpu or cpuacct controller
+			parts := strings.Split(line, ":")
+			if len(parts) >= 3 {
+				controllers := parts[1]
+				path := parts[2]
+				// Check if this line has cpu or cpuacct controller
+				if strings.Contains(controllers, "cpu") || strings.Contains(controllers, "cpuacct") {
+					if path != "" && path != "/" {
+						// Try to find the actual cgroup mount point
+						// Common mount points: /sys/fs/cgroup/cpu or /sys/fs/cgroup/cpuacct
+						for _, mountPoint := range []string{"/sys/fs/cgroup/cpu", "/sys/fs/cgroup/cpuacct"} {
+							fullPath := filepath.Join(mountPoint, path)
+							if _, err := os.Stat(fullPath); err == nil {
+								return fullPath, nil
+							}
+						}
+					}
+				}
+			}
 		}
-		// Fallback to root cgroup
-		return cgroupV2Path, nil
 	}
 
-	// For cgroup v1, we use the root paths directly
-	// CPU and memory might be in different paths, but we'll use the common parent
+	// Fallback
+	if version == CGroupV2 {
+		return cgroupV2Path, nil
+	}
 	if version == CGroupV1 {
-		return "/sys/fs/cgroup", nil
+		return "/sys/fs/cgroup/cpu", nil
 	}
 
 	return "", fmt.Errorf("unable to find cgroup path: unsupported cgroup version")
+}
+
+// findCGroupV1Paths finds CPU and memory cgroup paths for v1
+func findCGroupV1Paths() (cpuPath, memoryPath string, err error) {
+	cgroupFile := "/proc/self/cgroup"
+	data, err := os.ReadFile(cgroupFile)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to read cgroup file: %w", err)
+	}
+
+	var cpuCgroupPath, memoryCgroupPath string
+
+	scanner := bufio.NewScanner(strings.NewReader(string(data)))
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Split(line, ":")
+		if len(parts) >= 3 {
+			controllers := parts[1]
+			path := parts[2]
+
+			if path != "" && path != "/" {
+				// Find CPU path
+				if (strings.Contains(controllers, "cpu") || strings.Contains(controllers, "cpuacct")) && cpuCgroupPath == "" {
+					for _, mountPoint := range []string{"/sys/fs/cgroup/cpu", "/sys/fs/cgroup/cpuacct"} {
+						fullPath := filepath.Join(mountPoint, path, "cpuacct.usage")
+						if _, err := os.Stat(fullPath); err == nil {
+							cpuCgroupPath = filepath.Join(mountPoint, path)
+							break
+						}
+					}
+				}
+
+				// Find memory path
+				if strings.Contains(controllers, "memory") && memoryCgroupPath == "" {
+					for _, mountPoint := range []string{"/sys/fs/cgroup/memory"} {
+						fullPath := filepath.Join(mountPoint, path, "memory.usage_in_bytes")
+						if _, err := os.Stat(fullPath); err == nil {
+							memoryCgroupPath = filepath.Join(mountPoint, path)
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if cpuCgroupPath == "" {
+		cpuCgroupPath = "/sys/fs/cgroup/cpu"
+	}
+	if memoryCgroupPath == "" {
+		memoryCgroupPath = "/sys/fs/cgroup/memory"
+	}
+
+	return cpuCgroupPath, memoryCgroupPath, nil
 }
 
 // GetCPUUsage returns CPU usage in seconds (cumulative)
@@ -120,9 +197,20 @@ func GetCPUUsage() (float64, error) {
 
 // getCPUUsageV1 reads CPU usage from cgroup v1
 func getCPUUsageV1() (float64, error) {
-	data, err := os.ReadFile(cgroupV1CPUPath)
+	cpuPath, _, err := findCGroupV1Paths()
 	if err != nil {
-		return 0, fmt.Errorf("failed to read cgroup v1 CPU usage: %w", err)
+		return 0, err
+	}
+
+	cpuUsagePath := filepath.Join(cpuPath, "cpuacct.usage")
+	// Fallback to default path if the found path doesn't exist
+	if _, err := os.Stat(cpuUsagePath); err != nil {
+		cpuUsagePath = cgroupV1CPUPath
+	}
+
+	data, err := os.ReadFile(cpuUsagePath)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read cgroup v1 CPU usage from %s: %w", cpuUsagePath, err)
 	}
 
 	usage, err := strconv.ParseUint(strings.TrimSpace(string(data)), 10, 64)
@@ -191,9 +279,20 @@ func GetMemoryUsage() (uint64, error) {
 
 // getMemoryUsageV1 reads memory usage from cgroup v1
 func getMemoryUsageV1() (uint64, error) {
-	data, err := os.ReadFile(cgroupV1MemoryPath)
+	_, memoryPath, err := findCGroupV1Paths()
 	if err != nil {
-		return 0, fmt.Errorf("failed to read cgroup v1 memory usage: %w", err)
+		return 0, err
+	}
+
+	memoryUsagePath := filepath.Join(memoryPath, "memory.usage_in_bytes")
+	// Fallback to default path if the found path doesn't exist
+	if _, err := os.Stat(memoryUsagePath); err != nil {
+		memoryUsagePath = cgroupV1MemoryPath
+	}
+
+	data, err := os.ReadFile(memoryUsagePath)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read cgroup v1 memory usage from %s: %w", memoryUsagePath, err)
 	}
 
 	usage, err := strconv.ParseUint(strings.TrimSpace(string(data)), 10, 64)
