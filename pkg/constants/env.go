@@ -9,6 +9,7 @@ const (
 	EnvDebugKey            = "DEBUG"
 	EnvActiveNamespaceKey  = "ACTIVE_NAMESPACE"
 	EnvDefaultRuntimeImage = "DEFAULT_RUNTIME_IMAGE"
+	EnvProxy               = "PROXY"
 	EnvEventClusterKey     = "EVENT_CLUSTER"
 	EnvEventEndpointKey    = "EVENT_ENDPOINT"
 )
@@ -33,4 +34,8 @@ func GetEnvEventEndpoint() string {
 
 func GetEnvDefaultRuntimeImage() string {
 	return os.Getenv(EnvDefaultRuntimeImage)
+}
+
+func GetEnvProxy() string {
+	return os.Getenv(EnvProxy)
 }

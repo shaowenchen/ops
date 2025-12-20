@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/cmd/cli/config"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -55,10 +56,6 @@ var TaskCmd = &cobra.Command{
 func HostTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
 	hs := host.GetHosts(logger, option.ClusterOption{}, hostOpt, inventory)
 	for _, h := range hs {
-		if err != nil {
-			logger.Error.Println(err)
-			continue
-		}
 		for _, t := range tasks {
 			tr := opsv1.NewTaskRun(&t)
 			hc, err := host.NewHostConnBase64(h)
@@ -111,6 +108,7 @@ func KubeTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskO
 
 func parseArgs(args []string) (taskOption option.TaskOption) {
 	taskOption.Variables = make(map[string]string)
+	runtimeImageSetViaCLI := false
 	for i := 0; i < len(args); i++ {
 		fieldName := getArgName(args[i])
 		if len(fieldName) > 0 {
@@ -128,6 +126,7 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 			} else if fieldName == "filepath" || fieldName == "f" {
 				taskOption.FilePath = fieldValue
 			} else if fieldName == "proxy" {
+				// CLI argument has highest priority, set it directly
 				taskOption.Proxy = fieldValue
 			} else if fieldName == "nodename" {
 				kubeOpt.NodeName = fieldValue
@@ -135,6 +134,7 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 				kubeOpt.Namespace = fieldValue
 			} else if fieldName == "runtimeimage" {
 				kubeOpt.RuntimeImage = fieldValue
+				runtimeImageSetViaCLI = true
 			} else if fieldName == "inventory" || fieldName == "i" {
 				inventory = fieldValue
 			} else if fieldName == "port" {
@@ -148,10 +148,17 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 			} else {
 				taskOption.Variables[fieldName] = fieldValue
 			}
-			if taskOption.Proxy == "" {
-				taskOption.Proxy = constants.DefaultProxy
-			}
 		}
+	}
+	// Get proxy with priority: CLI > ENV > Config > Default
+	// If taskOption.Proxy is empty, it means not provided via CLI args
+	if taskOption.Proxy == "" {
+		taskOption.Proxy = config.GetValueWithPriority("", constants.EnvProxy, "proxy", constants.DefaultProxy)
+	}
+	// Get runtimeimage with priority: CLI > ENV > Config > Default
+	// If not set via CLI, use priority: ENV > Config > Default
+	if !runtimeImageSetViaCLI {
+		kubeOpt.RuntimeImage = config.GetValueWithPriority("", constants.EnvDefaultRuntimeImage, "runtimeimage", constants.DefaultRuntimeImage)
 	}
 	return
 }
@@ -173,7 +180,10 @@ func init() {
 
 	TaskCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	TaskCmd.Flags().StringVarP(&kubeOpt.Namespace, "opsnamespace", "", constants.OpsNamespace, "ops work namespace")
-	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "runtime image")
+
+	// Load runtimeimage with priority: ENV > Config > Default (CLI args handled in parseArgs)
+	runtimeImage := config.GetValueWithPriority("", constants.EnvDefaultRuntimeImage, "runtimeimage", constants.DefaultRuntimeImage)
+	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", runtimeImage, "runtime image")
 
 	TaskCmd.Flags().IntVarP(&hostOpt.Port, "port", "", 22, "")
 	TaskCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")

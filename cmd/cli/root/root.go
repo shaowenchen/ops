@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/shaowenchen/ops/cmd/cli/config"
 	"github.com/shaowenchen/ops/cmd/cli/create"
 	"github.com/shaowenchen/ops/cmd/cli/file"
 	"github.com/shaowenchen/ops/cmd/cli/shell"
@@ -20,6 +21,7 @@ func Execute() {
 	RootCmd.AddCommand(task.TaskCmd)
 	RootCmd.AddCommand(version.VersionCmd)
 	RootCmd.AddCommand(upgrade.UpgradeCmd)
+	RootCmd.AddCommand(config.ConfigCmd)
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

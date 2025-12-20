@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/shaowenchen/ops/cmd/cli/config"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
@@ -16,6 +17,9 @@ var UpgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "upgrade to latest version",
 	Run: func(cmd *cobra.Command, args []string) {
+		// Get proxy with priority: CLI > ENV > Config > Default
+		proxy = config.GetValueWithPriority(proxy, constants.EnvProxy, "proxy", constants.DefaultProxy)
+
 		bash := ""
 		if manifests {
 			bash = utils.ShellInstallManifests(proxy)

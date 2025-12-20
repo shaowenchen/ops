@@ -20,7 +20,7 @@ flags="-X github.com/shaowenchen/ops/cmd/cli/version.BuildVersion=`git symbolic-
 .PHONY: all
 all: build
 
-cli: 
+build-cli: 
 	GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -ldflags ${flags} -o ./bin/opscli ./cmd/cli/main.go
 
 ##@ General

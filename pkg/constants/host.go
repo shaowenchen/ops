@@ -76,3 +76,11 @@ func GetOpsLogsDir() string {
 func GetCurrentUserPrivateKeyPath() string {
 	return filepath.Join(GetCurrentUserHomeDir(), ".ssh", "id_rsa")
 }
+
+func GetOpsCliConfigDir() string {
+	return filepath.Join(GetOpsDir(), "opscli")
+}
+
+func GetOpsCliConfigPath() string {
+	return filepath.Join(GetOpsCliConfigDir(), "config")
+}
