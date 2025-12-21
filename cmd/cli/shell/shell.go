@@ -3,6 +3,7 @@ package shell
 import (
 	"context"
 
+	"github.com/shaowenchen/ops/cmd/cli/config"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -28,15 +29,17 @@ var ShellCmd = &cobra.Command{
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventory = utils.GetAbsoluteFilePath(inventory)
-		inventoryType := utils.GetInventoryType(inventory)
+		
+		inventoryType, availableInventory := utils.GetInventoryType(inventory, kubeOpt.NodeName)
+
 		if utils.IsExistsFile(shellOpt.Content) {
 			shellOpt.Content, _ = utils.ReadFile(shellOpt.Content)
 		}
 		switch inventoryType {
 		case constants.InventoryTypeKubernetes:
-			KubeShell(context.Background(), logger, shellOpt, kubeOpt, inventory)
+			KubeShell(context.Background(), logger, shellOpt, kubeOpt, availableInventory)
 		case constants.InventoryTypeHosts:
-			HostShell(context.Background(), logger, shellOpt, hostOpt, inventory)
+			HostShell(context.Background(), logger, shellOpt, hostOpt, availableInventory)
 		}
 	},
 }
@@ -79,7 +82,10 @@ func init() {
 
 	ShellCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
 	ShellCmd.Flags().StringVarP(&kubeOpt.Namespace, "opsnamespace", "", constants.OpsNamespace, "ops work namespace")
-	ShellCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", constants.DefaultRuntimeImage, "")
+
+	// Load runtimeimage with priority: ENV > Config > Default (CLI args handled by cobra)
+	runtimeImage := config.GetValueWithPriority("", constants.EnvDefaultRuntimeImage, "runtimeimage", constants.DefaultRuntimeImage)
+	ShellCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", runtimeImage, "runtime image")
 
 	ShellCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	ShellCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")

@@ -7,17 +7,25 @@ import (
 	"strings"
 )
 
-func GetInventoryType(inventory string) string {
-	_, err := GetRestConfig(inventory)
-	if err == nil {
-		return constants.InventoryTypeKubernetes
+func GetInventoryType(inventory string, nodename string) (inventoryType string, availableInventory string) {
+	availableInventory = GetAbsoluteFilePath(inventory)
+	if nodename != "" {
+		inventoryType = constants.InventoryTypeKubernetes
+		if availableInventory == "" {
+			if IsExistsFile(constants.GetCurrentUserKubeConfigPath()) {
+				availableInventory = constants.GetCurrentUserKubeConfigPath()
+				return
+			} else if IsExistsFile(constants.KubeAdminConfigPath) {
+				availableInventory = constants.KubeAdminConfigPath
+				return
+			}
+		} else {
+			inventoryType = constants.InventoryTypeKubernetes
+			availableInventory = GetAbsoluteFilePath(inventory)
+			return
+		}
 	}
-	_, err = GetInClusterConfig()
-	if err == nil && len(inventory) == 0 {
-		return constants.InventoryTypeKubernetes
-	}
-
-	return constants.InventoryTypeHosts
+	return constants.InventoryTypeHosts, availableInventory
 }
 
 func AnalysisHostsParameter(str string) (result []string, err error) {

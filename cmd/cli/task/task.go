@@ -37,7 +37,7 @@ var TaskCmd = &cobra.Command{
 		hostOpt.Password = utils.EncodingStringToBase64(hostOpt.Password)
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
-		inventoryType := utils.GetInventoryType(inventory)
+		inventoryType, availableInventory := utils.GetInventoryType(inventory, kubeOpt.NodeName)
 		tasks, err := opstask.ReadTaskYaml(utils.GetTaskAbsoluteFilePath(taskOpt.Proxy, taskOpt.FilePath))
 		if err != nil {
 			logger.Error.Println(err)
@@ -46,9 +46,9 @@ var TaskCmd = &cobra.Command{
 		taskOpt.Variables["nodename"] = kubeOpt.NodeName
 		switch inventoryType {
 		case constants.InventoryTypeHosts:
-			HostTask(context.Background(), logger, tasks, taskOpt, hostOpt, inventory)
+			HostTask(context.Background(), logger, tasks, taskOpt, hostOpt, availableInventory)
 		case constants.InventoryTypeKubernetes:
-			KubeTask(context.Background(), logger, tasks, taskOpt, kubeOpt, inventory)
+			KubeTask(context.Background(), logger, tasks, taskOpt, kubeOpt, availableInventory)
 		}
 	},
 }

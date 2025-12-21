@@ -28,12 +28,12 @@ var FileCmd = &cobra.Command{
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
-		inventoryType := utils.GetInventoryType(inventory)
+		inventoryType, availableInventory := utils.GetInventoryType(inventory, fileOpt.NodeName)
 		switch inventoryType {
 		case constants.InventoryTypeHosts:
-			HostFile(ctx, logger, fileOpt, hostOpt, inventory)
+			HostFile(ctx, logger, fileOpt, hostOpt, availableInventory)
 		case constants.InventoryTypeKubernetes:
-			KubeFile(ctx, logger, fileOpt, inventory)
+			KubeFile(ctx, logger, fileOpt, availableInventory)
 		}
 	},
 }
