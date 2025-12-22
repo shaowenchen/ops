@@ -21,6 +21,9 @@ const LabelOpsTaskValue = "true"
 const LabelOpsServerKey = "app.kubernetes.io/component"
 const LabelOpsServerValue = "server"
 
+const LabelOpsPartOf = "app.kubernetes.io/part-of"
+const LabelOpsPartOfValue = "ops"
+
 const KubeAdminConfigPath = "/etc/kubernetes/admin.conf"
 
 const DefaultRuntimeImage = "ubuntu:22.04"

@@ -967,7 +967,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max without (instance, pod, job, endpoint) (ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1) * on(namespace, name) group_left(hostname, distribution, arch, status) max without (instance, pod, job, endpoint) (ops_controller_host_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1065,7 +1065,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max without (instance, pod, job, endpoint) (ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1) * on(namespace, name) group_left(version, status, node, pod_count, running_pod, cert_not_after_days) max without (instance, pod, job, endpoint) (ops_controller_cluster_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1176,7 +1176,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max without (instance, pod, job, endpoint) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1) * on(namespace, name) group_left(status) max without (instance, pod, job, endpoint) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1274,7 +1274,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max without (instance, pod, job, endpoint) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1) * on(namespace, name) group_left(status) max without (instance, pod, job, endpoint) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1319,6 +1319,375 @@
       "type": "table"
     },
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "id": 103,
+      "panels": [],
+      "title": "Status",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 21,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_host_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Host Status",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "instance": true,
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "cluster": true
+            },
+            "indexByName": {
+              "name": 0
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "id": 22,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_cluster_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Cluster Status",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "instance": true,
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "cluster": true
+            },
+            "indexByName": {
+              "name": 0
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "id": 23,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "TaskRun Status",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "instance": true,
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "cluster": true
+            },
+            "indexByName": {
+              "name": 0
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "id": 24,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "PipelineRun Status",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "instance": true,
+              "job": true,
+              "endpoint": true,
+              "exported_namespace": true,
+              "exported_pod": true,
+              "pod": true,
+              "prometheus": true,
+              "prometheus_replica": true,
+              "container": true,
+              "cluster": true
+            },
+            "indexByName": {
+              "name": 0
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -1353,7 +1722,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 39
+        "y": 56
       },
       "id": 13,
       "options": {
@@ -1458,7 +1827,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 39
+        "y": 56
       },
       "id": 14,
       "options": {
@@ -1562,7 +1931,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 48
+        "y": 64
       },
       "id": 15,
       "options": {
@@ -1666,9 +2035,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 48
+        "y": 64
       },
-      "id": 16,
+      "id": 20,
       "options": {
         "cellHeight": "sm",
         "footer": {

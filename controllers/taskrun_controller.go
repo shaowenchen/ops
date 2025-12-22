@@ -465,9 +465,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 }
 
 func (r *TaskRunReconciler) getOpsServerEndpoint(logger *opslog.Logger, namespace string) string {
-	// get app.kubernetes.io/name service under current namespace
-	// if svc no nodeport, set to nodeport
-	// get nodeport address and node ip address and return
+	// get ops server service and return cluster-internal address
 	if len(r.opsserverEndpoint) > 0 {
 		return r.opsserverEndpoint
 	}
@@ -475,6 +473,7 @@ func (r *TaskRunReconciler) getOpsServerEndpoint(logger *opslog.Logger, namespac
 	serviceList := &corev1.ServiceList{}
 	labelSelector := labels.SelectorFromSet(labels.Set{
 		opsconstants.LabelOpsServerKey: opsconstants.LabelOpsServerValue,
+		opsconstants.LabelOpsPartOf:    opsconstants.LabelOpsPartOfValue,
 	})
 
 	listOptions := &client.ListOptions{
@@ -496,34 +495,41 @@ func (r *TaskRunReconciler) getOpsServerEndpoint(logger *opslog.Logger, namespac
 		return ""
 	}
 	svc := serviceList.Items[0]
-	if svc.Spec.Type != corev1.ServiceTypeNodePort {
-		if logger != nil {
-			logger.Info.Printf("service %s/%s is not NodePort type (current type: %s), cannot get OPSSERVER_ENDPOINT", svc.Namespace, svc.Name, svc.Spec.Type)
-		}
-		return ""
-	}
 	if len(svc.Spec.Ports) == 0 {
 		if logger != nil {
 			logger.Info.Printf("service %s/%s has no ports configured", svc.Namespace, svc.Name)
 		}
 		return ""
 	}
-	// get node
-	anyWorker, err := opsutils.GetAnyReadyNodesByReconcileClient(r.Client)
-	if err != nil {
-		if logger != nil {
-			logger.Error.Printf("failed to get ready node for OPSSERVER_ENDPOINT: %v", err)
+	// find port by name "http", otherwise use port 80 as default
+	var port int32 = 80
+	found := false
+	for _, svcPort := range svc.Spec.Ports {
+		if svcPort.Name == "http" {
+			port = svcPort.Port
+			if port == 0 {
+				// if Port is 0, try TargetPort (but prefer Port as it's the service exposed port)
+				if svcPort.TargetPort.IntVal > 0 {
+					port = svcPort.TargetPort.IntVal
+				} else {
+					// if TargetPort is also 0 or string, use default 80
+					port = 80
+				}
+			}
+			found = true
+			break
 		}
-		return ""
 	}
-	nodeIp := opsutils.GetNodeInternalIp(anyWorker)
-	if nodeIp == "" {
+	if !found {
+		// use default port 80 if no "http" named port found
+		port = 80
 		if logger != nil {
-			logger.Info.Printf("node %s has no internal IP", anyWorker.Name)
+			logger.Info.Printf("service %s/%s has no port named 'http', using default port 80", svc.Namespace, svc.Name)
 		}
-		return ""
 	}
-	r.opsserverEndpoint = fmt.Sprintf("http://%s:%d", nodeIp, svc.Spec.Ports[0].NodePort)
+	// use service name only (assuming same namespace, Kubernetes will resolve it)
+	// format: http://<service-name>:<port>
+	r.opsserverEndpoint = fmt.Sprintf("http://%s:%d", svc.Name, port)
 	if logger != nil {
 		logger.Info.Printf("OPSSERVER_ENDPOINT resolved: %s", r.opsserverEndpoint)
 	}

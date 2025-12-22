@@ -5,7 +5,7 @@ metadata:
   name: {{ include "ops.fullname" . }}-controller-metrics
   labels:
     {{- include "ops.controllerMetricsLabels" . | nindent 4 }}
-    app.kubernetes.io/part-of: ops
+    ops: "true"
 spec:
   selector:
     matchLabels:
