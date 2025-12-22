@@ -88,11 +88,7 @@ type EventWebhook struct {
 
 func (e EventWebhook) Readable(ce cloudevents.Event) string {
 	var result = &strings.Builder{}
-	AppendCluster(result, ce, e.Cluster)
-	AppendField(result, "content", e.Content)
-	AppendField(result, "source", e.Source)
-	AppendField(result, "webhookUrl", e.WebhookUrl)
-	AppendField(result, "time", ce.Time().Local().Format("2006-01-02 15:04:05"))
+	result.WriteString(e.Content)
 	return result.String()
 }
 
