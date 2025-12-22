@@ -95,8 +95,10 @@ func (r *TaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		return ctrl.Result{}, nil
 	}
 
-	// Record Task info metrics on every reconcile (value=1 for existing resource)
+	// Record Task info metrics (static fields only)
 	opsmetrics.RecordTaskInfo(obj.Namespace, obj.Name, obj.Spec.Desc, obj.Spec.Host, obj.Spec.RuntimeImage, 1)
+	// Record Task status metrics (dynamic fields)
+	opsmetrics.RecordTaskStatus(obj.Namespace, obj.Name)
 
 	r.syncResource(logger, ctx, false, obj)
 

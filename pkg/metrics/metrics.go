@@ -41,62 +41,116 @@ var (
 	// Resource Info metrics - expose all non-time fields for each resource
 	// ============================================================================
 
-	// TaskInfo records Task resource info
+	// TaskInfo records Task resource info (static fields only)
 	TaskInfo = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_controller_task_info",
-			Help: "Task resource info",
+			Help: "Task resource info (static fields only)",
 		},
 		[]string{"namespace", "name", "desc", "host", "runtime_image"},
 	)
 
-	// PipelineInfo records Pipeline resource info
+	// TaskStatus records Task resource status (dynamic fields)
+	TaskStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_task_status",
+			Help: "Task resource status (dynamic fields)",
+		},
+		[]string{"namespace", "name"},
+	)
+
+	// PipelineInfo records Pipeline resource info (static fields only)
 	PipelineInfo = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_controller_pipeline_info",
-			Help: "Pipeline resource info",
+			Help: "Pipeline resource info (static fields only)",
 		},
 		[]string{"namespace", "name", "desc"},
+	)
+
+	// PipelineStatus records Pipeline resource status (dynamic fields)
+	PipelineStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_pipeline_status",
+			Help: "Pipeline resource status (dynamic fields)",
+		},
+		[]string{"namespace", "name"},
 	)
 
 	// HostInfo records Host resource info (static fields only)
 	HostInfo = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_controller_host_info",
-			Help: "Host resource info",
+			Help: "Host resource info (static fields only)",
 		},
-		[]string{"namespace", "name", "address", "hostname", "distribution", "arch", "status"},
+		[]string{"namespace", "name", "address"},
+	)
+
+	// HostStatus records Host resource status (dynamic fields)
+	HostStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_host_status",
+			Help: "Host resource status (dynamic fields)",
+		},
+		[]string{"namespace", "name", "hostname", "distribution", "arch", "status"},
 	)
 
 	// ClusterInfo records Cluster resource info (static fields only)
 	ClusterInfo = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_controller_cluster_info",
-			Help: "Cluster resource info",
+			Help: "Cluster resource info (static fields only)",
 		},
-		[]string{"namespace", "name", "server", "version", "status", "node", "pod_count", "running_pod", "cert_not_after_days"},
+		[]string{"namespace", "name", "server"},
 	)
 
-	// EventHooksInfo records EventHooks resource info
+	// ClusterStatus records Cluster resource status (dynamic fields)
+	ClusterStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_cluster_status",
+			Help: "Cluster resource status (dynamic fields)",
+		},
+		[]string{"namespace", "name", "version", "status", "node", "pod_count", "running_pod", "cert_not_after_days"},
+	)
+
+	// EventHooksInfo records EventHooks resource info (static fields only)
 	EventHooksInfo = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_controller_eventhooks_info",
-			Help: "EventHooks resource info",
+			Help: "EventHooks resource info (static fields only)",
 		},
 		[]string{"namespace", "name", "type", "subject", "url"},
+	)
+
+	// EventHooksStatus records EventHooks resource status (dynamic fields)
+	EventHooksStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_eventhooks_status",
+			Help: "EventHooks resource status (dynamic fields, including trigger information)",
+		},
+		[]string{"namespace", "name", "keyword", "event_id"},
 	)
 
 	// ============================================================================
 	// TaskRun/PipelineRun metrics - track running status, start/end time, duration
 	// ============================================================================
 
-	// TaskRunInfo records TaskRun resource info with all fields
+	// TaskRunInfo records TaskRun resource info (static fields only)
 	TaskRunInfo = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_controller_taskrun_info",
-			Help: "TaskRun resource info",
+			Help: "TaskRun resource info (static fields only)",
 		},
-		[]string{"namespace", "name", "taskref", "crontab", "status"},
+		[]string{"namespace", "name", "taskref", "crontab"},
+	)
+
+	// TaskRunStatus records TaskRun resource status (dynamic fields)
+	TaskRunStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_taskrun_status",
+			Help: "TaskRun resource status (dynamic fields)",
+		},
+		[]string{"namespace", "name", "status"},
 	)
 
 	// TaskRunStartTime records TaskRun start time (unix timestamp)
@@ -126,13 +180,22 @@ var (
 		[]string{"namespace", "name", "taskref", "status"},
 	)
 
-	// PipelineRunInfo records PipelineRun resource info with all fields
+	// PipelineRunInfo records PipelineRun resource info (static fields only)
 	PipelineRunInfo = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "ops_controller_pipelinerun_info",
-			Help: "PipelineRun resource info",
+			Help: "PipelineRun resource info (static fields only)",
 		},
-		[]string{"namespace", "name", "pipelineref", "crontab", "status"},
+		[]string{"namespace", "name", "pipelineref", "crontab"},
+	)
+
+	// PipelineRunStatus records PipelineRun resource status (dynamic fields)
+	PipelineRunStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "ops_controller_pipelinerun_status",
+			Help: "PipelineRun resource status (dynamic fields)",
+		},
+		[]string{"namespace", "name", "status"},
 	)
 
 	// PipelineRunStartTime records PipelineRun start time (unix timestamp)
@@ -182,19 +245,6 @@ var (
 			Help: "PipelineRun status phase by pipelineref",
 		},
 		[]string{"namespace", "pipelineref", "status"},
-	)
-
-	// ============================================================================
-	// EventHooks trigger metrics
-	// ============================================================================
-
-	// EventHooksTriggerTotal records EventHooks trigger count (only successful triggers)
-	EventHooksTriggerTotal = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "ops_controller_eventhooks_trigger_total",
-			Help: "Total number of successful EventHooks triggers",
-		},
-		[]string{"namespace", "eventhook_name", "keyword", "event_id"},
 	)
 
 	// ============================================================================
@@ -351,7 +401,7 @@ var (
 
 // InitController initializes and registers controller-specific metrics
 func InitController() {
-	// Resource info metrics
+	// Resource info metrics (static fields only)
 	metrics.Registry.MustRegister(
 		TaskInfo,
 		PipelineInfo,
@@ -360,13 +410,24 @@ func InitController() {
 		EventHooksInfo,
 	)
 
+	// Resource status metrics (dynamic fields)
+	metrics.Registry.MustRegister(
+		TaskStatus,
+		PipelineStatus,
+		HostStatus,
+		ClusterStatus,
+		EventHooksStatus,
+	)
+
 	// TaskRun/PipelineRun metrics
 	metrics.Registry.MustRegister(
 		TaskRunInfo,
 		TaskRunStartTime,
 		TaskRunEndTime,
 		TaskRunDurationSeconds,
+		TaskRunStatus,
 		PipelineRunInfo,
+		PipelineRunStatus,
 		PipelineRunStartTime,
 		PipelineRunEndTime,
 		PipelineRunDurationSeconds,
@@ -376,11 +437,6 @@ func InitController() {
 	metrics.Registry.MustRegister(
 		TaskRunStatusPhase,
 		PipelineRunStatusPhase,
-	)
-
-	// EventHooks metrics
-	metrics.Registry.MustRegister(
-		EventHooksTriggerTotal,
 	)
 
 	// Controller reconcile metrics
@@ -470,48 +526,79 @@ func updateServerResourceMetrics() {
 // Resource info recording functions
 // ============================================================================
 
-// RecordTaskInfo records Task resource info
+// RecordTaskInfo records Task resource info (static fields only)
 // value: 1 for existing resource, 0 for deleted resource
 func RecordTaskInfo(namespace, name, desc, host, runtimeImage string, value float64) {
 	TaskInfo.WithLabelValues(namespace, name, desc, host, runtimeImage).Set(value)
 }
 
-// RecordPipelineInfo records Pipeline resource info
+// RecordTaskStatus records Task resource status (dynamic fields)
+func RecordTaskStatus(namespace, name string) {
+	TaskStatus.WithLabelValues(namespace, name).Set(1)
+}
+
+// RecordPipelineInfo records Pipeline resource info (static fields only)
 // value: 1 for existing resource, 0 for deleted resource
 func RecordPipelineInfo(namespace, name, desc string, value float64) {
 	PipelineInfo.WithLabelValues(namespace, name, desc).Set(value)
 }
 
+// RecordPipelineStatus records Pipeline resource status (dynamic fields)
+func RecordPipelineStatus(namespace, name string) {
+	PipelineStatus.WithLabelValues(namespace, name).Set(1)
+}
+
 // RecordHostInfo records Host resource info (static fields only)
 // value: 1 for existing resource, 0 for deleted resource
-func RecordHostInfo(namespace, name, address, hostname, distribution, arch, status string, value float64) {
-	HostInfo.WithLabelValues(namespace, name, address, hostname, distribution, arch, status).Set(value)
+func RecordHostInfo(namespace, name, address string, value float64) {
+	HostInfo.WithLabelValues(namespace, name, address).Set(value)
+}
+
+// RecordHostStatus records Host resource status (dynamic fields)
+func RecordHostStatus(namespace, name, hostname, distribution, arch, status string) {
+	HostStatus.WithLabelValues(namespace, name, hostname, distribution, arch, status).Set(1)
 }
 
 // RecordClusterInfo records Cluster resource info (static fields only)
 // value: 1 for existing resource, 0 for deleted resource
-func RecordClusterInfo(namespace, name, server, version, status string, node, podCount, runningPod int, certNotAfterDays int, value float64) {
+func RecordClusterInfo(namespace, name, server string, value float64) {
+	ClusterInfo.WithLabelValues(namespace, name, server).Set(value)
+}
+
+// RecordClusterStatus records Cluster resource status (dynamic fields)
+func RecordClusterStatus(namespace, name, version, status string, node, podCount, runningPod int, certNotAfterDays int) {
 	nodeStr := fmt.Sprintf("%d", node)
 	podCountStr := fmt.Sprintf("%d", podCount)
 	runningPodStr := fmt.Sprintf("%d", runningPod)
 	certNotAfterDaysStr := fmt.Sprintf("%d", certNotAfterDays)
-	ClusterInfo.WithLabelValues(namespace, name, server, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr).Set(value)
+	ClusterStatus.WithLabelValues(namespace, name, version, status, nodeStr, podCountStr, runningPodStr, certNotAfterDaysStr).Set(1)
 }
 
-// RecordEventHooksInfo records EventHooks resource info
+// RecordEventHooksInfo records EventHooks resource info (static fields only)
 // value: 1 for existing resource, 0 for deleted resource
 func RecordEventHooksInfo(namespace, name, eventType, subject, url string, value float64) {
 	EventHooksInfo.WithLabelValues(namespace, name, eventType, subject, url).Set(value)
+}
+
+// RecordEventHooksStatus records EventHooks resource status (dynamic fields)
+// When keyword and eventID are provided, it records trigger information
+func RecordEventHooksStatus(namespace, name, keyword, eventID string) {
+	EventHooksStatus.WithLabelValues(namespace, name, keyword, eventID).Set(1)
 }
 
 // ============================================================================
 // TaskRun/PipelineRun recording functions
 // ============================================================================
 
-// RecordTaskRunInfo records TaskRun resource info
+// RecordTaskRunInfo records TaskRun resource info (static fields only)
 // value: 1 for existing resource, 0 for deleted resource
-func RecordTaskRunInfo(namespace, name, taskref, crontab, status string, value float64) {
-	TaskRunInfo.WithLabelValues(namespace, name, taskref, crontab, status).Set(value)
+func RecordTaskRunInfo(namespace, name, taskref, crontab string, value float64) {
+	TaskRunInfo.WithLabelValues(namespace, name, taskref, crontab).Set(value)
+}
+
+// RecordTaskRunStatus records TaskRun resource status (dynamic fields)
+func RecordTaskRunStatus(namespace, name, status string) {
+	TaskRunStatus.WithLabelValues(namespace, name, status).Set(1)
 }
 
 // RecordTaskRunStart records TaskRun start time
@@ -525,10 +612,15 @@ func RecordTaskRunEnd(namespace, name, taskref, status string, endTime, duration
 	TaskRunDurationSeconds.WithLabelValues(namespace, name, taskref, status).Set(durationSeconds)
 }
 
-// RecordPipelineRunInfo records PipelineRun resource info
+// RecordPipelineRunInfo records PipelineRun resource info (static fields only)
 // value: 1 for existing resource, 0 for deleted resource
-func RecordPipelineRunInfo(namespace, name, pipelineref, crontab, status string, value float64) {
-	PipelineRunInfo.WithLabelValues(namespace, name, pipelineref, crontab, status).Set(value)
+func RecordPipelineRunInfo(namespace, name, pipelineref, crontab string, value float64) {
+	PipelineRunInfo.WithLabelValues(namespace, name, pipelineref, crontab).Set(value)
+}
+
+// RecordPipelineRunStatus records PipelineRun resource status (dynamic fields)
+func RecordPipelineRunStatus(namespace, name, status string) {
+	PipelineRunStatus.WithLabelValues(namespace, name, status).Set(1)
 }
 
 // RecordPipelineRunStart records PipelineRun start time
@@ -571,11 +663,6 @@ func RecordPipelineRunStatusPhase(namespace, pipelineref, oldStatus, newStatus s
 // ============================================================================
 // EventHooks recording functions
 // ============================================================================
-
-// RecordEventHooksTrigger records EventHooks trigger (only successful triggers)
-func RecordEventHooksTrigger(namespace, eventhookName, keyword, eventID string) {
-	EventHooksTriggerTotal.WithLabelValues(namespace, eventhookName, keyword, eventID).Inc()
-}
 
 // ============================================================================
 // Controller reconcile recording functions

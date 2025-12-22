@@ -15,17 +15,23 @@ Ops 暴露 Prometheus 指标用于监控 controller 和 server 组件。
 
 | 指标 | 标签 | 描述 |
 |------|------|------|
-| `ops_controller_task_info` | namespace, name, desc, host, runtime_image | Task 资源信息 |
-| `ops_controller_pipeline_info` | namespace, name, desc | Pipeline 资源信息 |
-| `ops_controller_host_info` | namespace, name, address, hostname, distribution, arch, cpu_total, mem_total, disk_total, accelerator_vendor, accelerator_model, accelerator_count, heart_status | Host 资源信息 |
-| `ops_controller_cluster_info` | namespace, name, server, version, node, pod, running_pod, heart_status | Cluster 资源信息 |
-| `ops_controller_eventhooks_info` | namespace, name, type, subject, url | EventHooks 资源信息 |
+| `ops_controller_task_info` | namespace, name, desc, host, runtime_image | Task 资源信息（仅静态字段） |
+| `ops_controller_task_status` | namespace, name | Task 资源状态（动态字段） |
+| `ops_controller_pipeline_info` | namespace, name, desc | Pipeline 资源信息（仅静态字段） |
+| `ops_controller_pipeline_status` | namespace, name | Pipeline 资源状态（动态字段） |
+| `ops_controller_host_info` | namespace, name, address | Host 资源信息（仅静态字段） |
+| `ops_controller_host_status` | namespace, name, hostname, distribution, arch, status | Host 资源状态（动态字段） |
+| `ops_controller_cluster_info` | namespace, name, server | Cluster 资源信息（仅静态字段） |
+| `ops_controller_cluster_status` | namespace, name, version, status, node, pod_count, running_pod, cert_not_after_days | Cluster 资源状态（动态字段） |
+| `ops_controller_eventhooks_info` | namespace, name, type, subject, url | EventHooks 资源信息（仅静态字段） |
+| `ops_controller_eventhooks_status` | namespace, name, keyword, event_id | EventHooks 资源状态（动态字段，包含触发信息） |
 
 ### TaskRun 指标
 
 | 指标 | 标签 | 描述 |
 |------|------|------|
-| `ops_controller_taskrun_info` | namespace, name, taskref, crontab, status | TaskRun 资源信息和状态 |
+| `ops_controller_taskrun_info` | namespace, name, taskref, crontab | TaskRun 资源信息（仅静态字段） |
+| `ops_controller_taskrun_status` | namespace, name, status | TaskRun 资源状态（动态字段） |
 | `ops_controller_taskrun_start_time` | namespace, name, taskref | TaskRun 开始时间（unix 时间戳） |
 | `ops_controller_taskrun_end_time` | namespace, name, taskref | TaskRun 结束时间（unix 时间戳） |
 | `ops_controller_taskrun_duration_seconds` | namespace, name, taskref, status | TaskRun 运行时长（秒） |
@@ -34,23 +40,22 @@ Ops 暴露 Prometheus 指标用于监控 controller 和 server 组件。
 
 | 指标 | 标签 | 描述 |
 |------|------|------|
-| `ops_controller_pipelinerun_info` | namespace, name, pipelineref, crontab, status | PipelineRun 资源信息和状态 |
+| `ops_controller_pipelinerun_info` | namespace, name, pipelineref, crontab | PipelineRun 资源信息（仅静态字段） |
+| `ops_controller_pipelinerun_status` | namespace, name, status | PipelineRun 资源状态（动态字段） |
 | `ops_controller_pipelinerun_start_time` | namespace, name, pipelineref | PipelineRun 开始时间（unix 时间戳） |
 | `ops_controller_pipelinerun_end_time` | namespace, name, pipelineref | PipelineRun 结束时间（unix 时间戳） |
 | `ops_controller_pipelinerun_duration_seconds` | namespace, name, pipelineref, status | PipelineRun 运行时长（秒） |
 
 ### 运行次数指标
 
-| 指标 | 标签 | 描述 |
-|------|------|------|
-| `ops_controller_taskref_run_total` | namespace, taskref, status | Task 运行总次数 |
-| `ops_controller_pipelineref_run_total` | namespace, pipelineref, status | Pipeline 运行总次数 |
+运行次数可以通过 `_info` 和 `_status` 指标统计：
+
+- **按 taskref 和 status 统计 TaskRun 总数**: `count by (taskref, status) (ops_controller_taskrun_info{namespace="$namespace"} == 1) * on(namespace, name) group_left(status) ops_controller_taskrun_status{namespace="$namespace"}`
+- **按 pipelineref 和 status 统计 PipelineRun 总数**: `count by (pipelineref, status) (ops_controller_pipelinerun_info{namespace="$namespace"} == 1) * on(namespace, name) group_left(status) ops_controller_pipelinerun_status{namespace="$namespace"}`
 
 ### EventHooks 指标
 
-| 指标 | 标签 | 描述 |
-|------|------|------|
-| `ops_controller_eventhooks_trigger_total` | namespace, eventhook_name, keyword, event_id, status | EventHooks 触发次数，包含匹配的关键字和事件 ID |
+EventHooks 触发信息记录在 `ops_controller_eventhooks_status` 指标中，包含 `keyword` 和 `event_id` 标签。
 
 ### Reconcile 指标
 
@@ -105,7 +110,11 @@ ops_controller_taskrun_info{status="Running"}
 ### 按状态统计 Task 运行次数
 
 ```promql
-sum by (taskref, status) (ops_controller_taskref_run_total)
+count by (taskref, status) (
+  ops_controller_taskrun_info{namespace="$namespace"} == 1
+  * on(namespace, name) group_left(status)
+  ops_controller_taskrun_status{namespace="$namespace"}
+)
 ```
 
 ### 获取 Host 列表及状态
@@ -117,7 +126,7 @@ ops_controller_host_info
 ### 按关键字统计 EventHooks 触发次数
 
 ```promql
-sum by (eventhook_name, keyword) (ops_controller_eventhooks_trigger_total)
+count by (name, keyword) (ops_controller_eventhooks_status{namespace="$namespace",keyword!=""})
 ```
 
 ### 获取 TaskRun 运行时长

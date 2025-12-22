@@ -110,7 +110,7 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	err = r.Client.Get(ctx, req.NamespacedName, tr)
 	if apierrors.IsNotFound(err) {
 		// Record TaskRun info metrics as deleted (value=0)
-		opsmetrics.RecordTaskRunInfo(req.Namespace, req.Name, "", "", "", 0)
+		opsmetrics.RecordTaskRunInfo(req.Namespace, req.Name, "", "", 0)
 		r.deleteCronTab(logger, ctx, req.NamespacedName)
 		return ctrl.Result{}, nil
 	}
@@ -494,10 +494,14 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 		if err == nil {
 			// Record CRD resource status change metrics - record every status change (value=1 for existing resource)
 			if oldStatus != latestTr.Status.RunStatus {
-				opsmetrics.RecordTaskRunInfo(latestTr.Namespace, latestTr.Name, latestTr.Spec.TaskRef, latestTr.Spec.Crontab, latestTr.Status.RunStatus, 1)
+				// Record TaskRun info metrics (static fields only)
+				opsmetrics.RecordTaskRunInfo(latestTr.Namespace, latestTr.Name, latestTr.Spec.TaskRef, latestTr.Spec.Crontab, 1)
+				// Record TaskRun status metrics (dynamic fields)
+				opsmetrics.RecordTaskRunStatus(latestTr.Namespace, latestTr.Name, latestTr.Status.RunStatus)
 				// Record scheduled task status change if this is a scheduled task (has Crontab)
 				if latestTr.Spec.Crontab != "" {
-					opsmetrics.RecordTaskRunInfo(latestTr.Namespace, latestTr.Name, latestTr.Spec.TaskRef, latestTr.Spec.Crontab, latestTr.Status.RunStatus, 1)
+					opsmetrics.RecordTaskRunInfo(latestTr.Namespace, latestTr.Name, latestTr.Spec.TaskRef, latestTr.Spec.Crontab, 1)
+					opsmetrics.RecordTaskRunStatus(latestTr.Namespace, latestTr.Name, latestTr.Status.RunStatus)
 				}
 				// Record TaskRef status phase change (decrement old status, increment new status)
 				if latestTr.Spec.TaskRef != "" {

@@ -29,7 +29,7 @@ var ShellCmd = &cobra.Command{
 		privateKey, _ := utils.ReadFile(hostOpt.PrivateKeyPath)
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		inventory = utils.GetAbsoluteFilePath(inventory)
-		
+
 		inventoryType, availableInventory := utils.GetInventoryType(inventory, kubeOpt.NodeName)
 
 		if utils.IsExistsFile(shellOpt.Content) {

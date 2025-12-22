@@ -87,19 +87,21 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	//if deleted, stop ticker
 	if apierrors.IsNotFound(err) {
 		// Record Cluster info metrics as deleted (value=0)
-		opsmetrics.RecordClusterInfo(req.Namespace, req.Name, "", "", "", 0, 0, 0, 0, 0)
+		opsmetrics.RecordClusterInfo(req.Namespace, req.Name, "", 0)
 		return ctrl.Result{}, r.deleteCluster(ctx, req.NamespacedName)
 	}
 
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	// Record Cluster info metrics on every reconcile (value=1 for existing resource)
+	// Record Cluster info metrics (static fields only)
+	opsmetrics.RecordClusterInfo(c.Namespace, c.Name, c.Spec.Server, 1)
+	// Record Cluster status metrics (dynamic fields)
 	status := c.Status.HeartStatus
 	if status == "" {
 		status = "Unknown"
 	}
-	opsmetrics.RecordClusterInfo(c.Namespace, c.Name, c.Spec.Server, c.Status.Version, status, c.Status.Node, c.Status.Pod, c.Status.RunningPod, c.Status.CertNotAfterDays, 1)
+	opsmetrics.RecordClusterStatus(c.Namespace, c.Name, c.Status.Version, status, c.Status.Node, c.Status.Pod, c.Status.RunningPod, c.Status.CertNotAfterDays)
 	// add timeticker
 	r.addTimeTicker(logger, ctx, c)
 	// sync tasks and pipelines
@@ -229,12 +231,14 @@ func (r *ClusterReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 	lastC.Status.HeartTime = &metav1.Time{Time: time.Now()}
 	err = r.Client.Status().Update(ctx, lastC)
 	if err == nil {
-		// Record Cluster info metrics (value=1 for existing resource)
+		// Record Cluster info metrics (static fields only)
+		opsmetrics.RecordClusterInfo(lastC.Namespace, lastC.Name, lastC.Spec.Server, 1)
+		// Record Cluster status metrics (dynamic fields)
 		status := lastC.Status.HeartStatus
 		if status == "" {
 			status = "Unknown"
 		}
-		opsmetrics.RecordClusterInfo(lastC.Namespace, lastC.Name, lastC.Spec.Server, lastC.Status.Version, status, lastC.Status.Node, lastC.Status.Pod, lastC.Status.RunningPod, lastC.Status.CertNotAfterDays, 1)
+		opsmetrics.RecordClusterStatus(lastC.Namespace, lastC.Name, lastC.Status.Version, status, lastC.Status.Node, lastC.Status.Pod, lastC.Status.RunningPod, lastC.Status.CertNotAfterDays)
 	} else {
 		logger.Error.Println(err, "update cluster status error")
 	}

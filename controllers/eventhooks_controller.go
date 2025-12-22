@@ -104,8 +104,10 @@ func (r *EventHooksReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	// Record EventHooks info metrics (value=1 for existing resource)
+	// Record EventHooks info metrics (static fields only)
 	opsmetrics.RecordEventHooksInfo(obj.Namespace, obj.Name, obj.Spec.Type, obj.Spec.Subject, obj.Spec.URL, 1)
+	// Record EventHooks status metrics (dynamic fields, empty for basic status)
+	opsmetrics.RecordEventHooksStatus(obj.Namespace, obj.Name, "", "")
 
 	// record for delete object and stop watch
 	r.objSubjectMapMutex.Lock()
@@ -224,7 +226,8 @@ func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx co
 		// Record event processing metrics only on success
 		go func() {
 			notif.Post(eventhook.Spec.URL, eventhook.Spec.Options, eventStrings, eventhook.Spec.Additional)
-			opsmetrics.RecordEventHooksTrigger(eventhook.Namespace, eventhook.Name, matchedKeyword, event.ID())
+			// Record EventHooks trigger information in status metrics
+			opsmetrics.RecordEventHooksStatus(eventhook.Namespace, eventhook.Name, matchedKeyword, event.ID())
 		}()
 	}
 }

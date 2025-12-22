@@ -88,7 +88,7 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 	//if delete, stop ticker
 	if apierrors.IsNotFound(err) {
 		// Record Host info metrics as deleted (value=0)
-		opsmetrics.RecordHostInfo(req.Namespace, req.Name, "", "", "", "", "", 0)
+		opsmetrics.RecordHostInfo(req.Namespace, req.Name, "", 0)
 		return ctrl.Result{}, r.deleteHost(ctx, req.NamespacedName)
 	}
 
@@ -96,12 +96,14 @@ func (r *HostReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resul
 		return ctrl.Result{}, err
 	}
 
-	// Record Host info metrics on every reconcile (value=1 for existing resource)
+	// Record Host info metrics (static fields only)
+	opsmetrics.RecordHostInfo(h.Namespace, h.Name, h.Spec.Address, 1)
+	// Record Host status metrics (dynamic fields)
 	status := h.Status.HeartStatus
 	if status == "" {
 		status = "Unknown"
 	}
-	opsmetrics.RecordHostInfo(h.Namespace, h.Name, h.Spec.Address, h.Status.Hostname, h.Status.Distribution, h.Status.Arch, status, 1)
+	opsmetrics.RecordHostStatus(h.Namespace, h.Name, h.Status.Hostname, h.Status.Distribution, h.Status.Arch, status)
 	// add timeticker
 	r.addTimeTicker(logger, ctx, h)
 
@@ -239,12 +241,14 @@ func (r *HostReconciler) commitStatus(logger *opslog.Logger, ctx context.Context
 	lastH.Status.HeartTime = &metav1.Time{Time: time.Now()}
 	err = r.Client.Status().Update(ctx, lastH)
 	if err == nil {
-		// Record Host info metrics (value=1 for existing resource)
+		// Record Host info metrics (static fields only)
+		opsmetrics.RecordHostInfo(lastH.Namespace, lastH.Name, lastH.Spec.Address, 1)
+		// Record Host status metrics (dynamic fields)
 		status := lastH.Status.HeartStatus
 		if status == "" {
 			status = "Unknown"
 		}
-		opsmetrics.RecordHostInfo(lastH.Namespace, lastH.Name, lastH.Spec.Address, lastH.Status.Hostname, lastH.Status.Distribution, lastH.Status.Arch, status, 1)
+		opsmetrics.RecordHostStatus(lastH.Namespace, lastH.Name, lastH.Status.Hostname, lastH.Status.Distribution, lastH.Status.Arch, status)
 	} else {
 		logger.Error.Println(err, "update host status error")
 	}

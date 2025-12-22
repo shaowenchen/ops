@@ -217,7 +217,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(count by (name) (ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"} == 1))",
+          "expr": "count(count by (name) (ops_controller_host_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"}))",
           "legendFormat": "Host Successed",
           "refId": "B"
         }
@@ -308,7 +308,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(count by (name) (ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"} == 1))",
+          "expr": "count(count by (name) (ops_controller_cluster_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"}))",
           "legendFormat": "Cluster Successed",
           "refId": "B"
         }
@@ -771,7 +771,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "group by (namespace, name, desc, host, runtime_image) (ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_task_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -869,7 +869,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "group by (namespace, name, desc) (ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_pipeline_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -967,7 +967,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "group by (namespace, name, address, hostname, distribution, arch, status) (ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_host_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1) * on(namespace, name) group_left(hostname, distribution, arch, status) max without (instance, pod, job, endpoint) (ops_controller_host_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1065,7 +1065,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "group by (namespace, name, server, version, status, node, pod_count, running_pod, cert_not_after_days) (ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_cluster_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1) * on(namespace, name) group_left(version, status, node, pod_count, running_pod, cert_not_after_days) max without (instance, pod, job, endpoint) (ops_controller_cluster_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1176,7 +1176,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "group by (namespace, name, taskref, crontab, status) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1) * on(namespace, name) group_left(status) max without (instance, pod, job, endpoint) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1274,7 +1274,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "group by (namespace, name, pipelineref, crontab, status) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1) * on(namespace, name) group_left(status) max without (instance, pod, job, endpoint) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1803,7 +1803,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "group by (namespace, name, type, subject, url) (ops_controller_eventhooks_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_eventhooks_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
           "format": "table",
           "instant": true,
           "legendFormat": "",
@@ -1907,7 +1907,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "ops_controller_eventhooks_trigger_total{cluster=\"$cluster\",namespace=\"$namespace\"}",
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_eventhooks_status{cluster=\"$cluster\",namespace=\"$namespace\",keyword!=\"\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "",

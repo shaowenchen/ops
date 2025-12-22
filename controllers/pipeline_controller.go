@@ -93,8 +93,10 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 		return ctrl.Result{}, nil
 	}
 
-	// Record Pipeline info metrics on every reconcile (value=1 for existing resource)
+	// Record Pipeline info metrics (static fields only)
 	opsmetrics.RecordPipelineInfo(obj.Namespace, obj.Name, obj.Spec.Desc, 1)
+	// Record Pipeline status metrics (dynamic fields)
+	opsmetrics.RecordPipelineStatus(obj.Namespace, obj.Name)
 
 	// filled variables
 	changed := r.filledVariables(logger, ctx, obj)
