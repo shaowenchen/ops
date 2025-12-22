@@ -365,7 +365,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(count by (name) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
+          "expr": "count(count by (name) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
           "legendFormat": "Running",
           "refId": "A"
         },
@@ -374,9 +374,36 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(count by (name) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)) - count(count by (name) (ops_controller_taskrun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
-          "legendFormat": "Other",
+          "expr": "count(count by (name) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"} == 1))",
+          "legendFormat": "Successed",
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(count by (name) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Failed\"} == 1))",
+          "legendFormat": "Failed",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(count by (name) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Aborted\"} == 1))",
+          "legendFormat": "Aborted",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(count by (name) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)) - count(count by (name) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=~\"Running|Successed|Failed|Aborted\"} == 1))",
+          "legendFormat": "Other",
+          "refId": "E"
         }
       ],
       "title": "TaskRun",
@@ -431,7 +458,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(count by (name) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
+          "expr": "count(count by (name) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
           "legendFormat": "Running",
           "refId": "A"
         },
@@ -440,9 +467,36 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "count(count by (name) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)) - count(count by (name) (ops_controller_pipelinerun_info{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Running\"} == 1))",
-          "legendFormat": "Other",
+          "expr": "count(count by (name) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Successed\"} == 1))",
+          "legendFormat": "Successed",
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(count by (name) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Failed\"} == 1))",
+          "legendFormat": "Failed",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(count by (name) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=\"Aborted\"} == 1))",
+          "legendFormat": "Aborted",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(count by (name) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)) - count(count by (name) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\",status=~\"Running|Successed|Failed|Aborted\"} == 1))",
+          "legendFormat": "Other",
+          "refId": "E"
         }
       ],
       "title": "PipelineRun",
@@ -1181,10 +1235,25 @@
           "instant": true,
           "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_taskrun_status{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "",
+          "refId": "B"
         }
       ],
       "title": "TaskRun List",
       "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
         {
           "id": "organize",
           "options": {
@@ -1279,10 +1348,25 @@
           "instant": true,
           "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max without (instance, pod, job, endpoint) (ops_controller_pipelinerun_status{cluster=\"$cluster\",namespace=\"$namespace\"} == 1)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "",
+          "refId": "B"
         }
       ],
       "title": "PipelineRun List",
       "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
         {
           "id": "organize",
           "options": {
