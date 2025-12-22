@@ -138,6 +138,9 @@ func NewPipelineRun(p *Pipeline) *PipelineRun {
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: p.Name + "-",
 			Namespace:    p.Namespace,
+			Labels: map[string]string{
+				opsconstants.LabelPipelineRefKey: p.Name,
+			},
 		},
 		Spec: PipelineRunSpec{
 			PipelineRef: p.Name,

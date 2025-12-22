@@ -89,6 +89,9 @@ func NewTaskRun(t *Task) TaskRun {
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: t.Name + "-",
 			Namespace:    t.Namespace,
+			Labels: map[string]string{
+				opsconstants.LabelTaskRefKey: t.ObjectMeta.GetName(),
+			},
 		},
 		Spec: TaskRunSpec{
 			TaskRef:   t.ObjectMeta.GetName(),
@@ -114,6 +117,10 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    pr.Namespace,
 			GenerateName: fmt.Sprintf("%s-%s-", pr.Name, tRef.TaskRef),
+			Labels: map[string]string{
+				opsconstants.LabelTaskRefKey:     t.ObjectMeta.GetName(),
+				opsconstants.LabelPipelineRefKey: pr.Spec.PipelineRef,
+			},
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: opsconstants.APIVersion,

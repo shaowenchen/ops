@@ -179,7 +179,13 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 	// else is this cluster
 	// add crontab
-	r.addCronTab(logger, ctx, pr)
+	// if has crontab, start timer and set status to Successed (don't run)
+	if pr.Spec.Crontab != "" {
+		r.addCronTab(logger, ctx, pr)
+		// scheduled pipelinerun should always be Successed after timer started
+		r.commitStatus(logger, ctx, pr, opsconstants.StatusSuccessed, "", "", nil)
+		return ctrl.Result{}, nil
+	}
 	// had run once, skip
 	if !(pr.Status.RunStatus == opsconstants.StatusEmpty || pr.Status.RunStatus == opsconstants.StatusRunning) {
 		return ctrl.Result{}, nil
@@ -192,12 +198,10 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	// run
-	if pr.Spec.Crontab == "" {
-		err = r.run(logger, ctx, p, pr)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	// run pipeline (no crontab)
+	err = r.run(logger, ctx, p, pr)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 	// send event
 	err = opsevent.FactoryPipelineRun(pr.Namespace, pr.Name).Publish(ctx, pr)
@@ -271,29 +275,82 @@ func (r *PipelineRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Co
 
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBias)) * time.Second)
-		// create a new PipelineRun object to avoid using stale data
-		currentPr := &opsv1.PipelineRun{}
-		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, currentPr)
+		// get the scheduled PipelineRun to verify it still exists
+		scheduledPr := &opsv1.PipelineRun{}
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, scheduledPr)
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
-		logger.Info.Println(fmt.Sprintf("ticker pipelinerun %s, status: %s", currentPr.GetUniqueKey(), currentPr.Status.RunStatus))
-		// only skip if currently running, allow empty status (first cron trigger) and finished status (re-run)
-		if currentPr.Status.RunStatus == opsconstants.StatusRunning {
-			logger.Info.Println(fmt.Sprintf("skip pipelinerun %s: already running", currentPr.GetUniqueKey()))
+		// verify it still has crontab
+		if scheduledPr.Spec.Crontab == "" {
+			logger.Info.Println(fmt.Sprintf("skip pipelinerun %s: crontab removed", scheduledPr.GetUniqueKey()))
 			return
 		}
-		// clear pipelinerun status
-		currentPr.Status = opsv1.PipelineRunStatus{}
-		r.commitStatus(logger, ctx, currentPr, "", "", "", nil)
-		obj := &opsv1.Pipeline{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: currentPr.Namespace, Name: currentPr.Spec.PipelineRef}, obj)
+		// check if there's already a running instance created by this scheduled pipelinerun
+		pipelineRunList := &opsv1.PipelineRunList{}
+		labelSelector := client.MatchingLabels{
+			opsconstants.LabelScheduledByKey:   scheduledPr.Name,
+			opsconstants.LabelScheduledKindKey: opsconstants.PipelineRun,
+		}
+		err = r.Client.List(ctx, pipelineRunList, client.InNamespace(scheduledPr.Namespace), labelSelector)
+		if err != nil {
+			logger.Error.Println(fmt.Sprintf("failed to list pipelineruns: %v", err))
+			return
+		}
+		for _, pr := range pipelineRunList.Items {
+			// check if this pipelinerun is running
+			if pr.Status.RunStatus == opsconstants.StatusRunning || pr.Status.RunStatus == opsconstants.StatusEmpty {
+				logger.Info.Println(fmt.Sprintf("skip pipelinerun %s: already has a running instance %s", scheduledPr.GetUniqueKey(), pr.GetUniqueKey()))
+				return
+			}
+		}
+		logger.Info.Println(fmt.Sprintf("cron triggered for pipelinerun %s, creating new execution instance", scheduledPr.GetUniqueKey()))
+		// get pipeline
+		p := &opsv1.Pipeline{}
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: scheduledPr.Namespace, Name: scheduledPr.Spec.PipelineRef}, p)
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
-		r.run(logger, ctx, obj, currentPr)
+		// create a new PipelineRun without crontab for execution
+		newPr := opsv1.NewPipelineRun(p)
+		newPr.Spec.Crontab = "" // ensure no crontab
+		// copy variables from scheduled pipelinerun (deep copy)
+		if scheduledPr.Spec.Variables != nil {
+			newPr.Spec.Variables = make(map[string]string)
+			for k, v := range scheduledPr.Spec.Variables {
+				newPr.Spec.Variables[k] = v
+			}
+		}
+		newPr.Spec.Desc = scheduledPr.Spec.Desc // copy desc
+		// ensure labels map exists (NewPipelineRun already creates it with LabelPipelineRefKey)
+		if newPr.Labels == nil {
+			newPr.Labels = make(map[string]string)
+		}
+		// ensure pipelineref label is set
+		newPr.Labels[opsconstants.LabelPipelineRefKey] = p.Name
+		// set labels to identify this is created by the scheduled pipelinerun
+		newPr.Labels[opsconstants.LabelScheduledByKey] = scheduledPr.Name
+		newPr.Labels[opsconstants.LabelScheduledKindKey] = opsconstants.PipelineRun
+		// set owner reference to the scheduled pipelinerun
+		if scheduledPr.UID != "" {
+			newPr.OwnerReferences = []metav1.OwnerReference{
+				{
+					APIVersion: opsconstants.APIVersion,
+					Kind:       opsconstants.PipelineRun,
+					Name:       scheduledPr.Name,
+					UID:        scheduledPr.UID,
+				},
+			}
+		}
+		// create the new pipelinerun
+		err = r.Client.Create(ctx, newPr)
+		if err != nil {
+			logger.Error.Println(fmt.Sprintf("failed to create new pipelinerun for scheduled pipelinerun %s: %v", scheduledPr.GetUniqueKey(), err))
+			return
+		}
+		logger.Info.Println(fmt.Sprintf("created new pipelinerun %s for scheduled pipelinerun %s", newPr.GetUniqueKey(), scheduledPr.GetUniqueKey()))
 	})
 	if err != nil {
 		logger.Error.Println(err)

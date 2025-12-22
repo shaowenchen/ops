@@ -125,7 +125,13 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 		return ctrl.Result{}, err
 	}
 	// add crontab
-	r.addCronTab(logger, ctx, tr)
+	// if has crontab, start timer and set status to Successed (don't run)
+	if tr.Spec.Crontab != "" {
+		r.addCronTab(logger, ctx, tr)
+		// scheduled taskrun should always be Successed after timer started
+		r.commitStatus(logger, ctx, tr, opsconstants.StatusSuccessed)
+		return ctrl.Result{}, nil
+	}
 	// check run status
 	if tr.Status.RunStatus != opsconstants.StatusEmpty {
 		// abort running taskrun if restart or modified
@@ -134,11 +140,10 @@ func (r *TaskRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 		}
 		return ctrl.Result{}, nil
 	}
-	if tr.Spec.Crontab == "" {
-		err = r.run(logger, ctx, t, tr)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	// run task (no crontab)
+	err = r.run(logger, ctx, t, tr)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 	// send event
 	err = opsevent.FactoryTaskRun(tr.Namespace, tr.Name, opsconstants.Status).Publish(ctx, tr)
@@ -189,26 +194,82 @@ func (r *TaskRunReconciler) addCronTab(logger *opslog.Logger, ctx context.Contex
 
 	id, err := r.cron.AddFunc(objRun.Spec.Crontab, func() {
 		time.Sleep(time.Duration(rand.Intn(opsconstants.SyncCronRandomBias)) * time.Second)
-		// create a new TaskRun object to avoid using stale data
-		currentTr := &opsv1.TaskRun{}
-		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, currentTr)
+		// get the scheduled TaskRun to verify it still exists
+		scheduledTr := &opsv1.TaskRun{}
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: objRun.Namespace, Name: objRun.Name}, scheduledTr)
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
-		logger.Info.Println(fmt.Sprintf("ticker taskrun %s, status: %s", currentTr.GetUniqueKey(), currentTr.Status.RunStatus))
-		// only skip if currently running, allow empty status (first cron trigger) and finished status (re-run)
-		if currentTr.Status.RunStatus == opsconstants.StatusRunning {
-			logger.Info.Println(fmt.Sprintf("skip taskrun %s: already running", currentTr.GetUniqueKey()))
+		// verify it still has crontab
+		if scheduledTr.Spec.Crontab == "" {
+			logger.Info.Println(fmt.Sprintf("skip taskrun %s: crontab removed", scheduledTr.GetUniqueKey()))
 			return
 		}
-		obj := &opsv1.Task{}
-		err = r.Client.Get(ctx, types.NamespacedName{Namespace: currentTr.Namespace, Name: currentTr.Spec.TaskRef}, obj)
+		// check if there's already a running instance created by this scheduled taskrun
+		taskRunList := &opsv1.TaskRunList{}
+		labelSelector := client.MatchingLabels{
+			opsconstants.LabelScheduledByKey:   scheduledTr.Name,
+			opsconstants.LabelScheduledKindKey: opsconstants.TaskRun,
+		}
+		err = r.Client.List(ctx, taskRunList, client.InNamespace(scheduledTr.Namespace), labelSelector)
+		if err != nil {
+			logger.Error.Println(fmt.Sprintf("failed to list taskruns: %v", err))
+			return
+		}
+		for _, tr := range taskRunList.Items {
+			// check if this taskrun is running
+			if tr.Status.RunStatus == opsconstants.StatusRunning || tr.Status.RunStatus == opsconstants.StatusEmpty {
+				logger.Info.Println(fmt.Sprintf("skip taskrun %s: already has a running instance %s", scheduledTr.GetUniqueKey(), tr.GetUniqueKey()))
+				return
+			}
+		}
+		logger.Info.Println(fmt.Sprintf("cron triggered for taskrun %s, creating new execution instance", scheduledTr.GetUniqueKey()))
+		// get task
+		t := &opsv1.Task{}
+		err = r.Client.Get(ctx, types.NamespacedName{Namespace: scheduledTr.Namespace, Name: scheduledTr.Spec.TaskRef}, t)
 		if err != nil {
 			logger.Error.Println(err)
 			return
 		}
-		r.run(logger, ctx, obj, currentTr)
+		// create a new TaskRun without crontab for execution
+		newTr := opsv1.NewTaskRun(t)
+		newTr.Spec.Crontab = "" // ensure no crontab
+		// copy variables from scheduled taskrun (deep copy)
+		if scheduledTr.Spec.Variables != nil {
+			newTr.Spec.Variables = make(map[string]string)
+			for k, v := range scheduledTr.Spec.Variables {
+				newTr.Spec.Variables[k] = v
+			}
+		}
+		newTr.Spec.Desc = scheduledTr.Spec.Desc // copy desc
+		// ensure labels map exists (NewTaskRun already creates it with LabelTaskRefKey)
+		if newTr.Labels == nil {
+			newTr.Labels = make(map[string]string)
+		}
+		// ensure taskref label is set
+		newTr.Labels[opsconstants.LabelTaskRefKey] = t.ObjectMeta.GetName()
+		// set labels to identify this is created by the scheduled taskrun
+		newTr.Labels[opsconstants.LabelScheduledByKey] = scheduledTr.Name
+		newTr.Labels[opsconstants.LabelScheduledKindKey] = opsconstants.TaskRun
+		// set owner reference to the scheduled taskrun
+		if scheduledTr.UID != "" {
+			newTr.OwnerReferences = []metav1.OwnerReference{
+				{
+					APIVersion: opsconstants.APIVersion,
+					Kind:       opsconstants.TaskRun,
+					Name:       scheduledTr.Name,
+					UID:        scheduledTr.UID,
+				},
+			}
+		}
+		// create the new taskrun
+		err = r.Client.Create(ctx, &newTr)
+		if err != nil {
+			logger.Error.Println(fmt.Sprintf("failed to create new taskrun for scheduled taskrun %s: %v", scheduledTr.GetUniqueKey(), err))
+			return
+		}
+		logger.Info.Println(fmt.Sprintf("created new taskrun %s for scheduled taskrun %s", newTr.GetUniqueKey(), scheduledTr.GetUniqueKey()))
 	})
 
 	if err != nil {
