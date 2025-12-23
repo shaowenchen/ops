@@ -111,11 +111,25 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 }
 
 func (r *ClusterReconciler) syncResource(logger *opslog.Logger, ctx context.Context, c *opsv1.Cluster) {
+	// Use recover to prevent panic from propagating
+	defer func() {
+		if rec := recover(); rec != nil {
+			logger.Error.Println(fmt.Errorf("panic in syncResource for cluster %s: %v", c.GetUniqueKey(), rec), "recovered from panic")
+		}
+	}()
+
 	kc, err := opskube.NewClusterConnection(c)
 	if err != nil {
 		logger.Error.Println(err, "failed to create cluster connection")
 		return
 	}
+
+	// Check if OpsClient is nil (may happen if BuildClients failed partially)
+	if kc.OpsClient == nil {
+		logger.Error.Println(fmt.Errorf("OpsClient is nil for cluster %s", c.GetUniqueKey()), "failed to build ops client")
+		return
+	}
+
 	// sync tasks
 	taskList := &opsv1.TaskList{}
 	err = r.List(ctx, taskList, &client.ListOptions{Namespace: c.Namespace})
@@ -196,6 +210,14 @@ func (r *ClusterReconciler) addTimeTicker(logger *opslog.Logger, ctx context.Con
 }
 
 func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Context, c *opsv1.Cluster) (err error) {
+	// Use recover to prevent panic from propagating
+	defer func() {
+		if rec := recover(); rec != nil {
+			logger.Error.Println(fmt.Errorf("panic in updateStatus for cluster %s: %v", c.GetUniqueKey(), rec), "recovered from panic")
+			err = r.commitStatus(logger, ctx, c, nil, opsconstants.StatusFailed)
+		}
+	}()
+
 	kc, err := opskube.NewClusterConnection(c)
 	if err != nil {
 		logger.Error.Println(err, "failed to create cluster connection")
@@ -207,10 +229,12 @@ func (r *ClusterReconciler) updateStatus(logger *opslog.Logger, ctx context.Cont
 	}
 	err = r.commitStatus(logger, ctx, c, status, "")
 	// push event
-	go opsevent.FactoryCluster(c.Namespace, c.Name, opsconstants.Status).Publish(ctx, opsevent.EventCluster{
-		Server: c.Spec.Server,
-		Status: *status,
-	})
+	if status != nil {
+		go opsevent.FactoryCluster(c.Namespace, c.Name, opsconstants.Status).Publish(ctx, opsevent.EventCluster{
+			Server: c.Spec.Server,
+			Status: *status,
+		})
+	}
 	return
 }
 

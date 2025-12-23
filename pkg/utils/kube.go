@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"fmt"
 	"io"
 	"math/rand"
 	"os"
@@ -34,7 +33,14 @@ func GetClusterUID(k8sClient runtimeClient.Client) (string, error) {
 
 func GetRestConfigByContent(kubeconfig string) (*rest.Config, error) {
 	restConfig, err := clientcmd.RESTConfigFromKubeConfig([]byte(kubeconfig))
-	return restConfig, err
+	if err != nil {
+		return nil, err
+	}
+	// Set default timeout if not set
+	if restConfig != nil && restConfig.Timeout == 0 {
+		restConfig.Timeout = 30 * time.Second
+	}
+	return restConfig, nil
 }
 
 func NewKubernetesClient(kubeconfigpath string) (client *kubernetes.Clientset, err error) {
@@ -60,24 +66,39 @@ func GetClientByRestconfig(restConfig *rest.Config) (client *kubernetes.Clientse
 }
 
 func GetRestConfig(kubeconfigPath string) (*rest.Config, error) {
+	var restConfig *rest.Config
+	var err error
+
 	if len(kubeconfigPath) > 0 {
-		return clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+		restConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	} else if kubeconfig := os.Getenv("KUBECONFIG"); len(kubeconfig) > 0 {
+		// try KUBECONFIG
+		restConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+	} else {
+		// try inCluster
+		restConfig, err = rest.InClusterConfig()
 	}
-	// try KUBECONFIG
-	if kubeconfig := os.Getenv("KUBECONFIG"); len(kubeconfig) > 0 {
-		return clientcmd.BuildConfigFromFlags("", kubeconfig)
+
+	if err != nil {
+		return nil, err
 	}
-	// try inCluster
-	if _, err := rest.InClusterConfig(); err == nil {
-		return rest.InClusterConfig()
+
+	// Set default timeout if not set
+	if restConfig != nil && restConfig.Timeout == 0 {
+		restConfig.Timeout = 30 * time.Second
 	}
-	return nil, fmt.Errorf("could not locate a kubeconfig")
+
+	return restConfig, nil
 }
 
 func GetInClusterConfig() (*rest.Config, error) {
 	c, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
+	}
+	// Set default timeout if not set
+	if c != nil && c.Timeout == 0 {
+		c.Timeout = 30 * time.Second
 	}
 	return c, nil
 }

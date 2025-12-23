@@ -159,6 +159,11 @@ func (kc *KubeConnection) GetHost(namespace, hostname string) (host *opsv1.Host,
 }
 
 func (kc *KubeConnection) BuildClients() (err error) {
+	// Set timeout for RestConfig to prevent hanging on unreachable clusters
+	if kc.RestConfig != nil && kc.RestConfig.Timeout == 0 {
+		kc.RestConfig.Timeout = 30 * time.Second
+	}
+
 	kc.Client, err = opsutils.GetClientByRestconfig(kc.RestConfig)
 	if err != nil {
 		return
@@ -171,6 +176,14 @@ func (kc *KubeConnection) BuildClients() (err error) {
 	if err != nil {
 		return
 	}
+
+	// Use recover to prevent panic from discovery client timeout
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic while building clients (likely due to cluster connection timeout): %v", r)
+		}
+	}()
+
 	opsClient, err := runtimeClient.New(kc.RestConfig, runtimeClient.Options{Scheme: scheme})
 	if err == nil {
 		kc.OpsClient = &opsClient
