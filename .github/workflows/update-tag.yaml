@@ -28,7 +28,6 @@ jobs:
             BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           fi
           echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
-          # 从分支名提取版本号，v2.0 -> v2.0.0
           VERSION=$(echo "${BRANCH_NAME}" | sed 's/^v//')
           if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
             TAG_NAME="v${VERSION}.0"
@@ -59,15 +58,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Clean up local tag reference
+        if: steps.check_tag.outputs.exists == 'true'
+        run: |
+          TAG_NAME="${{ steps.branch.outputs.tag_name }}"
+          git tag -d "$TAG_NAME" 2>/dev/null || true
+          git fetch --prune --prune-tags origin "+refs/tags/*:refs/tags/*" || true
+
       - name: Create tag
         run: |
           TAG_NAME="${{ steps.branch.outputs.tag_name }}"
           BRANCH_NAME="${{ steps.branch.outputs.branch_name }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # 从当前分支的 HEAD 创建 tag
+          git tag -d "$TAG_NAME" 2>/dev/null || true
           git tag -a "$TAG_NAME" -m "Release $TAG_NAME from branch $BRANCH_NAME" HEAD
-          git push origin "$TAG_NAME"
+          git push origin "$TAG_NAME" --force
 
       - name: Create release
         run: |
