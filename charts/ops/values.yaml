@@ -15,9 +15,9 @@ controller:
   replicaCount: 2
   image:
     repository: shaowenchen/ops-controller-manager
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "2.0.0"
+    tag: "v2.0.0"
   env:
     # Active namespace for processing CRDs (empty means all namespaces)
     activeNamespace: "ops-system"
@@ -30,9 +30,9 @@ server:
   replicaCount: 2
   image:
     repository: shaowenchen/ops-server
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "2.0.0"
+    tag: "v2.0.0"
   # Server resource configuration (overrides global resources if set)
   resources:
     limits:

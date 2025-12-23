@@ -3,9 +3,9 @@ entries:
   ops:
   - apiVersion: v2
     appVersion: 2.0.0
-    created: "2024-11-07T14:32:37.05352+08:00"
+    created: "2025-12-23T18:02:44.69458+08:00"
     description: A Helm chart for Ops
-    digest: 4d4c8443ccabed7ac7f1486d24f7396123665e6ab7db76f1d514c4cbc7dc5a05
+    digest: 68fa17310d00a48272c655a5cd9e6b1dc7c5e8c28941763084dc337421fbdaae
     home: https://www.chenshaowen.com/ops
     icon: https://www.chenshaowen.com/ops/logo.png
     maintainers:
@@ -18,3 +18,4 @@ entries:
     urls:
     - https://www.chenshaowen.com/ops/charts/ops-2.0.0.tgz
     version: 2.0.0
+generated: "2025-12-23T18:02:44.693648+08:00"
