@@ -115,6 +115,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (r
 func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.Context, obj *opsv1.Pipeline) (changed bool) {
 	// get tasks
 	taskList := []opsv1.Task{}
+	taskMap := make(map[string]opsv1.Task) // map[taskRef]Task
 	for _, t := range obj.Spec.Tasks {
 		task := opsv1.Task{}
 		err := r.Client.Get(ctx, types.NamespacedName{Namespace: obj.Namespace, Name: t.TaskRef}, &task)
@@ -123,6 +124,7 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 			return false
 		}
 		taskList = append(taskList, task)
+		taskMap[t.TaskRef] = task
 	}
 	// merge variables
 	for _, t := range taskList {
@@ -130,6 +132,48 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 			changed = true
 		}
 	}
+	
+	// Fill variables for each task in TaskRef
+	// If task variable has default value and pipeline has the same variable, fill it
+	for i, tRef := range obj.Spec.Tasks {
+		if task, ok := taskMap[tRef.TaskRef]; ok {
+			if task.Spec.Variables != nil {
+				if tRef.Variables == nil {
+					tRef.Variables = make(map[string]string)
+					changed = true
+				}
+				// Fill variables from Pipeline to TaskRef
+				// If task variable has default and pipeline has the same variable, fill pipeline value
+				for varName, varDef := range task.Spec.Variables {
+					// Check if pipeline has this variable
+					if pipelineVar, exists := obj.Spec.Variables[varName]; exists {
+						pipelineValue := pipelineVar.GetValue()
+						if pipelineValue != "" {
+							// Pipeline has value, fill it to TaskRef (overwrite existing if different)
+							if tRef.Variables[varName] != pipelineValue {
+								tRef.Variables[varName] = pipelineValue
+								changed = true
+							}
+						} else if varDef.Default != "" {
+							// Pipeline variable exists but no value, use task default if available
+							if tRef.Variables[varName] == "" {
+								tRef.Variables[varName] = varDef.Default
+								changed = true
+							}
+						}
+					} else if varDef.Default != "" {
+						// Pipeline doesn't have this variable, but task has default, fill default
+						if tRef.Variables[varName] == "" {
+							tRef.Variables[varName] = varDef.Default
+							changed = true
+						}
+					}
+				}
+				obj.Spec.Tasks[i] = tRef
+			}
+		}
+	}
+	
 	// check cluster variables
 	findClusterVariable := false
 	for _, v := range obj.Spec.Variables {

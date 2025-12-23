@@ -17,6 +17,8 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
+
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -38,7 +40,8 @@ type TaskSpec struct {
 }
 
 type Step struct {
-	When           string `json:"when,omitempty" yaml:"when,omitempty"`
+	When string `json:"when,omitempty" yaml:"when,omitempty"`
+	// +kubebuilder:validation:Pattern="^[a-z](-?[a-z0-9])*$"
 	Name           string `json:"name,omitempty" yaml:"name,omitempty"`
 	Content        string `json:"content,omitempty" yaml:"content,omitempty"`
 	LocalFile      string `json:"localfile,omitempty" yaml:"localfile,omitempty"`
@@ -98,6 +101,22 @@ func (obj *Task) CopyWithOutVersion() *Task {
 		},
 		Spec: obj.Spec,
 	}
+}
+
+// ValidateStepNames validates that all step names follow the naming convention
+// - Must start with a lowercase letter (not a number or hyphen)
+// - Can contain lowercase letters, numbers and hyphens
+// - Must end with a letter or number (not a hyphen)
+func (obj *Task) ValidateStepNames() error {
+	for _, step := range obj.Spec.Steps {
+		if step.Name == "" {
+			continue
+		}
+		if !isValidName(step.Name) {
+			return fmt.Errorf("step name '%s' must start with a lowercase letter, and contain only lowercase letters, numbers and hyphens (a-z, 0-9, -)", step.Name)
+		}
+	}
+	return nil
 }
 
 func (obj *Task) MergeVersion(merge *Task) *Task {

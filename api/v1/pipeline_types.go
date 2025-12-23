@@ -17,6 +17,9 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
+	"regexp"
+
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -36,11 +39,13 @@ type PipelineSpec struct {
 }
 
 type TaskRef struct {
+	// +kubebuilder:validation:Pattern="^[a-z](-?[a-z0-9])*$"
 	Name         string            `json:"name,omitempty" yaml:"name,omitempty"`
 	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	AllowFailure bool              `json:"allowFailure,omitempty" yaml:"allowFailure,omitempty"`
 	RunAlways    bool              `json:"runAlways,omitempty" yaml:"runAlways,omitempty"`
+	Results      map[string]string `json:"results,omitempty" yaml:"results,omitempty"` // map[resultKey]stepName, defines which step outputs to export as results
 }
 
 // PipelineStatus defines the observed state of Pipeline
@@ -141,6 +146,35 @@ func (obj *Pipeline) MergeVariables(vars Variables) bool {
 func (obj *Pipeline) MergeVersion(merge *Pipeline) *Pipeline {
 	obj.ObjectMeta.ResourceVersion = merge.ObjectMeta.ResourceVersion
 	return obj
+}
+
+// ValidateTaskNames validates that all task names follow the naming convention
+// - Must start with a lowercase letter (not a number or hyphen)
+// - Can contain lowercase letters, numbers and hyphens
+// - Must end with a letter or number (not a hyphen)
+func (obj *Pipeline) ValidateTaskNames() error {
+	for _, task := range obj.Spec.Tasks {
+		if task.Name == "" {
+			continue
+		}
+		if !isValidName(task.Name) {
+			return fmt.Errorf("task name '%s' must start with a lowercase letter, and contain only lowercase letters, numbers and hyphens (a-z, 0-9, -)", task.Name)
+		}
+	}
+	return nil
+}
+
+// isValidName checks if a name contains only lowercase letters, numbers and hyphens
+// Pattern: ^[a-z](-?[a-z0-9])*$
+// - Must start with a lowercase letter (not a number or hyphen)
+// - Can contain numbers and hyphens in the middle
+// - Must end with a letter or number (not a hyphen)
+func isValidName(name string) bool {
+	if name == "" {
+		return true // empty name is allowed (will be skipped)
+	}
+	matched, _ := regexp.MatchString("^[a-z](-?[a-z0-9])*$", name)
+	return matched
 }
 
 // +kubebuilder:object:root=true

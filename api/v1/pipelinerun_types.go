@@ -67,9 +67,10 @@ func (pr *PipelineRunStatus) AddPipelineRunTaskStatus(taskName string, taskRef s
 }
 
 type PipelineRunTaskStatus struct {
-	TaskName      string         `json:"name,omitempty" yaml:"name,omitempty"`
-	TaskRef       string         `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
-	TaskRunStatus *TaskRunStatus `json:"taskRunStatus,omitempty" yaml:"taskRunStatus,omitempty"`
+	TaskName      string            `json:"name,omitempty" yaml:"name,omitempty"`
+	TaskRef       string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
+	TaskRunStatus *TaskRunStatus    `json:"taskRunStatus,omitempty" yaml:"taskRunStatus,omitempty"`
+	Results       map[string]string `json:"results,omitempty" yaml:"results,omitempty"` // exported results from this task
 }
 
 // +kubebuilder:object:root=true

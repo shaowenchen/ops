@@ -30,12 +30,16 @@ func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr
 	if err != nil {
 		return err
 	}
+	// Map to store step outputs for path references: map[stepName]output
+	stepOutputs := make(map[string]string)
 	logger.Debug.Println("> Run Task", t.GetUniqueKey(), "on", hc.Host.Spec.Address)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
-		sp = RenderStepVariables(sp, allVars)
+		sp = RenderStepVariablesWithPathRefs(sp, allVars, nil)
+		// Also support steps.{stepName}.output references
+		sp = RenderStepVariablesWithStepRefs(sp, allVars, stepOutputs)
 		logger.Debug.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
-		s.When = RenderString(s.When, allVars)
+		s.When = RenderStringWithStepRefs(s.When, allVars, stepOutputs)
 		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
 			logger.Error.Println(err)
@@ -52,7 +56,10 @@ func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr
 		stepStatus, stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
 		stepStatus = GetValidStatusError(stepStatus, stepErr)
 		tr.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, stepStatus)
+		// Store step output for path references
+		stepOutputs[s.Name] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
+		allVars["output"] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["status"] = stepStatus
 		logger.Debug.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)
@@ -72,12 +79,16 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 	if err != nil {
 		return err
 	}
+	// Map to store step outputs for path references: map[stepName]output
+	stepOutputs := make(map[string]string)
 	logger.Debug.Println("> Run Task", t.GetUniqueKey(), "on Node", node.Name)
 	for si, s := range t.Spec.Steps {
 		var sp = &s
-		sp = RenderStepVariables(sp, allVars)
+		sp = RenderStepVariablesWithPathRefs(sp, allVars, nil)
+		// Also support steps.{stepName}.output references
+		sp = RenderStepVariablesWithStepRefs(sp, allVars, stepOutputs)
 		logger.Debug.Println(fmt.Sprintf("(%d/%d) %s", si+1, len(t.Spec.Steps), s.Name))
-		s.When = RenderString(s.When, allVars)
+		s.When = RenderStringWithStepRefs(s.When, allVars, stepOutputs)
 		result, err := utils.LogicExpression(s.When, true)
 		if err != nil {
 			logger.Error.Println(err)
@@ -103,7 +114,10 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 		stepStatus, stepOutput, stepErr := stepFunc(logger, t, kc, master, s, taskOpt, kubeOpt)
 		stepStatus = GetValidStatusError(stepStatus, stepErr)
 		tr.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, stepStatus)
+		// Store step output for path references
+		stepOutputs[s.Name] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
+		allVars["output"] = strings.ReplaceAll(stepOutput, "\"", "")
 		allVars["status"] = stepStatus
 		logger.Debug.Println(stepOutput)
 		result, err = utils.LogicExpression(s.AllowFailure, false)

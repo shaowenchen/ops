@@ -58,6 +58,7 @@ spec:
                     localfile:
                       type: string
                     name:
+                      pattern: ^[a-z](-?[a-z0-9])*$
                       type: string
                     remotefile:
                       type: string

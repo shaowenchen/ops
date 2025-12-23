@@ -11,5 +11,6 @@
   - [Host](opscontroller-host.md)
   - [Cluster](opscontroller-cluster.md)
   - [Task](opscontroller-task.md)
+  - [Pipeline](opscontroller-pipeline.md)
   - [Metrics](metrics.md)
 - [Nats](nats.md)

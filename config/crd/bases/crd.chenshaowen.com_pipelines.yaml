@@ -49,7 +49,12 @@ spec:
                     allowFailure:
                       type: boolean
                     name:
+                      pattern: ^[a-z](-?[a-z0-9])*$
                       type: string
+                    results:
+                      additionalProperties:
+                        type: string
+                      type: object
                     runAlways:
                       type: boolean
                     taskRef:

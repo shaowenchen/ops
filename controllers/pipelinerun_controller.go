@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -33,6 +34,7 @@ import (
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
+	opstask "github.com/shaowenchen/ops/pkg/task"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -404,7 +406,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			})
 			continue
 		}
-		// patch latest tr ouput var:value to variables
+		// patch latest tr ouput var:value to variables (backward compatibility)
 		// Todo: support multi vars
 		if latestTrOuput != "" {
 			latestTrOuputArr := strings.Split(latestTrOuput, ":")
@@ -415,7 +417,49 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			}
 		}
 
-		tr := opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
+		// Resolve path references (tasks.{taskName}.results.{resultKey}) in variables
+		// Get latest PipelineRun to ensure we have the most recent results
+		latestPr := &opsv1.PipelineRun{}
+		var tr *opsv1.TaskRun
+		if err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: pr.Name}, latestPr); err == nil {
+			// Build taskResults map from PipelineRunStatus
+			taskResults := make(map[string]map[string]string)
+			for _, taskStatus := range latestPr.Status.PipelineRunStatus {
+				if taskStatus.Results != nil && len(taskStatus.Results) > 0 {
+					taskResults[taskStatus.TaskName] = taskStatus.Results
+				}
+			}
+			// Resolve path references in variables before creating TaskRun
+			if len(taskResults) > 0 {
+				resolvedVars := make(map[string]string)
+				for k, v := range pr.Spec.Variables {
+					resolvedVars[k] = opstask.RenderStringWithPathRefs(v, pr.Spec.Variables, taskResults)
+				}
+				// Also merge TaskRef.Variables and resolve path references in them
+				if tRef.Variables != nil {
+					for k, v := range tRef.Variables {
+						resolvedVars[k] = opstask.RenderStringWithPathRefs(v, resolvedVars, taskResults)
+					}
+				}
+				// Create TaskRun with resolved variables
+				tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
+				tr.Spec.Variables = resolvedVars
+			} else {
+				tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
+				// Merge TaskRef.Variables even if no taskResults
+				if tRef.Variables != nil && len(tRef.Variables) > 0 {
+					if tr.Spec.Variables == nil {
+						tr.Spec.Variables = make(map[string]string)
+					}
+					for k, v := range tRef.Variables {
+						tr.Spec.Variables[k] = opstask.RenderStringWithPathRefs(v, tr.Spec.Variables, nil)
+					}
+				}
+			}
+		} else {
+			// If we can't get latest PipelineRun, create TaskRun with original variables
+			tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
+		}
 		err = r.Client.Create(ctx, tr)
 		if err != nil {
 			logger.Error.Println(err)
@@ -435,7 +479,47 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			if trRunning.Status.RunStatus == opsconstants.StatusRunning || trRunning.Status.RunStatus == opsconstants.StatusEmpty {
 				continue
 			} else if trRunning.Status.RunStatus == opsconstants.StatusSuccessed {
-				// patch latest tr ouput var:value to variables
+				// Extract and store task results
+				if tRef.Results != nil && len(tRef.Results) > 0 {
+					taskResults := make(map[string]string)
+					// Extract results from TaskRunStatus based on TaskRef.Results definition
+					// TaskRef.Results is map[resultKey]stepName
+					if len(trRunning.Status.TaskRunNodeStatus) == 1 {
+						for _, nodeStatus := range trRunning.Status.TaskRunNodeStatus {
+							// Build a map of stepName -> stepOutput for quick lookup
+							stepOutputs := make(map[string]string)
+							for _, step := range nodeStatus.TaskRunStep {
+								stepOutputs[step.StepName] = step.StepOutput
+							}
+							// Extract results according to TaskRef.Results
+							for resultKey, stepName := range tRef.Results {
+								if output, ok := stepOutputs[stepName]; ok {
+									// Try to extract result using special markers
+									extractedValue := extractResultFromOutput(output, resultKey)
+									if extractedValue != "" {
+										taskResults[resultKey] = extractedValue
+									} else {
+										// Fallback to full output (backward compatibility)
+										taskResults[resultKey] = strings.TrimSpace(output)
+									}
+								}
+							}
+						}
+					}
+					// Store results in PipelineRunTaskStatus
+					if len(taskResults) > 0 {
+						r.updateTaskResults(logger, ctx, pr, tRef.Name, taskResults)
+						// Also add results to PipelineRun variables for direct reference
+						if pr.Spec.Variables == nil {
+							pr.Spec.Variables = make(map[string]string)
+						}
+						for k, v := range taskResults {
+							pr.Spec.Variables[k] = v
+						}
+					}
+				}
+				// patch latest tr ouput var:value to variables (backward compatibility)
+				// This maintains the existing key:value mechanism
 				if len(trRunning.Status.TaskRunNodeStatus) == 1 {
 					for _, nodeStatus := range trRunning.Status.TaskRunNodeStatus {
 						if len(nodeStatus.TaskRunStep) > 0 {
@@ -560,4 +644,100 @@ func (r *PipelineRunReconciler) commitStatus(logger *opslog.Logger, ctx context.
 	}
 	logger.Error.Println("update pipelinerun taskrun status failed after retries", err)
 	return
+}
+
+// updateTaskResults updates the results for a specific task in PipelineRunStatus
+func (r *PipelineRunReconciler) updateTaskResults(logger *opslog.Logger, ctx context.Context, pr *opsv1.PipelineRun, taskName string, results map[string]string) error {
+	for retries := 0; retries < CommitStatusMaxRetries; retries++ {
+		latestPr := &opsv1.PipelineRun{}
+		err := r.Client.Get(ctx, types.NamespacedName{Namespace: pr.GetNamespace(), Name: pr.GetName()}, latestPr)
+		if err != nil {
+			logger.Error.Println(err)
+			return err
+		}
+		// Find and update the task status
+		found := false
+		for i, taskStatus := range latestPr.Status.PipelineRunStatus {
+			if taskStatus.TaskName == taskName {
+				if taskStatus.Results == nil {
+					taskStatus.Results = make(map[string]string)
+				}
+				for k, v := range results {
+					taskStatus.Results[k] = v
+				}
+				latestPr.Status.PipelineRunStatus[i] = taskStatus
+				found = true
+				break
+			}
+		}
+		if !found {
+			// Task status not found, create a new one
+			latestPr.Status.PipelineRunStatus = append(latestPr.Status.PipelineRunStatus, opsv1.PipelineRunTaskStatus{
+				TaskName: taskName,
+				Results:  results,
+			})
+		}
+		err = r.Client.Status().Update(ctx, latestPr)
+		if err == nil {
+			return nil
+		}
+		if !apierrors.IsConflict(err) {
+			logger.Error.Println(err, "update pipelinerun task results error")
+			return err
+		}
+		logger.Info.Println("try update task results times ", retries+1, "conflict detected, retrying...", err)
+		time.Sleep(3 * time.Second)
+	}
+	logger.Error.Println("update pipelinerun task results failed after retries")
+	return fmt.Errorf("update pipelinerun task results failed after retries")
+}
+
+// extractResultFromOutput extracts result value from step output using special markers
+// Supports multiple formats:
+// 1. OPS_RESULT:key=value
+// 2. OPS_RESULT:{"key":"value"} (JSON format)
+// 3. OPS_RESULT:key:value (alternative format)
+// Returns empty string if no marker found (fallback to full output)
+func extractResultFromOutput(output, resultKey string) string {
+	if output == "" || resultKey == "" {
+		return ""
+	}
+	
+	lines := strings.Split(output, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		
+		// Format 1: OPS_RESULT:key=value
+		if strings.HasPrefix(line, "OPS_RESULT:") {
+			content := strings.TrimPrefix(line, "OPS_RESULT:")
+			
+			// Try key=value format
+			if strings.Contains(content, "=") {
+				parts := strings.SplitN(content, "=", 2)
+				if len(parts) == 2 && strings.TrimSpace(parts[0]) == resultKey {
+					return strings.TrimSpace(parts[1])
+				}
+			}
+			
+			// Try key:value format
+			if strings.Contains(content, ":") && !strings.HasPrefix(content, "{") {
+				parts := strings.SplitN(content, ":", 2)
+				if len(parts) == 2 && strings.TrimSpace(parts[0]) == resultKey {
+					return strings.TrimSpace(parts[1])
+				}
+			}
+			
+			// Try JSON format: OPS_RESULT:{"key":"value"}
+			if strings.HasPrefix(content, "{") {
+				// Simple JSON parsing for single key-value pair
+				jsonStr := content
+				keyPattern := fmt.Sprintf(`"%s"\s*:\s*"([^"]+)"`, resultKey)
+				if matched := regexp.MustCompile(keyPattern).FindStringSubmatch(jsonStr); len(matched) > 1 {
+					return matched[1]
+				}
+			}
+		}
+	}
+	
+	return ""
 }

@@ -36,10 +36,10 @@ spec:
     message:
       default: ${url} http status is not ${expect}
   steps:
-    - name: get status
+    - name: get-status
       content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}
-    - name: notifaction
-      when: ${result} != ${expect}
+    - name: notification
+      when: ${steps.get-status.output} != ${expect}
       content: |
         curl -X POST 'https://365.kdocs.cn/woa/api/v1/webhook/send?key=xxx' -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${message}" } }'
 ```
@@ -50,8 +50,69 @@ In this YAML:
 - **`crontab`**: The cron schedule (e.g., `*/1 * * * *` means every minute).
 - **`variables`**: Defines task-specific variables, like `url`, `expect`, and `message`.
 - **`steps`**: Defines the individual operations or commands that should be executed:
-  - `get status`: Executes a `curl` command to get the HTTP status code.
+  - `get status`: Executes a `curl` command to get the HTTP status code. The output is automatically available as `${output}`, `${result}`, or `${steps.get-status.output}`.
   - `notifaction`: Sends a notification if the HTTP status code does not match the expected value.
+
+#### **Export Results from Task Steps**
+
+Task steps can export results that can be referenced by other tasks in a Pipeline using path references like `tasks.{taskName}.results.{resultKey}`.
+
+**Default Output Variable:**
+
+Each step's output is automatically available in subsequent steps. You can reference them directly or use path syntax:
+
+- `${output}` or `${result}` - references the previous step's output (direct reference, recommended)
+- `${steps.{stepName}.output}` - references a specific step's output by name (path reference)
+
+Example:
+```yaml
+steps:
+  - name: get-status
+    content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}
+  - name: notification
+    when: ${output} != ${expect}  # Direct reference (recommended)
+    content: echo "Status is ${output}"
+```
+
+Or using path syntax:
+```yaml
+steps:
+  - name: get-status
+    content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}
+  - name: notification
+    when: ${steps.get-status.output} != ${expect}  # Path reference
+    content: echo "Status is ${steps.get-status.output}"
+```
+
+**Export Results Using OPS_RESULT Marker:**
+
+To export specific results for use in Pipeline tasks, use the `OPS_RESULT:` marker in your step output:
+
+```yaml
+steps:
+  - name: build-step
+    content: |
+      docker build -t myapp:v1.0.0 .
+      echo "OPS_RESULT:image=registry.example.com/myapp:v1.0.0"
+      echo "OPS_RESULT:tag=v1.0.0"
+```
+
+Supported formats:
+- `OPS_RESULT:key=value`
+- `OPS_RESULT:key:value`
+- `OPS_RESULT:{"key":"value"}` (JSON format for multiple results)
+
+**Export Results Using key:value Format (Backward Compatible):**
+
+The last step's output in `key:value` format will be automatically exported:
+
+```yaml
+steps:
+  - name: build-step
+    content: |
+      docker build -t myapp:v1.0.0 .
+      echo "image:registry.example.com/myapp:v1.0.0"
+```
 
 You can apply this file using:
 
