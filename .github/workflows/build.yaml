@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - main
+      - v2.0
   workflow_dispatch:
     inputs:
       platforms:
@@ -34,31 +34,31 @@ jobs:
         with:
           platforms: ${{ inputs.platforms || 'linux/amd64,linux/arm64' }}
           push: true
-          tags: docker.io/shaowenchen/ops-controller-manager:latest
+          tags: docker.io/shaowenchen/ops-controller-manager:2.0.0
           file: Dockerfile
       - name: Push ops-controller-manager to aliyun
         run: |
-          export image=ops-controller-manager:latest
+          export image=ops-controller-manager:2.0.0
           docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
       - name: Build and push Server
         uses: docker/build-push-action@v6
         with:
           platforms: ${{ inputs.platforms || 'linux/amd64,linux/arm64' }}
           push: true
-          tags: docker.io/shaowenchen/ops-server:latest
+          tags: docker.io/shaowenchen/ops-server:2.0.0
           file: Dockerfile-Server
       - name: Push ops-server to aliyun
         run: |
-          export image=ops-server:latest
+          export image=ops-server:2.0.0
           docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all
       - name: Build and push Cli
         uses: docker/build-push-action@v6
         with:
           platforms: ${{ inputs.platforms || 'linux/amd64,linux/arm64' }}
           push: true
-          tags: docker.io/shaowenchen/ops-cli:latest
+          tags: docker.io/shaowenchen/ops-cli:2.0.0
           file: Dockerfile-Cli
       - name: Push ops-cli to aliyun
         run: |
-          export image=ops-cli:latest
+          export image=ops-cli:2.0.0
           docker run --rm -v ~/.docker/config.json:/auth.json quay.io/skopeo/stable copy docker://shaowenchen/${image} docker://registry.cn-beijing.aliyuncs.com/opshub/shaowenchen-${image} --dest-authfile /auth.json --insecure-policy --src-tls-verify=false --dest-tls-verify=false --retry-times 5 --all

@@ -2,7 +2,7 @@ apiVersion: v1
 entries:
   ops:
   - apiVersion: v2
-    appVersion: 1.0.0
+    appVersion: 2.0.0
     created: "2024-11-07T14:32:37.05352+08:00"
     description: A Helm chart for Ops
     digest: 4d4c8443ccabed7ac7f1486d24f7396123665e6ab7db76f1d514c4cbc7dc5a05
