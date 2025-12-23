@@ -3,7 +3,7 @@ entries:
   ops:
   - apiVersion: v2
     appVersion: 3.0.0
-    created: "2024-11-07T14:32:37.05352+08:00"
+    created: "2025-12-23T13:15:11.00000Z"
     description: A Helm chart for Ops
     digest: ""
     home: https://www.chenshaowen.com/ops
@@ -20,7 +20,7 @@ entries:
     version: 3.0.0
   - apiVersion: v2
     appVersion: 2.0.0
-    created: "2024-11-07T14:32:37.05352+08:00"
+    created: "2025-12-23T13:14:11.00000Z"
     description: A Helm chart for Ops
     digest: 
     home: https://www.chenshaowen.com/ops

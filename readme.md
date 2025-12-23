@@ -25,10 +25,10 @@ curl -sfL $PROXY/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.s
 helm repo add ops https://www.chenshaowen.com/ops/charts
 ```
 
-2. Install Opscli Controller
+2. Install Ops Controller
 
 ```bash
-helm install myops ops/ops --version 1.0.0 --namespace ops-system --create-namespace
+helm install myops ops/ops --version 3.0.0 --namespace ops-system --create-namespace
 ```
 
 ## More

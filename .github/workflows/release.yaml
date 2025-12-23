@@ -4,30 +4,149 @@ on:
   schedule:
     - cron: '0 0 * * 0'
   workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch name (e.g., main, v2.0)'
+        required: true
+        type: string
+        default: main
 
 jobs:
-  GoReleaser:
+  update-tag:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete Latest Tag And Release
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch_name || 'main' }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine branch name and tag
+        id: branch
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            BRANCH_NAME="${{ github.event.inputs.branch_name }}"
+          else
+            BRANCH_NAME="main"
+          fi
+          echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          
+          if [ "${BRANCH_NAME}" == "main" ]; then
+            TAG_NAME="latest"
+          else
+            VERSION=$(echo "${BRANCH_NAME}" | sed 's/^v//')
+            if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
+              TAG_NAME="v${VERSION}.0"
+            else
+              TAG_NAME="v${VERSION}"
+            fi
+          fi
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "Branch: ${BRANCH_NAME}, Tag: ${TAG_NAME}"
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          TAG_NAME="${{ steps.branch.outputs.tag_name }}"
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME does not exist"
+          fi
+
+      - name: Delete tag and release if exists
+        if: steps.check_tag.outputs.exists == 'true'
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1
+        with:
+          delete_release: true
+          tag_name: ${{ steps.branch.outputs.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up local tag reference
+        if: steps.check_tag.outputs.exists == 'true'
+        run: |
+          TAG_NAME="${{ steps.branch.outputs.tag_name }}"
+          git tag -d "$TAG_NAME" 2>/dev/null || true
+          git fetch --prune --prune-tags origin "+refs/tags/*:refs/tags/*" || true
+
+      - name: Create tag
+        run: |
+          TAG_NAME="${{ steps.branch.outputs.tag_name }}"
+          BRANCH_NAME="${{ steps.branch.outputs.branch_name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -d "$TAG_NAME" 2>/dev/null || true
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME from branch $BRANCH_NAME" HEAD
+          git push origin "$TAG_NAME" --force
+
+      - name: Create release
+        run: |
+          TAG_NAME="${{ steps.branch.outputs.tag_name }}"
+          BRANCH_NAME="${{ steps.branch.outputs.branch_name }}"
+          gh release create "$TAG_NAME" \
+            --title "Release $TAG_NAME" \
+            --notes "Release $TAG_NAME from branch $BRANCH_NAME
+
+          This release was automatically created from branch $BRANCH_NAME." \
+            --target "$BRANCH_NAME"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  GoReleaser:
+    runs-on: ubuntu-latest
+    needs: update-tag
+    steps:
+      - name: Determine branch name and tag
+        id: branch
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            BRANCH_NAME="${{ github.event.inputs.branch_name }}"
+          else
+            BRANCH_NAME="main"
+          fi
+          echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          
+          if [ "${BRANCH_NAME}" == "main" ]; then
+            TAG_NAME="latest"
+          else
+            VERSION=$(echo "${BRANCH_NAME}" | sed 's/^v//')
+            if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
+              TAG_NAME="v${VERSION}.0"
+            else
+              TAG_NAME="v${VERSION}"
+            fi
+          fi
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "Branch: ${BRANCH_NAME}, Tag: ${TAG_NAME}"
+
+      - name: Delete Tag And Release if latest
+        if: steps.branch.outputs.tag_name == 'latest'
         uses: dev-drprasad/delete-tag-and-release@v0.2.1
         with:
           delete_release: true
           tag_name: latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout Main
         uses: actions/checkout@v3
-      - name: Tag Repo
+
+      - name: Tag Repo (if latest)
+        if: steps.branch.outputs.tag_name == 'latest'
         uses: richardsimko/update-tag@v1
         with:
           tag_name: latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Checkout Latest
+
+      - name: Checkout Tag
         uses: actions/checkout@v3
         with:
-          ref: latest
+          ref: ${{ steps.branch.outputs.tag_name }}
       - name: Set Up Go
         uses: actions/setup-go@v2
         with:
