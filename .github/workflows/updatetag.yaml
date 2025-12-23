@@ -1,4 +1,4 @@
-name: Update Tag and Release
+name: UpdateTag
 
 on:
   workflow_dispatch:
