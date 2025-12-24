@@ -41,6 +41,7 @@ type PipelineSpec struct {
 type TaskRef struct {
 	// +kubebuilder:validation:Pattern="^[a-z](-?[a-z0-9])*$"
 	Name         string            `json:"name,omitempty" yaml:"name,omitempty"`
+	Desc         string            `json:"desc,omitempty" yaml:"desc,omitempty"`
 	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	AllowFailure bool              `json:"allowFailure,omitempty" yaml:"allowFailure,omitempty"`

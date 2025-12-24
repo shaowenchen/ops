@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -192,28 +193,15 @@ func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx co
 	eventStrings := opsevent.GetCloudEventReadable(event)
 
 	// If no keywords are configured, trigger all events
-	// Otherwise, check if any keyword matches the event
 	shouldTrigger := true
-	if len(eventhook.Spec.Keywords) > 0 {
-		// Keywords are configured, need to check for match
-		shouldTrigger = false
-		for _, keyword := range eventhook.Spec.Keywords {
-			if strings.Contains(eventStrings, keyword) {
-				shouldTrigger = true
-				logger.Info.Println(fmt.Sprintf("event %s contains keyword %s trigger eventhook %s", event.ID(), keyword, eventhook.ObjectMeta.Name))
-				break
-			}
-		}
-	}
-
-	// Find matched keyword for metrics
 	matchedKeyword := ""
-	if len(eventhook.Spec.Keywords) > 0 {
-		for _, keyword := range eventhook.Spec.Keywords {
-			if strings.Contains(eventStrings, keyword) {
-				matchedKeyword = keyword
-				break
-			}
+
+	if eventhook.Spec.Keywords != nil {
+		keywords := eventhook.Spec.Keywords
+		shouldTrigger = r.matchKeywords(eventStrings, keywords, logger, eventhook.ObjectMeta.Name, event.ID())
+		if shouldTrigger {
+			// Find matched keyword for metrics
+			matchedKeyword = r.findMatchedKeyword(eventStrings, keywords)
 		}
 	}
 
@@ -230,6 +218,88 @@ func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx co
 			opsmetrics.RecordEventHooksStatus(eventhook.Namespace, eventhook.Name, matchedKeyword, event.ID())
 		}()
 	}
+}
+
+// matchKeywords checks if the event matches the keywords configuration
+func (r *EventHooksReconciler) matchKeywords(eventStrings string, keywords *opsv1.KeywordsConfig, logger *opslog.Logger, eventhookName, eventID string) bool {
+	// Default values
+	matchMode := opsconstants.MatchModeANY
+	matchType := opsconstants.MatchTypeCONTAINS
+	if keywords.MatchMode != "" {
+		matchMode = keywords.MatchMode
+	}
+	if keywords.MatchType != "" {
+		matchType = keywords.MatchType
+	}
+
+	// Check exclude list first - if any exclude matches, return false
+	if len(keywords.Exclude) > 0 {
+		for _, excludeKeyword := range keywords.Exclude {
+			if r.matchKeyword(eventStrings, excludeKeyword, matchType) {
+				logger.Info.Println(fmt.Sprintf("event %s excluded by keyword %s for eventhook %s", eventID, excludeKeyword, eventhookName))
+				return false
+			}
+		}
+	}
+
+	// If no include keywords, trigger all (after exclude check)
+	if len(keywords.Include) == 0 {
+		return true
+	}
+
+	// Check include list based on matchMode
+	matchedCount := 0
+	for _, includeKeyword := range keywords.Include {
+		if r.matchKeyword(eventStrings, includeKeyword, matchType) {
+			matchedCount++
+			logger.Info.Println(fmt.Sprintf("event %s matched keyword %s for eventhook %s", eventID, includeKeyword, eventhookName))
+			if matchMode == opsconstants.MatchModeANY {
+				// For ANY mode, one match is enough
+				return true
+			}
+		}
+	}
+
+	// For ALL mode, all keywords must match
+	if matchMode == opsconstants.MatchModeALL {
+		return matchedCount == len(keywords.Include)
+	}
+
+	// Default to false if no match
+	return false
+}
+
+// matchKeyword checks if a single keyword matches the event string based on matchType
+func (r *EventHooksReconciler) matchKeyword(eventStrings, keyword, matchType string) bool {
+	switch matchType {
+	case opsconstants.MatchTypeEXACT:
+		return eventStrings == keyword
+	case opsconstants.MatchTypeREGEX:
+		matched, err := regexp.MatchString(keyword, eventStrings)
+		if err != nil {
+			return false
+		}
+		return matched
+	case opsconstants.MatchTypeCONTAINS:
+		fallthrough
+	default:
+		return strings.Contains(eventStrings, keyword)
+	}
+}
+
+// findMatchedKeyword finds the first matched keyword for metrics
+func (r *EventHooksReconciler) findMatchedKeyword(eventStrings string, keywords *opsv1.KeywordsConfig) string {
+	matchType := opsconstants.MatchTypeCONTAINS
+	if keywords.MatchType != "" {
+		matchType = keywords.MatchType
+	}
+
+	for _, keyword := range keywords.Include {
+		if r.matchKeyword(eventStrings, keyword, matchType) {
+			return keyword
+		}
+	}
+	return ""
 }
 
 // SetupWithManager sets up the controller with the Manager.

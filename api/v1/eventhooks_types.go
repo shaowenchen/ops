@@ -23,6 +23,15 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// KeywordsConfig defines keyword matching configuration
+// Default values: matchMode=opsconstants.MatchModeANY, matchType=opsconstants.MatchTypeCONTAINS
+type KeywordsConfig struct {
+	Include   []string `json:"include,omitempty"`
+	Exclude   []string `json:"exclude,omitempty"`
+	MatchMode string   `json:"matchMode,omitempty"` // opsconstants.MatchModeANY | opsconstants.MatchModeALL (default: opsconstants.MatchModeANY)
+	MatchType string   `json:"matchType,omitempty"` // opsconstants.MatchTypeCONTAINS | opsconstants.MatchTypeEXACT | opsconstants.MatchTypeREGEX (default: opsconstants.MatchTypeCONTAINS)
+}
+
 // EventHooksSpec defines the desired state of EventHooks
 type EventHooksSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -33,7 +42,7 @@ type EventHooksSpec struct {
 	Subject    string            `json:"subject,omitempty"`
 	URL        string            `json:"url,omitempty"`
 	Options    map[string]string `json:"options,omitempty"`
-	Keywords   []string          `json:"keywords,omitempty"`
+	Keywords   *KeywordsConfig   `json:"keywords,omitempty"`
 	Additional string            `json:"additional,omitempty"`
 }
 

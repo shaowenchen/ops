@@ -9,4 +9,15 @@ metadata:
     app.kubernetes.io/created-by: ops
   name: eventhooks-sample
 spec:
-  # TODO(user): Add fields here
+  keywords:
+    include:
+      - alerting
+      - evicted
+    exclude:
+      - healthcheck
+      - test
+    # matchMode: ANY        # Optional, default: ANY (options: ANY | ALL)
+    # matchType: CONTAINS   # Optional, default: CONTAINS (options: CONTAINS | EXACT | REGEX)
+  subject: ops.clusters.*.namespaces.ops-system.taskruns.alert-evicted-pods.reports
+  type: xiezuo
+  url: https://365.kdocs.cn/woa/api/v1/webhook/send?key=xxxx

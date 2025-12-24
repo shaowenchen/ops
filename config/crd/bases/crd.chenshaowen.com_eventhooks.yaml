@@ -48,9 +48,22 @@ spec:
               additional:
                 type: string
               keywords:
-                items:
-                  type: string
-                type: array
+                description: 'KeywordsConfig defines keyword matching configuration
+                  Default values: matchMode=opsconstants.MatchModeANY, matchType=opsconstants.MatchTypeCONTAINS'
+                properties:
+                  exclude:
+                    items:
+                      type: string
+                    type: array
+                  include:
+                    items:
+                      type: string
+                    type: array
+                  matchMode:
+                    type: string
+                  matchType:
+                    type: string
+                type: object
               options:
                 additionalProperties:
                   type: string

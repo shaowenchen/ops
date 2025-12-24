@@ -28,9 +28,17 @@ func GetClusterSubject(cluster, namespace, format string) string {
 	return fmt.Sprintf(format, cluster, namespace)
 }
 
-const ActionClearDisk = "clean disk"
-const ActionGetDataSetStatus = "get dataset status"
-const ActionGetNodeStatus = "get node status"
+// EventHooks keyword matching constants
+const (
+	// MatchMode constants
+	MatchModeANY = "ANY"
+	MatchModeALL = "ALL"
+
+	// MatchType constants
+	MatchTypeCONTAINS = "CONTAINS"
+	MatchTypeEXACT    = "EXACT"
+	MatchTypeREGEX    = "REGEX"
+)
 
 func GetCurrentNamespace() (string, error) {
 	namespaceFile := "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
