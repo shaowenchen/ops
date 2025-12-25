@@ -133,13 +133,26 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout Main
-        uses: actions/checkout@v3
-
-      - name: Tag Repo (if latest)
-        if: steps.branch.outputs.tag_name == 'latest'
-        uses: richardsimko/update-tag@v1
+        uses: actions/checkout@v4
         with:
-          tag_name: latest
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create or update tag (if latest)
+        if: steps.branch.outputs.tag_name == 'latest'
+        run: |
+          TAG_NAME="${{ steps.branch.outputs.tag_name }}"
+          BRANCH_NAME="${{ steps.branch.outputs.branch_name }}"
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Delete local tag if exists
+          git tag -d "$TAG_NAME" 2>/dev/null || true
+          
+          # Create or update tag
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME from branch $BRANCH_NAME" HEAD
+          git push origin "$TAG_NAME" --force
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
