@@ -1,7 +1,7 @@
 project_name: opscli
 before:
   hooks:
-    - git clone https://github.com/shaowenchen/ops-manifests.git ops-manifests
+    - git clone -b v2.0.0 https://github.com/shaowenchen/ops-manifests.git ops-manifests
 builds:
   - env:
       - CGO_ENABLED=0
