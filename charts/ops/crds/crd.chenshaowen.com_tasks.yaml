@@ -44,6 +44,38 @@ spec:
                 type: string
               host:
                 type: string
+              mounts:
+                items:
+                  description: TaskMount defines a mount configuration for a Task
+                  properties:
+                    configMap:
+                      description: ConfigMapMount defines a configMap mount configuration
+                      properties:
+                        mountPath:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - mountPath
+                      - name
+                      type: object
+                    hostPath:
+                      type: string
+                    mountPath:
+                      type: string
+                    secret:
+                      description: SecretMount defines a secret mount configuration
+                      properties:
+                        mountPath:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - mountPath
+                      - name
+                      type: object
+                  type: object
+                type: array
               runtimeImage:
                 type: string
               steps:
@@ -58,8 +90,11 @@ spec:
                     localfile:
                       type: string
                     name:
+                      pattern: ^[a-z](-?[a-z0-9])*$
                       type: string
                     remotefile:
+                      type: string
+                    runtimeImage:
                       type: string
                     timeoutSeconds:
                       type: integer

@@ -43,15 +43,26 @@ spec:
                 description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                   Important: Run "make" to regenerate code after modifying this file'
                 type: string
+              runtimeImage:
+                type: string
               tasks:
                 items:
                   properties:
                     allowFailure:
                       type: boolean
-                    name:
+                    desc:
                       type: string
+                    name:
+                      pattern: ^[a-z](-?[a-z0-9])*$
+                      type: string
+                    results:
+                      additionalProperties:
+                        type: string
+                      type: object
                     runAlways:
                       type: boolean
+                    runtimeImage:
+                      type: string
                     taskRef:
                       type: string
                     variables:

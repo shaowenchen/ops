@@ -73,6 +73,10 @@ spec:
                   properties:
                     name:
                       type: string
+                    results:
+                      additionalProperties:
+                        type: string
+                      type: object
                     taskRef:
                       type: string
                     taskRunStatus:
