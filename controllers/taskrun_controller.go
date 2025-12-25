@@ -319,7 +319,7 @@ func (r *TaskRunReconciler) run(logger *opslog.Logger, ctx context.Context, t *o
 	cliLogger := opslog.NewLogger().SetStd().WaitFlush().Build()
 
 	// only run script
-	if len(hosts) > 0 && t.OnlyScript() {
+	if len(hosts) > 0 && t.OnlyScript() && !t.NeedKubeExecution() {
 		for _, h := range hosts {
 			logger.Info.Printf("run task %s on host %s", t.GetUniqueKey(), t.Spec.Host)
 			err = r.runTaskOnHost(cliLogger, ctx, r.Client, t, tr, &h)
@@ -409,7 +409,7 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	}
 	// if find host in cluster, and can connect
 	host, _ := kc.GetHost(opsconstants.OpsNamespace, tr.GetHost(t))
-	if host != nil && t.Spec.RuntimeImage == "" {
+	if host != nil && !t.NeedKubeExecution() {
 		logger.Debug.Println("use host credentials to run cluster task " + tr.Name)
 		return r.runTaskOnHost(logger, ctx, *kc.OpsClient, t, tr, host)
 	}

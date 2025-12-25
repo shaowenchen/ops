@@ -44,39 +44,38 @@ var TaskCmd = &cobra.Command{
 			return
 		}
 		taskOpt.Variables["nodename"] = kubeOpt.NodeName
-		switch inventoryType {
-		case constants.InventoryTypeHosts:
-			HostTask(context.Background(), logger, tasks, taskOpt, hostOpt, availableInventory)
-		case constants.InventoryTypeKubernetes:
-			KubeTask(context.Background(), logger, tasks, taskOpt, kubeOpt, availableInventory)
+		for _, task := range tasks {
+			if inventoryType == constants.InventoryTypeHosts && !task.NeedKubeExecution() {
+				HostTask(context.Background(), logger, task, taskOpt, hostOpt, availableInventory)
+			} else {
+				KubeTask(context.Background(), logger, task, taskOpt, kubeOpt, availableInventory)
+			}
 		}
 	},
 }
 
-func HostTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
+func HostTask(ctx context.Context, logger *log.Logger, t opsv1.Task, taskOpt option.TaskOption, hostOpt option.HostOption, inventory string) (err error) {
 	hs := host.GetHosts(logger, option.ClusterOption{}, hostOpt, inventory)
 	for _, h := range hs {
-		for _, t := range tasks {
-			tr := opsv1.NewTaskRun(&t)
-			hc, err := host.NewHostConnBase64(h)
-			if err != nil {
-				logger.Error.Println(err)
-				continue
-			}
-			newTaskOpt := taskOpt
-			newTaskOpt.Variables["host"] = h.GetHostname()
-			newTaskOpt.Variables["proxy"] = taskOpt.Proxy
-			err = opstask.RunTaskOnHost(ctx, logger, &t, &tr, hc, newTaskOpt)
-			if err != nil {
-				logger.Error.Println(err)
-				continue
-			}
+		tr := opsv1.NewTaskRun(&t)
+		hc, err := host.NewHostConnBase64(h)
+		if err != nil {
+			logger.Error.Println(err)
+			continue
+		}
+		newTaskOpt := taskOpt
+		newTaskOpt.Variables["host"] = h.GetHostname()
+		newTaskOpt.Variables["proxy"] = taskOpt.Proxy
+		err = opstask.RunTaskOnHost(ctx, logger, &t, &tr, hc, newTaskOpt)
+		if err != nil {
+			logger.Error.Println(err)
+			continue
 		}
 	}
 	return
 }
 
-func KubeTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskOpt option.TaskOption, kubeOpt option.KubeOption, inventory string) (err error) {
+func KubeTask(ctx context.Context, logger *log.Logger, t opsv1.Task, taskOpt option.TaskOption, kubeOpt option.KubeOption, inventory string) (err error) {
 	kc, err := kube.NewKubeConnection(inventory)
 	if err != nil {
 		logger.Error.Println(err)
@@ -84,23 +83,21 @@ func KubeTask(ctx context.Context, logger *log.Logger, tasks []opsv1.Task, taskO
 	}
 	nodes, err := kube.GetNodes(ctx, logger, kc.Client, kubeOpt)
 	for _, node := range nodes {
-		for _, t := range tasks {
-			newKubeOpt := kubeOpt
-			if t.Spec.RuntimeImage != "" {
-				newKubeOpt.RuntimeImage = t.Spec.RuntimeImage
+		newKubeOpt := kubeOpt
+		if t.Spec.RuntimeImage != "" {
+			newKubeOpt.RuntimeImage = t.Spec.RuntimeImage
+		}
+		for k, v := range t.Spec.Variables {
+			if _, ok := taskOpt.Variables[k]; !ok {
+				taskOpt.Variables[k] = v.GetValue()
 			}
-			for k, v := range t.Spec.Variables {
-				if _, ok := taskOpt.Variables[k]; !ok {
-					taskOpt.Variables[k] = v.GetValue()
-				}
-			}
-			taskOpt.Variables["host"] = node.GetName()
-			taskOpt.Variables["proxy"] = taskOpt.Proxy
-			tr := opsv1.NewTaskRun(&t)
-			err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, newKubeOpt)
-			if err != nil {
-				logger.Error.Println(err)
-			}
+		}
+		taskOpt.Variables["host"] = node.GetName()
+		taskOpt.Variables["proxy"] = taskOpt.Proxy
+		tr := opsv1.NewTaskRun(&t)
+		err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, newKubeOpt)
+		if err != nil {
+			logger.Error.Println(err)
 		}
 	}
 	return

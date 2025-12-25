@@ -89,6 +89,10 @@ type TaskStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
+func (obj *Task) NeedKubeExecution() bool {
+	return obj.Spec.RuntimeImage != "" || len(obj.Spec.Mounts) > 0
+}
+
 func (obj *Task) GetTTLSecondsAfterFinished() int {
 	if obj.Spec.TTlSecondsAfterFinished > 0 {
 		return obj.Spec.TTlSecondsAfterFinished
