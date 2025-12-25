@@ -1,6 +1,7 @@
 package option
 
 import (
+	"fmt"
 	"strings"
 
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -16,11 +17,31 @@ type HostOption struct {
 	SecretRef      string
 }
 
+type MountConfig struct {
+	HostPath  string
+	MountPath string
+	Secret    *SecretMountConfig
+	ConfigMap *ConfigMapMountConfig
+}
+
+// SecretMountConfig defines a secret mount configuration
+type SecretMountConfig struct {
+	Name      string
+	MountPath string
+}
+
+// ConfigMapMountConfig defines a configMap mount configuration
+type ConfigMapMountConfig struct {
+	Name      string
+	MountPath string
+}
+
 type KubeOption struct {
 	Debug        bool
 	Namespace    string
 	NodeName     string
 	RuntimeImage string
+	Mounts       []MountConfig
 }
 
 func (k *KubeOption) IsAllNodes() bool {
@@ -124,4 +145,43 @@ type ClusterOption struct {
 	Desc       string
 	Kubeconfig string
 	Clear      bool
+}
+
+// ParseMountConfig parses a mount configuration string
+// format: hostPath:mountPath
+// example: /opt/data:/data
+func ParseMountConfig(mountStr string) (MountConfig, error) {
+	parts := strings.Split(mountStr, ":")
+	if len(parts) != 2 {
+		return MountConfig{}, fmt.Errorf("invalid mount format: %s, expected hostPath:mountPath", mountStr)
+	}
+
+	hostPath := strings.TrimSpace(parts[0])
+	mountPath := strings.TrimSpace(parts[1])
+
+	// validate path format
+	if !strings.HasPrefix(hostPath, "/") {
+		return MountConfig{}, fmt.Errorf("hostPath must be absolute path: %s", hostPath)
+	}
+	if !strings.HasPrefix(mountPath, "/") {
+		return MountConfig{}, fmt.Errorf("mountPath must be absolute path: %s", mountPath)
+	}
+
+	return MountConfig{
+		HostPath:  hostPath,
+		MountPath: mountPath,
+	}, nil
+}
+
+// ParseMountConfigs parses multiple mount configurations
+func ParseMountConfigs(mountStrs []string) ([]MountConfig, error) {
+	configs := make([]MountConfig, 0, len(mountStrs))
+	for _, str := range mountStrs {
+		config, err := ParseMountConfig(str)
+		if err != nil {
+			return nil, err
+		}
+		configs = append(configs, config)
+	}
+	return configs, nil
 }

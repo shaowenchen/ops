@@ -19,6 +19,7 @@ var hostOpt option.HostOption
 
 var inventory string
 var verbose string
+var mounts []string
 
 var ShellCmd = &cobra.Command{
 	Use:   "shell",
@@ -34,6 +35,16 @@ var ShellCmd = &cobra.Command{
 
 		if utils.IsExistsFile(shellOpt.Content) {
 			shellOpt.Content, _ = utils.ReadFile(shellOpt.Content)
+		}
+
+		// 解析挂载配置
+		if len(mounts) > 0 {
+			mountConfigs, err := option.ParseMountConfigs(mounts)
+			if err != nil {
+				logger.Error.Println(err)
+				return
+			}
+			kubeOpt.Mounts = mountConfigs
 		}
 		switch inventoryType {
 		case constants.InventoryTypeKubernetes:
@@ -92,4 +103,6 @@ func init() {
 	ShellCmd.Flags().StringVarP(&hostOpt.PrivateKey, "privatekey", "", "", "")
 	ShellCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")
 	ShellCmd.Flags().IntVar(&hostOpt.Port, "port", 22, "")
+
+	ShellCmd.Flags().StringArrayVarP(&mounts, "mount", "m", []string{}, "mount host path to container (format: hostPath:mountPath, can be specified multiple times)")
 }

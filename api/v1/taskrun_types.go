@@ -112,7 +112,7 @@ func NewTaskRun(t *Task) TaskRun {
 	return tr
 }
 
-func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun {
+func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef, p *Pipeline) *TaskRun {
 	tr := &TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    pr.Namespace,
@@ -121,6 +121,7 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 				opsconstants.LabelTaskRefKey:     t.ObjectMeta.GetName(),
 				opsconstants.LabelPipelineRefKey: pr.Spec.PipelineRef,
 			},
+			Annotations: make(map[string]string),
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: opsconstants.APIVersion,
@@ -134,6 +135,14 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef) *TaskRun 
 			TaskRef:   t.ObjectMeta.GetName(),
 			Variables: pr.Spec.Variables,
 		},
+	}
+	// Store Pipeline runtimeImage in annotation for priority resolution
+	// Priority: step > task > pipeline > env
+	// TaskRef runtimeImage takes precedence over Pipeline runtimeImage
+	if tRef.RuntimeImage != "" {
+		tr.Annotations["pipeline.runtimeImage"] = tRef.RuntimeImage
+	} else if p != nil && p.Spec.RuntimeImage != "" {
+		tr.Annotations["pipeline.runtimeImage"] = p.Spec.RuntimeImage
 	}
 	return tr
 }

@@ -175,6 +175,11 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 	if strings.Contains(step.Content, "/host") {
 		mode = opsconstants.ModeContainer
 	}
+	// Use step-level runtimeImage if specified, otherwise use kubeOpt.RuntimeImage
+	stepKubeOpt := kubeOpt
+	if step.RuntimeImage != "" {
+		stepKubeOpt.RuntimeImage = step.RuntimeImage
+	}
 	output, err = kc.ShellOnNode(
 		logger,
 		node,
@@ -183,7 +188,7 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 			Content: step.Content,
 			Mode:    mode,
 		},
-		kubeOpt)
+		stepKubeOpt)
 	if len(output) == 0 {
 		if err != nil {
 			output = err.Error()
@@ -195,6 +200,11 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 }
 
 func runStepFileOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
+	// Use step-level runtimeImage if specified, otherwise use kubeOpt.RuntimeImage
+	stepKubeOpt := kubeOpt
+	if step.RuntimeImage != "" {
+		stepKubeOpt.RuntimeImage = step.RuntimeImage
+	}
 	fileOpt := option.FileOption{
 		Sudo:       taskOpt.Sudo,
 		Direction:  step.Direction,
@@ -207,7 +217,7 @@ func runStepFileOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnec
 		Region:     taskOpt.Variables["region"],
 		Endpoint:   taskOpt.Variables["endpoint"],
 		Bucket:     taskOpt.Variables["bucket"],
-		KubeOption: kubeOpt,
+		KubeOption: stepKubeOpt,
 	}
 	output, err = kc.FileNode(
 		logger,

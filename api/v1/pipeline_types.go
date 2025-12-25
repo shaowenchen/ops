@@ -35,6 +35,7 @@ type PipelineSpec struct {
 	Desc                    string    `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Variables               Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
 	Tasks                   []TaskRef `json:"tasks" yaml:"tasks"`
+	RuntimeImage            string    `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
 	TTlSecondsAfterFinished int       `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
 }
 
@@ -44,6 +45,7 @@ type TaskRef struct {
 	Desc         string            `json:"desc,omitempty" yaml:"desc,omitempty"`
 	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
 	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	RuntimeImage string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
 	AllowFailure bool              `json:"allowFailure,omitempty" yaml:"allowFailure,omitempty"`
 	RunAlways    bool              `json:"runAlways,omitempty" yaml:"runAlways,omitempty"`
 	Results      map[string]string `json:"results,omitempty" yaml:"results,omitempty"` // map[resultKey]stepName, defines which step outputs to export as results

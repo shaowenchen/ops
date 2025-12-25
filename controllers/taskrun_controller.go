@@ -416,19 +416,53 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	// else use pod to run task
 	// build options
 	hostStr := tr.GetHost(t)
-	// task > env > default
+	// Priority: step > task > pipeline > env > default
+	// Note: step-level runtimeImage is handled in runStepShellOnKube/runStepFileOnKube
 	runtimeImage := t.Spec.RuntimeImage
+	if runtimeImage == "" {
+		// Check Pipeline runtimeImage from annotation
+		if tr.Annotations != nil {
+			if pipelineRuntimeImage, ok := tr.Annotations["pipeline.runtimeImage"]; ok && pipelineRuntimeImage != "" {
+				runtimeImage = pipelineRuntimeImage
+			}
+		}
+	}
 	if runtimeImage == "" {
 		runtimeImage = opsconstants.GetEnvDefaultRuntimeImage()
 	}
 	if runtimeImage == "" {
 		runtimeImage = opsconstants.DefaultRuntimeImage
 	}
+	// Convert Task mounts to MountConfig
+	mountConfigs := make([]opsoption.MountConfig, 0)
+	for _, taskMount := range t.Spec.Mounts {
+		mountConfig := opsoption.MountConfig{}
+		if taskMount.Secret != nil {
+			// Secret mount
+			mountConfig.Secret = &opsoption.SecretMountConfig{
+				Name:      taskMount.Secret.Name,
+				MountPath: taskMount.Secret.MountPath,
+			}
+		} else if taskMount.ConfigMap != nil {
+			// ConfigMap mount
+			mountConfig.ConfigMap = &opsoption.ConfigMapMountConfig{
+				Name:      taskMount.ConfigMap.Name,
+				MountPath: taskMount.ConfigMap.MountPath,
+			}
+		} else {
+			// HostPath mount
+			mountConfig.HostPath = taskMount.HostPath
+			mountConfig.MountPath = taskMount.MountPath
+		}
+		mountConfigs = append(mountConfigs, mountConfig)
+	}
+
 	kubeOpt := opsoption.KubeOption{
 		Debug:        opsconstants.GetEnvDebug(),
 		NodeName:     hostStr,
 		RuntimeImage: runtimeImage,
 		Namespace:    opsconstants.OpsNamespace,
+		Mounts:       mountConfigs,
 	}
 	// run
 	if kubeOpt.NodeName == "" {

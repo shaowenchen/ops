@@ -442,10 +442,10 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 					}
 				}
 				// Create TaskRun with resolved variables
-				tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
+				tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef, p)
 				tr.Spec.Variables = resolvedVars
 			} else {
-				tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
+				tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef, p)
 				// Merge TaskRef.Variables even if no taskResults
 				if tRef.Variables != nil && len(tRef.Variables) > 0 {
 					if tr.Spec.Variables == nil {
@@ -458,7 +458,7 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			}
 		} else {
 			// If we can't get latest PipelineRun, create TaskRun with original variables
-			tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef)
+			tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef, p)
 		}
 		err = r.Client.Create(ctx, tr)
 		if err != nil {
@@ -702,15 +702,15 @@ func extractResultFromOutput(output, resultKey string) string {
 	if output == "" || resultKey == "" {
 		return ""
 	}
-	
+
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		
+
 		// Format 1: OPS_RESULT:key=value
 		if strings.HasPrefix(line, "OPS_RESULT:") {
 			content := strings.TrimPrefix(line, "OPS_RESULT:")
-			
+
 			// Try key=value format
 			if strings.Contains(content, "=") {
 				parts := strings.SplitN(content, "=", 2)
@@ -718,7 +718,7 @@ func extractResultFromOutput(output, resultKey string) string {
 					return strings.TrimSpace(parts[1])
 				}
 			}
-			
+
 			// Try key:value format
 			if strings.Contains(content, ":") && !strings.HasPrefix(content, "{") {
 				parts := strings.SplitN(content, ":", 2)
@@ -726,7 +726,7 @@ func extractResultFromOutput(output, resultKey string) string {
 					return strings.TrimSpace(parts[1])
 				}
 			}
-			
+
 			// Try JSON format: OPS_RESULT:{"key":"value"}
 			if strings.HasPrefix(content, "{") {
 				// Simple JSON parsing for single key-value pair
@@ -738,6 +738,6 @@ func extractResultFromOutput(output, resultKey string) string {
 			}
 		}
 	}
-	
+
 	return ""
 }

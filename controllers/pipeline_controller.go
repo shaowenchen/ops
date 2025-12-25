@@ -132,7 +132,7 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 			changed = true
 		}
 	}
-	
+
 	// Fill variables for each task in TaskRef
 	// If task variable has default value and pipeline has the same variable, fill it
 	for i, tRef := range obj.Spec.Tasks {
@@ -173,7 +173,7 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 			}
 		}
 	}
-	
+
 	// check cluster variables
 	findClusterVariable := false
 	for _, v := range obj.Spec.Variables {

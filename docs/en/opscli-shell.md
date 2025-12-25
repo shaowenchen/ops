@@ -88,3 +88,43 @@ To specify a custom `kubeconfig`, use the `-i` flag:
 ```bash
 opscli shell -i ~/Documents/opscli/prod --content "uname -a" --nodename node1
 ```
+
+#### 4. **Mount Host Paths to Container**
+
+The `--mount` flag allows you to mount host paths into the container. This is useful for accessing host files, directories, or socket files (like `docker.sock`) from within the container.
+
+- **Single Mount**
+
+```bash
+opscli shell --content "ls /data" --mount /opt/data:/data
+```
+
+- **Multiple Mounts**
+
+You can specify multiple mounts by using `--mount` multiple times:
+
+```bash
+opscli shell --content "ls /data /logs" \
+    --mount /opt/data:/data \
+    --mount /opt/logs:/logs
+```
+
+- **Mount Docker Socket**
+
+To mount the Docker socket and use Docker commands inside the container:
+
+```bash
+opscli shell --content "docker ps" \
+    --mount /var/run/docker.sock:/var/run/docker.sock
+```
+
+- **Mount Format**
+
+The mount format is: `hostPath:mountPath`
+- `hostPath`: absolute path on the host (required)
+- `mountPath`: absolute path in the container (required)
+
+**Note**: If you need to access the host root filesystem, you can mount it explicitly:
+```bash
+opscli shell --content "ls /host" --mount /:/host
+```

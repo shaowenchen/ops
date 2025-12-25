@@ -100,3 +100,41 @@ To copy an image file from the cluster to the local machine:
 ```
 
 This command helps copy the executable or file from a container/image inside the cluster to the local machine.
+
+#### 6. **Mount Host Paths to Container**
+
+The `--mount` flag allows you to mount host paths into the container when transferring files. This is useful for accessing host files or directories from within the container.
+
+- **Single Mount**
+
+```bash
+opscli file -i ~/.kube/config --nodename node1 \
+    --direction upload \
+    --localfile /root/tmp.log \
+    --remotefile s3://logs/tmp.log \
+    --mount /opt/data:/data
+```
+
+- **Multiple Mounts**
+
+You can specify multiple mounts by using `--mount` multiple times:
+
+```bash
+opscli file -i ~/.kube/config --nodename node1 \
+    --direction upload \
+    --localfile /root/tmp.log \
+    --remotefile s3://logs/tmp.log \
+    --mount /opt/data:/data \
+    --mount /opt/logs:/logs
+```
+
+- **Mount Format**
+
+The mount format is: `hostPath:mountPath`
+- `hostPath`: absolute path on the host (required)
+- `mountPath`: absolute path in the container (required)
+
+**Note**: If you need to access the host root filesystem for file operations, you can mount it explicitly:
+```bash
+opscli file --mount /:/host ...
+```

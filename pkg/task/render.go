@@ -105,25 +105,25 @@ func ResolvePathReference(pathRef string, taskResults map[string]map[string]stri
 	if !strings.HasPrefix(pathRef, "tasks.") {
 		return "", false
 	}
-	
+
 	parts := strings.Split(pathRef, ".")
 	if len(parts) != 4 || parts[0] != "tasks" || parts[2] != "results" {
 		return "", false
 	}
-	
+
 	taskName := parts[1]
 	resultKey := parts[3]
-	
+
 	if taskResults == nil {
 		return "", false
 	}
-	
+
 	if results, ok := taskResults[taskName]; ok {
 		if value, ok := results[resultKey]; ok {
 			return value, true
 		}
 	}
-	
+
 	return "", false
 }
 
@@ -149,7 +149,7 @@ func RenderStringWithPathRefs(target string, vars map[string]string, taskResults
 				break
 			}
 			endIdx += idx
-			
+
 			// Extract the path reference
 			pathRef := target[idx+2 : endIdx] // +2 to skip "${"
 			if value, found := ResolvePathReference(pathRef, taskResults); found {
@@ -164,7 +164,7 @@ func RenderStringWithPathRefs(target string, vars map[string]string, taskResults
 			break
 		}
 	}
-	
+
 	// Then, resolve regular variables
 	return RenderString(target, vars)
 }
@@ -176,22 +176,22 @@ func ResolveStepReference(stepRef string, stepOutputs map[string]string) (string
 	if !strings.HasPrefix(stepRef, "steps.") {
 		return "", false
 	}
-	
+
 	parts := strings.Split(stepRef, ".")
 	if len(parts) != 3 || parts[0] != "steps" || parts[2] != "output" {
 		return "", false
 	}
-	
+
 	stepName := parts[1]
-	
+
 	if stepOutputs == nil {
 		return "", false
 	}
-	
+
 	if output, ok := stepOutputs[stepName]; ok {
 		return output, true
 	}
-	
+
 	return "", false
 }
 
@@ -216,7 +216,7 @@ func RenderStringWithStepRefs(target string, vars map[string]string, stepOutputs
 				break
 			}
 			endIdx += idx
-			
+
 			// Extract the step reference
 			stepRef := target[idx+2 : endIdx] // +2 to skip "${"
 			if value, found := ResolveStepReference(stepRef, stepOutputs); found {
@@ -231,7 +231,7 @@ func RenderStringWithStepRefs(target string, vars map[string]string, stepOutputs
 			break
 		}
 	}
-	
+
 	// Then, resolve regular variables
 	return RenderString(target, vars)
 }

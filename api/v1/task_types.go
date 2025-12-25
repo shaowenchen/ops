@@ -31,12 +31,33 @@ import (
 type TaskSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Desc                    string    `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Host                    string    `json:"host,omitempty" yaml:"host,omitempty"`
-	Variables               Variables `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Steps                   []Step    `json:"steps,omitempty" yaml:"steps,omitempty"`
-	RuntimeImage            string    `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
-	TTlSecondsAfterFinished int       `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
+	Desc                    string      `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Host                    string      `json:"host,omitempty" yaml:"host,omitempty"`
+	Variables               Variables   `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Steps                   []Step      `json:"steps,omitempty" yaml:"steps,omitempty"`
+	RuntimeImage            string      `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
+	TTlSecondsAfterFinished int         `json:"ttlSecondsAfterFinished,omitempty" yaml:"ttlSecondsAfterFinished,omitempty"`
+	Mounts                  []TaskMount `json:"mounts,omitempty" yaml:"mounts,omitempty"`
+}
+
+// TaskMount defines a mount configuration for a Task
+type TaskMount struct {
+	HostPath  string          `json:"hostPath,omitempty" yaml:"hostPath,omitempty"`
+	MountPath string          `json:"mountPath,omitempty" yaml:"mountPath,omitempty"`
+	Secret    *SecretMount    `json:"secret,omitempty" yaml:"secret,omitempty"`
+	ConfigMap *ConfigMapMount `json:"configMap,omitempty" yaml:"configMap,omitempty"`
+}
+
+// SecretMount defines a secret mount configuration
+type SecretMount struct {
+	Name      string `json:"name" yaml:"name"`
+	MountPath string `json:"mountPath" yaml:"mountPath"`
+}
+
+// ConfigMapMount defines a configMap mount configuration
+type ConfigMapMount struct {
+	Name      string `json:"name" yaml:"name"`
+	MountPath string `json:"mountPath" yaml:"mountPath"`
 }
 
 type Step struct {
@@ -49,6 +70,7 @@ type Step struct {
 	Direction      string `json:"direction,omitempty" yaml:"direction,omitempty"`
 	AllowFailure   string `json:"allowfailure,omitempty" yaml:"allowfailure,omitempty"`
 	TimeOutSeconds int    `json:"timeoutSeconds,omitempty" yaml:"timeoutSeconds,omitempty"`
+	RuntimeImage   string `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
 }
 
 // +kubebuilder:object:root=true

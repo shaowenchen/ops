@@ -25,7 +25,7 @@ func Shell(logger *opslog.Logger, client *kubernetes.Clientset, node v1.Node, sh
 	if err != nil {
 		logger.Error.Println(err)
 	}
-	pod, err := RunShellOnNode(client, &node, namespacedName, kubeOpt.RuntimeImage, shellOpt.Mode, shellOpt.Content)
+	pod, err := RunShellOnNode(client, &node, namespacedName, kubeOpt.RuntimeImage, shellOpt.Mode, shellOpt.Content, kubeOpt.Mounts)
 	if err != nil {
 		logger.Error.Println(err)
 	}

@@ -17,6 +17,7 @@ var hostOpt option.HostOption
 var fileOpt option.FileOption
 var inventory string
 var verbose string
+var mounts []string
 
 var FileCmd = &cobra.Command{
 	Use:   "file",
@@ -29,6 +30,15 @@ var FileCmd = &cobra.Command{
 		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
 		inventoryType, availableInventory := utils.GetInventoryType(inventory, fileOpt.NodeName)
+
+		if len(mounts) > 0 {
+			mountConfigs, err := option.ParseMountConfigs(mounts)
+			if err != nil {
+				logger.Error.Println(err)
+				return
+			}
+			fileOpt.Mounts = mountConfigs
+		}
 		switch inventoryType {
 		case constants.InventoryTypeHosts:
 			HostFile(ctx, logger, fileOpt, hostOpt, availableInventory)
@@ -97,4 +107,6 @@ func init() {
 	FileCmd.Flags().StringVarP(&fileOpt.NodeName, "nodename", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.RuntimeImage, "runtimeimage", "", constants.OpsCliRuntimeImage, "")
 	FileCmd.Flags().StringVarP(&fileOpt.Namespace, "opsnamespace", "", constants.OpsNamespace, "ops work namespace")
+
+	FileCmd.Flags().StringArrayVarP(&mounts, "mount", "m", []string{}, "mount host path to container (format: hostPath:mountPath, can be specified multiple times)")
 }
