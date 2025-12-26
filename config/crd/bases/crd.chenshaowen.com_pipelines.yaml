@@ -65,10 +65,6 @@ spec:
                       type: string
                     taskRef:
                       type: string
-                    variables:
-                      additionalProperties:
-                        type: string
-                      type: object
                   type: object
                 type: array
               ttlSecondsAfterFinished:

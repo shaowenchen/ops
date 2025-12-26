@@ -44,7 +44,6 @@ type TaskRef struct {
 	Name         string            `json:"name,omitempty" yaml:"name,omitempty"`
 	Desc         string            `json:"desc,omitempty" yaml:"desc,omitempty"`
 	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
-	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
 	RuntimeImage string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
 	AllowFailure bool              `json:"allowFailure,omitempty" yaml:"allowFailure,omitempty"`
 	RunAlways    bool              `json:"runAlways,omitempty" yaml:"runAlways,omitempty"`

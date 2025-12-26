@@ -32,10 +32,11 @@ import (
 type TaskRunSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Desc      string            `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Crontab   string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
-	Variables map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
-	TaskRef   string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
+	Desc         string            `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Crontab      string            `json:"crontab,omitempty" yaml:"crontab,omitempty"`
+	Variables    map[string]string `json:"variables,omitempty" yaml:"variables,omitempty"`
+	TaskRef      string            `json:"taskRef,omitempty" yaml:"taskRef,omitempty"`
+	RuntimeImage string            `json:"runtimeImage,omitempty" yaml:"runtimeImage,omitempty"`
 }
 
 func (obj *TaskRun) MergeVariables(t *Task) {
@@ -121,7 +122,6 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef, p *Pipeli
 				opsconstants.LabelTaskRefKey:     t.ObjectMeta.GetName(),
 				opsconstants.LabelPipelineRefKey: pr.Spec.PipelineRef,
 			},
-			Annotations: make(map[string]string),
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: opsconstants.APIVersion,
@@ -133,16 +133,16 @@ func NewTaskRunWithPipelineRun(pr *PipelineRun, t *Task, tRef TaskRef, p *Pipeli
 		},
 		Spec: TaskRunSpec{
 			TaskRef:   t.ObjectMeta.GetName(),
-			Variables: pr.Spec.Variables,
+			Variables: make(map[string]string), // Initialize empty, caller should set filtered variables
 		},
 	}
-	// Store Pipeline runtimeImage in annotation for priority resolution
+	// Set Pipeline runtimeImage in spec
 	// Priority: step > task > pipeline > env
 	// TaskRef runtimeImage takes precedence over Pipeline runtimeImage
 	if tRef.RuntimeImage != "" {
-		tr.Annotations["pipeline.runtimeImage"] = tRef.RuntimeImage
+		tr.Spec.RuntimeImage = tRef.RuntimeImage
 	} else if p != nil && p.Spec.RuntimeImage != "" {
-		tr.Annotations["pipeline.runtimeImage"] = p.Spec.RuntimeImage
+		tr.Spec.RuntimeImage = p.Spec.RuntimeImage
 	}
 	return tr
 }

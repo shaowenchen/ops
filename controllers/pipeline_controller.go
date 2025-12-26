@@ -26,6 +26,7 @@ import (
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
+	opstask "github.com/shaowenchen/ops/pkg/task"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -126,51 +127,34 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 		taskList = append(taskList, task)
 		taskMap[t.TaskRef] = task
 	}
-	// merge variables
-	for _, t := range taskList {
-		if obj.MergeVariables(t.Spec.Variables) {
-			changed = true
-		}
-	}
 
-	// Fill variables for each task in TaskRef
-	// If task variable has default value and pipeline has the same variable, fill it
-	for i, tRef := range obj.Spec.Tasks {
-		if task, ok := taskMap[tRef.TaskRef]; ok {
-			if task.Spec.Variables != nil {
-				if tRef.Variables == nil {
-					tRef.Variables = make(map[string]string)
+	// Step 1: Extract required variables from each task and merge to pipeline variables
+	// This ensures all task-required variables are defined in pipeline
+	for _, task := range taskList {
+		requiredVars := opstask.GetTaskRequiredVariables(&task)
+		for varName := range requiredVars {
+			// If variable not in pipeline, add it from task definition
+			if _, exists := obj.Spec.Variables[varName]; !exists {
+				if taskVar, ok := task.Spec.Variables[varName]; ok {
+					// Add variable definition from task to pipeline
+					if obj.Spec.Variables == nil {
+						obj.Spec.Variables = make(opsv1.Variables)
+					}
+					obj.Spec.Variables[varName] = taskVar
+					changed = true
+				} else {
+					// Variable is referenced in task but not defined, add empty variable
+					if obj.Spec.Variables == nil {
+						obj.Spec.Variables = make(opsv1.Variables)
+					}
+					obj.Spec.Variables[varName] = opsv1.Variable{}
 					changed = true
 				}
-				// Fill variables from Pipeline to TaskRef
-				// If task variable has default and pipeline has the same variable, fill pipeline value
-				for varName, varDef := range task.Spec.Variables {
-					// Check if pipeline has this variable
-					if pipelineVar, exists := obj.Spec.Variables[varName]; exists {
-						pipelineValue := pipelineVar.GetValue()
-						if pipelineValue != "" {
-							// Pipeline has value, fill it to TaskRef (overwrite existing if different)
-							if tRef.Variables[varName] != pipelineValue {
-								tRef.Variables[varName] = pipelineValue
-								changed = true
-							}
-						} else if varDef.Default != "" {
-							// Pipeline variable exists but no value, use task default if available
-							if tRef.Variables[varName] == "" {
-								tRef.Variables[varName] = varDef.Default
-								changed = true
-							}
-						}
-					} else if varDef.Default != "" {
-						// Pipeline doesn't have this variable, but task has default, fill default
-						if tRef.Variables[varName] == "" {
-							tRef.Variables[varName] = varDef.Default
-							changed = true
-						}
-					}
-				}
-				obj.Spec.Tasks[i] = tRef
 			}
+		}
+		// Also merge task-defined variables (for metadata like desc, required, etc.)
+		if obj.MergeVariables(task.Spec.Variables) {
+			changed = true
 		}
 	}
 

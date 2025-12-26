@@ -388,6 +388,39 @@ func (r *PipelineRunReconciler) registerClearCron() {
 	r.clearCron.Start()
 }
 
+// buildTaskRunVariables builds variables for TaskRun by filtering pipeline variables
+// based on task requirements and merging TaskRef variables
+func (r *PipelineRunReconciler) buildTaskRunVariables(pr *opsv1.PipelineRun, t *opsv1.Task, tRef opsv1.TaskRef, ctx context.Context) map[string]string {
+	requiredVars := opstask.GetTaskRequiredVariables(t)
+	taskResults := r.getTaskResults(pr, ctx)
+	vars := make(map[string]string)
+
+	// Filter pipeline variables to only include what task needs
+	for k, v := range pr.Spec.Variables {
+		if requiredVars[k] {
+			vars[k] = opstask.RenderStringWithPathRefs(v, pr.Spec.Variables, taskResults)
+		}
+	}
+
+	return vars
+}
+
+// getTaskResults extracts task results from PipelineRun status
+func (r *PipelineRunReconciler) getTaskResults(pr *opsv1.PipelineRun, ctx context.Context) map[string]map[string]string {
+	latestPr := &opsv1.PipelineRun{}
+	if err := r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: pr.Name}, latestPr); err != nil {
+		return nil
+	}
+
+	taskResults := make(map[string]map[string]string)
+	for _, taskStatus := range latestPr.Status.PipelineRunStatus {
+		if len(taskStatus.Results) > 0 {
+			taskResults[taskStatus.TaskName] = taskStatus.Results
+		}
+	}
+	return taskResults
+}
+
 func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, p *opsv1.Pipeline, pr *opsv1.PipelineRun) (err error) {
 	runAlways := false
 	latestTrOuput := ""
@@ -417,49 +450,9 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 			}
 		}
 
-		// Resolve path references (tasks.{taskName}.results.{resultKey}) in variables
-		// Get latest PipelineRun to ensure we have the most recent results
-		latestPr := &opsv1.PipelineRun{}
-		var tr *opsv1.TaskRun
-		if err = r.Client.Get(ctx, types.NamespacedName{Namespace: pr.Namespace, Name: pr.Name}, latestPr); err == nil {
-			// Build taskResults map from PipelineRunStatus
-			taskResults := make(map[string]map[string]string)
-			for _, taskStatus := range latestPr.Status.PipelineRunStatus {
-				if taskStatus.Results != nil && len(taskStatus.Results) > 0 {
-					taskResults[taskStatus.TaskName] = taskStatus.Results
-				}
-			}
-			// Resolve path references in variables before creating TaskRun
-			if len(taskResults) > 0 {
-				resolvedVars := make(map[string]string)
-				for k, v := range pr.Spec.Variables {
-					resolvedVars[k] = opstask.RenderStringWithPathRefs(v, pr.Spec.Variables, taskResults)
-				}
-				// Also merge TaskRef.Variables and resolve path references in them
-				if tRef.Variables != nil {
-					for k, v := range tRef.Variables {
-						resolvedVars[k] = opstask.RenderStringWithPathRefs(v, resolvedVars, taskResults)
-					}
-				}
-				// Create TaskRun with resolved variables
-				tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef, p)
-				tr.Spec.Variables = resolvedVars
-			} else {
-				tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef, p)
-				// Merge TaskRef.Variables even if no taskResults
-				if tRef.Variables != nil && len(tRef.Variables) > 0 {
-					if tr.Spec.Variables == nil {
-						tr.Spec.Variables = make(map[string]string)
-					}
-					for k, v := range tRef.Variables {
-						tr.Spec.Variables[k] = opstask.RenderStringWithPathRefs(v, tr.Spec.Variables, nil)
-					}
-				}
-			}
-		} else {
-			// If we can't get latest PipelineRun, create TaskRun with original variables
-			tr = opsv1.NewTaskRunWithPipelineRun(pr, t, tRef, p)
-		}
+		// Build variables for TaskRun: filter pipeline variables by task requirements and merge TaskRef variables
+		tr := opsv1.NewTaskRunWithPipelineRun(pr, t, tRef, p)
+		tr.Spec.Variables = r.buildTaskRunVariables(pr, t, tRef, ctx)
 		err = r.Client.Create(ctx, tr)
 		if err != nil {
 			logger.Error.Println(err)

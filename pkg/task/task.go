@@ -3,7 +3,9 @@ package task
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"strings"
+	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -82,6 +84,9 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 	// Map to store step outputs for path references: map[stepName]output
 	stepOutputs := make(map[string]string)
 	logger.Debug.Println("> Run Task", t.GetUniqueKey(), "on Node", node.Name)
+
+	// Collect all steps that need to be executed
+	stepsToExecute := []opsv1.Step{}
 	for si, s := range t.Spec.Steps {
 		var sp = &s
 		sp = RenderStepVariablesWithPathRefs(sp, allVars, nil)
@@ -98,37 +103,91 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 			logger.Debug.Println("Skip!")
 			continue
 		}
-		if err != nil {
-			logger.Error.Println(err)
-		}
-		stepFunc := GetKubeStepFunc(s)
-		// patch node to master, if content including kubectl
-		master := node
+		stepsToExecute = append(stepsToExecute, s)
+	}
+
+	if len(stepsToExecute) == 0 {
+		logger.Debug.Println("No steps to execute")
+		return nil
+	}
+
+	// Determine the node to use (master if kubectl is needed)
+	execNode := node
+	for _, s := range stepsToExecute {
 		if strings.Contains(s.Content, "kubectl") && !kc.IsMaster(node) {
-			master, err = kc.GetAnyMaster()
+			execNode, err = kc.GetAnyMaster()
 			if err != nil {
 				logger.Error.Println(err)
 				return err
 			}
-		}
-		stepStatus, stepOutput, stepErr := stepFunc(logger, t, kc, master, s, taskOpt, kubeOpt)
-		stepStatus = GetValidStatusError(stepStatus, stepErr)
-		tr.Status.AddOutputStep(node.Name, s.Name, s.Content, stepOutput, stepStatus)
-		// Store step output for path references
-		stepOutputs[s.Name] = strings.ReplaceAll(stepOutput, "\"", "")
-		allVars["result"] = strings.ReplaceAll(stepOutput, "\"", "")
-		allVars["output"] = strings.ReplaceAll(stepOutput, "\"", "")
-		allVars["status"] = stepStatus
-		logger.Debug.Println(stepOutput)
-		result, err = utils.LogicExpression(s.AllowFailure, false)
-		if err != nil {
-			logger.Error.Println(err)
-			return err
-		}
-		if result == false && stepErr != nil {
 			break
 		}
 	}
+
+	// Build step container configurations
+	stepConfigs := []kube.StepContainerConfig{}
+	for _, s := range stepsToExecute {
+		stepConfig := kube.StepContainerConfig{
+			StepName:     s.Name,
+			Content:      s.Content,
+			LocalFile:    s.LocalFile,
+			RemoteFile:   s.RemoteFile,
+			Direction:    s.Direction,
+			RuntimeImage: s.RuntimeImage,
+			AllowFailure: s.AllowFailure,
+		}
+
+		// Determine mode and if it's a file step
+		if len(s.Content) > 0 {
+			// Shell step
+			stepConfig.Mode = opsconstants.ModeHost
+			if strings.Contains(s.Content, "/host") {
+				stepConfig.Mode = opsconstants.ModeContainer
+			}
+			stepConfig.IsFileStep = false
+		} else {
+			// File step
+			stepConfig.IsFileStep = true
+			fileOpt := option.FileOption{
+				Sudo:       taskOpt.Sudo,
+				Direction:  s.Direction,
+				LocalFile:  s.LocalFile,
+				RemoteFile: s.RemoteFile,
+				Api:        taskOpt.Variables["api"],
+				AesKey:     taskOpt.Variables["aeskey"],
+				AK:         taskOpt.Variables["ak"],
+				SK:         taskOpt.Variables["sk"],
+				Region:     taskOpt.Variables["region"],
+				Endpoint:   taskOpt.Variables["endpoint"],
+				Bucket:     taskOpt.Variables["bucket"],
+				KubeOption: kubeOpt,
+			}
+			if s.RuntimeImage != "" {
+				fileOpt.RuntimeImage = s.RuntimeImage
+			} else {
+				fileOpt.RuntimeImage = kubeOpt.RuntimeImage
+			}
+			stepConfig.FileOpt = &fileOpt
+		}
+
+		stepConfigs = append(stepConfigs, stepConfig)
+	}
+
+	// Create pod with multiple containers (one per step)
+	namespacedName, err := utils.GetOrCreateNamespacedName(kc.Client, kubeOpt.Namespace, fmt.Sprintf("ops-task-%s-%d", time.Now().Format("2006-01-02-15-04-05"), rand.Intn(10000)))
+	if err != nil {
+		logger.Error.Println(err)
+		return err
+	}
+
+	pod, err := kc.RunTaskStepsOnNode(execNode, namespacedName, stepConfigs, kubeOpt.RuntimeImage, kubeOpt.Mounts)
+	if err != nil {
+		logger.Error.Println(err)
+		return err
+	}
+
+	// Wait for pod to complete and collect logs from each container
+	err = kc.WaitForTaskStepsPod(logger, pod, stepConfigs, tr, node.Name, allVars, stepOutputs)
 	return err
 }
 

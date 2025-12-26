@@ -1,10 +1,13 @@
 package kube
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
+	"strings"
 	"time"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
@@ -346,4 +349,196 @@ func (kc *KubeConnection) FileNodes(logger *opslog.Logger, runtimeImage string, 
 		kc.FileNode(logger, &node, fileOpt)
 	}
 	return
+}
+
+// RunTaskStepsOnNode creates a pod with multiple containers for task steps
+func (kc *KubeConnection) RunTaskStepsOnNode(node *corev1.Node, namespacedName types.NamespacedName, stepConfigs []StepContainerConfig, defaultImage string, mounts []opsopt.MountConfig) (pod *corev1.Pod, err error) {
+	return RunTaskStepsOnNode(kc.Client, node, namespacedName, stepConfigs, defaultImage, mounts)
+}
+
+// WaitForTaskStepsPod waits for the pod to complete and collects logs from each container
+func (kc *KubeConnection) WaitForTaskStepsPod(logger *opslog.Logger, pod *corev1.Pod, stepConfigs []StepContainerConfig, tr *opsv1.TaskRun, nodeName string, allVars map[string]string, stepOutputs map[string]string) error {
+	ctx := context.TODO()
+	var err error
+
+	// Wait for pod to be ready
+	for range time.Tick(time.Second * 2) {
+		updatedPod, err := kc.Client.CoreV1().Pods(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
+		if err != nil {
+			logger.Error.Println(err)
+			return err
+		}
+		if opsutils.IsPendingPod(updatedPod) {
+			continue
+		}
+		pod = updatedPod
+		break
+	}
+
+	// Collect logs from init containers (all steps except the last one)
+	for i := 0; i < len(stepConfigs)-1; i++ {
+		stepConfig := stepConfigs[i]
+		containerName := stepConfig.StepName
+		if containerName == "" {
+			containerName = fmt.Sprintf("step-%d", i)
+		}
+
+		logs, err := GetContainerLog(ctx, kc.Client, pod.Namespace, pod.Name, containerName)
+		if err != nil {
+			logger.Error.Printf("Failed to get logs for container %s: %v", containerName, err)
+			logs = err.Error()
+		}
+
+		// Determine status based on container state
+		status := opsconstants.StatusSuccessed
+		containerStatus := getContainerStatus(pod, containerName, true)
+		if containerStatus != nil && containerStatus.State.Terminated != nil {
+			if containerStatus.State.Terminated.ExitCode != 0 {
+				status = opsconstants.StatusFailed
+			}
+		} else if containerStatus != nil && containerStatus.State.Waiting != nil {
+			status = opsconstants.StatusRunning
+		}
+
+		stepContent := stepConfig.Content
+		if stepConfig.IsFileStep {
+			stepContent = fmt.Sprintf("file: %s -> %s", stepConfig.LocalFile, stepConfig.RemoteFile)
+		}
+
+		tr.Status.AddOutputStep(nodeName, stepConfig.StepName, stepContent, logs, status)
+
+		// Store step output for path references
+		stepOutputs[stepConfig.StepName] = strings.ReplaceAll(logs, "\"", "")
+		allVars["result"] = strings.ReplaceAll(logs, "\"", "")
+		allVars["output"] = strings.ReplaceAll(logs, "\"", "")
+		allVars["status"] = status
+
+		// Check if step failed and should stop
+		if status == opsconstants.StatusFailed {
+			// Check AllowFailure
+			allowFailure, err := opsutils.LogicExpression(stepConfig.AllowFailure, false)
+			if err != nil {
+				logger.Error.Printf("Failed to evaluate AllowFailure for step %s: %v", stepConfig.StepName, err)
+			}
+			if !allowFailure {
+				// Step failed and failure is not allowed, stop execution
+				logger.Error.Printf("Step %s failed and AllowFailure is false, stopping execution", stepConfig.StepName)
+				break
+			}
+		}
+	}
+
+	// Wait for main container (last step) to complete
+	for range time.Tick(time.Second * 2) {
+		updatedPod, err := kc.Client.CoreV1().Pods(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
+		if err != nil {
+			logger.Error.Println(err)
+			return err
+		}
+		pod = updatedPod
+
+		if opsutils.IsSucceededPod(pod) || opsutils.IsFailedPod(pod) {
+			break
+		}
+	}
+
+	// Collect logs from main container (last step)
+	if len(stepConfigs) > 0 {
+		lastStep := stepConfigs[len(stepConfigs)-1]
+		containerName := lastStep.StepName
+		if containerName == "" {
+			containerName = fmt.Sprintf("step-%d", len(stepConfigs)-1)
+		}
+
+		logs, err := GetContainerLog(ctx, kc.Client, pod.Namespace, pod.Name, containerName)
+		if err != nil {
+			logger.Error.Printf("Failed to get logs for container %s: %v", containerName, err)
+			logs = err.Error()
+		}
+
+		// Determine status based on pod state
+		status := opsconstants.StatusSuccessed
+		if opsutils.IsFailedPod(pod) {
+			status = opsconstants.StatusFailed
+		}
+
+		containerStatus := getContainerStatus(pod, containerName, false)
+		if containerStatus != nil && containerStatus.State.Terminated != nil {
+			if containerStatus.State.Terminated.ExitCode != 0 {
+				status = opsconstants.StatusFailed
+			}
+		}
+
+		stepContent := lastStep.Content
+		if lastStep.IsFileStep {
+			stepContent = fmt.Sprintf("file: %s -> %s", lastStep.LocalFile, lastStep.RemoteFile)
+		}
+
+		tr.Status.AddOutputStep(nodeName, lastStep.StepName, stepContent, logs, status)
+
+		// Store step output for path references
+		stepOutputs[lastStep.StepName] = strings.ReplaceAll(logs, "\"", "")
+		allVars["result"] = strings.ReplaceAll(logs, "\"", "")
+		allVars["output"] = strings.ReplaceAll(logs, "\"", "")
+		allVars["status"] = status
+
+		// Check if last step failed and should return error
+		if status == opsconstants.StatusFailed {
+			// Check AllowFailure
+			allowFailure, err := opsutils.LogicExpression(lastStep.AllowFailure, false)
+			if err != nil {
+				logger.Error.Printf("Failed to evaluate AllowFailure for step %s: %v", lastStep.StepName, err)
+			}
+			if !allowFailure {
+				// Step failed and failure is not allowed, return error
+				logger.Error.Printf("Step %s failed and AllowFailure is false", lastStep.StepName)
+				err = fmt.Errorf("step %s failed", lastStep.StepName)
+			}
+		}
+	}
+
+	// Clean up pod if not in debug mode
+	if !opsconstants.GetEnvDebug() {
+		kc.Client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
+	}
+
+	return err
+}
+
+// GetContainerLog gets logs from a specific container in a pod
+func GetContainerLog(ctx context.Context, client *kubernetes.Clientset, namespace, podName, containerName string) (logs string, err error) {
+	req := client.CoreV1().Pods(namespace).GetLogs(podName, &corev1.PodLogOptions{
+		Container: containerName,
+	})
+	podLogs, err := req.Stream(ctx)
+	if err != nil {
+		return
+	}
+	defer podLogs.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, podLogs)
+	if err != nil {
+		return
+	}
+	logs = buf.String()
+	return
+}
+
+// getContainerStatus gets the status of a container (init or regular)
+func getContainerStatus(pod *corev1.Pod, containerName string, isInit bool) *corev1.ContainerStatus {
+	if isInit {
+		for i := range pod.Status.InitContainerStatuses {
+			if pod.Status.InitContainerStatuses[i].Name == containerName {
+				return &pod.Status.InitContainerStatuses[i]
+			}
+		}
+	} else {
+		for i := range pod.Status.ContainerStatuses {
+			if pod.Status.ContainerStatuses[i].Name == containerName {
+				return &pod.Status.ContainerStatuses[i]
+			}
+		}
+	}
+	return nil
 }

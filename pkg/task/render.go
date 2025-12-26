@@ -98,6 +98,91 @@ func RenderString(target string, vars map[string]string) string {
 	return target
 }
 
+// ExtractVariableReferences extracts variable references from a string
+// Returns a set of variable names referenced in the format ${varName}
+func ExtractVariableReferences(target string) map[string]bool {
+	variables := make(map[string]bool)
+	if target == "" {
+		return variables
+	}
+
+	// Pattern to match ${varName}
+	// This regex matches ${...} but excludes path references like ${tasks.xxx.results.yyy} and ${steps.xxx.output}
+	start := 0
+	for {
+		idx := strings.Index(target[start:], "${")
+		if idx == -1 {
+			break
+		}
+		idx += start
+		// Find the closing }
+		endIdx := strings.Index(target[idx:], "}")
+		if endIdx == -1 {
+			break
+		}
+		endIdx += idx
+
+		// Extract the variable reference
+		varRef := target[idx+2 : endIdx] // +2 to skip "${"
+
+		// Skip path references (tasks.xxx.results.yyy, steps.xxx.output)
+		if !strings.Contains(varRef, ".") {
+			variables[varRef] = true
+		}
+
+		start = endIdx + 1
+	}
+
+	return variables
+}
+
+// GetTaskRequiredVariables extracts all variables that a task needs
+// This includes:
+// 1. Variables defined in task.Spec.Variables
+// 2. Variables referenced in step content, when, localfile, remotefile, etc.
+func GetTaskRequiredVariables(t *opsv1.Task) map[string]bool {
+	requiredVars := make(map[string]bool)
+
+	// Add variables defined in task.Spec.Variables
+	for varName := range t.Spec.Variables {
+		requiredVars[varName] = true
+	}
+
+	// Extract variables from all steps
+	for _, step := range t.Spec.Steps {
+		// Extract from step content
+		for varName := range ExtractVariableReferences(step.Content) {
+			requiredVars[varName] = true
+		}
+		// Extract from step when condition
+		for varName := range ExtractVariableReferences(step.When) {
+			requiredVars[varName] = true
+		}
+		// Extract from step localfile
+		for varName := range ExtractVariableReferences(step.LocalFile) {
+			requiredVars[varName] = true
+		}
+		// Extract from step remotefile
+		for varName := range ExtractVariableReferences(step.RemoteFile) {
+			requiredVars[varName] = true
+		}
+		// Extract from step allowfailure
+		for varName := range ExtractVariableReferences(step.AllowFailure) {
+			requiredVars[varName] = true
+		}
+	}
+
+	// Extract from task host (if it's a variable reference)
+	if t.Spec.Host != "" && !strings.Contains(t.Spec.Host, "=") {
+		// If host is not a label selector, it might be a variable reference
+		for varName := range ExtractVariableReferences(t.Spec.Host) {
+			requiredVars[varName] = true
+		}
+	}
+
+	return requiredVars
+}
+
 // ResolvePathReference resolves path references like tasks.{taskName}.results.{resultKey}
 // Returns the resolved value and true if the reference was found, empty string and false otherwise
 func ResolvePathReference(pathRef string, taskResults map[string]map[string]string) (string, bool) {

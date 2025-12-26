@@ -282,3 +282,170 @@ func DownloadS3FileOnNode(client *kubernetes.Clientset, node *v1.Node, namespace
 	)
 	return
 }
+
+// StepContainerConfig represents configuration for a step container
+type StepContainerConfig struct {
+	StepName     string
+	Content      string
+	LocalFile    string
+	RemoteFile   string
+	Direction    string
+	RuntimeImage string
+	Mode         string
+	IsFileStep   bool
+	FileOpt      *option.FileOption
+	AllowFailure string
+}
+
+// RunTaskStepsOnNode creates a pod with multiple containers, one for each step
+// Uses init containers for all steps except the last one, which runs as the main container
+func RunTaskStepsOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName types.NamespacedName, stepConfigs []StepContainerConfig, defaultImage string, mounts []option.MountConfig) (pod *corev1.Pod, err error) {
+	if len(stepConfigs) == 0 {
+		err = errors.New("no step configurations provided")
+		return
+	}
+
+	priviBool := true
+	tolerations := []v1.Toleration{}
+	for _, taint := range node.Spec.Taints {
+		tolerations = append(tolerations, v1.Toleration{
+			Key:      taint.Key,
+			Value:    "",
+			Operator: v1.TolerationOperator(v1.TolerationOpExists),
+			Effect:   taint.Effect,
+		})
+	}
+	automountSA := false
+	volumes, volumeMounts := buildVolumesAndMounts(mounts)
+
+	// Build init containers for all steps except the last one
+	initContainers := []corev1.Container{}
+	for i := 0; i < len(stepConfigs)-1; i++ {
+		stepConfig := stepConfigs[i]
+		container := buildStepContainer(stepConfig, defaultImage, volumeMounts, priviBool)
+		initContainers = append(initContainers, container)
+	}
+
+	// Last step runs as main container
+	mainContainer := buildStepContainer(stepConfigs[len(stepConfigs)-1], defaultImage, volumeMounts, priviBool)
+
+	hostFlag := true
+	pod, err = client.CoreV1().Pods(namespacedName.Namespace).Create(
+		context.TODO(),
+		&corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      namespacedName.Name,
+				Namespace: namespacedName.Namespace,
+				Labels: map[string]string{
+					constants.LabelOpsTaskKey: constants.LabelOpsTaskValue,
+				},
+			},
+			Spec: corev1.PodSpec{
+				AutomountServiceAccountToken: &automountSA,
+				NodeName:                     node.Name,
+				InitContainers:               initContainers,
+				Containers: []corev1.Container{
+					mainContainer,
+				},
+				HostIPC:       hostFlag,
+				HostNetwork:   hostFlag,
+				HostPID:       hostFlag,
+				RestartPolicy: corev1.RestartPolicyNever,
+				Tolerations:   tolerations,
+				Volumes:       volumes,
+			},
+		},
+		metav1.CreateOptions{},
+	)
+	return
+}
+
+// buildStepContainer builds a container configuration for a step
+func buildStepContainer(stepConfig StepContainerConfig, defaultImage string, volumeMounts []v1.VolumeMount, priviBool bool) corev1.Container {
+	image := stepConfig.RuntimeImage
+	if image == "" {
+		image = defaultImage
+	}
+	if image == "" {
+		image = constants.DefaultRuntimeImage
+	}
+
+	container := corev1.Container{
+		Name:            stepConfig.StepName,
+		Image:           image,
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		VolumeMounts:    volumeMounts,
+	}
+
+	if stepConfig.IsFileStep {
+		// File step
+		fileOpt := stepConfig.FileOpt
+		if fileOpt == nil {
+			// This should not happen if stepConfig is properly constructed
+			// Return a container that will fail with an error message
+			container.Command = []string{"bash"}
+			container.Args = []string{"-c", "echo 'Error: FileOpt is nil for file step' && exit 1"}
+		} else {
+			// Use provided fileOpt
+			hostMountPath := "/host"
+			for _, mount := range fileOpt.Mounts {
+				if mount.HostPath == "/" {
+					hostMountPath = mount.MountPath
+					break
+				}
+			}
+			hostLocalfile := hostMountPath + fileOpt.LocalFile
+			cmd := ""
+			switch fileOpt.GetStorageType() {
+			case constants.RemoteStorageTypeS3:
+				if fileOpt.IsDownloadDirection() {
+					cmd = utils.ShellOpscliDownS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket,
+						fileOpt.AK, fileOpt.SK, hostLocalfile, fileOpt.RemoteFile)
+				} else if fileOpt.IsUploadDirection() {
+					cmd = utils.ShellOpscliUploadS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket,
+						fileOpt.AK, fileOpt.SK, hostLocalfile, fileOpt.RemoteFile)
+				}
+			case constants.RemoteStorageTypeServer:
+				if fileOpt.IsDownloadDirection() {
+					cmd = utils.ShellOpscliDownServer(fileOpt.Api, fileOpt.AesKey, hostLocalfile, fileOpt.RemoteFile)
+				} else if fileOpt.IsUploadDirection() {
+					cmd = utils.ShellOpscliUploadServer(fileOpt.Api, fileOpt.AesKey, hostLocalfile, fileOpt.RemoteFile)
+				}
+			case constants.RemoteStorageTypeImage:
+				if fileOpt.IsDownloadDirection() {
+					cmd = fmt.Sprintf("cp -rbf %s %s", fileOpt.RemoteFile, hostLocalfile)
+				}
+			}
+			if cmd == "" {
+				cmd = "echo 'Error: Invalid file operation configuration' && exit 1"
+			}
+			container.Command = []string{"bash"}
+			container.Args = []string{"-c", cmd}
+		}
+	} else {
+		// Shell step
+		usePython := false
+		lines := strings.Split(stepConfig.Content, "\n")
+		if len(lines) > 0 && strings.Contains(lines[0], "python") {
+			usePython = true
+		}
+		shellBase64 := utils.EncodingStringToBase64(stepConfig.Content)
+		cmdArg := []string{}
+		if stepConfig.Mode == constants.ModeContainer {
+			cmdArg = []string{"-c", "echo " + shellBase64 + " | base64 -d | bash"}
+			container.ImagePullPolicy = corev1.PullAlways
+		} else {
+			cmdArg = []string{"-c", "echo " + shellBase64 + " | base64 -d | nsenter -t 1 -m -u -i -n"}
+		}
+		if usePython {
+			cmdArg[1] = cmdArg[1] + " -- python3 /dev/stdin"
+		}
+		container.Command = []string{"bash"}
+		container.Args = cmdArg
+		container.SecurityContext = &corev1.SecurityContext{
+			Privileged: &priviBool,
+		}
+	}
+
+	return container
+}

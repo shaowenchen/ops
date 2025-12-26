@@ -420,11 +420,9 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	// Note: step-level runtimeImage is handled in runStepShellOnKube/runStepFileOnKube
 	runtimeImage := t.Spec.RuntimeImage
 	if runtimeImage == "" {
-		// Check Pipeline runtimeImage from annotation
-		if tr.Annotations != nil {
-			if pipelineRuntimeImage, ok := tr.Annotations["pipeline.runtimeImage"]; ok && pipelineRuntimeImage != "" {
-				runtimeImage = pipelineRuntimeImage
-			}
+		// Check Pipeline runtimeImage from spec
+		if tr.Spec.RuntimeImage != "" {
+			runtimeImage = tr.Spec.RuntimeImage
 		}
 	}
 	if runtimeImage == "" {
