@@ -23,22 +23,25 @@ func ServerFile(fileOpt option.FileOption) (stdout string, err error) {
 		return
 	}
 	if fileOpt.IsUploadDirection() {
-		if fileOpt.AesKey != UnSetFlag {
-			if fileOpt.AesKey == "" {
-				aesKey, err1 := GetDefaultRandomKey()
-				if err1 != nil {
-					err = err1
-					return
-				}
-				fileOpt.AesKey = string(aesKey)
-			} else {
-				aeskeyBytes, err1 := hex.DecodeString(fileOpt.AesKey)
-				if err1 != nil {
-					stdout = err1.Error()
-					return stdout, err
-				}
-				fileOpt.AesKey = string(aeskeyBytes)
+		// Default: encrypt with auto-generated key. Only skip if --aeskey "" is set
+		if fileOpt.AesKey == UnSetFlag {
+			aesKey, err1 := GetDefaultRandomKey()
+			if err1 != nil {
+				err = err1
+				return
 			}
+			fileOpt.AesKey = string(aesKey)
+		} else if fileOpt.AesKey != "" {
+			aeskeyBytes, err1 := hex.DecodeString(fileOpt.AesKey)
+			if err1 != nil {
+				stdout = err1.Error()
+				return stdout, err
+			}
+			fileOpt.AesKey = string(aeskeyBytes)
+		}
+
+		// Encrypt if key is set
+		if fileOpt.AesKey != "" {
 			tartgetFile := fileOpt.LocalFile + ".aes"
 			err = EncryptFile(fileOpt.AesKey, fileOpt.LocalFile, tartgetFile)
 			defer os.Remove(tartgetFile)
@@ -53,8 +56,10 @@ func ServerFile(fileOpt option.FileOption) (stdout string, err error) {
 			err = err1
 			return
 		}
-		stdout = "Please use the following command to download the file: \n" +
-			buildDowloadOpscliCmd(fileOpt.Api, resp, hex.EncodeToString([]byte(fileOpt.AesKey)))
+		if fileOpt.AesKey != "" {
+			stdout = "Please use the following command to download the file: \n" +
+				buildDowloadOpscliCmd(fileOpt.Api, resp, hex.EncodeToString([]byte(fileOpt.AesKey)))
+		}
 		return
 	} else if fileOpt.IsDownloadDirection() {
 		if fileOpt.LocalFile == "" {
@@ -91,7 +96,7 @@ func buildDowloadOpscliCmd(api, resp, aesKey string) string {
 	} else {
 		return fmt.Sprintf("No url found in response: %s", resp)
 	}
-	return fmt.Sprintf("opscli file --api %s --aeskey %s --direction download --remotefile %s", api, aesKey, downloadUrl)
+	return fmt.Sprintf("opscli file --fileapi %s --aeskey %s --direction download --remotefile %s", api, aesKey, downloadUrl)
 }
 
 func getFileToLocal(downloadUrl, localFilePath string) (err error) {

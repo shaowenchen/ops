@@ -94,6 +94,45 @@ func KubeTask(ctx context.Context, logger *log.Logger, t opsv1.Task, taskOpt opt
 		}
 		taskOpt.Variables["host"] = node.GetName()
 		taskOpt.Variables["proxy"] = taskOpt.Proxy
+
+		// Convert Task mounts to MountConfig with variable rendering
+		mountConfigs := make([]option.MountConfig, 0)
+		// Prepare variables for mount rendering
+		mountVars := make(map[string]string)
+		for k, v := range taskOpt.Variables {
+			mountVars[k] = v
+		}
+		for _, taskMount := range t.Spec.Mounts {
+			// Render variables in mount fields
+			renderedMount := opstask.RenderTaskMount(&taskMount, mountVars, nil)
+
+			mountConfig := option.MountConfig{}
+			if renderedMount.Secret != nil {
+				// Secret mount
+				mountConfig.Secret = &option.SecretMountConfig{
+					Name:      renderedMount.Secret.Name,
+					MountPath: renderedMount.Secret.MountPath,
+				}
+			} else if renderedMount.ConfigMap != nil {
+				// ConfigMap mount
+				mountConfig.ConfigMap = &option.ConfigMapMountConfig{
+					Name:      renderedMount.ConfigMap.Name,
+					MountPath: renderedMount.ConfigMap.MountPath,
+				}
+			} else {
+				// HostPath mount
+				mountConfig.HostPath = renderedMount.HostPath
+				mountConfig.MountPath = renderedMount.MountPath
+			}
+			mountConfigs = append(mountConfigs, mountConfig)
+		}
+		// Copy existing mounts and append Task mounts
+		if len(mountConfigs) > 0 {
+			newKubeOpt.Mounts = make([]option.MountConfig, len(kubeOpt.Mounts))
+			copy(newKubeOpt.Mounts, kubeOpt.Mounts)
+			newKubeOpt.Mounts = append(newKubeOpt.Mounts, mountConfigs...)
+		}
+
 		tr := opsv1.NewTaskRun(&t)
 		err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, newKubeOpt)
 		if err != nil {
