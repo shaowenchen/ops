@@ -3,6 +3,7 @@ package file
 import (
 	"context"
 
+	"github.com/shaowenchen/ops/cmd/cli/config"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -29,6 +30,10 @@ var FileCmd = &cobra.Command{
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
+
+		// Get fileapi value with priority: CLI > ENV > Config > Default (empty)
+		fileOpt.Api = config.GetValueWithPriority(fileOpt.Api, "FILE_API", "fileapi", "")
+
 		inventoryType, availableInventory := utils.GetInventoryType(inventory, fileOpt.NodeName)
 
 		if len(mounts) > 0 {
@@ -96,7 +101,7 @@ func init() {
 	FileCmd.Flags().StringVarP(&fileOpt.AK, "ak", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.SK, "sk", "", "", "")
 
-	FileCmd.Flags().StringVarP(&fileOpt.Api, "api", "", "", "")
+	FileCmd.Flags().StringVarP(&fileOpt.Api, "fileapi", "", "", "")
 
 	FileCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	FileCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")

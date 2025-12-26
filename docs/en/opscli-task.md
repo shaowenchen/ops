@@ -88,7 +88,7 @@ The default version is `1.13.7` and the default `kubeconfig` is `/etc/kubernetes
 - **Upload to Server**
 
 ```bash
-/usr/local/bin/opscli task -f tasks/file-upload.yaml --api https://gh-uploadapi.chenshaowen.com/api/v1/files --localfile dockerfile
+/usr/local/bin/opscli task -f tasks/file-upload.yaml --fileapi https://gh-uploadapi.chenshaowen.com/api/v1/files --localfile dockerfile
 ```
 
 - **Upload to S3**
@@ -102,7 +102,7 @@ The default version is `1.13.7` and the default `kubeconfig` is `/etc/kubernetes
 - **From Server**
 
 ```bash
-/usr/local/bin/opscli task -f tasks/file-download.yaml --api https://gh-uploadapi.chenshaowen.com/api/v1/files --aeskey <AES_KEY> --remotefile <URL> --localfile dockerfile1
+/usr/local/bin/opscli task -f tasks/file-download.yaml --fileapi https://gh-uploadapi.chenshaowen.com/api/v1/files --aeskey <AES_KEY> --remotefile <URL> --localfile dockerfile1
 ```
 
 - **From S3**
