@@ -89,6 +89,32 @@ func RenderVarsVariables(vars map[string]string) map[string]string {
 	return vars
 }
 
+// RenderTaskMount renders variables in TaskMount fields
+// Supports variable references in HostPath, MountPath, Secret.Name, Secret.MountPath, ConfigMap.Name, ConfigMap.MountPath
+func RenderTaskMount(mount *opsv1.TaskMount, vars map[string]string, taskResults map[string]map[string]string) *opsv1.TaskMount {
+	if mount == nil {
+		return nil
+	}
+
+	// Render HostPath and MountPath
+	mount.HostPath = RenderStringWithPathRefs(mount.HostPath, vars, taskResults)
+	mount.MountPath = RenderStringWithPathRefs(mount.MountPath, vars, taskResults)
+
+	// Render Secret fields
+	if mount.Secret != nil {
+		mount.Secret.Name = RenderStringWithPathRefs(mount.Secret.Name, vars, taskResults)
+		mount.Secret.MountPath = RenderStringWithPathRefs(mount.Secret.MountPath, vars, taskResults)
+	}
+
+	// Render ConfigMap fields
+	if mount.ConfigMap != nil {
+		mount.ConfigMap.Name = RenderStringWithPathRefs(mount.ConfigMap.Name, vars, taskResults)
+		mount.ConfigMap.MountPath = RenderStringWithPathRefs(mount.ConfigMap.MountPath, vars, taskResults)
+	}
+
+	return mount
+}
+
 func RenderString(target string, vars map[string]string) string {
 	for key, value := range vars {
 		if strings.Contains(target, fmt.Sprintf(`${%s}`, key)) {

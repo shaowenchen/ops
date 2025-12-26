@@ -431,26 +431,36 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 	if runtimeImage == "" {
 		runtimeImage = opsconstants.DefaultRuntimeImage
 	}
-	// Convert Task mounts to MountConfig
+	// Convert Task mounts to MountConfig with variable rendering
 	mountConfigs := make([]opsoption.MountConfig, 0)
+	// Prepare variables for mount rendering (use TaskRun variables, will be enriched per node later)
+	mountVars := make(map[string]string)
+	if tr.Spec.Variables != nil {
+		for k, v := range tr.Spec.Variables {
+			mountVars[k] = v
+		}
+	}
 	for _, taskMount := range t.Spec.Mounts {
+		// Render variables in mount fields
+		renderedMount := opstask.RenderTaskMount(&taskMount, mountVars, nil)
+
 		mountConfig := opsoption.MountConfig{}
-		if taskMount.Secret != nil {
+		if renderedMount.Secret != nil {
 			// Secret mount
 			mountConfig.Secret = &opsoption.SecretMountConfig{
-				Name:      taskMount.Secret.Name,
-				MountPath: taskMount.Secret.MountPath,
+				Name:      renderedMount.Secret.Name,
+				MountPath: renderedMount.Secret.MountPath,
 			}
-		} else if taskMount.ConfigMap != nil {
+		} else if renderedMount.ConfigMap != nil {
 			// ConfigMap mount
 			mountConfig.ConfigMap = &opsoption.ConfigMapMountConfig{
-				Name:      taskMount.ConfigMap.Name,
-				MountPath: taskMount.ConfigMap.MountPath,
+				Name:      renderedMount.ConfigMap.Name,
+				MountPath: renderedMount.ConfigMap.MountPath,
 			}
 		} else {
 			// HostPath mount
-			mountConfig.HostPath = taskMount.HostPath
-			mountConfig.MountPath = taskMount.MountPath
+			mountConfig.HostPath = renderedMount.HostPath
+			mountConfig.MountPath = renderedMount.MountPath
 		}
 		mountConfigs = append(mountConfigs, mountConfig)
 	}
