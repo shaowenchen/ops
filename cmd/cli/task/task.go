@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -82,6 +83,18 @@ func KubeTask(ctx context.Context, logger *log.Logger, t opsv1.Task, taskOpt opt
 		return err
 	}
 	nodes, err := kube.GetNodes(ctx, logger, kc.Client, kubeOpt)
+	if err != nil {
+		logger.Error.Println(err)
+		return err
+	}
+	if len(nodes) == 0 {
+		if kubeOpt.NodeName != "" {
+			logger.Error.Printf("Node '%s' not found", kubeOpt.NodeName)
+		} else {
+			logger.Error.Println("No nodes found")
+		}
+		return fmt.Errorf("no nodes found")
+	}
 	for _, node := range nodes {
 		newKubeOpt := kubeOpt
 		if t.Spec.RuntimeImage != "" {

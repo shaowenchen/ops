@@ -140,9 +140,11 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 		// Determine mode and if it's a file step
 		if len(s.Content) > 0 {
 			// Shell step
-			stepConfig.Mode = opsconstants.ModeHost
-			if strings.Contains(s.Content, "/host") {
+			// Use container mode if mounts are configured
+			if len(kubeOpt.Mounts) > 0 {
 				stepConfig.Mode = opsconstants.ModeContainer
+			} else {
+				stepConfig.Mode = opsconstants.ModeHost
 			}
 			stepConfig.IsFileStep = false
 		} else {
@@ -230,8 +232,9 @@ func GetKubeStepFunc(step opsv1.Step) func(logger *opslog.Logger, t *opsv1.Task,
 }
 
 func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taksOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
+	// Use container mode if mounts are configured
 	mode := opsconstants.ModeHost
-	if strings.Contains(step.Content, "/host") {
+	if len(kubeOpt.Mounts) > 0 {
 		mode = opsconstants.ModeContainer
 	}
 	// Use step-level runtimeImage if specified, otherwise use kubeOpt.RuntimeImage
