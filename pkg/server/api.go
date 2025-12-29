@@ -1153,7 +1153,7 @@ func GetEvents(c *gin.Context) {
 		MaxLength: 1000,
 		Event:     "ops.>",
 		TimeOut:   1,
-		StartTime: time.Now().UnixMicro(),
+		StartTime: time.Now().UnixMilli(),
 	}
 	err := c.ShouldBindUri(&req)
 	if err != nil {
@@ -1168,13 +1168,20 @@ func GetEvents(c *gin.Context) {
 	// set more resonable max length and timeout
 	if req.MaxLength < 1000 {
 		req.TimeOut = 5
+	} else {
+		req.TimeOut = 10
 	}
-	sec := req.StartTime / 1000
 
-	t := time.Unix(sec, 0).UTC()
-	location := time.FixedZone("CST", 8*60*60)
-	startTime := t.In(location)
-	if err != nil {
+	// Convert milliseconds to seconds (start_time is in milliseconds)
+	var startTime time.Time
+	if req.StartTime > 0 {
+		sec := req.StartTime / 1000
+		nanosec := (req.StartTime % 1000) * 1000000
+		t := time.Unix(sec, nanosec).UTC()
+		location := time.FixedZone("CST", 8*60*60)
+		startTime = t.In(location)
+	} else {
+		// Default to 1 hour ago if start_time is not provided or invalid
 		startTime = time.Now().Add(-time.Hour * 1)
 	}
 	client, err := opsevent.FactoryJetStreamClient(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster)
