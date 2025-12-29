@@ -594,11 +594,12 @@ func (r *TaskRunReconciler) commitStatus(logger *opslog.Logger, ctx context.Cont
 			logger.Error.Println(err)
 			return
 		}
-		// merge status
-		if tr.Status.TaskRunNodeStatus != nil {
-			latestTr.Status.TaskRunNodeStatus = tr.Status.TaskRunNodeStatus
-		}
-		latestTr.Status = tr.Status
+		// merge status - always use tr.Status which contains the latest execution logs
+		latestTr.Status.RunStatus = tr.Status.RunStatus
+		latestTr.Status.StartTime = tr.Status.StartTime
+		// Always update TaskRunNodeStatus from tr.Status (contains execution logs)
+		// This ensures execution logs are preserved even if tr.Status.TaskRunNodeStatus is empty
+		latestTr.Status.TaskRunNodeStatus = tr.Status.TaskRunNodeStatus
 		err = r.Client.Status().Update(ctx, latestTr)
 		if err == nil {
 			// Record CRD resource status change metrics - record every status change (value=1 for existing resource)

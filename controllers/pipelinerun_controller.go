@@ -520,8 +520,12 @@ func (r *PipelineRunReconciler) run(logger *opslog.Logger, ctx context.Context, 
 						}
 					}
 				}
+				// Commit final status with execution logs (TaskRunNodeStatus)
+				r.commitStatus(logger, ctx, pr, opsconstants.StatusRunning, tRef.Name, trRunning.Spec.TaskRef, &trRunning.Status)
 				break
 			} else {
+				// TaskRun failed or other status, commit final status with execution logs
+				r.commitStatus(logger, ctx, pr, opsconstants.StatusRunning, tRef.Name, trRunning.Spec.TaskRef, &trRunning.Status)
 				runAlways = true
 				break
 			}
