@@ -6,7 +6,7 @@ on:
       tag:
         description: ""
         required: true
-        default: "v2.0.0"
+        default: "v1.1.0"
 
 jobs:
   GoReleaser:
