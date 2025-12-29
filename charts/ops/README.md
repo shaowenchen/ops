@@ -22,13 +22,13 @@ helm repo update
 Basic installation:
 
 ```bash
-helm install myops ops/ops --version 2.0.0 --namespace ops-system --create-namespace
+helm install myops ops/ops --version 1.2.0 --namespace ops-system --create-namespace
 ```
 
 Installation with custom values:
 
 ```bash
-helm install myops ops/ops --version 2.0.0 \
+helm install myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   --create-namespace \
   --set controller.image.repository="shaowenchen/ops-controller-manager" \
@@ -98,7 +98,7 @@ prometheus:
   enabled: true
 EOF
 
-helm install myops ops/ops --version 2.0.0 \
+helm install myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   --create-namespace \
   -f my-values.yaml
@@ -174,7 +174,7 @@ When `prometheus.enabled` is set to `true`, the chart creates:
 To upgrade the release:
 
 ```bash
-helm upgrade myops ops/ops --version 2.0.0 --namespace ops-system
+helm upgrade myops ops/ops --version 1.2.0 --namespace ops-system
 ```
 
 ## Uninstallation

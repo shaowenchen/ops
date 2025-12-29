@@ -44,7 +44,7 @@ helm repo update
 使用默认配置安装：
 
 ```bash
-helm install myops ops/ops --version 2.0.0 --namespace ops-system --create-namespace
+helm install myops ops/ops --version 1.2.0 --namespace ops-system --create-namespace
 ```
 
 **使用自定义值安装：**
@@ -52,7 +52,7 @@ helm install myops ops/ops --version 2.0.0 --namespace ops-system --create-names
 可以使用 `--set` 参数自定义配置：
 
 ```bash
-helm install myops ops/ops --version 2.0.0 \
+helm install myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   --create-namespace \
   --set controller.image.repository="shaowenchen/ops-controller-manager" \
@@ -110,7 +110,7 @@ prometheus:
 然后使用 values 文件安装：
 
 ```bash
-helm install myops ops/ops --version 2.0.0 \
+helm install myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   --create-namespace \
   -f my-values.yaml
@@ -136,13 +136,13 @@ kubectl get deployments -n ops-system
 升级现有安装：
 
 ```bash
-helm upgrade myops ops/ops --version 2.0.0 --namespace ops-system
+helm upgrade myops ops/ops --version 1.2.0 --namespace ops-system
 ```
 
 或使用自定义值：
 
 ```bash
-helm upgrade myops ops/ops --version 2.0.0 \
+helm upgrade myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   -f my-values.yaml
 ```
@@ -166,7 +166,7 @@ helm uninstall myops --namespace ops-system
 **使用 --set：**
 
 ```bash
-helm install myops ops/ops --version 2.0.0 \
+helm install myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   --create-namespace \
   --set controller.env.activeNamespace=""

@@ -2,7 +2,7 @@ apiVersion: v1
 entries:
   ops:
   - apiVersion: v2
-    appVersion: 3.0.0
+    appVersion: 1.3.0
     created: "2025-12-23T13:15:11.00000Z"
     description: A Helm chart for Ops
     digest: ""
@@ -16,10 +16,10 @@ entries:
     - https://github.com/shaowenchen/ops
     type: application
     urls:
-    - https://www.chenshaowen.com/ops/charts/ops-3.0.0.tgz
-    version: 3.0.0
+    - https://www.chenshaowen.com/ops/charts/ops-1.3.0.tgz
+    version: 1.3.0
   - apiVersion: v2
-    appVersion: 2.0.0
+    appVersion: 1.2.0
     created: "2025-12-23T13:14:11.00000Z"
     description: A Helm chart for Ops
     digest: 
@@ -33,8 +33,8 @@ entries:
     - https://github.com/shaowenchen/ops
     type: application
     urls:
-    - https://www.chenshaowen.com/ops/charts/ops-2.0.0.tgz
-    version: 2.0.0
+    - https://www.chenshaowen.com/ops/charts/ops-1.2.0.tgz
+    version: 1.2.0
   - apiVersion: v2
     appVersion: 1.0.0
     created: "2024-11-07T14:32:37.05352+08:00"

@@ -40,7 +40,7 @@ helm repo update
 To install the `ops-controller-manager` using Helm with default values:
 
 ```bash
-helm install myops ops/ops --version 2.0.0 --namespace ops-system --create-namespace
+helm install myops ops/ops --version 1.2.0 --namespace ops-system --create-namespace
 ```
 
 **Installation with Custom Values:**
@@ -48,7 +48,7 @@ helm install myops ops/ops --version 2.0.0 --namespace ops-system --create-names
 You can customize the installation using `--set` flags:
 
 ```bash
-helm install myops ops/ops --version 2.0.0 \
+helm install myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   --create-namespace \
   --set controller.image.repository="shaowenchen/ops-controller-manager" \
@@ -106,7 +106,7 @@ prometheus:
 Then install with the values file:
 
 ```bash
-helm install myops ops/ops --version 2.0.0 \
+helm install myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   --create-namespace \
   -f my-values.yaml
@@ -132,13 +132,13 @@ kubectl get deployments -n ops-system
 To upgrade an existing installation:
 
 ```bash
-helm upgrade myops ops/ops --version 2.0.0 --namespace ops-system
+helm upgrade myops ops/ops --version 1.2.0 --namespace ops-system
 ```
 
 Or with custom values:
 
 ```bash
-helm upgrade myops ops/ops --version 2.0.0 \
+helm upgrade myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   -f my-values.yaml
 ```
@@ -162,7 +162,7 @@ To change this behavior, you can modify the `controller.env.activeNamespace` val
 **Using --set:**
 
 ```bash
-helm install myops ops/ops --version 2.0.0 \
+helm install myops ops/ops --version 1.2.0 \
   --namespace ops-system \
   --create-namespace \
   --set controller.env.activeNamespace=""
