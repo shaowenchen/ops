@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       branch_name:
-        description: 'Branch name (e.g., main, v1.2)'
+        description: 'Branch name (e.g., main, v1.0, v1.1)'
         required: true
         type: string
         default: main

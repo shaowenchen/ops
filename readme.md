@@ -28,7 +28,7 @@ helm repo add ops https://www.chenshaowen.com/ops/charts
 2. Install Ops Controller
 
 ```bash
-helm install myops ops/ops --version 1.3.0 --namespace ops-system --create-namespace
+helm install myops ops/ops --version 1.2.0 --namespace ops-system --create-namespace
 ```
 
 ## More
