@@ -30,16 +30,27 @@ jobs:
           else
             BRANCH_NAME="main"
           fi
+          # Remove leading and trailing whitespace
+          BRANCH_NAME=$(echo "${BRANCH_NAME}" | xargs)
           echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
           
           if [ "${BRANCH_NAME}" == "main" ]; then
             TAG_NAME="latest"
           else
-            VERSION=$(echo "${BRANCH_NAME}" | sed 's/^v//')
+            # Remove 'v' prefix if present and trim whitespace
+            VERSION=$(echo "${BRANCH_NAME}" | sed 's/^[vV]//' | xargs)
+            # Check if version matches pattern like "1.0" or "1.0.0"
             if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
               TAG_NAME="v${VERSION}.0"
-            else
+            elif [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               TAG_NAME="v${VERSION}"
+            else
+              # If branch name already has 'v' prefix, use it as is
+              if [[ "${BRANCH_NAME}" =~ ^[vV] ]]; then
+                TAG_NAME="${BRANCH_NAME}"
+              else
+                TAG_NAME="v${VERSION}"
+              fi
             fi
           fi
           echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
@@ -108,16 +119,27 @@ jobs:
           else
             BRANCH_NAME="main"
           fi
+          # Remove leading and trailing whitespace
+          BRANCH_NAME=$(echo "${BRANCH_NAME}" | xargs)
           echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
           
           if [ "${BRANCH_NAME}" == "main" ]; then
             TAG_NAME="latest"
           else
-            VERSION=$(echo "${BRANCH_NAME}" | sed 's/^v//')
+            # Remove 'v' prefix if present and trim whitespace
+            VERSION=$(echo "${BRANCH_NAME}" | sed 's/^[vV]//' | xargs)
+            # Check if version matches pattern like "1.0" or "1.0.0"
             if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
               TAG_NAME="v${VERSION}.0"
-            else
+            elif [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               TAG_NAME="v${VERSION}"
+            else
+              # If branch name already has 'v' prefix, use it as is
+              if [[ "${BRANCH_NAME}" =~ ^[vV] ]]; then
+                TAG_NAME="${BRANCH_NAME}"
+              else
+                TAG_NAME="v${VERSION}"
+              fi
             fi
           fi
           echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
