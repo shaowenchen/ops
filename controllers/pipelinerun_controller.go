@@ -402,6 +402,11 @@ func (r *PipelineRunReconciler) buildTaskRunVariables(pr *opsv1.PipelineRun, t *
 		}
 	}
 
+	// Always include host variable if it exists
+	if hostVal, ok := pr.Spec.Variables[opsconstants.HostLower]; ok {
+		vars[opsconstants.HostLower] = opstask.RenderStringWithPathRefs(hostVal, pr.Spec.Variables, taskResults)
+	}
+
 	return vars
 }
 
