@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"sort"
@@ -1185,6 +1186,9 @@ func GetEvents(c *gin.Context) {
 		// Default to 1 hour ago if start_time is not provided or invalid
 		startTime = time.Now().Add(-time.Hour * 1)
 	}
+	startTime = time.Now().Add(-time.Hour * 1)
+	fmt.Println("endpoint", GlobalConfig.Event.Endpoint)
+	fmt.Println("cluster", GlobalConfig.Event.Cluster)
 	client, err := opsevent.FactoryJetStreamClient(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster)
 	if err != nil {
 		showError(c, err.Error())
@@ -1230,6 +1234,7 @@ func ListEvents(c *gin.Context) {
 // @Param namespace path string true "namespace"
 // @Param page query int false "page"
 // @Param page_size query int false "page_size"
+// @Param search query string false "search"
 // @Success 200
 // @Router /api/v1/namespaces/{namespace}/eventhooks [get]
 func ListEventHooks(c *gin.Context) {
@@ -1237,6 +1242,7 @@ func ListEventHooks(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -1258,12 +1264,31 @@ func ListEventHooks(c *gin.Context) {
 		return
 	}
 	eventhooks := &opsv1.EventHooksList{}
-	err = client.List(context.TODO(), eventhooks, runtimeClient.InNamespace(req.Namespace))
+	if req.Namespace == opsconstants.AllNamespaces {
+		err = client.List(context.TODO(), eventhooks)
+	} else {
+		err = client.List(context.TODO(), eventhooks, runtimeClient.InNamespace(req.Namespace))
+	}
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
-	showData(c, paginator[opsv1.EventHooks](eventhooks.Items, req.PageSize, req.Page))
+	newEventHooks := make([]opsv1.EventHooks, 0)
+	// search
+	if req.Search != "" {
+		for i := range eventhooks.Items {
+			searchField := []string{eventhooks.Items[i].Name, eventhooks.Items[i].Spec.Type, eventhooks.Items[i].Spec.Subject, eventhooks.Items[i].Spec.URL}
+			for j := range searchField {
+				if opsutils.Contains(searchField[j], req.Search) {
+					newEventHooks = append(newEventHooks, eventhooks.Items[i])
+					break
+				}
+			}
+		}
+	} else {
+		newEventHooks = eventhooks.Items
+	}
+	showData(c, paginator[opsv1.EventHooks](newEventHooks, req.PageSize, req.Page))
 }
 
 // @Summary Get EventHook
@@ -1355,11 +1380,28 @@ func PutEventHook(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
+	err = c.ShouldBindJSON(&eventhook)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	eventhook.ObjectMeta.Namespace = req.Namespace
+	eventhook.ObjectMeta.Name = req.Eventhook
 	client, err := getRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
+	oldEventhook := &opsv1.EventHooks{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Eventhook,
+	}, oldEventhook)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	eventhook.ObjectMeta.ResourceVersion = oldEventhook.ObjectMeta.ResourceVersion
 	err = client.Update(context.TODO(), &eventhook)
 	if err != nil {
 		showError(c, err.Error())

@@ -61,7 +61,7 @@ func SetupRouter(r *gin.Engine) {
 		v1Events.GET("", ListEvents)
 		v1Events.GET("/:event", GetEvents)
 	}
-	v1EventHooks := r.Group("/api/v1/eventhooks").Use(AuthMiddleware())
+	v1EventHooks := r.Group("/api/v1/namespaces/:namespace/eventhooks").Use(AuthMiddleware())
 	{
 		v1EventHooks.GET("", ListEventHooks)
 		v1EventHooks.GET("/:eventhook", GetEventHook)

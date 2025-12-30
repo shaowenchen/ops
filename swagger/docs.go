@@ -260,6 +260,12 @@ const docTemplate = `{
                         "description": "page_size",
                         "name": "page_size",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
                     }
                 ],
                 "responses": {

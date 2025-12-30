@@ -12,6 +12,7 @@ var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
+var searchQuery = ref("");
 var dialogVisible = ref(false);
 var dialogMode = ref("view"); // 'view', 'create', 'edit'
 var selectedItem = ref(null);
@@ -55,7 +56,7 @@ var selectedFields = ref([
 loadData();
 
 async function loadData() {
-  var res = await eventHooksStore.list("all", pageSize.value, currentPage.value);
+  var res = await eventHooksStore.list("all", pageSize.value, currentPage.value, searchQuery.value);
   dataList.value = res.list;
   total.value = res.total;
 }
@@ -203,8 +204,23 @@ function updateOptionKey(oldKey, newKey) {
 
 <template>
   <div class="container">
-    <div class="form-control">
-      <el-button type="primary" @click="create">Create EventHook</el-button>
+    <div class="form-control enhanced-form">
+      <el-row :gutter="20" align="middle">
+        <el-col :span="18">
+          <el-input
+            v-model="searchQuery"
+            placeholder="Search..."
+            class="search-bar"
+            clearable
+            @input="loadData"
+          />
+        </el-col>
+        <el-col :span="6">
+          <el-button type="primary" @click="create" class="search-button">
+            Create EventHook
+          </el-button>
+        </el-col>
+      </el-row>
     </div>
 
     <el-select
@@ -522,10 +538,19 @@ function updateOptionKey(oldKey, newKey) {
 }
 
 .form-control {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   margin-bottom: 20px;
+  width: 100%;
+}
+
+.enhanced-form {
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  width: 100%;
+}
+
+.search-button {
   width: 100%;
 }
 
@@ -579,4 +604,5 @@ ul {
   padding-left: 20px;
 }
 </style>
+
 

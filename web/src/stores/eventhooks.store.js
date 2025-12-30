@@ -8,10 +8,12 @@ export const useEventHooksStore = defineStore({
     alert: null,
   }),
   actions: {
-    async list(namespace, page_size = 10, page = 1) {
-      const analysis = await fetchWrapper.get(
-        `/api/v1/namespaces/${namespace}/eventhooks?page_size=${page_size}&page=${page}`
-      );
+    async list(namespace, page_size = 10, page = 1, search = "") {
+      let url = `/api/v1/namespaces/${namespace}/eventhooks?page_size=${page_size}&page=${page}`;
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+      const analysis = await fetchWrapper.get(url);
       return analysis.data;
     },
     async get(namespace, name) {

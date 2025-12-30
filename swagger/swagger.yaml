@@ -701,6 +701,10 @@ paths:
         in: query
         name: page_size
         type: integer
+      - description: search
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
