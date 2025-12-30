@@ -1507,6 +1507,12 @@ func GetSummary(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
+	eventhooksList := &opsv1.EventHooksList{}
+	err = client.List(context.TODO(), eventhooksList)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
 	showData(c, gin.H{
 		"clusters":     len(clusterList.Items),
 		"hosts":        len(hostList.Items),
@@ -1514,6 +1520,7 @@ func GetSummary(c *gin.Context) {
 		"pipelineruns": len(pipelinerunList.Items),
 		"tasks":        len(taskList.Items),
 		"taskruns":     len(taskrunList.Items),
+		"eventhooks":   len(eventhooksList.Items),
 	})
 }
 func getRuntimeClient(kubeconfigPath string) (client runtimeClient.Client, err error) {

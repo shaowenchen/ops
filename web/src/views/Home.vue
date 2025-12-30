@@ -1,8 +1,42 @@
 <script setup>
-import { useLoginStore } from "@/stores";
+import { ref, onMounted } from "vue";
+import { useLoginStore, useSummaryStore } from "@/stores";
 
 var loginStore = useLoginStore();
 loginStore.check();
+
+const summaryStore = useSummaryStore();
+var summaryData = ref({
+  clusters: 0,
+  hosts: 0,
+  pipelines: 0,
+  pipelineruns: 0,
+  tasks: 0,
+  taskruns: 0,
+  eventhooks: 0
+});
+
+async function loadData() {
+  try {
+    const data = await summaryStore.get();
+    summaryData.value = data;
+  } catch (error) {
+    console.error("Error loading summary data:", error);
+    summaryData.value = {
+      clusters: 0,
+      hosts: 0,
+      pipelines: 0,
+      pipelineruns: 0,
+      tasks: 0,
+      taskruns: 0,
+      eventhooks: 0
+    };
+  }
+}
+
+onMounted(() => {
+  loadData();
+});
 </script>
 <template>
 
@@ -67,25 +101,17 @@ loginStore.check();
                 </router-link>
             </el-card>
         </el-col>
+
+        <el-col :span="8">
+            <el-card shadow="hover" class="card">
+                <router-link to="/eventhooks" class="card-link">
+                    <div class="card-title">EventHooks</div>
+                    <div class="card-data">{{ summaryData.eventhooks }}</div>
+                </router-link>
+            </el-card>
+        </el-col>
     </el-row>
 </template>
-
-<script>
-export default {
-    data() {
-        return {
-            summaryData: {
-                clusters: 10,
-                hosts: 20,
-                pipelines: 5,
-                pipelineruns: 8,
-                tasks: 12,
-                taskruns: 15
-            }
-        };
-    }
-};
-</script>
 
 <style scoped>
 .container {
@@ -95,7 +121,7 @@ export default {
     flex-wrap: wrap;
 }
 
-e-col {
+.el-col {
     margin: 0;
 }
 
@@ -109,6 +135,13 @@ e-col {
     justify-content: center;
     align-items: center;
     text-align: center;
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
 }
 
 .card-title {
