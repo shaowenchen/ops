@@ -17,6 +17,7 @@ import (
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opsutils "github.com/shaowenchen/ops/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -695,7 +696,7 @@ func ListPipelines(c *gin.Context) {
 }
 
 // @Summary Get TaskRun
-// @Tags TaskRun
+// @Tags TaskRuns
 // @Accept json
 // @Produce json
 // @Param namespace path string true "namespace"
@@ -731,7 +732,7 @@ func GetTaskRun(c *gin.Context) {
 }
 
 // @Summary Get PipelineRun
-// @Tags PipelineRun
+// @Tags PipelineRuns
 // @Accept json
 // @Produce json
 // @Param namespace path string true "namespace"
@@ -767,7 +768,7 @@ func GetPipelineRun(c *gin.Context) {
 }
 
 // @Summary List TaskRun
-// @Tags TaskRun
+// @Tags TaskRuns
 // @Accept json
 // @Produce json
 // @Param namespace path string true "namespace"
@@ -818,7 +819,7 @@ func ListTaskRun(c *gin.Context) {
 }
 
 // @Summary List PipelineRun
-// @Tags PipelineRun
+// @Tags PipelineRuns
 // @Accept json
 // @Produce json
 // @Param namespace path string true "namespace"
@@ -868,7 +869,7 @@ func ListPipelineRuns(c *gin.Context) {
 }
 
 // @Summary Create TaskRun
-// @Tags TaskRun
+// @Tags TaskRuns
 // @Accept json
 // @Produce json
 // @Param namespace path string true "namespace"
@@ -886,7 +887,7 @@ func CreateTaskRun(c *gin.Context) {
 }
 
 // @Summary Create TaskRun Sync
-// @Tags TaskRun
+// @Tags TaskRuns
 // @Accept json
 // @Produce json
 // @Param namespace path string true "namespace"
@@ -983,7 +984,7 @@ func createTaskRun(c *gin.Context, sync bool) (latest opsv1.TaskRun, err error) 
 }
 
 // @Summary Create PipelineRun
-// @Tags PipelineRun
+// @Tags PipelineRuns
 // @Accept json
 // @Produce json
 // @Param namespace path string true "namespace"
@@ -1001,7 +1002,7 @@ func CreatePipelineRun(c *gin.Context) {
 }
 
 // @Summary Create PipelineRun Sync
-// @Tags PipelineRun
+// @Tags PipelineRuns
 // @Accept json
 // @Produce json
 // @Param namespace path string true "namespace"
@@ -1089,7 +1090,7 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 }
 
 // @Summary Create Event
-// @Tags Event
+// @Tags Events
 // @Accept json
 // @Produce json
 // @Param event path string true "event"
@@ -1220,6 +1221,190 @@ func ListEvents(c *gin.Context) {
 	}
 	data, err := opsevent.ListSubjects(GlobalConfig.Event.Endpoint, opsconstants.OpsStreamName, req.Search)
 	showData(c, paginator[string](data, req.PageSize, req.Page))
+}
+
+// @Summary List EventHooks
+// @Tags EventHooks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/eventhooks [get]
+func ListEventHooks(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Page      uint   `form:"page"`
+		PageSize  uint   `form:"page_size"`
+	}
+	var req = Params{
+		PageSize: 10,
+		Page:     1,
+	}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = c.ShouldBindQuery(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	eventhooks := &opsv1.EventHooksList{}
+	err = client.List(context.TODO(), eventhooks, runtimeClient.InNamespace(req.Namespace))
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, paginator[opsv1.EventHooks](eventhooks.Items, req.PageSize, req.Page))
+}
+
+// @Summary Get EventHook
+// @Tags EventHooks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param eventhook path string true "eventhook"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/eventhooks/{eventhook} [get]
+func GetEventHook(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Eventhook string `uri:"eventhook"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	eventhook := &opsv1.EventHooks{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Eventhook,
+	}, eventhook)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showData(c, eventhook)
+}
+
+// @Summary Create EventHook
+// @Tags EventHooks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param eventhook body opsv1.EventHooks true "eventhook"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/eventhooks [post]
+func CreateEventHook(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+	}
+	var eventhook = opsv1.EventHooks{}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Create(context.TODO(), &eventhook)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
+// @Summary Update EventHook
+// @Tags EventHooks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param eventhook path string true "eventhook"
+// @Param eventhook body opsv1.EventHooks true "eventhook"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/eventhooks/{eventhook} [put]
+func PutEventHook(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Eventhook string `uri:"eventhook"`
+	}
+	var eventhook = opsv1.EventHooks{}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Update(context.TODO(), &eventhook)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
+// @Summary Delete EventHook
+// @Tags EventHooks
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param eventhook path string true "eventhook"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/eventhooks/{eventhook} [delete]
+func DeleteEventHook(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Eventhook string `uri:"eventhook"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	var eventhook = opsv1.EventHooks{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: req.Namespace,
+			Name:      req.Eventhook,
+		},
+	}
+
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Delete(context.TODO(), &eventhook)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
 }
 
 // @Summary Login Check

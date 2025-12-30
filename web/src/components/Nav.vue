@@ -36,6 +36,7 @@ export default {
                 { navItem: 'Pipelines', path: '/pipelines', icon: 'el-icon-s-promotion' },
                 { navItem: 'PipelineRuns', path: '/pipelineruns', icon: 'el-icon-s-tools' },
                 { navItem: 'Events', path: '/events', icon: 'el-icon-s-release' },
+                { navItem: 'EventHooks', path: '/eventhooks', icon: 'el-icon-s-marketing' },
                 { navItem: 'Logout', path: '/logout', icon: 'el-icon-s-release' }
             ]
         };

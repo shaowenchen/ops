@@ -61,6 +61,14 @@ func SetupRouter(r *gin.Engine) {
 		v1Events.GET("", ListEvents)
 		v1Events.GET("/:event", GetEvents)
 	}
+	v1EventHooks := r.Group("/api/v1/eventhooks").Use(AuthMiddleware())
+	{
+		v1EventHooks.GET("", ListEventHooks)
+		v1EventHooks.GET("/:eventhook", GetEventHook)
+		v1EventHooks.POST("", CreateEventHook)
+		v1EventHooks.PUT("/:eventhook", PutEventHook)
+		v1EventHooks.DELETE("/:eventhook", DeleteEventHook)
+	}
 }
 
 func SetupRouteWithoutAuth(r *gin.Engine) {

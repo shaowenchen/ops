@@ -1,6 +1,7 @@
 export { default as ClusterDetails } from './ClusterDetails.vue';
 export { default as Clusters } from './Clusters.vue';
 export { default as Events } from './Events.vue';
+export { default as EventHooks } from './EventHooks.vue';
 export { default as Home } from './Home.vue';
 export { default as Hosts } from './Hosts.vue';
 export { default as Login } from './Login.vue';

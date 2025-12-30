@@ -1,5 +1,78 @@
 definitions:
+  v1.ConfigMapMount:
+    properties:
+      mountPath:
+        type: string
+      name:
+        type: string
+    type: object
+  v1.EventHooks:
+    properties:
+      apiVersion:
+        description: |-
+          APIVersion defines the versioned schema of this representation of an object.
+          Servers should convert recognized schemas to the latest internal value, and
+          may reject unrecognized values.
+          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+          +optional
+        type: string
+      kind:
+        description: |-
+          Kind is a string value representing the REST resource this object represents.
+          Servers may infer this from the endpoint the client submits requests to.
+          Cannot be updated.
+          In CamelCase.
+          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+          +optional
+        type: string
+      metadata:
+        $ref: '#/definitions/v1.ObjectMeta'
+      spec:
+        $ref: '#/definitions/v1.EventHooksSpec'
+      status:
+        $ref: '#/definitions/v1.EventHooksStatus'
+    type: object
+  v1.EventHooksSpec:
+    properties:
+      additional:
+        type: string
+      keywords:
+        $ref: '#/definitions/v1.KeywordsConfig'
+      options:
+        additionalProperties:
+          type: string
+        type: object
+      subject:
+        type: string
+      type:
+        description: Foo is an example field of EventHooks. Edit eventhooks_types.go
+          to remove/update
+        type: string
+      url:
+        type: string
+    type: object
+  v1.EventHooksStatus:
+    type: object
   v1.FieldsV1:
+    type: object
+  v1.KeywordsConfig:
+    properties:
+      exclude:
+        items:
+          type: string
+        type: array
+      include:
+        items:
+          type: string
+        type: array
+      matchMode:
+        description: 'opsconstants.MatchModeANY | opsconstants.MatchModeALL (default:
+          opsconstants.MatchModeANY)'
+        type: string
+      matchType:
+        description: 'opsconstants.MatchTypeCONTAINS | opsconstants.MatchTypeEXACT
+          | opsconstants.MatchTypeREGEX (default: opsconstants.MatchTypeCONTAINS)'
+        type: string
     type: object
   v1.ManagedFieldsEntry:
     properties:
@@ -314,6 +387,8 @@ definitions:
           INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
           Important: Run "make" to regenerate code after modifying this file
         type: string
+      runtimeImage:
+        type: string
       tasks:
         items:
           $ref: '#/definitions/v1.TaskRef'
@@ -324,6 +399,13 @@ definitions:
         $ref: '#/definitions/v1.Variables'
     type: object
   v1.PipelineStatus:
+    type: object
+  v1.SecretMount:
+    properties:
+      mountPath:
+        type: string
+      name:
+        type: string
     type: object
   v1.Step:
     properties:
@@ -336,8 +418,11 @@ definitions:
       localfile:
         type: string
       name:
+        description: +kubebuilder:validation:Pattern="^[a-z](-?[a-z0-9])*$"
         type: string
       remotefile:
+        type: string
+      runtimeImage:
         type: string
       timeoutSeconds:
         type: integer
@@ -370,20 +455,38 @@ definitions:
       status:
         $ref: '#/definitions/v1.TaskStatus'
     type: object
+  v1.TaskMount:
+    properties:
+      configMap:
+        $ref: '#/definitions/v1.ConfigMapMount'
+      hostPath:
+        type: string
+      mountPath:
+        type: string
+      secret:
+        $ref: '#/definitions/v1.SecretMount'
+    type: object
   v1.TaskRef:
     properties:
       allowFailure:
         type: boolean
+      desc:
+        type: string
       name:
+        description: +kubebuilder:validation:Pattern="^[a-z](-?[a-z0-9])*$"
         type: string
-      runAlways:
-        type: boolean
-      taskRef:
-        type: string
-      variables:
+      results:
         additionalProperties:
           type: string
+        description: map[resultKey]stepName, defines which step outputs to export
+          as results
         type: object
+      runAlways:
+        type: boolean
+      runtimeImage:
+        type: string
+      taskRef:
+        type: string
     type: object
   v1.TaskSpec:
     properties:
@@ -394,6 +497,10 @@ definitions:
         type: string
       host:
         type: string
+      mounts:
+        items:
+          $ref: '#/definitions/v1.TaskMount'
+        type: array
       runtimeImage:
         type: string
       steps:
@@ -576,6 +683,128 @@ paths:
       summary: Get Cluster Nodes
       tags:
       - Clusters
+  /api/v1/namespaces/{namespace}/eventhooks:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: page_size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: List EventHooks
+      tags:
+      - EventHooks
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: eventhook
+        in: body
+        name: eventhook
+        required: true
+        schema:
+          $ref: '#/definitions/v1.EventHooks'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create EventHook
+      tags:
+      - EventHooks
+  /api/v1/namespaces/{namespace}/eventhooks/{eventhook}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: eventhook
+        in: path
+        name: eventhook
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete EventHook
+      tags:
+      - EventHooks
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: eventhook
+        in: path
+        name: eventhook
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get EventHook
+      tags:
+      - EventHooks
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: eventhook
+        in: path
+        name: eventhook
+        required: true
+        type: string
+      - description: eventhook
+        in: body
+        name: eventhook
+        required: true
+        schema:
+          $ref: '#/definitions/v1.EventHooks'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update EventHook
+      tags:
+      - EventHooks
   /api/v1/namespaces/{namespace}/events/{event}:
     post:
       consumes:
@@ -600,7 +829,7 @@ paths:
           description: OK
       summary: Create Event
       tags:
-      - Event
+      - Events
   /api/v1/namespaces/{namespace}/hosts:
     get:
       consumes:
@@ -652,7 +881,7 @@ paths:
           description: OK
       summary: List PipelineRun
       tags:
-      - PipelineRun
+      - PipelineRuns
     post:
       consumes:
       - application/json
@@ -683,7 +912,7 @@ paths:
           description: OK
       summary: Create PipelineRun
       tags:
-      - PipelineRun
+      - PipelineRuns
   /api/v1/namespaces/{namespace}/pipelineruns/{pipelinerun}:
     get:
       consumes:
@@ -706,7 +935,7 @@ paths:
           description: OK
       summary: Get PipelineRun
       tags:
-      - PipelineRun
+      - PipelineRuns
   /api/v1/namespaces/{namespace}/pipelineruns/sync:
     post:
       consumes:
@@ -738,7 +967,7 @@ paths:
           description: OK
       summary: Create PipelineRun Sync
       tags:
-      - PipelineRun
+      - PipelineRuns
   /api/v1/namespaces/{namespace}/pipelines:
     get:
       consumes:
@@ -889,7 +1118,7 @@ paths:
           description: OK
       summary: List TaskRun
       tags:
-      - TaskRun
+      - TaskRuns
     post:
       consumes:
       - application/json
@@ -920,7 +1149,7 @@ paths:
           description: OK
       summary: Create TaskRun
       tags:
-      - TaskRun
+      - TaskRuns
   /api/v1/namespaces/{namespace}/taskruns/{taskrun}:
     get:
       consumes:
@@ -943,7 +1172,7 @@ paths:
           description: OK
       summary: Get TaskRun
       tags:
-      - TaskRun
+      - TaskRuns
   /api/v1/namespaces/{namespace}/taskruns/sync:
     post:
       consumes:
@@ -975,7 +1204,7 @@ paths:
           description: OK
       summary: Create TaskRun Sync
       tags:
-      - TaskRun
+      - TaskRuns
   /api/v1/namespaces/{namespace}/tasks:
     get:
       consumes:

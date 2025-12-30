@@ -229,6 +229,191 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/namespaces/{namespace}/eventhooks": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EventHooks"
+                ],
+                "summary": "List EventHooks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page_size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EventHooks"
+                ],
+                "summary": "Create EventHook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "eventhook",
+                        "name": "eventhook",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.EventHooks"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/namespaces/{namespace}/eventhooks/{eventhook}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EventHooks"
+                ],
+                "summary": "Get EventHook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "eventhook",
+                        "name": "eventhook",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EventHooks"
+                ],
+                "summary": "Update EventHook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "eventhook",
+                        "name": "eventhook",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "eventhook",
+                        "name": "eventhook",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.EventHooks"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EventHooks"
+                ],
+                "summary": "Delete EventHook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "eventhook",
+                        "name": "eventhook",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/namespaces/{namespace}/events/{event}": {
             "post": {
                 "consumes": [
@@ -238,7 +423,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Event"
+                    "Events"
                 ],
                 "summary": "Create Event",
                 "parameters": [
@@ -316,7 +501,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PipelineRun"
+                    "PipelineRuns"
                 ],
                 "summary": "List PipelineRun",
                 "parameters": [
@@ -354,7 +539,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PipelineRun"
+                    "PipelineRuns"
                 ],
                 "summary": "Create PipelineRun",
                 "parameters": [
@@ -403,7 +588,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PipelineRun"
+                    "PipelineRuns"
                 ],
                 "summary": "Create PipelineRun Sync",
                 "parameters": [
@@ -452,7 +637,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PipelineRun"
+                    "PipelineRuns"
                 ],
                 "summary": "Get PipelineRun",
                 "parameters": [
@@ -677,7 +862,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "TaskRun"
+                    "TaskRuns"
                 ],
                 "summary": "List TaskRun",
                 "parameters": [
@@ -715,7 +900,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "TaskRun"
+                    "TaskRuns"
                 ],
                 "summary": "Create TaskRun",
                 "parameters": [
@@ -764,7 +949,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "TaskRun"
+                    "TaskRuns"
                 ],
                 "summary": "Create TaskRun Sync",
                 "parameters": [
@@ -813,7 +998,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "TaskRun"
+                    "TaskRuns"
                 ],
                 "summary": "Get TaskRun",
                 "parameters": [
@@ -1063,8 +1248,96 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "v1.ConfigMapMount": {
+            "type": "object",
+            "properties": {
+                "mountPath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.EventHooks": {
+            "type": "object",
+            "properties": {
+                "apiVersion": {
+                    "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources\n+optional",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds\n+optional",
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/v1.ObjectMeta"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1.EventHooksSpec"
+                },
+                "status": {
+                    "$ref": "#/definitions/v1.EventHooksStatus"
+                }
+            }
+        },
+        "v1.EventHooksSpec": {
+            "type": "object",
+            "properties": {
+                "additional": {
+                    "type": "string"
+                },
+                "keywords": {
+                    "$ref": "#/definitions/v1.KeywordsConfig"
+                },
+                "options": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "subject": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Foo is an example field of EventHooks. Edit eventhooks_types.go to remove/update",
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.EventHooksStatus": {
+            "type": "object"
+        },
         "v1.FieldsV1": {
             "type": "object"
+        },
+        "v1.KeywordsConfig": {
+            "type": "object",
+            "properties": {
+                "exclude": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "include": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "matchMode": {
+                    "description": "opsconstants.MatchModeANY | opsconstants.MatchModeALL (default: opsconstants.MatchModeANY)",
+                    "type": "string"
+                },
+                "matchType": {
+                    "description": "opsconstants.MatchTypeCONTAINS | opsconstants.MatchTypeEXACT | opsconstants.MatchTypeREGEX (default: opsconstants.MatchTypeCONTAINS)",
+                    "type": "string"
+                }
+            }
         },
         "v1.ManagedFieldsEntry": {
             "type": "object",
@@ -1256,6 +1529,9 @@ const docTemplate = `{
                     "description": "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster\nImportant: Run \"make\" to regenerate code after modifying this file",
                     "type": "string"
                 },
+                "runtimeImage": {
+                    "type": "string"
+                },
                 "tasks": {
                     "type": "array",
                     "items": {
@@ -1273,6 +1549,17 @@ const docTemplate = `{
         "v1.PipelineStatus": {
             "type": "object"
         },
+        "v1.SecretMount": {
+            "type": "object",
+            "properties": {
+                "mountPath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.Step": {
             "type": "object",
             "properties": {
@@ -1289,9 +1576,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "description": "+kubebuilder:validation:Pattern=\"^[a-z](-?[a-z0-9])*$\"",
                     "type": "string"
                 },
                 "remotefile": {
+                    "type": "string"
+                },
+                "runtimeImage": {
                     "type": "string"
                 },
                 "timeoutSeconds": {
@@ -1324,26 +1615,51 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.TaskMount": {
+            "type": "object",
+            "properties": {
+                "configMap": {
+                    "$ref": "#/definitions/v1.ConfigMapMount"
+                },
+                "hostPath": {
+                    "type": "string"
+                },
+                "mountPath": {
+                    "type": "string"
+                },
+                "secret": {
+                    "$ref": "#/definitions/v1.SecretMount"
+                }
+            }
+        },
         "v1.TaskRef": {
             "type": "object",
             "properties": {
                 "allowFailure": {
                     "type": "boolean"
                 },
+                "desc": {
+                    "type": "string"
+                },
                 "name": {
+                    "description": "+kubebuilder:validation:Pattern=\"^[a-z](-?[a-z0-9])*$\"",
                     "type": "string"
                 },
-                "runAlways": {
-                    "type": "boolean"
-                },
-                "taskRef": {
-                    "type": "string"
-                },
-                "variables": {
+                "results": {
+                    "description": "map[resultKey]stepName, defines which step outputs to export as results",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "runAlways": {
+                    "type": "boolean"
+                },
+                "runtimeImage": {
+                    "type": "string"
+                },
+                "taskRef": {
+                    "type": "string"
                 }
             }
         },
@@ -1356,6 +1672,12 @@ const docTemplate = `{
                 },
                 "host": {
                     "type": "string"
+                },
+                "mounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.TaskMount"
+                    }
                 },
                 "runtimeImage": {
                     "type": "string"

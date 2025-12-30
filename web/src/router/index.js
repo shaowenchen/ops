@@ -4,6 +4,7 @@ import {
   ClusterDetails,
   Clusters,
   Events,
+  EventHooks,
   Home,
   Hosts,
   Login,
@@ -29,6 +30,7 @@ export const router = createRouter({
     { path: "/login", component: Login, name: "login" },
     { path: "/logout", component: Logout, name: "logout" },
     { path: "/events", component: Events, name: "events" },
+    { path: "/eventhooks", component: EventHooks, name: "eventhooks" },
   ],
 });
 
