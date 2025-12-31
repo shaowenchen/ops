@@ -8,10 +8,6 @@ import (
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
 )
 
-func encodeSubjectPart(part string) string {
-	return strings.ReplaceAll(part, ".", "-")
-}
-
 // for controller
 var endpoint = opsconstants.GetEnvEventEndpoint()
 var cluster = opsconstants.GetEnvEventCluster()
@@ -80,12 +76,7 @@ func FactoryKube(namespace string, subs ...string) *EventBus {
 		subject = opsconstants.GetClusterSubject(cluster, namespace, opsconstants.SubjectPrefix)
 	}
 	if len(subs) > 0 {
-		// Encode each part to handle special characters (like dots in node names)
-		encodedSubs := make([]string, len(subs))
-		for i, sub := range subs {
-			encodedSubs[i] = encodeSubjectPart(sub)
-		}
-		subject = subject + "." + strings.Join(encodedSubs, ".")
+		subject = subject + "." + strings.Join(subs, ".")
 	}
 	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
