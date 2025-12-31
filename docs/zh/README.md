@@ -13,14 +13,14 @@ Ops 是一个运维工具项目。它的目标是提供一个简单的运维工�
 
 ![](images/ops-core.png)
 
-对象定义
+### 对象定义
 
 - Host，主机。可以是云主机、裸金属机器，通过 SSH 能够访问到的机器。
 - Cluster，Kubernetes 集群。通过 `kubectl` 能够访问的 Kubernetes 集群。
 - Task，组合多个 File 和 Shell 的任务。
 - Pipeline，组合多个 Task 的任务。
 
-核心操作
+### 核心操作
 
 - File，文件的上传和下发。
 - Shell，执行脚本。
@@ -29,15 +29,15 @@ Ops 是一个运维工具项目。它的目标是提供一个简单的运维工�
 
 ![](images/ops-component.png)
 
-- ops-cli，是可以单独使用的命令行工具，辅助运维人员在命令行终端完成一些自动化的运维工作
-- ops-server 一个 HTTP 服务，用于提供 HTTP API，提供有一个 Dashboard 的界面
-- ops-controller，以 Operator 的形式管理主机、集群、任务、流水线等资源
+- **ops-cli**：是可以单独使用的命令行工具，辅助运维人员在命令行终端完成一些自动化的运维工作
+- **ops-server**：一个 HTTP 服务，用于提供 HTTP API，提供有一个 Dashboard 的界面
+- **ops-controller**：以 Operator 的形式管理主机、集群、任务、流水线等资源
 
 ## 多集群支持
 
 ![](images/ops-multicluster.png)
 
-在实践中，建议:
+在实践中，建议：
 
 - 将当前集群的主机创建为 Host
 - 可以创建多个 Cluster，拥有的 Cluster 对象即为纳管的集群
@@ -56,7 +56,7 @@ Controller 会根据 PipelineRun 中设置的 cluster 字段，将 PipelineRun �
 
 在事件中，主要定义了以下 Topic:
 
-- 探活类，每个主机、集群会有定时检测，能够看到探活的事件
-- 执行任务类，执行 TaskRun、PipelineRun 任务的事件
-- 巡检类，TaskRun 执行定时任务巡检任务时，会推送相关的检测事件
-- Webhook类，用户自定义的一些运维事件，告警、通知等
+- **探活类**：每个主机、集群会有定时检测，能够看到探活的事件
+- **执行任务类**：执行 TaskRun、PipelineRun 任务的事件
+- **巡检类**：TaskRun 执行定时任务巡检任务时，会推送相关的检测事件
+- **Webhook 类**：用户自定义的一些运维事件，告警、通知等

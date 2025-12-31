@@ -249,6 +249,6 @@ nats --user=app --password=${apppassword} bench benchsubject --pub 1 --sub 10
 
 ### 参考
 
-https://docs.nats.io/running-a-nats-service/configuration#jetstream
-https://docs.nats.io/running-a-nats-service/configuration/leafnodes/leafnode_conf
-https://docs.nats.io/running-a-nats-service/configuration/gateways/gateway#gateway-configuration-block
+- [JetStream 配置](https://docs.nats.io/running-a-nats-service/configuration#jetstream)
+- [LeafNode 配置](https://docs.nats.io/running-a-nats-service/configuration/leafnodes/leafnode_conf)
+- [Gateway 配置](https://docs.nats.io/running-a-nats-service/configuration/gateways/gateway#gateway-configuration-block)
