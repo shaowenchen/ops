@@ -90,6 +90,7 @@ function capacityFormatter(row, type) {
 
 <style scoped>
 .form-control {
+    height: 100%;
     display: inline-block;
     width: 90%;
     margin-right: 10px;

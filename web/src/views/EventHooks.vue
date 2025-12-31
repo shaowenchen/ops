@@ -1,6 +1,10 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
-import { useEventHooksStore, useLoginStore, useNamespacesStore } from "@/stores";
+import {
+  useEventHooksStore,
+  useLoginStore,
+  useNamespacesStore,
+} from "@/stores";
 import { formatObject } from "@/utils/common";
 
 var loginStore = useLoginStore();
@@ -61,12 +65,17 @@ async function loadNamespaces() {
     namespaces.value = namespacesStore.namespaces;
   } catch (error) {
     console.error("Error loading namespaces:", error);
-    namespaces.value = ['ops-system'];
+    namespaces.value = ["ops-system"];
   }
 }
 
 async function loadData() {
-  var res = await eventHooksStore.list(namespacesStore.selectedNamespace, pageSize.value, currentPage.value, searchQuery.value);
+  var res = await eventHooksStore.list(
+    namespacesStore.selectedNamespace,
+    pageSize.value,
+    currentPage.value,
+    searchQuery.value
+  );
   dataList.value = res.list;
   total.value = res.total;
 }
@@ -81,9 +90,12 @@ onMounted(() => {
   loadData();
 });
 
-watch(() => namespacesStore.selectedNamespace, () => {
-  onNamespaceChange();
-});
+watch(
+  () => namespacesStore.selectedNamespace,
+  () => {
+    onNamespaceChange();
+  }
+);
 
 function onPaginationChange() {
   loadData();
@@ -100,25 +112,27 @@ function view(item) {
 }
 
 function create() {
-  formData.value = JSON.parse(JSON.stringify({
-    metadata: {
-      namespace: "ops-system",
-      name: "",
-    },
-    spec: {
-      type: "",
-      subject: "",
-      url: "",
-      options: {},
-      keywords: {
-        include: [],
-        exclude: [],
-        matchMode: "ANY",
-        matchType: "CONTAINS",
+  formData.value = JSON.parse(
+    JSON.stringify({
+      metadata: {
+        namespace: "ops-system",
+        name: "",
       },
-      additional: "",
-    },
-  }));
+      spec: {
+        type: "",
+        subject: "",
+        url: "",
+        options: {},
+        keywords: {
+          include: [],
+          exclude: [],
+          matchMode: "ANY",
+          matchType: "CONTAINS",
+        },
+        additional: "",
+      },
+    })
+  );
   dialogMode.value = "create";
   dialogVisible.value = true;
 }
@@ -126,30 +140,34 @@ function create() {
 function edit(item) {
   selectedItem.value = item;
   // Deep clone to avoid mutating the original object
-  formData.value = JSON.parse(JSON.stringify({
-    metadata: {
-      namespace: item.metadata.namespace || "ops-system",
-      name: item.metadata.name || "",
-    },
-    spec: {
-      type: item.spec.type || "",
-      subject: item.spec.subject || "",
-      url: item.spec.url || "",
-      options: item.spec.options ? { ...item.spec.options } : {},
-      keywords: item.spec.keywords ? {
-        include: [...(item.spec.keywords.include || [])],
-        exclude: [...(item.spec.keywords.exclude || [])],
-        matchMode: item.spec.keywords.matchMode || "ANY",
-        matchType: item.spec.keywords.matchType || "CONTAINS",
-      } : {
-        include: [],
-        exclude: [],
-        matchMode: "ANY",
-        matchType: "CONTAINS",
+  formData.value = JSON.parse(
+    JSON.stringify({
+      metadata: {
+        namespace: item.metadata.namespace || "ops-system",
+        name: item.metadata.name || "",
       },
-      additional: item.spec.additional || "",
-    },
-  }));
+      spec: {
+        type: item.spec.type || "",
+        subject: item.spec.subject || "",
+        url: item.spec.url || "",
+        options: item.spec.options ? { ...item.spec.options } : {},
+        keywords: item.spec.keywords
+          ? {
+              include: [...(item.spec.keywords.include || [])],
+              exclude: [...(item.spec.keywords.exclude || [])],
+              matchMode: item.spec.keywords.matchMode || "ANY",
+              matchType: item.spec.keywords.matchType || "CONTAINS",
+            }
+          : {
+              include: [],
+              exclude: [],
+              matchMode: "ANY",
+              matchType: "CONTAINS",
+            },
+        additional: item.spec.additional || "",
+      },
+    })
+  );
   dialogMode.value = "edit";
   dialogVisible.value = true;
 }
@@ -162,7 +180,10 @@ function close() {
 async function save() {
   try {
     if (dialogMode.value === "create") {
-      await eventHooksStore.create(namespacesStore.selectedNamespace, formData.value);
+      await eventHooksStore.create(
+        namespacesStore.selectedNamespace,
+        formData.value
+      );
     } else if (dialogMode.value === "edit") {
       await eventHooksStore.update(
         selectedItem.value.metadata.namespace,
@@ -219,7 +240,10 @@ function removeOption(key) {
 
 function updateOptionKey(oldKey, newKey) {
   if (oldKey === newKey || !newKey) return;
-  if (formData.value.spec.options && formData.value.spec.options[oldKey] !== undefined) {
+  if (
+    formData.value.spec.options &&
+    formData.value.spec.options[oldKey] !== undefined
+  ) {
     formData.value.spec.options[newKey] = formData.value.spec.options[oldKey];
     delete formData.value.spec.options[oldKey];
   }
@@ -230,13 +254,12 @@ function updateOptionKey(oldKey, newKey) {
   <div class="container">
     <div class="namespace-filter">
       <label>Namespace:</label>
-      <el-select :model-value="namespacesStore.selectedNamespace" class="namespace-select" @change="namespacesStore.setSelectedNamespace">
-        <el-option
-          v-for="ns in namespaces"
-          :key="ns"
-          :label="ns"
-          :value="ns"
-        />
+      <el-select
+        :model-value="namespacesStore.selectedNamespace"
+        class="namespace-select"
+        @change="namespacesStore.setSelectedNamespace"
+      >
+        <el-option v-for="ns in namespaces" :key="ns" :label="ns" :value="ns" />
       </el-select>
     </div>
     <div class="form-control enhanced-form">
@@ -335,7 +358,10 @@ function updateOptionKey(oldKey, newKey) {
           <div v-if="selectedItem.spec.keywords.include?.length > 0">
             <strong>Include:</strong>
             <ul>
-              <li v-for="(kw, idx) in selectedItem.spec.keywords.include" :key="idx">
+              <li
+                v-for="(kw, idx) in selectedItem.spec.keywords.include"
+                :key="idx"
+              >
                 {{ kw }}
               </li>
             </ul>
@@ -343,16 +369,21 @@ function updateOptionKey(oldKey, newKey) {
           <div v-if="selectedItem.spec.keywords.exclude?.length > 0">
             <strong>Exclude:</strong>
             <ul>
-              <li v-for="(kw, idx) in selectedItem.spec.keywords.exclude" :key="idx">
+              <li
+                v-for="(kw, idx) in selectedItem.spec.keywords.exclude"
+                :key="idx"
+              >
                 {{ kw }}
               </li>
             </ul>
           </div>
           <div v-if="selectedItem.spec.keywords.matchMode">
-            <strong>Match Mode:</strong> {{ selectedItem.spec.keywords.matchMode }}
+            <strong>Match Mode:</strong>
+            {{ selectedItem.spec.keywords.matchMode }}
           </div>
           <div v-if="selectedItem.spec.keywords.matchType">
-            <strong>Match Type:</strong> {{ selectedItem.spec.keywords.matchType }}
+            <strong>Match Type:</strong>
+            {{ selectedItem.spec.keywords.matchType }}
           </div>
         </div>
         <div class="form-group" v-if="selectedItem?.spec?.options">
@@ -391,7 +422,11 @@ function updateOptionKey(oldKey, newKey) {
         </div>
         <div class="form-group">
           <label>Type</label>
-          <input type="text" v-model="formData.spec.type" class="form-control" />
+          <input
+            type="text"
+            v-model="formData.spec.type"
+            class="form-control"
+          />
         </div>
         <div class="form-group">
           <label>Subject</label>
@@ -489,11 +524,7 @@ function updateOptionKey(oldKey, newKey) {
               class="form-control"
               placeholder="Value"
             />
-            <el-button
-              type="danger"
-              size="small"
-              @click="removeOption(key)"
-            >
+            <el-button type="danger" size="small" @click="removeOption(key)">
               Remove
             </el-button>
           </div>
@@ -514,11 +545,7 @@ function updateOptionKey(oldKey, newKey) {
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="close">Cancel</el-button>
-          <el-button
-            v-if="dialogMode !== 'view'"
-            type="primary"
-            @click="save"
-          >
+          <el-button v-if="dialogMode !== 'view'" type="primary" @click="save">
             Save
           </el-button>
         </span>
@@ -531,11 +558,8 @@ function updateOptionKey(oldKey, newKey) {
         :key="field"
         :prop="field"
         :label="
-          field
-            .split('.')
-            .pop()
-            .charAt(0)
-            .toUpperCase() + field.split('.').pop().slice(1)
+          field.split('.').pop().charAt(0).toUpperCase() +
+          field.split('.').pop().slice(1)
         "
       >
         <template #default="{ row }">
@@ -545,9 +569,15 @@ function updateOptionKey(oldKey, newKey) {
       <el-table-column label="Actions" width="300" class-name="actions-column">
         <template #default="scope">
           <div class="actions-container">
-            <el-button type="primary" size="small" @click="view(scope.row)">View</el-button>
-            <el-button type="warning" size="small" @click="edit(scope.row)">Edit</el-button>
-            <el-button type="danger" size="small" @click="remove(scope.row)">Delete</el-button>
+            <el-button type="primary" size="small" @click="view(scope.row)"
+              >View</el-button
+            >
+            <el-button type="warning" size="small" @click="edit(scope.row)"
+              >Edit</el-button
+            >
+            <el-button type="danger" size="small" @click="remove(scope.row)"
+              >Delete</el-button
+            >
           </div>
         </template>
       </el-table-column>
@@ -591,7 +621,7 @@ function updateOptionKey(oldKey, newKey) {
 }
 
 .form-control {
-  margin-bottom: 20px;
+  height: 100%;
   width: 100%;
 }
 
@@ -619,13 +649,6 @@ function updateOptionKey(oldKey, newKey) {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-}
-
-.form-control {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
 }
 
 .form-item {
@@ -668,5 +691,3 @@ ul {
   margin: 0;
 }
 </style>
-
-

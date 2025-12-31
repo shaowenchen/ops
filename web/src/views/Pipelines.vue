@@ -412,7 +412,7 @@ async function saveCreate() {
 
 <style scoped>
 .form-control {
-    margin-bottom: 20px;
+    height: 100%;
     width: 100%;
 }
 
@@ -467,6 +467,7 @@ async function saveCreate() {
 }
 
 .form-control {
+    height: 100%;
     padding: 8px;
     border: 1px solid #dcdfe6;
     border-radius: 4px;

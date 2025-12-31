@@ -350,7 +350,7 @@ async function remove(item) {
 }
 
 .form-control {
-    margin-bottom: 20px;
+    height: 100%;
     width: 100%;
 }
 
@@ -381,6 +381,7 @@ async function remove(item) {
 }
 
 .form-control {
+    height: 100%;
     width: 100%;
     padding: 8px;
     border: 1px solid #dcdfe6;
