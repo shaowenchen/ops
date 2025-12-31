@@ -15,6 +15,7 @@ import (
 type EventData struct {
 	Subject string      `json:"subject"`
 	Event   event.Event `json:"event"`
+	Time    string      `json:"time,omitempty"` // Formatted time in local timezone
 }
 
 func QueryStartTime(client nats.JetStreamContext, subject string, startTime time.Time, maxLen uint, seconds uint) (data []EventData, err error) {
@@ -44,12 +45,13 @@ func QueryStartTime(client nats.JetStreamContext, subject string, startTime time
 		data = append(data, EventData{
 			Subject: msg.Subject,
 			Event:   e,
+			Time:    e.Time().Local().Format("2006-01-02 15:04:05"),
 		})
 	}
 	return data, nil
 }
 
-func ListSubjects(url, streamName, search string) (results []string, err error) {
+func ListSubjects(url, streamName, search string, timeoutSeconds uint) (results []string, err error) {
 	nc, err := nats.Connect(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to NATS: %w", err)
@@ -61,7 +63,7 @@ func ListSubjects(url, streamName, search string) (results []string, err error) 
 		return nil, fmt.Errorf("failed to create JetStream context: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
 	defer cancel()
 
 	stream, err := js.Stream(ctx, streamName)

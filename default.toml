@@ -4,3 +4,5 @@ token="ops"
 [event]
 cluster="default"
 endpoint="http://app:mypassword@nats-headless.ops-system.svc:4222"
+query_timeout=10
+list_subjects_timeout=10

@@ -27,6 +27,10 @@ function formatObject(row, field) {
       return taskRefs || "No taskRef found";
     }
   } else if (field === "status.heartTime" || field === "status.startTime" || field === "event.time") {
+    // For event.time, prefer the formatted time field from backend (local timezone)
+    if (field === "event.time" && row.time) {
+      return row.time;
+    }
     const date = new Date(value);
     if (!isNaN(date)) {
       const options = {
@@ -44,6 +48,9 @@ function formatObject(row, field) {
     } else {
       return "Invalid Date";
     }
+  } else if (field === "time") {
+    // Direct time field from EventData (already formatted in local timezone)
+    return value || "";
   } else if (field == "spec.variables") {
     if (typeof value === "object" && value !== null) {
       const keys = Object.keys(value).join(", ");

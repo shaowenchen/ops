@@ -161,10 +161,7 @@ function fetchSuggestions(query, callback) {
 }
 
 .form-control {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    height: 100%;
     width: 100%;
 }
 
@@ -175,6 +172,15 @@ function fetchSuggestions(query, callback) {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 600px;
     margin: 0 auto;
+    margin-bottom: 30px;
+}
+
+.enhanced-form .el-row {
+    margin: 0;
+}
+
+.enhanced-form .el-col {
+    padding: 0;
 }
 
 .search-bar {
@@ -194,6 +200,7 @@ function fetchSuggestions(query, callback) {
 .el-row {
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 

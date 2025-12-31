@@ -22,8 +22,10 @@ type ServerOptions struct {
 }
 
 type EventOption struct {
-	Endpoint string `mapstructure:"endpoint"`
-	Cluster  string `mapstructure:"cluster"`
+	Endpoint            string `mapstructure:"endpoint"`
+	Cluster             string `mapstructure:"cluster"`
+	QueryTimeout        uint   `mapstructure:"query_timeout"`
+	ListSubjectsTimeout uint   `mapstructure:"list_subjects_timeout"`
 }
 
 func LoadConfig(configPath string) {

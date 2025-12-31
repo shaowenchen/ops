@@ -1524,12 +1524,14 @@ func GetEvents(c *gin.Context) {
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
 	}
+	// Get timeout with priority: env var > config file > default
+	defaultTimeout := opsconstants.GetEventQueryTimeout(GlobalConfig.Event.QueryTimeout)
 	var req = Params{
 		PageSize:  10,
 		Page:      1,
 		MaxLength: 1000,
 		Event:     "ops.>",
-		TimeOut:   1,
+		TimeOut:   defaultTimeout,
 		StartTime: time.Now().UnixMicro(),
 	}
 	err := c.ShouldBindUri(&req)
@@ -1542,9 +1544,9 @@ func GetEvents(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	// set more resonable max length and timeout
-	if req.MaxLength < 1000 {
-		req.TimeOut = 5
+	// If timeout is not specified or is 0, use default from config
+	if req.TimeOut == 0 {
+		req.TimeOut = defaultTimeout
 	}
 	sec := req.StartTime / 1000
 
@@ -1588,7 +1590,9 @@ func ListEvents(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	data, err := opsevent.ListSubjects(GlobalConfig.Event.Endpoint, opsconstants.OpsStreamName, req.Search)
+	// Get timeout with priority: env var > config file > default
+	timeout := opsconstants.GetEventListSubjectsTimeout(GlobalConfig.Event.ListSubjectsTimeout)
+	data, err := opsevent.ListSubjects(GlobalConfig.Event.Endpoint, opsconstants.OpsStreamName, req.Search, timeout)
 	showData(c, paginator[string](data, req.PageSize, req.Page))
 }
 
