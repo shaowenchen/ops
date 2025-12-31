@@ -18,59 +18,33 @@ type EventData struct {
 }
 
 func QueryStartTime(client nats.JetStreamContext, subject string, startTime time.Time, maxLen uint, seconds uint) (data []EventData, err error) {
-	// Use empty string for ephemeral consumer (auto-generated name)
-	// This avoids consumer conflicts and is cleaned up automatically
 	sub, err := client.PullSubscribe(
 		subject,
 		"",
 		nats.StartTime(startTime),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create pull subscription: %w", err)
+		return nil, err
 	}
-	defer func() {
-		// Clean up subscription
-		if sub != nil {
-			_ = sub.Unsubscribe()
-			_ = sub.Drain()
-		}
-	}()
 
-	// Use longer timeout to ensure we can fetch messages
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
 	defer cancel()
-
 	msgs, err := sub.Fetch(int(maxLen), nats.Context(ctx))
-	// Handle timeout and no messages as valid cases (not errors)
 	if err != nil {
-		// Check for timeout errors - these are expected when no messages match the criteria
-		errStr := err.Error()
-		if err == nats.ErrTimeout ||
-			strings.Contains(errStr, "timeout") ||
-			strings.Contains(errStr, "no messages") ||
-			strings.Contains(errStr, "context deadline exceeded") {
-			// No messages found within timeout, return empty result (not an error)
-			return []EventData{}, nil
-		}
-		// For other errors, return them
-		return nil, fmt.Errorf("failed to fetch messages: %w", err)
+		return nil, err
 	}
-
-	// Process messages in reverse order (newest first)
-	for i := len(msgs) - 1; i >= 0; i-- {
+	len := len(msgs)
+	for i := len - 1; i >= 0; i-- {
 		msg := msgs[i]
 		e := event.Event{}
 		err := json.Unmarshal(msg.Data, &e)
 		if err != nil {
-			// Skip messages that can't be unmarshaled, but continue with others
 			continue
 		}
 		data = append(data, EventData{
 			Subject: msg.Subject,
 			Event:   e,
 		})
-		// Acknowledge message to prevent redelivery
-		_ = msg.Ack()
 	}
 	return data, nil
 }
