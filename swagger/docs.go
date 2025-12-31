@@ -119,6 +119,25 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/namespaces": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Namespaces"
+                ],
+                "summary": "List Namespaces",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/namespaces/{namespace}/clusters": {
             "get": {
                 "consumes": [
@@ -157,6 +176,41 @@ const docTemplate = `{
                         "description": "OK"
                     }
                 }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clusters"
+                ],
+                "summary": "Create Cluster",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "cluster",
+                        "name": "cluster",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shaowenchen_ops_api_v1.Cluster"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
             }
         },
         "/api/v1/namespaces/{namespace}/clusters/{cluster}": {
@@ -171,6 +225,81 @@ const docTemplate = `{
                     "Clusters"
                 ],
                 "summary": "Get Cluster",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clusters"
+                ],
+                "summary": "Update Cluster",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "cluster",
+                        "name": "cluster",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shaowenchen_ops_api_v1.Cluster"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clusters"
+                ],
+                "summary": "Delete Cluster",
                 "parameters": [
                     {
                         "type": "string",
@@ -489,6 +618,151 @@ const docTemplate = `{
                         "description": "page_size",
                         "name": "page_size",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hosts"
+                ],
+                "summary": "Create Host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "host",
+                        "name": "host",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.Host"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/namespaces/{namespace}/hosts/{host}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hosts"
+                ],
+                "summary": "Get Host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "host",
+                        "name": "host",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hosts"
+                ],
+                "summary": "Update Host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "host",
+                        "name": "host",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "host",
+                        "name": "host",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.Host"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hosts"
+                ],
+                "summary": "Delete Host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "host",
+                        "name": "host",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1254,6 +1528,75 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_shaowenchen_ops_api_v1.Cluster": {
+            "type": "object",
+            "properties": {
+                "apiVersion": {
+                    "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources\n+optional",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds\n+optional",
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/v1.ObjectMeta"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1.ClusterSpec"
+                },
+                "status": {
+                    "$ref": "#/definitions/v1.ClusterStatus"
+                }
+            }
+        },
+        "v1.ClusterSpec": {
+            "type": "object",
+            "properties": {
+                "config": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "server": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.ClusterStatus": {
+            "type": "object",
+            "properties": {
+                "certNotAfterDays": {
+                    "type": "integer"
+                },
+                "heartStatus": {
+                    "type": "string"
+                },
+                "heartTime": {
+                    "type": "string"
+                },
+                "node": {
+                    "type": "integer"
+                },
+                "pod": {
+                    "type": "integer"
+                },
+                "runningPod": {
+                    "type": "integer"
+                },
+                "uid": {
+                    "description": "INSERT ADDITIONAL STATUS FIELD - define observed state of cluster\nImportant: Run \"make\" to regenerate code after modifying this file",
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.ConfigMapMount": {
             "type": "object",
             "properties": {
@@ -1319,6 +1662,115 @@ const docTemplate = `{
         },
         "v1.FieldsV1": {
             "type": "object"
+        },
+        "v1.Host": {
+            "type": "object",
+            "properties": {
+                "apiVersion": {
+                    "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources\n+optional",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds\n+optional",
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/v1.ObjectMeta"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1.HostSpec"
+                },
+                "status": {
+                    "$ref": "#/definitions/v1.HostStatus"
+                }
+            }
+        },
+        "v1.HostSpec": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "desc": {
+                    "description": "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster\nImportant: Run \"make\" to regenerate code after modifying this file",
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "privateKey": {
+                    "type": "string"
+                },
+                "privateKeyPath": {
+                    "type": "string"
+                },
+                "secretRef": {
+                    "type": "string"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.HostStatus": {
+            "type": "object",
+            "properties": {
+                "acceleratorCount": {
+                    "type": "string"
+                },
+                "acceleratorModel": {
+                    "type": "string"
+                },
+                "acceleratorVendor": {
+                    "type": "string"
+                },
+                "arch": {
+                    "type": "string"
+                },
+                "cpuLoad1": {
+                    "type": "string"
+                },
+                "cpuTotal": {
+                    "type": "string"
+                },
+                "cpuUsagePercent": {
+                    "type": "string"
+                },
+                "diskTotal": {
+                    "type": "string"
+                },
+                "diskUsagePercent": {
+                    "type": "string"
+                },
+                "distribution": {
+                    "type": "string"
+                },
+                "heartStatus": {
+                    "type": "string"
+                },
+                "heartTime": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "description": "INSERT ADDITIONAL STATUS FIELD - define observed state of cluster\nImportant: Run \"make\" to regenerate code after modifying this file",
+                    "type": "string"
+                },
+                "kernelVersion": {
+                    "type": "string"
+                },
+                "memTotal": {
+                    "type": "string"
+                },
+                "memUsagePercent": {
+                    "type": "string"
+                }
+            }
         },
         "v1.KeywordsConfig": {
             "type": "object",

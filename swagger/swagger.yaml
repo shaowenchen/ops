@@ -1,4 +1,63 @@
 definitions:
+  github_com_shaowenchen_ops_api_v1.Cluster:
+    properties:
+      apiVersion:
+        description: |-
+          APIVersion defines the versioned schema of this representation of an object.
+          Servers should convert recognized schemas to the latest internal value, and
+          may reject unrecognized values.
+          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+          +optional
+        type: string
+      kind:
+        description: |-
+          Kind is a string value representing the REST resource this object represents.
+          Servers may infer this from the endpoint the client submits requests to.
+          Cannot be updated.
+          In CamelCase.
+          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+          +optional
+        type: string
+      metadata:
+        $ref: '#/definitions/v1.ObjectMeta'
+      spec:
+        $ref: '#/definitions/v1.ClusterSpec'
+      status:
+        $ref: '#/definitions/v1.ClusterStatus'
+    type: object
+  v1.ClusterSpec:
+    properties:
+      config:
+        type: string
+      desc:
+        type: string
+      server:
+        type: string
+      token:
+        type: string
+    type: object
+  v1.ClusterStatus:
+    properties:
+      certNotAfterDays:
+        type: integer
+      heartStatus:
+        type: string
+      heartTime:
+        type: string
+      node:
+        type: integer
+      pod:
+        type: integer
+      runningPod:
+        type: integer
+      uid:
+        description: |-
+          INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+          Important: Run "make" to regenerate code after modifying this file
+        type: string
+      version:
+        type: string
+    type: object
   v1.ConfigMapMount:
     properties:
       mountPath:
@@ -54,6 +113,94 @@ definitions:
   v1.EventHooksStatus:
     type: object
   v1.FieldsV1:
+    type: object
+  v1.Host:
+    properties:
+      apiVersion:
+        description: |-
+          APIVersion defines the versioned schema of this representation of an object.
+          Servers should convert recognized schemas to the latest internal value, and
+          may reject unrecognized values.
+          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+          +optional
+        type: string
+      kind:
+        description: |-
+          Kind is a string value representing the REST resource this object represents.
+          Servers may infer this from the endpoint the client submits requests to.
+          Cannot be updated.
+          In CamelCase.
+          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+          +optional
+        type: string
+      metadata:
+        $ref: '#/definitions/v1.ObjectMeta'
+      spec:
+        $ref: '#/definitions/v1.HostSpec'
+      status:
+        $ref: '#/definitions/v1.HostStatus'
+    type: object
+  v1.HostSpec:
+    properties:
+      address:
+        type: string
+      desc:
+        description: |-
+          INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+          Important: Run "make" to regenerate code after modifying this file
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+      privateKey:
+        type: string
+      privateKeyPath:
+        type: string
+      secretRef:
+        type: string
+      timeoutSeconds:
+        type: integer
+      username:
+        type: string
+    type: object
+  v1.HostStatus:
+    properties:
+      acceleratorCount:
+        type: string
+      acceleratorModel:
+        type: string
+      acceleratorVendor:
+        type: string
+      arch:
+        type: string
+      cpuLoad1:
+        type: string
+      cpuTotal:
+        type: string
+      cpuUsagePercent:
+        type: string
+      diskTotal:
+        type: string
+      diskUsagePercent:
+        type: string
+      distribution:
+        type: string
+      heartStatus:
+        type: string
+      heartTime:
+        type: string
+      hostname:
+        description: |-
+          INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+          Important: Run "make" to regenerate code after modifying this file
+        type: string
+      kernelVersion:
+        type: string
+      memTotal:
+        type: string
+      memUsagePercent:
+        type: string
     type: object
   v1.KeywordsConfig:
     properties:
@@ -611,6 +758,18 @@ paths:
       summary: Login Check
       tags:
       - Login
+  /api/v1/namespaces:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: List Namespaces
+      tags:
+      - Namespaces
   /api/v1/namespaces/{namespace}/clusters:
     get:
       consumes:
@@ -637,7 +796,52 @@ paths:
       summary: List Clusters
       tags:
       - Clusters
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: cluster
+        in: body
+        name: cluster
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_shaowenchen_ops_api_v1.Cluster'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create Cluster
+      tags:
+      - Clusters
   /api/v1/namespaces/{namespace}/clusters/{cluster}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: cluster
+        in: path
+        name: cluster
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete Cluster
+      tags:
+      - Clusters
     get:
       consumes:
       - application/json
@@ -658,6 +862,34 @@ paths:
         "200":
           description: OK
       summary: Get Cluster
+      tags:
+      - Clusters
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: cluster
+        in: path
+        name: cluster
+        required: true
+        type: string
+      - description: cluster
+        in: body
+        name: cluster
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_shaowenchen_ops_api_v1.Cluster'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update Cluster
       tags:
       - Clusters
   /api/v1/namespaces/{namespace}/clusters/{cluster}/nodes:
@@ -858,6 +1090,102 @@ paths:
         "200":
           description: OK
       summary: List Hosts
+      tags:
+      - Hosts
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: host
+        in: body
+        name: host
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Host'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create Host
+      tags:
+      - Hosts
+  /api/v1/namespaces/{namespace}/hosts/{host}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: host
+        in: path
+        name: host
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete Host
+      tags:
+      - Hosts
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: host
+        in: path
+        name: host
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get Host
+      tags:
+      - Hosts
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: host
+        in: path
+        name: host
+        required: true
+        type: string
+      - description: host
+        in: body
+        name: host
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Host'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update Host
       tags:
       - Hosts
   /api/v1/namespaces/{namespace}/pipelineruns:

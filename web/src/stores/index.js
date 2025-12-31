@@ -9,3 +9,4 @@ export * from "./login.store";
 export * from "./summary.store";
 export * from "./events.store";
 export * from "./eventhooks.store";
+export * from "./namespaces.store";

@@ -11,12 +11,19 @@ func SetupRouter(r *gin.Engine) {
 	v1Hosts := r.Group("/api/v1/namespaces/:namespace/hosts").Use(AuthMiddleware())
 	{
 		v1Hosts.GET("", ListHosts)
+		v1Hosts.POST("", CreateHost)
+		v1Hosts.GET("/:host", GetHost)
+		v1Hosts.PUT("/:host", PutHost)
+		v1Hosts.DELETE("/:host", DeleteHost)
 	}
 	v1Clusters := r.Group("/api/v1/namespaces/:namespace/clusters").Use(AuthMiddleware())
 	{
 		v1Clusters.GET("", ListClusters)
-		v1Clusters.GET(":cluster", GetCluster)
-		v1Clusters.GET(":cluster/nodes", GetClusterNodes)
+		v1Clusters.POST("", CreateCluster)
+		v1Clusters.GET("/:cluster", GetCluster)
+		v1Clusters.PUT("/:cluster", PutCluster)
+		v1Clusters.DELETE("/:cluster", DeleteCluster)
+		v1Clusters.GET("/:cluster/nodes", GetClusterNodes)
 	}
 	v1Tasks := r.Group("/api/v1/namespaces/:namespace/tasks").Use(AuthMiddleware())
 	{
@@ -55,6 +62,10 @@ func SetupRouter(r *gin.Engine) {
 	v1Summary := r.Group("/api/v1/summary").Use(AuthMiddleware())
 	{
 		v1Summary.GET("", GetSummary)
+	}
+	v1Namespaces := r.Group("/api/v1/namespaces").Use(AuthMiddleware())
+	{
+		v1Namespaces.GET("", ListNamespaces)
 	}
 	v1Events := r.Group("/api/v1/events").Use()
 	{

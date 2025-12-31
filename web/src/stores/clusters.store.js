@@ -26,5 +26,31 @@ export const useClustersStore = defineStore({
       );
       return res.data;
     },
+    async get(namespace, name) {
+      const analysis = await fetchWrapper.get(
+        `/api/v1/namespaces/${namespace}/clusters/${name}`
+      );
+      return analysis.data;
+    },
+    async create(namespace, cluster) {
+      const analysis = await fetchWrapper.post(
+        `/api/v1/namespaces/${namespace}/clusters`,
+        cluster
+      );
+      return analysis.data;
+    },
+    async update(namespace, name, cluster) {
+      const analysis = await fetchWrapper.put(
+        `/api/v1/namespaces/${namespace}/clusters/${name}`,
+        cluster
+      );
+      return analysis.data;
+    },
+    async delete(namespace, name) {
+      const analysis = await fetchWrapper.delete(
+        `/api/v1/namespaces/${namespace}/clusters/${name}`
+      );
+      return analysis.data;
+    },
   },
 });

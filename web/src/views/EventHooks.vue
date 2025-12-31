@@ -1,24 +1,26 @@
 <script setup>
-import { ref } from "vue";
-import { useEventHooksStore, useLoginStore } from "@/stores";
+import { ref, watch, onMounted } from "vue";
+import { useEventHooksStore, useLoginStore, useNamespacesStore } from "@/stores";
 import { formatObject } from "@/utils/common";
 
 var loginStore = useLoginStore();
 loginStore.check();
 
 const eventHooksStore = useEventHooksStore();
+const namespacesStore = useNamespacesStore();
 
 var dataList = ref([]);
 var currentPage = ref(1);
 var pageSize = ref(10);
 var total = ref(0);
 var searchQuery = ref("");
+var namespaces = ref([]);
 var dialogVisible = ref(false);
 var dialogMode = ref("view"); // 'view', 'create', 'edit'
 var selectedItem = ref(null);
 var formData = ref({
   metadata: {
-    namespace: "all",
+    namespace: "ops-system",
     name: "",
   },
   spec: {
@@ -53,13 +55,35 @@ var selectedFields = ref([
   "spec.url",
 ]);
 
-loadData();
+async function loadNamespaces() {
+  try {
+    await namespacesStore.list();
+    namespaces.value = namespacesStore.namespaces;
+  } catch (error) {
+    console.error("Error loading namespaces:", error);
+    namespaces.value = ['ops-system'];
+  }
+}
 
 async function loadData() {
-  var res = await eventHooksStore.list("all", pageSize.value, currentPage.value, searchQuery.value);
+  var res = await eventHooksStore.list(namespacesStore.selectedNamespace, pageSize.value, currentPage.value, searchQuery.value);
   dataList.value = res.list;
   total.value = res.total;
 }
+
+function onNamespaceChange() {
+  currentPage.value = 1;
+  loadData();
+}
+
+onMounted(() => {
+  loadNamespaces();
+  loadData();
+});
+
+watch(() => namespacesStore.selectedNamespace, () => {
+  onNamespaceChange();
+});
 
 function onPaginationChange() {
   loadData();
@@ -78,7 +102,7 @@ function view(item) {
 function create() {
   formData.value = JSON.parse(JSON.stringify({
     metadata: {
-      namespace: "all",
+      namespace: "ops-system",
       name: "",
     },
     spec: {
@@ -104,7 +128,7 @@ function edit(item) {
   // Deep clone to avoid mutating the original object
   formData.value = JSON.parse(JSON.stringify({
     metadata: {
-      namespace: item.metadata.namespace || "all",
+      namespace: item.metadata.namespace || "ops-system",
       name: item.metadata.name || "",
     },
     spec: {
@@ -138,7 +162,7 @@ function close() {
 async function save() {
   try {
     if (dialogMode.value === "create") {
-      await eventHooksStore.create("all", formData.value);
+      await eventHooksStore.create(namespacesStore.selectedNamespace, formData.value);
     } else if (dialogMode.value === "edit") {
       await eventHooksStore.update(
         selectedItem.value.metadata.namespace,
@@ -204,6 +228,17 @@ function updateOptionKey(oldKey, newKey) {
 
 <template>
   <div class="container">
+    <div class="namespace-filter">
+      <label>Namespace:</label>
+      <el-select :model-value="namespacesStore.selectedNamespace" class="namespace-select" @change="namespacesStore.setSelectedNamespace">
+        <el-option
+          v-for="ns in namespaces"
+          :key="ns"
+          :label="ns"
+          :value="ns"
+        />
+      </el-select>
+    </div>
     <div class="form-control enhanced-form">
       <el-row :gutter="20" align="middle">
         <el-col :span="18">
@@ -217,7 +252,7 @@ function updateOptionKey(oldKey, newKey) {
         </el-col>
         <el-col :span="6">
           <el-button type="primary" @click="create" class="search-button">
-            Create EventHook
+            Create
           </el-button>
         </el-col>
       </el-row>
@@ -507,11 +542,13 @@ function updateOptionKey(oldKey, newKey) {
           <span v-html="formatObject(row, field)"></span>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" width="250">
+      <el-table-column label="Actions" width="300" class-name="actions-column">
         <template #default="scope">
-          <el-button type="primary" @click="view(scope.row)">View</el-button>
-          <el-button type="warning" @click="edit(scope.row)">Edit</el-button>
-          <el-button type="danger" @click="remove(scope.row)">Delete</el-button>
+          <div class="actions-container">
+            <el-button type="primary" size="small" @click="view(scope.row)">View</el-button>
+            <el-button type="warning" size="small" @click="edit(scope.row)">Edit</el-button>
+            <el-button type="danger" size="small" @click="remove(scope.row)">Delete</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -535,6 +572,22 @@ function updateOptionKey(oldKey, newKey) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+.namespace-filter {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.namespace-filter label {
+  font-weight: bold;
+  min-width: 80px;
+}
+
+.namespace-select {
+  width: 200px;
 }
 
 .form-control {
@@ -602,6 +655,17 @@ pre {
 ul {
   margin: 5px 0;
   padding-left: 20px;
+}
+
+.actions-container {
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.actions-container .el-button {
+  margin: 0;
 }
 </style>
 

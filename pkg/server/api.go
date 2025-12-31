@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"sort"
@@ -30,6 +29,31 @@ import (
 // @Router /healthz [get]
 func Healthz(c *gin.Context) {
 	c.JSON(http.StatusOK, "OK")
+}
+
+// @Summary List Namespaces
+// @Tags Namespaces
+// @Accept json
+// @Produce json
+// @Success 200
+// @Router /api/v1/namespaces [get]
+func ListNamespaces(c *gin.Context) {
+	client, err := opsutils.NewKubernetesClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	namespaceList, err := client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	namespaces := make([]string, 0, len(namespaceList.Items))
+	for _, ns := range namespaceList.Items {
+		namespaces = append(namespaces, ns.Name)
+	}
+	sort.Strings(namespaces)
+	showData(c, namespaces)
 }
 
 // @Summary List Hosts
@@ -68,11 +92,7 @@ func ListHosts(c *gin.Context) {
 		return
 	}
 	hostList := &opsv1.HostList{}
-	if req.Namespace == opsconstants.AllNamespaces {
-		err = client.List(context.TODO(), hostList)
-	} else {
-		err = client.List(context.TODO(), hostList, runtimeClient.InNamespace(req.Namespace))
-	}
+	err = client.List(context.TODO(), hostList, runtimeClient.InNamespace(req.Namespace))
 	if err != nil {
 		return
 	}
@@ -96,6 +116,185 @@ func ListHosts(c *gin.Context) {
 		newHosts[i].Cleaned()
 	}
 	showData(c, paginator[opsv1.Host](newHosts, req.PageSize, req.Page))
+}
+
+// @Summary Get Host
+// @Tags Hosts
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param host path string true "host"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/hosts/{host} [get]
+func GetHost(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Host      string `uri:"host"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	host := &opsv1.Host{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Host,
+	}, host)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	host.Cleaned()
+	showData(c, host)
+}
+
+// @Summary Update Host
+// @Tags Hosts
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param host path string true "host"
+// @Param host body opsv1.Host true "host"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/hosts/{host} [put]
+func PutHost(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Host      string `uri:"host"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	dataBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	host := &opsv1.Host{}
+	err = json.Unmarshal(dataBytes, host)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// Get existing host to preserve ResourceVersion
+	oldHost := &opsv1.Host{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Host,
+	}, oldHost)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	host.ObjectMeta.ResourceVersion = oldHost.ObjectMeta.ResourceVersion
+	err = client.Update(context.TODO(), host)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
+// @Summary Delete Host
+// @Tags Hosts
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param host path string true "host"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/hosts/{host} [delete]
+func DeleteHost(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Host      string `uri:"host"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	host := &opsv1.Host{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Host,
+	}, host)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Delete(context.TODO(), host)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
+// @Summary Create Host
+// @Tags Hosts
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param host body opsv1.Host true "host"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/hosts [post]
+func CreateHost(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	dataBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	host := &opsv1.Host{}
+	err = json.Unmarshal(dataBytes, host)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// Set namespace from URI if not set in body
+	if host.Namespace == "" {
+		host.Namespace = req.Namespace
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Create(context.TODO(), host)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
 }
 
 // @Summary List Clusters
@@ -134,11 +333,7 @@ func ListClusters(c *gin.Context) {
 		return
 	}
 	clusterList := &opsv1.ClusterList{}
-	if req.Namespace == opsconstants.AllNamespaces {
-		err = client.List(context.TODO(), clusterList)
-	} else {
-		err = client.List(context.TODO(), clusterList, runtimeClient.InNamespace(req.Namespace))
-	}
+	err = client.List(context.TODO(), clusterList, runtimeClient.InNamespace(req.Namespace))
 	if err != nil {
 		return
 	}
@@ -189,16 +384,10 @@ func GetCluster(c *gin.Context) {
 		return
 	}
 	cluster := &opsv1.Cluster{}
-	if req.Namespace == opsconstants.AllNamespaces {
-		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
-			Name: req.Cluster,
-		}, cluster)
-	} else {
-		err = client.Get(context.TODO(), runtimeClient.ObjectKey{
-			Namespace: req.Namespace,
-			Name:      req.Cluster,
-		}, cluster)
-	}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Cluster,
+	}, cluster)
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -206,6 +395,148 @@ func GetCluster(c *gin.Context) {
 	// hide info
 	cluster.Cleaned()
 	showData(c, cluster)
+}
+
+// @Summary Update Cluster
+// @Tags Clusters
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param cluster path string true "cluster"
+// @Param cluster body opsv1.Cluster true "cluster"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/clusters/{cluster} [put]
+func PutCluster(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Cluster   string `uri:"cluster"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	dataBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	cluster := &opsv1.Cluster{}
+	err = json.Unmarshal(dataBytes, cluster)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// Get existing cluster to preserve ResourceVersion
+	oldCluster := &opsv1.Cluster{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Cluster,
+	}, oldCluster)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	cluster.ObjectMeta.ResourceVersion = oldCluster.ObjectMeta.ResourceVersion
+	err = client.Update(context.TODO(), cluster)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
+// @Summary Delete Cluster
+// @Tags Clusters
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param cluster path string true "cluster"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/clusters/{cluster} [delete]
+func DeleteCluster(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+		Cluster   string `uri:"cluster"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	cluster := &opsv1.Cluster{}
+	err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Cluster,
+	}, cluster)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Delete(context.TODO(), cluster)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
+}
+
+// @Summary Create Cluster
+// @Tags Clusters
+// @Accept json
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param cluster body opsv1.Cluster true "cluster"
+// @Success 200
+// @Router /api/v1/namespaces/{namespace}/clusters [post]
+func CreateCluster(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	dataBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	cluster := &opsv1.Cluster{}
+	err = json.Unmarshal(dataBytes, cluster)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// Set namespace from URI if not set in body
+	if cluster.Namespace == "" {
+		cluster.Namespace = req.Namespace
+	}
+	client, err := getRuntimeClient("")
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	err = client.Create(context.TODO(), cluster)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	showSuccess(c)
 }
 
 // @Summary Get Cluster Nodes
@@ -359,15 +690,29 @@ func GetPipeline(c *gin.Context) {
 // @Success 200
 // @Router /api/v1/namespaces/{namespace}/tasks [post]
 func CreateTask(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
 	dataBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		showError(c, err.Error())
+		return
 	}
 	task := &opsv1.Task{}
 	err = json.Unmarshal(dataBytes, task)
 	if err != nil {
 		showError(c, err.Error())
 		return
+	}
+	// Set namespace from URI if not set in body
+	if task.Namespace == "" {
+		task.Namespace = req.Namespace
 	}
 	client, err := getRuntimeClient("")
 	if err != nil {
@@ -391,15 +736,29 @@ func CreateTask(c *gin.Context) {
 // @Success 200
 // @Router /api/v1/namespaces/{namespace}/pipelines [post]
 func CreatePipeline(c *gin.Context) {
+	type Params struct {
+		Namespace string `uri:"namespace"`
+	}
+	var req = Params{}
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
 	dataBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		showError(c, err.Error())
+		return
 	}
 	pipeline := &opsv1.Pipeline{}
 	err = json.Unmarshal(dataBytes, pipeline)
 	if err != nil {
 		showError(c, err.Error())
 		return
+	}
+	// Set namespace from URI if not set in body
+	if pipeline.Namespace == "" {
+		pipeline.Namespace = req.Namespace
 	}
 	client, err := getRuntimeClient("")
 	if err != nil {
@@ -599,11 +958,7 @@ func ListTasks(c *gin.Context) {
 		return
 	}
 	taskList := &opsv1.TaskList{}
-	if req.Namespace == opsconstants.AllNamespaces {
-		err = client.List(context.TODO(), taskList)
-	} else {
-		err = client.List(context.TODO(), taskList, runtimeClient.InNamespace(req.Namespace))
-	}
+	err = client.List(context.TODO(), taskList, runtimeClient.InNamespace(req.Namespace))
 	if err != nil {
 		return
 	}
@@ -670,11 +1025,7 @@ func ListPipelines(c *gin.Context) {
 		return
 	}
 	pipelineList := &opsv1.PipelineList{}
-	if req.Namespace == opsconstants.AllNamespaces {
-		err = client.List(context.TODO(), pipelineList, runtimeClient.MatchingLabels(labels))
-	} else {
-		err = client.List(context.TODO(), pipelineList, runtimeClient.InNamespace(req.Namespace), runtimeClient.MatchingLabels(labels))
-	}
+	err = client.List(context.TODO(), pipelineList, runtimeClient.InNamespace(req.Namespace), runtimeClient.MatchingLabels(labels))
 	if err != nil {
 		return
 	}
@@ -782,6 +1133,7 @@ func ListTaskRun(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -803,11 +1155,7 @@ func ListTaskRun(c *gin.Context) {
 		return
 	}
 	taskRunList := &opsv1.TaskRunList{}
-	if req.Namespace == opsconstants.AllNamespaces {
-		err = client.List(context.TODO(), taskRunList)
-	} else {
-		err = client.List(context.TODO(), taskRunList, runtimeClient.InNamespace(req.Namespace))
-	}
+	err = client.List(context.TODO(), taskRunList, runtimeClient.InNamespace(req.Namespace))
 	if err != nil {
 		return
 	}
@@ -815,8 +1163,23 @@ func ListTaskRun(c *gin.Context) {
 	sort.Slice(taskRunList.Items, func(i, j int) bool {
 		return taskRunList.Items[i].ObjectMeta.CreationTimestamp.Time.After(taskRunList.Items[j].ObjectMeta.CreationTimestamp.Time)
 	})
+	newTaskRunList := make([]opsv1.TaskRun, 0)
+	// search
+	if req.Search != "" {
+		for i := range taskRunList.Items {
+			searchField := []string{taskRunList.Items[i].Name, taskRunList.Items[i].Spec.TaskRef, taskRunList.Items[i].Status.RunStatus}
+			for j := range searchField {
+				if opsutils.Contains(searchField[j], req.Search) {
+					newTaskRunList = append(newTaskRunList, taskRunList.Items[i])
+					break
+				}
+			}
+		}
+	} else {
+		newTaskRunList = taskRunList.Items
+	}
 	// item.status.startTime
-	showData(c, paginator[opsv1.TaskRun](taskRunList.Items, req.PageSize, req.Page))
+	showData(c, paginator[opsv1.TaskRun](newTaskRunList, req.PageSize, req.Page))
 }
 
 // @Summary List PipelineRun
@@ -833,6 +1196,7 @@ func ListPipelineRuns(c *gin.Context) {
 		Namespace string `uri:"namespace"`
 		Page      uint   `form:"page"`
 		PageSize  uint   `form:"page_size"`
+		Search    string `form:"search"`
 	}
 	var req = Params{
 		PageSize: 10,
@@ -854,11 +1218,7 @@ func ListPipelineRuns(c *gin.Context) {
 		return
 	}
 	objs := &opsv1.PipelineRunList{}
-	if req.Namespace == opsconstants.AllNamespaces {
-		err = client.List(context.TODO(), objs)
-	} else {
-		err = client.List(context.TODO(), objs, runtimeClient.InNamespace(req.Namespace))
-	}
+	err = client.List(context.TODO(), objs, runtimeClient.InNamespace(req.Namespace))
 	if err != nil {
 		return
 	}
@@ -866,7 +1226,22 @@ func ListPipelineRuns(c *gin.Context) {
 	sort.Slice(objs.Items, func(i, j int) bool {
 		return objs.Items[i].ObjectMeta.CreationTimestamp.Time.After(objs.Items[j].ObjectMeta.CreationTimestamp.Time)
 	})
-	showData(c, paginator[opsv1.PipelineRun](objs.Items, req.PageSize, req.Page))
+	newPipelineRunList := make([]opsv1.PipelineRun, 0)
+	// search
+	if req.Search != "" {
+		for i := range objs.Items {
+			searchField := []string{objs.Items[i].Name, objs.Items[i].Spec.PipelineRef, objs.Items[i].Status.RunStatus}
+			for j := range searchField {
+				if opsutils.Contains(searchField[j], req.Search) {
+					newPipelineRunList = append(newPipelineRunList, objs.Items[i])
+					break
+				}
+			}
+		}
+	} else {
+		newPipelineRunList = objs.Items
+	}
+	showData(c, paginator[opsv1.PipelineRun](newPipelineRunList, req.PageSize, req.Page))
 }
 
 // @Summary Create TaskRun
@@ -1155,7 +1530,7 @@ func GetEvents(c *gin.Context) {
 		MaxLength: 1000,
 		Event:     "ops.>",
 		TimeOut:   1,
-		StartTime: time.Now().UnixMilli(),
+		StartTime: time.Now().UnixMicro(),
 	}
 	err := c.ShouldBindUri(&req)
 	if err != nil {
@@ -1170,25 +1545,15 @@ func GetEvents(c *gin.Context) {
 	// set more resonable max length and timeout
 	if req.MaxLength < 1000 {
 		req.TimeOut = 5
-	} else {
-		req.TimeOut = 10
 	}
+	sec := req.StartTime / 1000
 
-	// Convert milliseconds to seconds (start_time is in milliseconds)
-	var startTime time.Time
-	if req.StartTime > 0 {
-		sec := req.StartTime / 1000
-		nanosec := (req.StartTime % 1000) * 1000000
-		t := time.Unix(sec, nanosec).UTC()
-		location := time.FixedZone("CST", 8*60*60)
-		startTime = t.In(location)
-	} else {
-		// Default to 1 hour ago if start_time is not provided or invalid
+	t := time.Unix(sec, 0).UTC()
+	location := time.FixedZone("CST", 8*60*60)
+	startTime := t.In(location)
+	if err != nil {
 		startTime = time.Now().Add(-time.Hour * 1)
 	}
-	startTime = time.Now().Add(-time.Hour * 1)
-	fmt.Println("endpoint", GlobalConfig.Event.Endpoint)
-	fmt.Println("cluster", GlobalConfig.Event.Cluster)
 	client, err := opsevent.FactoryJetStreamClient(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster)
 	if err != nil {
 		showError(c, err.Error())
@@ -1264,11 +1629,7 @@ func ListEventHooks(c *gin.Context) {
 		return
 	}
 	eventhooks := &opsv1.EventHooksList{}
-	if req.Namespace == opsconstants.AllNamespaces {
-		err = client.List(context.TODO(), eventhooks)
-	} else {
-		err = client.List(context.TODO(), eventhooks, runtimeClient.InNamespace(req.Namespace))
-	}
+	err = client.List(context.TODO(), eventhooks, runtimeClient.InNamespace(req.Namespace))
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1339,19 +1700,33 @@ func CreateEventHook(c *gin.Context) {
 	type Params struct {
 		Namespace string `uri:"namespace"`
 	}
-	var eventhook = opsv1.EventHooks{}
 	var req = Params{}
 	err := c.ShouldBindUri(&req)
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
+	dataBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	eventhook := &opsv1.EventHooks{}
+	err = json.Unmarshal(dataBytes, eventhook)
+	if err != nil {
+		showError(c, err.Error())
+		return
+	}
+	// Set namespace from URI if not set in body
+	if eventhook.Namespace == "" {
+		eventhook.Namespace = req.Namespace
+	}
 	client, err := getRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
 	}
-	err = client.Create(context.TODO(), &eventhook)
+	err = client.Create(context.TODO(), eventhook)
 	if err != nil {
 		showError(c, err.Error())
 		return
