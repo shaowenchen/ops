@@ -3,6 +3,7 @@ package event
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/nats-io/nats.go"
 	opsconstants "github.com/shaowenchen/ops/pkg/constants"
@@ -98,16 +99,43 @@ func Factory(endpoint, cluster, namespace string, subs ...string) *EventBus {
 	return (&EventBus{}).WithEndpoint(endpoint).WithSubject(subject)
 }
 
-var jetCache = make(map[string]*nats.JetStreamContext)
+var (
+	jetStreamConn *nats.Conn
+	jetStreamJS   nats.JetStreamContext
+	jetStreamMu   sync.RWMutex
+)
 
-func FactoryJetStreamClient(endpoint, cluster string) (*nats.JetStreamContext, error) {
-	if _, ok := jetCache[cluster]; !ok {
-		nc, err := nats.Connect(endpoint)
-		if err != nil {
-			return nil, err
-		}
-		js, _ := nc.JetStream()
-		jetCache[cluster] = &js
+func FactoryJetStreamClient(endpoint, cluster string) (nats.JetStreamContext, error) {
+	jetStreamMu.RLock()
+	// Check if cached connection is still valid
+	if jetStreamConn != nil && !jetStreamConn.IsClosed() && jetStreamJS != nil {
+		js := jetStreamJS
+		jetStreamMu.RUnlock()
+		return js, nil
 	}
-	return jetCache[cluster], nil
+	jetStreamMu.RUnlock()
+
+	// Create new connection
+	nc, err := nats.Connect(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	js, err := nc.JetStream()
+	if err != nil {
+		nc.Close() // Close connection if JetStream creation fails
+		return nil, err
+	}
+
+	// Cache the connection and JetStream context
+	jetStreamMu.Lock()
+	// Close old connection if exists
+	if jetStreamConn != nil && !jetStreamConn.IsClosed() {
+		jetStreamConn.Close()
+	}
+	jetStreamConn = nc
+	jetStreamJS = js
+	jetStreamMu.Unlock()
+
+	return js, nil
 }

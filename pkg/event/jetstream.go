@@ -27,27 +27,57 @@ func QueryStartTime(client nats.JetStreamContext, subject string, startTime time
 	if err != nil {
 		return nil, err
 	}
+	// Ensure subscription is closed to prevent goroutine leaks
+	defer func() {
+		if sub != nil {
+			_ = sub.Unsubscribe()
+		}
+	}()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
 	defer cancel()
-	msgs, err := sub.Fetch(int(maxLen), nats.Context(ctx))
+
+	// Fetch a larger batch to ensure we get all messages in the time range
+	// Then we'll filter and sort to get the latest maxLen messages
+	fetchBatch := int(maxLen * 10)
+	if fetchBatch > 1000 {
+		fetchBatch = 1000 // Cap at 1000 to avoid memory issues
+	}
+	msgs, err := sub.Fetch(fetchBatch, nats.Context(ctx))
 	if err != nil {
+		// If timeout, return empty (no messages in time range)
+		if err == nats.ErrTimeout {
+			return []EventData{}, nil
+		}
 		return nil, err
 	}
-	len := len(msgs)
-	for i := len - 1; i >= 0; i-- {
-		msg := msgs[i]
+
+	// Parse all messages and collect valid events
+	allEvents := make([]EventData, 0, len(msgs))
+	for _, msg := range msgs {
 		e := event.Event{}
 		err := json.Unmarshal(msg.Data, &e)
 		if err != nil {
 			continue
 		}
-		data = append(data, EventData{
+		allEvents = append(allEvents, EventData{
 			Subject: msg.Subject,
 			Event:   e,
 			Time:    e.Time().Local().Format("2006-01-02 15:04:05"),
 		})
 	}
+
+	// Sort by event time (newest first)
+	// Events are already in chronological order from Fetch, so reverse to get newest first
+	for i := len(allEvents) - 1; i >= 0; i-- {
+		data = append(data, allEvents[i])
+	}
+
+	// Take only the latest maxLen messages
+	if len(data) > int(maxLen) {
+		data = data[:maxLen]
+	}
+
 	return data, nil
 }
 
@@ -56,7 +86,12 @@ func ListSubjects(url, streamName, search string, timeoutSeconds uint) (results 
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to NATS: %w", err)
 	}
-	defer nc.Drain()
+	// Drain will gracefully close the connection and wait for pending operations
+	defer func() {
+		if nc != nil {
+			_ = nc.Drain()
+		}
+	}()
 
 	js, err := jetstream.New(nc)
 	if err != nil {

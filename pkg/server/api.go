@@ -86,7 +86,7 @@ func ListHosts(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -137,7 +137,7 @@ func GetHost(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -186,7 +186,7 @@ func PutHost(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -229,7 +229,7 @@ func DeleteHost(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -284,7 +284,7 @@ func CreateHost(c *gin.Context) {
 	if host.Namespace == "" {
 		host.Namespace = req.Namespace
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -327,7 +327,7 @@ func ListClusters(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -378,7 +378,7 @@ func GetCluster(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -428,7 +428,7 @@ func PutCluster(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -471,7 +471,7 @@ func DeleteCluster(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -526,7 +526,7 @@ func CreateCluster(c *gin.Context) {
 	if cluster.Namespace == "" {
 		cluster.Namespace = req.Namespace
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -569,7 +569,7 @@ func GetClusterNodes(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -627,7 +627,7 @@ func GetTask(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -664,7 +664,7 @@ func GetPipeline(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -714,7 +714,7 @@ func CreateTask(c *gin.Context) {
 	if task.Namespace == "" {
 		task.Namespace = req.Namespace
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -760,7 +760,7 @@ func CreatePipeline(c *gin.Context) {
 	if pipeline.Namespace == "" {
 		pipeline.Namespace = req.Namespace
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -792,7 +792,7 @@ func PutTask(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -824,7 +824,7 @@ func PutPipeline(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -856,7 +856,7 @@ func DeleteTask(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -898,7 +898,7 @@ func DeletePipeline(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -952,7 +952,7 @@ func ListTasks(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1020,7 +1020,7 @@ func ListPipelines(c *gin.Context) {
 			labels[keyValue[0]] = keyValue[1]
 		}
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		return
 	}
@@ -1066,7 +1066,7 @@ func GetTaskRun(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1102,7 +1102,7 @@ func GetPipelineRun(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1149,7 +1149,7 @@ func ListTaskRun(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1212,7 +1212,7 @@ func ListPipelineRuns(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1299,7 +1299,7 @@ func createTaskRun(c *gin.Context, sync bool) (latest opsv1.TaskRun, err error) 
 		err = errors.New("taskRef is required")
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		return
 	}
@@ -1331,7 +1331,9 @@ func createTaskRun(c *gin.Context, sync bool) (latest opsv1.TaskRun, err error) 
 		return
 	}
 	// wait done
-	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
+	// Use request context so we can cancel if client disconnects
+	reqCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(reqCtx, 600*time.Second)
 	defer cancel()
 
 	ticker := time.NewTicker(3 * time.Second)
@@ -1341,7 +1343,8 @@ func createTaskRun(c *gin.Context, sync bool) (latest opsv1.TaskRun, err error) 
 		select {
 		case <-ticker.C:
 			latest = opsv1.TaskRun{}
-			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+			// Use the timeout context instead of context.TODO() so the request can be cancelled
+			err = client.Get(ctx, runtimeClient.ObjectKey{
 				Namespace: taskRun.Namespace,
 				Name:      taskRun.Name,
 			}, &latest)
@@ -1353,7 +1356,11 @@ func createTaskRun(c *gin.Context, sync bool) (latest opsv1.TaskRun, err error) 
 			}
 
 		case <-ctx.Done():
-			err = errors.New("timeout")
+			if ctx.Err() == context.Canceled {
+				err = errors.New("request cancelled")
+			} else {
+				err = errors.New("timeout")
+			}
 			return
 		}
 	}
@@ -1410,7 +1417,7 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 	if err != nil {
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		return
 	}
@@ -1439,7 +1446,9 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 		return
 	}
 	// wait done
-	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
+	// Use request context so we can cancel if client disconnects
+	reqCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(reqCtx, 600*time.Second)
 	defer cancel()
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
@@ -1447,7 +1456,8 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 		select {
 		case <-ticker.C:
 			latest = opsv1.PipelineRun{}
-			err = client.Get(context.TODO(), runtimeClient.ObjectKey{
+			// Use the timeout context instead of context.TODO() so the request can be cancelled
+			err = client.Get(ctx, runtimeClient.ObjectKey{
 				Namespace: pipelinerun.Namespace,
 				Name:      pipelinerun.Name,
 			}, &latest)
@@ -1459,7 +1469,11 @@ func createPipelineRun(c *gin.Context, sync bool) (latest opsv1.PipelineRun, err
 			}
 
 		case <-ctx.Done():
-			err = errors.New("timeout")
+			if ctx.Err() == context.Canceled {
+				err = errors.New("request cancelled")
+			} else {
+				err = errors.New("timeout")
+			}
 			return
 		}
 	}
@@ -1493,12 +1507,17 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
+	// Publish event asynchronously to avoid blocking the HTTP response
+	// Use a goroutine with timeout to prevent goroutine leaks
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
+
 		eventBus := opsevent.Factory(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster, req.Namespace, req.Event)
+		// Publish already has defer Close inside, so we don't need to call Close again
+		// The context timeout ensures this goroutine will exit even if Publish blocks
 		_ = eventBus.Publish(ctx, body)
-		eventBus.Close(ctx)
+		// Goroutine will exit here, and context will be cancelled by defer
 	}()
 
 	showSuccess(c)
@@ -1532,7 +1551,7 @@ func GetEvents(c *gin.Context) {
 		MaxLength: 1000,
 		Event:     "ops.>",
 		TimeOut:   defaultTimeout,
-		StartTime: time.Now().UnixMicro(),
+		StartTime: time.Now().Add(-time.Minute).UnixMicro(), // Default to 1 minute ago
 	}
 	err := c.ShouldBindUri(&req)
 	if err != nil {
@@ -1561,7 +1580,7 @@ func GetEvents(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	data, err := opsevent.QueryStartTime(*client, req.Event, startTime, req.MaxLength, req.TimeOut)
+	data, err := opsevent.QueryStartTime(client, req.Event, startTime, req.MaxLength, req.TimeOut)
 	showData(c, paginator[opsevent.EventData](data, req.PageSize, req.Page))
 }
 
@@ -1627,7 +1646,7 @@ func ListEventHooks(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1675,7 +1694,7 @@ func GetEventHook(c *gin.Context) {
 		showError(c, err.Error())
 		return
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1725,7 +1744,7 @@ func CreateEventHook(c *gin.Context) {
 	if eventhook.Namespace == "" {
 		eventhook.Namespace = req.Namespace
 	}
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1766,7 +1785,7 @@ func PutEventHook(c *gin.Context) {
 	}
 	eventhook.ObjectMeta.Namespace = req.Namespace
 	eventhook.ObjectMeta.Name = req.Eventhook
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1815,7 +1834,7 @@ func DeleteEventHook(c *gin.Context) {
 		},
 	}
 
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1845,7 +1864,7 @@ func LoginCheck(c *gin.Context) {
 // @Success 200
 // @Router /api/v1/summary [get]
 func GetSummary(c *gin.Context) {
-	client, err := getRuntimeClient("")
+	client, err := opskube.GetRuntimeClient("")
 	if err != nil {
 		showError(c, err.Error())
 		return
@@ -1901,17 +1920,4 @@ func GetSummary(c *gin.Context) {
 		"taskruns":     len(taskrunList.Items),
 		"eventhooks":   len(eventhooksList.Items),
 	})
-}
-func getRuntimeClient(kubeconfigPath string) (client runtimeClient.Client, err error) {
-	scheme, err := opsv1.SchemeBuilder.Build()
-	if err != nil {
-		return
-	}
-	restConfig, err := opsutils.GetRestConfig(kubeconfigPath)
-
-	if err != nil {
-		return
-	}
-
-	return runtimeClient.New(restConfig, runtimeClient.Options{Scheme: scheme})
 }
