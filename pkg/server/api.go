@@ -1493,12 +1493,17 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
+	// Publish event asynchronously to avoid blocking the HTTP response
+	// Use a goroutine with timeout to prevent goroutine leaks
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
+
 		eventBus := opsevent.Factory(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster, req.Namespace, req.Event)
+		// Publish already has defer Close inside, so we don't need to call Close again
+		// The context timeout ensures this goroutine will exit even if Publish blocks
 		_ = eventBus.Publish(ctx, body)
-		eventBus.Close(ctx)
+		// Goroutine will exit here, and context will be cancelled by defer
 	}()
 
 	showSuccess(c)
