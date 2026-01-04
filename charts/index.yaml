@@ -1,0 +1,53 @@
+apiVersion: v1
+entries:
+  ops:
+  - apiVersion: v2
+    appVersion: 1.2.0
+    created: "2026-01-04T07:20:49.612983331Z"
+    description: A Helm chart for Ops
+    digest: a59badc187960ddc8ecf29f0df518bd606f93b67ff8f7c1535604a75d22eaed3
+    home: https://www.chenshaowen.com/ops
+    icon: https://www.chenshaowen.com/ops/logo.png
+    maintainers:
+    - email: mail@chenshaowen.com
+      name: shaowenchen
+    name: ops
+    sources:
+    - https://github.com/shaowenchen/ops
+    type: application
+    urls:
+    - https://www.chenshaowen.com/ops/charts/ops-1.2.0.tgz
+    version: 1.2.0
+  - apiVersion: v2
+    appVersion: 1.1.0
+    created: "2025-12-23T13:13:11Z"
+    description: A Helm chart for Ops
+    home: https://www.chenshaowen.com/ops
+    icon: https://www.chenshaowen.com/ops/logo.png
+    maintainers:
+    - email: mail@chenshaowen.com
+      name: shaowenchen
+    name: ops
+    sources:
+    - https://github.com/shaowenchen/ops
+    type: application
+    urls:
+    - https://www.chenshaowen.com/ops/charts/ops-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-11-07T14:32:37.05352+08:00"
+    description: A Helm chart for Ops
+    home: https://www.chenshaowen.com/ops
+    icon: https://www.chenshaowen.com/ops/logo.png
+    maintainers:
+    - email: mail@chenshaowen.com
+      name: shaowenchen
+    name: ops
+    sources:
+    - https://github.com/shaowenchen/ops
+    type: application
+    urls:
+    - https://www.chenshaowen.com/ops/charts/ops-1.0.0.tgz
+    version: 1.0.0
+generated: "2026-01-04T07:20:49.611951295Z"
