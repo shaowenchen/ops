@@ -14,7 +14,7 @@ var dialogVisible = ref(false);
 var selectedItem = ref(null);
 var searchQuery = ref('ops.>');
 var selectTime = ref(Date);
-selectTime.value = new Date(new Date() - 5 * 60 * 1000);
+selectTime.value = new Date(new Date() - 1 * 60 * 1000);
 
 const allFields = [
     { value: 'event.id', label: 'ID' },
