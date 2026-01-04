@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"net/http"
-	_ "net/http/pprof"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,9 +16,6 @@ func init() {
 	configpath := flag.String("c", "", "")
 	flag.Parse()
 	server.LoadConfig(*configpath)
-	go func() {
-		http.ListenAndServe("0.0.0.0:6060", nil)
-	}()
 }
 
 func main() {
@@ -64,6 +59,7 @@ func main() {
 	server.SetupRouter(r)
 	server.SetupRouteWithoutAuth(r)
 	server.SetHealthzRouter(r)
+	server.SetupPprofRouter(r)
 	web.SetupRouter(r)
 	r.Run(":80")
 }

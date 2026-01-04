@@ -1,6 +1,9 @@
 package server
 
 import (
+	"net/http"
+	"net/http/pprof"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/shaowenchen/ops/swagger"
 	swaggerfiles "github.com/swaggo/files"
@@ -95,5 +98,23 @@ func SetHealthzRouter(r *gin.Engine) {
 	{
 		root.GET("healthz", Healthz)
 		root.GET("readyz", Healthz)
+	}
+}
+
+func SetupPprofRouter(r *gin.Engine) {
+	pprofGroup := r.Group("/debug/pprof")
+	{
+		pprofGroup.GET("/", gin.WrapH(http.HandlerFunc(pprof.Index)))
+		pprofGroup.GET("/cmdline", gin.WrapH(http.HandlerFunc(pprof.Cmdline)))
+		pprofGroup.GET("/profile", gin.WrapH(http.HandlerFunc(pprof.Profile)))
+		pprofGroup.POST("/symbol", gin.WrapH(http.HandlerFunc(pprof.Symbol)))
+		pprofGroup.GET("/symbol", gin.WrapH(http.HandlerFunc(pprof.Symbol)))
+		pprofGroup.GET("/trace", gin.WrapH(http.HandlerFunc(pprof.Trace)))
+		pprofGroup.GET("/allocs", gin.WrapH(pprof.Handler("allocs")))
+		pprofGroup.GET("/block", gin.WrapH(pprof.Handler("block")))
+		pprofGroup.GET("/goroutine", gin.WrapH(pprof.Handler("goroutine")))
+		pprofGroup.GET("/heap", gin.WrapH(pprof.Handler("heap")))
+		pprofGroup.GET("/mutex", gin.WrapH(pprof.Handler("mutex")))
+		pprofGroup.GET("/threadcreate", gin.WrapH(pprof.Handler("threadcreate")))
 	}
 }
