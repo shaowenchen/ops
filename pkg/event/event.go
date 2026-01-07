@@ -14,6 +14,7 @@ import (
 type EventController struct {
 	Cluster string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 	Kind    string `json:"kind,omitempty" yaml:"kind,omitempty"`
+	Status  string `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type EventHost struct {

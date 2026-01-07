@@ -307,8 +307,9 @@ func (r *EventHooksReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.EventHooks, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
-			Kind: opsconstants.EventHooks,
+		go opsevent.FactoryController(namespace, opsconstants.EventHooks, opsconstants.Status).Publish(context.TODO(), opsevent.EventController{
+			Kind:   opsconstants.EventHooks,
+			Status: opsconstants.Setup,
 		})
 	}
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.EventHooks{}, ".spec.subject", func(rawObj client.Object) []string {

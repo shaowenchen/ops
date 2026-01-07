@@ -76,8 +76,9 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.Events, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
-			Kind: opsconstants.PipelineRuns,
+		go opsevent.FactoryController(namespace, opsconstants.Events, opsconstants.Status).Publish(context.TODO(), opsevent.EventController{
+			Kind:   opsconstants.Events,
+			Status: opsconstants.Setup,
 		})
 	}
 	if !isEventsV1Available(r.Client) {

@@ -724,8 +724,9 @@ func (r *TaskRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.TaskRuns, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
-			Kind: opsconstants.TaskRuns,
+		go opsevent.FactoryController(namespace, opsconstants.TaskRuns, opsconstants.Status).Publish(context.TODO(), opsevent.EventController{
+			Kind:   opsconstants.TaskRuns,
+			Status: opsconstants.Setup,
 		})
 	}
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.TaskRun{}, ".spec.taskRef", func(rawObj client.Object) []string {

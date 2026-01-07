@@ -115,8 +115,9 @@ func (r *HostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.Hosts, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
-			Kind: opsconstants.Hosts,
+		go opsevent.FactoryController(namespace, opsconstants.Hosts, opsconstants.Status).Publish(context.TODO(), opsevent.EventController{
+			Kind:   opsconstants.Hosts,
+			Status: opsconstants.Setup,
 		})
 	}
 	return ctrl.NewControllerManagedBy(mgr).

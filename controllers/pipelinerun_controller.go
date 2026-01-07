@@ -166,16 +166,17 @@ func (r *PipelineRunReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				err = r.Client.Status().Update(ctx, currentPR)
 				if err != nil {
 					logger.Error.Println(err, "failed to update current pr")
+					return
 				}
+				// send event
+				go opsevent.FactoryPipelineRun(pr.Namespace, pr.Name, opsconstants.Status).Publish(ctx, &opsevent.EventPipelineRun{
+					PipelineRef:       pr.Spec.PipelineRef,
+					Desc:              pr.Spec.Desc,
+					Variables:         pr.Spec.Variables,
+					PipelineRunStatus: pr.Status,
+				})
 				return
 			}
-			// send event
-			go opsevent.FactoryPipelineRun(pr.Namespace, pr.Name, opsconstants.Status).Publish(ctx, &opsevent.EventPipelineRun{
-				PipelineRef:       pr.Spec.PipelineRef,
-				Desc:              pr.Spec.Desc,
-				Variables:         pr.Spec.Variables,
-				PipelineRunStatus: pr.Status,
-			})
 		}()
 		return ctrl.Result{}, nil
 	}
@@ -562,8 +563,9 @@ func (r *PipelineRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// push event
 	namespace, err := opsconstants.GetCurrentNamespace()
 	if err == nil {
-		go opsevent.FactoryController(namespace, opsconstants.PipelineRuns, opsconstants.Setup).Publish(context.TODO(), opsevent.EventController{
-			Kind: opsconstants.PipelineRuns,
+		go opsevent.FactoryController(namespace, opsconstants.PipelineRuns, opsconstants.Status).Publish(context.TODO(), opsevent.EventController{
+			Kind:   opsconstants.PipelineRuns,
+			Status: opsconstants.Setup,
 		})
 	}
 	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &opsv1.PipelineRun{}, ".spec.pipelineRef", func(rawObj client.Object) []string {
