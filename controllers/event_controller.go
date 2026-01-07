@@ -96,7 +96,7 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 						return
 					}
 					if getEventTime(v1e).Sub(time.Now().Add(-120*time.Second)) > 0 {
-						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Events).Publish(context.TODO(), GetEventKube(v1e))
 					}
 				},
 				UpdateFunc: func(e event.UpdateEvent, q workqueue.RateLimitingInterface) {
@@ -105,7 +105,7 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 						return
 					}
 					if getEventTime(v1e).Sub(time.Now().Add(-120*time.Second)) > 0 {
-						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Events).Publish(context.TODO(), GetEventKube(v1e))
 					}
 				},
 				DeleteFunc: func(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
@@ -114,7 +114,7 @@ func (r *EventReconciler) SetupWithManager(mgr ctrl.Manager) error {
 						return
 					}
 					if getEventTime(v1e).Sub(time.Now().Add(-120*time.Second)) > 0 {
-						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Event).Publish(context.TODO(), GetEventKube(v1e))
+						opsevent.FactoryKube(v1e.Regarding.Namespace, v1e.Regarding.Kind+"s", v1e.Regarding.Name, opsconstants.Events).Publish(context.TODO(), GetEventKube(v1e))
 					}
 				},
 			},
