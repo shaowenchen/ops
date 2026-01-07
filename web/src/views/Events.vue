@@ -1,10 +1,14 @@
 <script setup>
 import { useEventsStore, useLoginStore } from '@/stores';
 import { formatObject } from '@/utils/common';
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 var loginStore = useLoginStore();
 loginStore.check();
+
+const route = useRoute();
+const router = useRouter();
 
 var dataList = ref([]);
 var currentPage = ref(1);
@@ -63,12 +67,32 @@ watch(searchQuery, (newQuery) => {
 });
 
 function handleSelectChange(selectedValue) {
+    updateUrl();
     loadData();
 }
 
 function view(item) {
     dialogVisible.value = true;
     selectedItem.value = item;
+}
+
+function updateUrl() {
+    const query = {
+        ...route.query,
+    };
+    if (searchQuery.value && searchQuery.value !== 'ops.>') {
+        query.event = searchQuery.value;
+    } else {
+        delete query.event;
+    }
+    router.push({ query });
+}
+
+function loadFromUrl() {
+    const query = route.query;
+    if (query.event) {
+        searchQuery.value = query.event;
+    }
 }
 
 async function loadData() {
@@ -78,16 +102,23 @@ async function loadData() {
     var res = await store.get(searchQuery.value, utcTimestamp, pageSize.value, currentPage.value);
     dataList.value = res.list;
     total.value = res.total;
+    updateUrl();
 }
 
-fetchSubjects("");
-loadData();
+onMounted(() => {
+    loadFromUrl();
+    fetchSubjects("");
+    loadData();
+});
 
 function onPaginationChange() {
+    updateUrl();
     loadData();
 }
 
 function onPageSizeChange() {
+    currentPage.value = 1;
+    updateUrl();
     loadData();
 }
 
@@ -98,6 +129,12 @@ function fetchSuggestions(query, callback) {
     callback(results);
 }
 
+function handleSearch() {
+    currentPage.value = 1;
+    updateUrl();
+    loadData();
+}
+
 </script>
 
 <template>
@@ -105,15 +142,28 @@ function fetchSuggestions(query, callback) {
         <div class="form-control enhanced-form">
             <el-row :gutter="20" align="middle">
                 <el-col :span="10">
-                    <el-autocomplete v-model="searchQuery" :fetch-suggestions="fetchSuggestions" placeholder="Search"
-                        @select="handleSelectChange" trigger-on-focus class="search-bar"></el-autocomplete>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <el-autocomplete v-model="searchQuery" :fetch-suggestions="fetchSuggestions" placeholder="Search"
+                            @select="handleSelectChange" trigger-on-focus class="search-bar"></el-autocomplete>
+                        <el-tooltip placement="top" raw-content>
+                            <template #content>
+                                <div style="line-height: 1.8;">
+                                    <div>支持 NATS 主题格式查询，示例：</div>
+                                    <div style="margin-top: 4px;">• ops.></div>
+                                    <div>• ops.clusters.xxx.nodes.*.events</div>
+                                    <div>• ops.clusters.xxx.namespaces.xxx.pods.events</div>
+                                </div>
+                            </template>
+                            <span style="cursor: help; color: #909399; font-size: 16px; font-weight: bold;">?</span>
+                        </el-tooltip>
+                    </div>
                 </el-col>
                 <el-col :span="8">
                     <el-date-picker v-model="selectTime" type="datetime" placeholder="Select Start Time"
                         format="YYYY-MM-DD HH:mm:ss" class="date-picker"></el-date-picker>
                 </el-col>
                 <el-col :span="6">
-                    <el-button type="primary" icon="el-icon-search" @click="loadData" class="search-button">
+                    <el-button type="primary" icon="el-icon-search" @click="handleSearch" class="search-button">
                         Search
                     </el-button>
                 </el-col>
