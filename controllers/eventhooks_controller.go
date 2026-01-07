@@ -213,7 +213,13 @@ func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx co
 		}
 		// Record event processing metrics only on success
 		go func() {
-			notif.Post(eventhook.Spec.URL, eventhook.Spec.Options, eventStrings, eventhook.Spec.Additional)
+			// Pass original event subject for all types (useful for Event type suffix replacement)
+			options := eventhook.Spec.Options
+			if options == nil {
+				options = make(map[string]string)
+			}
+			options["sourceSubject"] = event.Subject()
+			notif.Post(eventhook.Spec.URL, options, eventStrings, eventhook.Spec.Additional)
 			// Record EventHooks trigger information in status metrics
 			opsmetrics.RecordEventHooksStatus(eventhook.Namespace, eventhook.Name, matchedKeyword, event.ID())
 		}()
