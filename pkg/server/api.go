@@ -1513,7 +1513,23 @@ func CreateEvent(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		eventBus := opsevent.Factory(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster, req.Namespace, req.Event)
+		var eventBus *opsevent.EventBus
+		// If event path starts with "ops.", use it directly as subject (e.g., notification events)
+		// Format: ops.notifications.providers.{provider}.channels.{channel}.severities.{severity}
+		if strings.HasPrefix(req.Event, "ops.") {
+			// Use the event path directly as subject without any transformation
+			eventBus = (&opsevent.EventBus{}).WithEndpoint(GlobalConfig.Event.Endpoint).WithSubject(req.Event)
+		} else if strings.HasPrefix(req.Event, "nodes.") {
+			// Handle node events specially: nodes.{nodeName}.{observation} format
+			// Node events use special format without namespaces: ops.clusters.{cluster}.nodes.{nodeName}.{observation}
+			// Split event path: "nodes.{nodeName}.findings" -> ["nodes", "{nodeName}", "findings"]
+			// Use FactoryKube with empty namespace for node events
+			parts := strings.Split(req.Event, ".")
+			eventBus = opsevent.FactoryKube("", parts...)
+		} else {
+			// Standard format: ops.clusters.{cluster}.namespaces.{namespace}.{event}
+			eventBus = opsevent.Factory(GlobalConfig.Event.Endpoint, GlobalConfig.Event.Cluster, req.Namespace, req.Event)
+		}
 		// Publish already has defer Close inside, so we don't need to call Close again
 		// The context timeout ensures this goroutine will exit even if Publish blocks
 		_ = eventBus.Publish(ctx, body)

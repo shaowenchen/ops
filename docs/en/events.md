@@ -276,12 +276,92 @@ ops.clusters.mycluster.nodes.mynode.events
 
 ---
 
-### 7. Custom Events (via API)
+### 7. Notification Events
 
 **Subject Format:**
 ```
-ops.clusters.{cluster}.namespaces.{namespace}.{eventName}
+ops.notifications.providers.{provider}.channels.{channel}.severities.{severity}
 ```
+
+Where:
+- `{provider}`: Notification provider or system name (e.g., `ksyun`, `ai`, etc.)
+- `{channel}`: Notification channel type (e.g., `webhook`, `email`, `sms`, etc.)
+- `{severity}`: Severity level (e.g., `info`, `warning`, `error`, `critical`, etc.)
+
+**Trigger:**
+- Published when the notification system sends notifications
+
+**Published From:**
+- Published via API endpoint `/api/v1/namespaces/{namespace}/events/{event}`
+- If the event path starts with `ops.`, it will be used directly as the subject without format transformation
+
+**Publishing Method:**
+```bash
+curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/ops.notifications.providers.ksyun.channels.webhook.severities.info \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "provider": "ksyun",
+    "channel": "webhook",
+    "severity": "info",
+    "message": "Notification message",
+    "title": "Notification title"
+  }'
+```
+
+**Event Data Structure:**
+```json
+{
+  "provider": "string",
+  "channel": "string",
+  "severity": "string",
+  "message": "string",
+  "title": "string",
+  "timestamp": "string",
+  // ... other notification-related fields
+}
+```
+
+**Example Subjects:**
+```
+ops.notifications.providers.ksyun.channels.webhook.severities.info
+ops.notifications.providers.ksyun.channels.webhook.severities.warning
+ops.notifications.providers.ksyun.channels.webhook.severities.error
+ops.notifications.providers.ksyun.channels.email.severities.critical
+ops.notifications.providers.AI.channels.webhook.severities.info
+```
+
+**Note:**
+- Notification events use an independent subject format without `clusters` and `namespaces` parts
+- Used for notification system routing and distribution
+- Supports combinations of multiple providers, channels, and severity levels
+- **Important**: If the event path starts with `ops.`, the API will use the path directly as the NATS subject without any format transformation
+
+---
+
+### 8. Custom Events (via API)
+
+**Subject Format:**
+The API uses different processing methods based on the event path:
+
+1. **Event path starting with `ops.`** (direct delivery):
+   ```
+   ops.{any path}
+   ```
+   - Uses the path directly as the NATS subject without any format transformation
+   - Suitable for notification events and other independent format events
+
+2. **Event path starting with `nodes.`** (node events):
+   ```
+   ops.clusters.{cluster}.nodes.{nodeName}.{observation}
+   ```
+   - Converts to node event format without the `namespaces` part
+
+3. **Standard format** (other paths):
+   ```
+   ops.clusters.{cluster}.namespaces.{namespace}.{eventName}
+   ```
+   - Automatically adds cluster and namespace prefixes
 
 **Trigger:**
 - Manually published via API endpoint `/api/v1/namespaces/{namespace}/events/{event}`
@@ -292,7 +372,8 @@ ops.clusters.{cluster}.namespaces.{namespace}.{eventName}
 **Event Data Structure:**
 - Custom JSON object defined by the caller
 
-**Usage Example:**
+**Usage Examples:**
+Standard format event:
 ```bash
 curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/my-custom-event \
   -H "Content-Type: application/json" \
@@ -300,6 +381,30 @@ curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/my-custom-e
   -d '{
     "message": "Custom event data",
     "level": "info"
+  }'
+```
+
+Direct delivery format (starting with `ops.`):
+```bash
+curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/ops.notifications.providers.ksyun.channels.webhook.severities.info \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "provider": "ksyun",
+    "channel": "webhook",
+    "severity": "info",
+    "message": "Notification message"
+  }'
+```
+
+Node event format:
+```bash
+curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/nodes.mynode.findings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "message": "Node finding",
+    "status": "normal"
   }'
 ```
 
@@ -345,6 +450,22 @@ nats --user=app --password=${apppassword} sub "ops.clusters.*.namespaces.*.*.eve
 
 # Subscribe to node events (special format)
 nats --user=app --password=${apppassword} sub "ops.clusters.*.nodes.*.events"
+```
+
+### Subscribe to Notification Events
+
+```bash
+# Subscribe to all notification events
+nats --user=app --password=${apppassword} sub "ops.notifications.>"
+
+# Subscribe to notifications from a specific provider
+nats --user=app --password=${apppassword} sub "ops.notifications.providers.ksyun.>"
+
+# Subscribe to notifications from a specific channel
+nats --user=app --password=${apppassword} sub "ops.notifications.providers.*.channels.webhook.>"
+
+# Subscribe to notifications with a specific severity level
+nats --user=app --password=${apppassword} sub "ops.notifications.providers.*.channels.*.severities.error"
 ```
 
 ## Event Format

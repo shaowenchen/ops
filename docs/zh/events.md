@@ -276,12 +276,93 @@ ops.clusters.mycluster.nodes.mynode.events
 
 ---
 
-### 7. 自定义事件（通过 API）
+### 7. 通知事件
 
 **主题格式：**
 ```
-ops.clusters.{cluster}.namespaces.{namespace}.{eventName}
+ops.notifications.providers.{provider}.channels.{channel}.severities.{severity}
 ```
+
+其中：
+- `{provider}`: 通知提供商或系统名称（如 `ksyun`, `ai` 等）
+- `{channel}`: 通知渠道类型（如 `webhook`, `email`, `sms` 等）
+- `{severity}`: 严重程度级别（如 `info`, `warning`, `error`, `critical` 等）
+
+**触发时机：**
+- 通知系统发送通知时发布
+
+**发布位置：**
+- 通过 API 接口 `/api/v1/namespaces/{namespace}/events/{event}` 发布
+- 如果事件路径以 `ops.` 开头，将直接使用该路径作为主题，不进行格式转换
+
+**发布方式：**
+```bash
+curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/ops.notifications.providers.ksyun.channels.webhook.severities.info \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "provider": "ksyun",
+    "channel": "webhook",
+    "severity": "info",
+    "message": "Notification message",
+    "title": "Notification title"
+  }'
+```
+
+**事件数据结构：**
+```json
+{
+  "provider": "string",
+  "channel": "string",
+  "severity": "string",
+  "message": "string",
+  "title": "string",
+  "timestamp": "string",
+  // ... 其他通知相关字段
+}
+```
+
+**示例主题：**
+```
+ops.notifications.providers.ksyun.channels.webhook.severities.info
+ops.notifications.providers.ksyun.channels.webhook.severities.warning
+ops.notifications.providers.ksyun.channels.webhook.severities.error
+ops.notifications.providers.ksyun.channels.email.severities.critical
+ops.notifications.providers.AI.channels.webhook.severities.info
+```
+
+**说明：**
+- 通知事件使用独立的主题格式，不包含 `clusters` 和 `namespaces` 部分
+- 用于通知系统的路由和分发
+- 支持多个提供商、渠道和严重程度级别的组合
+- **重要**：如果事件路径以 `ops.` 开头，API 会直接使用该路径作为 NATS 主题，不会进行任何格式转换
+
+---
+
+### 8. 自定义事件（通过 API）
+
+**主题格式：**
+
+根据事件路径的不同，API 会采用不同的处理方式：
+
+1. **以 `ops.` 开头的事件路径**（直接投递）：
+   ```
+   ops.{任意路径}
+   ```
+   - 直接使用该路径作为 NATS 主题，不进行任何格式转换
+   - 适用于通知事件等独立格式的事件
+
+2. **以 `nodes.` 开头的事件路径**（节点事件）：
+   ```
+   ops.clusters.{cluster}.nodes.{nodeName}.{observation}
+   ```
+   - 转换为节点事件格式，不包含 `namespaces` 部分
+
+3. **标准格式**（其他路径）：
+   ```
+   ops.clusters.{cluster}.namespaces.{namespace}.{eventName}
+   ```
+   - 自动添加集群和命名空间前缀
 
 **触发时机：**
 - 通过 API 接口 `/api/v1/namespaces/{namespace}/events/{event}` 手动发布
@@ -293,6 +374,8 @@ ops.clusters.{cluster}.namespaces.{namespace}.{eventName}
 - 由调用方自定义，可以是任意 JSON 对象
 
 **使用示例：**
+
+标准格式事件：
 ```bash
 curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/my-custom-event \
   -H "Content-Type: application/json" \
@@ -300,6 +383,30 @@ curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/my-custom-e
   -d '{
     "message": "Custom event data",
     "level": "info"
+  }'
+```
+
+直接投递格式（以 `ops.` 开头）：
+```bash
+curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/ops.notifications.providers.ksyun.channels.webhook.severities.info \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "provider": "ksyun",
+    "channel": "webhook",
+    "severity": "info",
+    "message": "Notification message"
+  }'
+```
+
+节点事件格式：
+```bash
+curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/nodes.mynode.findings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "message": "Node finding",
+    "status": "normal"
   }'
 ```
 
@@ -345,6 +452,22 @@ nats --user=app --password=${apppassword} sub "ops.clusters.*.namespaces.*.*.eve
 
 # 订阅节点事件（特殊格式）
 nats --user=app --password=${apppassword} sub "ops.clusters.*.nodes.*.events"
+```
+
+### 订阅通知事件
+
+```bash
+# 订阅所有通知事件
+nats --user=app --password=${apppassword} sub "ops.notifications.>"
+
+# 订阅特定提供商的通知事件
+nats --user=app --password=${apppassword} sub "ops.notifications.providers.ksyun.>"
+
+# 订阅特定渠道的通知事件
+nats --user=app --password=${apppassword} sub "ops.notifications.providers.*.channels.webhook.>"
+
+# 订阅特定严重程度的通知事件
+nats --user=app --password=${apppassword} sub "ops.notifications.providers.*.channels.*.severities.error"
 ```
 
 ## 事件格式说明
