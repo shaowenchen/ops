@@ -94,6 +94,27 @@ func (bus *EventBus) Publish(ctx context.Context, data interface{}) error {
 	return nil
 }
 
+// W writes the event to the specified subject
+func (bus *EventBus) W(ctx context.Context, subject string, event cloudevents.Event) error {
+	if bus.Server == "" || subject == "" {
+		return nil
+	}
+	bus.Subject = strings.ToLower(subject)
+	event.SetSubject(bus.Subject)
+	client, err := bus.GetClient()
+	if err != nil {
+		return err
+	}
+
+	defer bus.Close(ctx)
+
+	result := (*client).Send(ctx, event)
+	if cloudevents.IsUndelivered(result) {
+		return errors.New("failed to publish")
+	}
+	return nil
+}
+
 func (bus *EventBus) Subscribe(ctx context.Context) error {
 	if bus.Cancel != nil {
 		bus.Cancel()

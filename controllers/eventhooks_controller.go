@@ -219,7 +219,7 @@ func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx co
 				options = make(map[string]string)
 			}
 			options["sourceSubject"] = event.Subject()
-			notif.Post(eventhook.Spec.URL, options, eventStrings, eventhook.Spec.Additional)
+			notif.Post(event, eventhook.Spec.URL, options, eventStrings, eventhook.Spec.Additional)
 			// Record EventHooks trigger information in status metrics
 			opsmetrics.RecordEventHooksStatus(eventhook.Namespace, eventhook.Name, matchedKeyword, event.ID())
 		}()

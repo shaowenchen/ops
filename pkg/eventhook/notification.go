@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	opsevent "github.com/shaowenchen/ops/pkg/event"
 )
 
@@ -19,7 +20,7 @@ const (
 )
 
 type PostInterface interface {
-	Post(url string, options map[string]string, data string, addtional string) error
+	Post(event cloudevents.Event, url string, options map[string]string, data string, addtional string) error
 }
 
 var NotificationMap = map[string]PostInterface{
@@ -42,7 +43,7 @@ type XiezuoBody struct {
 	} `json:"text"`
 }
 
-func (xiezuo *XiezuoPost) Post(url string, options map[string]string, data string, addtional string) error {
+func (xiezuo *XiezuoPost) Post(event cloudevents.Event, url string, options map[string]string, data string, addtional string) error {
 	// if data is XiezuoBody, just post it
 	sendJson := "{}"
 	var tryXiezuoBody XiezuoBody
@@ -78,7 +79,7 @@ type WebhookPost struct {
 	URL string
 }
 
-func (webhook *WebhookPost) Post(url string, options map[string]string, data string, addtional string) error {
+func (webhook *WebhookPost) Post(event cloudevents.Event, url string, options map[string]string, data string, addtional string) error {
 	data = data + addtional
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(data)))
 	if err != nil {
@@ -96,7 +97,7 @@ func (webhook *WebhookPost) Post(url string, options map[string]string, data str
 
 type EventPost struct{}
 
-func (eventPost *EventPost) Post(url string, options map[string]string, data string, addtional string) error {
+func (eventPost *EventPost) Post(event cloudevents.Event, url string, options map[string]string, data string, addtional string) error {
 	// url is the target event subject (NATS subject)
 	if url == "" {
 		return nil
@@ -127,41 +128,13 @@ func (eventPost *EventPost) Post(url string, options map[string]string, data str
 		}
 	}
 
-	// Parse data as JSON
-	var eventData map[string]interface{}
-	if data != "" {
-		err := json.Unmarshal([]byte(data), &eventData)
-		if err != nil {
-			// If data is not valid JSON, wrap it in a message field
-			eventData = map[string]interface{}{
-				"message": data + addtional,
-			}
-		} else if addtional != "" {
-			// Merge additional data if provided
-			var additionalData map[string]interface{}
-			if err := json.Unmarshal([]byte(addtional), &additionalData); err == nil {
-				for k, v := range additionalData {
-					eventData[k] = v
-				}
-			} else {
-				// If additional is not JSON, add it as a field
-				eventData["additional"] = addtional
-			}
-		}
-	} else {
-		// If data is empty, use additional as message
-		eventData = map[string]interface{}{
-			"message": addtional,
-		}
-	}
-
-	// Create EventBus and publish event
+	// Get endpoint
 	endpoint := os.Getenv("EVENT_ENDPOINT")
 	if endpoint == "" {
 		return nil
 	}
 
-	eventBus := (&opsevent.EventBus{}).WithEndpoint(endpoint).WithSubject(targetSubject)
+	// Use EventBus.W to directly write event to the new subject
 	ctx := context.Background()
-	return eventBus.Publish(ctx, eventData)
+	return (&opsevent.EventBus{}).WithEndpoint(endpoint).W(ctx, targetSubject, event)
 }
