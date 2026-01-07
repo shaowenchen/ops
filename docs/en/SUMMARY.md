@@ -12,5 +12,6 @@
   - [Cluster](opscontroller-cluster.md)
   - [Task](opscontroller-task.md)
   - [Pipeline](opscontroller-pipeline.md)
-  - [Metrics](metrics.md)
+  - [Metrics](opscontroller-metrics.md)
+  - [Events](opscontroller-events.md)
 - [Nats](nats.md)
