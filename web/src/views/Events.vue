@@ -100,8 +100,8 @@ async function loadData() {
     const utcTime = new Date(Date.UTC(selectTime.value.getUTCFullYear(), selectTime.value.getUTCMonth(), selectTime.value.getUTCDate(), selectTime.value.getUTCHours(), selectTime.value.getUTCMinutes(), selectTime.value.getUTCSeconds()));
     const utcTimestamp = utcTime.getTime();
     var res = await store.get(searchQuery.value, utcTimestamp, pageSize.value, currentPage.value);
-    dataList.value = res.list;
-    total.value = res.total;
+    dataList.value = res.list || [];
+    total.value = res.total || 0;
     updateUrl();
 }
 
@@ -149,9 +149,9 @@ function handleSearch() {
                             <template #content>
                                 <div style="line-height: 1.8;">
                                     <div>支持 NATS 主题格式查询，示例：</div>
-                                    <div style="margin-top: 4px;">• ops.></div>
-                                    <div>• ops.clusters.xxx.nodes.*.events</div>
-                                    <div>• ops.clusters.xxx.namespaces.xxx.pods.events</div>
+                                    <div style="margin-top: 4px;">ops.></div>
+                                    <div>ops.clusters.*.nodes.*.events</div>
+                                    <div>ops.clusters.*.namespaces.*.pods.events</div>
                                 </div>
                             </template>
                             <span style="cursor: help; color: #909399; font-size: 16px; font-weight: bold;">?</span>
