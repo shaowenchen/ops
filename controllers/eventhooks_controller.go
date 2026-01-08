@@ -281,7 +281,14 @@ func (r *EventHooksReconciler) matchKeyword(eventStrings, keyword, matchType str
 	case opsconstants.MatchTypeEXACT:
 		return eventStrings == keyword
 	case opsconstants.MatchTypeREGEX:
-		matched, err := regexp.MatchString(keyword, eventStrings)
+		// Compile regex with (?s) flag to make . match newlines, or use [\s\S] instead of .
+		// If the regex already starts with (?s), use it as-is, otherwise prepend (?s)
+		regexPattern := keyword
+		if !strings.HasPrefix(keyword, "(?s)") && !strings.HasPrefix(keyword, "(?m)") && !strings.HasPrefix(keyword, "(?sm)") {
+			// Prepend (?s) to make . match newlines
+			regexPattern = "(?s)" + keyword
+		}
+		matched, err := regexp.MatchString(regexPattern, eventStrings)
 		if err != nil {
 			return false
 		}
