@@ -26,7 +26,6 @@ import (
 	opskube "github.com/shaowenchen/ops/pkg/kube"
 	opslog "github.com/shaowenchen/ops/pkg/log"
 	opsmetrics "github.com/shaowenchen/ops/pkg/metrics"
-	opstask "github.com/shaowenchen/ops/pkg/task"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -130,29 +129,11 @@ func (r *PipelineReconciler) filledVariables(logger *opslog.Logger, ctx context.
 
 	// Step 1: Extract required variables from each task and merge to pipeline variables
 	// This ensures all task-required variables are defined in pipeline
+	// Only extract variables that are explicitly defined in task.Spec.Variables
+	// Variables referenced in content but not defined in task.Spec.Variables are ignored
 	for _, task := range taskList {
-		requiredVars := opstask.GetTaskRequiredVariables(&task)
-		for varName := range requiredVars {
-			// If variable not in pipeline, add it from task definition
-			if _, exists := obj.Spec.Variables[varName]; !exists {
-				if taskVar, ok := task.Spec.Variables[varName]; ok {
-					// Add variable definition from task to pipeline
-					if obj.Spec.Variables == nil {
-						obj.Spec.Variables = make(opsv1.Variables)
-					}
-					obj.Spec.Variables[varName] = taskVar
-					changed = true
-				} else {
-					// Variable is referenced in task but not defined, add empty variable
-					if obj.Spec.Variables == nil {
-						obj.Spec.Variables = make(opsv1.Variables)
-					}
-					obj.Spec.Variables[varName] = opsv1.Variable{}
-					changed = true
-				}
-			}
-		}
-		// Also merge task-defined variables (for metadata like desc, required, etc.)
+		// Only merge variables that are explicitly defined in task.Spec.Variables
+		// This prevents extracting variables that are only referenced in content but not defined
 		if obj.MergeVariables(task.Spec.Variables) {
 			changed = true
 		}
