@@ -1,0 +1,928 @@
+
+<!DOCTYPE HTML>
+<html lang="zh" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Events · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="opscontroller-eventhooks.html" />
+    
+    
+    <link rel="prev" href="opscontroller-metrics.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="輸入並搜尋" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本書使用 GitBook 釋出
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Events</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="ops-&#x4E8B;&#x4EF6;&#x7CFB;&#x7EDF;">Ops &#x4E8B;&#x4EF6;&#x7CFB;&#x7EDF;</h1>
+<h2 id="&#x6982;&#x8FF0;">&#x6982;&#x8FF0;</h2>
+<p>Ops &#x9879;&#x76EE;&#x901A;&#x8FC7; NATS JetStream &#x53D1;&#x5E03;&#x5404;&#x79CD;&#x4E8B;&#x4EF6;&#xFF0C;&#x7528;&#x4E8E;&#x76D1;&#x63A7;&#x3001;&#x544A;&#x8B66;&#x548C;&#x96C6;&#x6210;&#x3002;&#x6240;&#x6709;&#x4E8B;&#x4EF6;&#x90FD;&#x9075;&#x5FAA; CloudEvents &#x6807;&#x51C6;&#xFF0C;&#x5E76;&#x901A;&#x8FC7; NATS &#x4E3B;&#x9898;&#xFF08;Subject&#xFF09;&#x8FDB;&#x884C;&#x8DEF;&#x7531;&#x3002;</p>
+<h2 id="&#x4E8B;&#x4EF6;&#x4E3B;&#x9898;&#x683C;&#x5F0F;">&#x4E8B;&#x4EF6;&#x4E3B;&#x9898;&#x683C;&#x5F0F;</h2>
+<h3 id="&#x6807;&#x51C6;&#x683C;&#x5F0F;">&#x6807;&#x51C6;&#x683C;&#x5F0F;</h3>
+<p>&#x5927;&#x591A;&#x6570;&#x4E8B;&#x4EF6;&#x4E3B;&#x9898;&#x9075;&#x5FAA;&#x4EE5;&#x4E0B;&#x683C;&#x5F0F;&#xFF1A;</p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.{resourceType}.{resourceName}.{observation}
+</code></pre><p>&#x5176;&#x4E2D;&#xFF1A;</p>
+<ul>
+<li><code>{cluster}</code>: &#x96C6;&#x7FA4;&#x540D;&#x79F0;&#xFF08;&#x4ECE;&#x73AF;&#x5883;&#x53D8;&#x91CF; <code>EVENT_CLUSTER</code> &#x83B7;&#x53D6;&#xFF09;</li>
+<li><code>{namespace}</code>: Kubernetes &#x547D;&#x540D;&#x7A7A;&#x95F4;</li>
+<li><code>{resourceType}</code>: &#x8D44;&#x6E90;&#x7C7B;&#x578B;&#xFF08;&#x5982; <code>hosts</code>, <code>clusters</code>, <code>taskruns</code> &#x7B49;&#xFF09;</li>
+<li><code>{resourceName}</code>: &#x8D44;&#x6E90;&#x540D;&#x79F0;</li>
+<li><code>{observation}</code>: &#x89C2;&#x6D4B;&#x7C7B;&#x578B;&#xFF0C;&#x53EF;&#x80FD;&#x7684;&#x503C;&#x53CA;&#x542B;&#x4E49;&#xFF1A;<ul>
+<li><code>status</code>: &#x8D44;&#x6E90;&#x72B6;&#x6001;&#x4FE1;&#x606F;&#xFF08;&#x5982;&#x8FD0;&#x884C;&#x72B6;&#x6001;&#x3001;&#x5065;&#x5EB7;&#x72B6;&#x6001;&#x7B49;&#xFF09;</li>
+<li><code>metrics</code>: &#x6307;&#x6807;&#x6570;&#x636E;&#xFF08;&#x5982; CPU&#x3001;&#x5185;&#x5B58;&#x3001;&#x78C1;&#x76D8;&#x4F7F;&#x7528;&#x7387;&#x7B49;&#xFF09;</li>
+<li><code>logs</code>: &#x65E5;&#x5FD7;&#x4FE1;&#x606F;</li>
+<li><code>events</code>: &#x4E8B;&#x4EF6;&#x4FE1;&#x606F;&#xFF08;&#x5982; Kubernetes &#x4E8B;&#x4EF6;&#xFF09;</li>
+<li><code>traces</code>: &#x8FFD;&#x8E2A;&#x4FE1;&#x606F;&#xFF08;&#x5982;&#x5206;&#x5E03;&#x5F0F;&#x8FFD;&#x8E2A;&#x6570;&#x636E;&#xFF09;</li>
+<li><code>alerts</code>: &#x544A;&#x8B66;&#x4FE1;&#x606F;</li>
+<li><code>findings</code>: &#x4E3B;&#x52A8;&#x4E0A;&#x62A5;&#x7684;&#x4FE1;&#x606F;&#x548C;&#x72B6;&#x6001;</li>
+</ul>
+</li>
+</ul>
+<h3 id="&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x7279;&#x6B8A;&#x683C;&#x5F0F;">&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x7279;&#x6B8A;&#x683C;&#x5F0F;</h3>
+<p>&#x8282;&#x70B9;&#xFF08;Node&#xFF09;&#x4E8B;&#x4EF6;&#x4F7F;&#x7528;&#x7279;&#x6B8A;&#x683C;&#x5F0F;&#xFF0C;&#x4E0D;&#x5305;&#x542B; <code>namespaces</code> &#x90E8;&#x5206;&#xFF1A;</p>
+<pre><code>ops.clusters.{cluster}.nodes.{nodeName}.{observation}
+</code></pre><p><strong>&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<pre><code>ops.clusters.mycluster.nodes.mynode.events
+</code></pre><p><strong>&#x8BF4;&#x660E;&#xFF1A;</strong></p>
+<ul>
+<li>&#x8282;&#x70B9;&#x662F;&#x96C6;&#x7FA4;&#x7EA7;&#x522B;&#x7684;&#x8D44;&#x6E90;&#xFF0C;&#x4E0D;&#x5C5E;&#x4E8E;&#x4EFB;&#x4F55;&#x547D;&#x540D;&#x7A7A;&#x95F4;</li>
+<li>&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x7684;&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#x7701;&#x7565;&#x4E86; <code>namespaces</code> &#x90E8;&#x5206;</li>
+<li>&#x5176;&#x4ED6;&#x683C;&#x5F0F;&#x89C4;&#x5219;&#x4E0E;&#x6807;&#x51C6;&#x683C;&#x5F0F;&#x76F8;&#x540C;</li>
+</ul>
+<h2 id="&#x4E8B;&#x4EF6;&#x7C7B;&#x578B;&#x5217;&#x8868;">&#x4E8B;&#x4EF6;&#x7C7B;&#x578B;&#x5217;&#x8868;</h2>
+<h3 id="1-controller-&#x8BBE;&#x7F6E;&#x4E8B;&#x4EF6;">1. Controller &#x8BBE;&#x7F6E;&#x4E8B;&#x4EF6;</h3>
+<p><strong>&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.controllers.{resourceType}.status
+</code></pre><p><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;&#xFF1A;</strong></p>
+<ul>
+<li>&#x5404;&#x4E2A; Controller &#x542F;&#x52A8;&#x65F6;&#x53D1;&#x5E03;&#xFF0C;&#x8868;&#x793A;&#x8BE5; Controller &#x5DF2;&#x5C31;&#x7EEA;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x4F4D;&#x7F6E;&#xFF1A;</strong></p>
+<ul>
+<li><code>controllers/host_controller.go</code>: Host Controller &#x542F;&#x52A8;</li>
+<li><code>controllers/cluster_controller.go</code>: Cluster Controller &#x542F;&#x52A8;</li>
+<li><code>controllers/task_controller.go</code>: Task Controller &#x542F;&#x52A8;</li>
+<li><code>controllers/taskrun_controller.go</code>: TaskRun Controller &#x542F;&#x52A8;</li>
+<li><code>controllers/pipeline_controller.go</code>: Pipeline Controller &#x542F;&#x52A8;</li>
+<li><code>controllers/pipelinerun_controller.go</code>: PipelineRun Controller &#x542F;&#x52A8;</li>
+<li><code>controllers/event_controller.go</code>: Event Controller &#x542F;&#x52A8;</li>
+<li><code>controllers/eventhooks_controller.go</code>: EventHook Controller &#x542F;&#x52A8;</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;kind&quot;: &quot;string&quot;  // &#x8D44;&#x6E90;&#x7C7B;&#x578B;&#xFF0C;&#x5982; &quot;Hosts&quot;, &quot;Clusters&quot;, &quot;TaskRuns&quot; &#x7B49;
+}
+</code></pre>
+<hr>
+<h3 id="2-host-&#x72B6;&#x6001;&#x4E8B;&#x4EF6;">2. Host &#x72B6;&#x6001;&#x4E8B;&#x4EF6;</h3>
+<p><strong>&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.hosts.{hostName}.status
+</code></pre><p><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;&#xFF1A;</strong></p>
+<ul>
+<li>Host &#x8D44;&#x6E90;&#x72B6;&#x6001;&#x66F4;&#x65B0;&#x65F6;&#xFF08;&#x5FC3;&#x8DF3;&#x72B6;&#x6001;&#x3001;&#x78C1;&#x76D8;&#x4F7F;&#x7528;&#x7387;&#x7B49;&#xFF09;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x4F4D;&#x7F6E;&#xFF1A;</strong></p>
+<ul>
+<li><code>controllers/host_controller.go</code>: Host &#x72B6;&#x6001;&#x53D8;&#x66F4;&#x65F6;</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;address&quot;: &quot;string&quot;,
+  &quot;port&quot;: 0,
+  &quot;username&quot;: &quot;string&quot;,
+  &quot;status&quot;: {
+    &quot;hostname&quot;: &quot;string&quot;,
+    &quot;diskUsagePercent&quot;: &quot;string&quot;,
+    &quot;heartStatus&quot;: &quot;string&quot;,
+    &quot;heartTime&quot;: &quot;string&quot;,
+    // ... &#x5176;&#x4ED6; HostStatus &#x5B57;&#x6BB5;
+  }
+}
+</code></pre>
+<hr>
+<h3 id="3-cluster-&#x72B6;&#x6001;&#x4E8B;&#x4EF6;">3. Cluster &#x72B6;&#x6001;&#x4E8B;&#x4EF6;</h3>
+<p><strong>&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.clusters.{clusterName}.status
+</code></pre><p><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;&#xFF1A;</strong></p>
+<ul>
+<li>Cluster &#x8D44;&#x6E90;&#x72B6;&#x6001;&#x66F4;&#x65B0;&#x65F6;&#xFF08;Kubernetes &#x7248;&#x672C;&#x3001;&#x8BC1;&#x4E66;&#x8FC7;&#x671F;&#x65F6;&#x95F4;&#x3001;&#x5FC3;&#x8DF3;&#x72B6;&#x6001;&#x7B49;&#xFF09;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x4F4D;&#x7F6E;&#xFF1A;</strong></p>
+<ul>
+<li><code>controllers/cluster_controller.go</code>: Cluster &#x72B6;&#x6001;&#x53D8;&#x66F4;&#x65F6;</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;server&quot;: &quot;string&quot;,
+  &quot;status&quot;: {
+    &quot;version&quot;: &quot;string&quot;,
+    &quot;certNotAfterDays&quot;: 0,
+    &quot;heartStatus&quot;: &quot;string&quot;,
+    &quot;heartTime&quot;: &quot;string&quot;,
+    // ... &#x5176;&#x4ED6; ClusterStatus &#x5B57;&#x6BB5;
+  }
+}
+</code></pre>
+<hr>
+<h3 id="4-taskrun-&#x72B6;&#x6001;&#x4E8B;&#x4EF6;">4. TaskRun &#x72B6;&#x6001;&#x4E8B;&#x4EF6;</h3>
+<p><strong>&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.taskruns.{taskRunName}.status
+</code></pre><p><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;&#xFF1A;</strong></p>
+<ul>
+<li>TaskRun &#x6267;&#x884C;&#x5B8C;&#x6210;&#x6216;&#x72B6;&#x6001;&#x53D8;&#x66F4;&#x65F6;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x4F4D;&#x7F6E;&#xFF1A;</strong></p>
+<ul>
+<li><code>controllers/taskrun_controller.go</code>: <ul>
+<li>TaskRun &#x6267;&#x884C;&#x5B8C;&#x6210;&#x65F6;&#xFF08;<code>run</code> &#x51FD;&#x6570;&#x4E2D;&#xFF09;</li>
+<li>TaskRun &#x72B6;&#x6001;&#x53D8;&#x66F4;&#x65F6;&#xFF08;Reconcile &#x4E2D;&#xFF09;</li>
+</ul>
+</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;taskRef&quot;: &quot;string&quot;,
+  &quot;desc&quot;: &quot;string&quot;,
+  &quot;variables&quot;: {
+    &quot;key&quot;: &quot;value&quot;
+  },
+  &quot;runStatus&quot;: &quot;string&quot;,
+  &quot;startTime&quot;: &quot;string&quot;,
+  &quot;taskRunNodeStatus&quot;: [
+    {
+      &quot;nodeName&quot;: &quot;string&quot;,
+      &quot;runStatus&quot;: &quot;string&quot;,
+      &quot;taskRunStep&quot;: [
+        {
+          &quot;stepName&quot;: &quot;string&quot;,
+          &quot;stepContent&quot;: &quot;string&quot;,
+          &quot;stepOutput&quot;: &quot;string&quot;,
+          &quot;stepStatus&quot;: &quot;string&quot;
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
+<hr>
+<h3 id="5-pipelinerun-&#x72B6;&#x6001;&#x4E8B;&#x4EF6;">5. PipelineRun &#x72B6;&#x6001;&#x4E8B;&#x4EF6;</h3>
+<p><strong>&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.pipelineruns.{pipelineRunName}.status
+</code></pre><p><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;&#xFF1A;</strong></p>
+<ul>
+<li>PipelineRun &#x6267;&#x884C;&#x5B8C;&#x6210;&#x6216;&#x72B6;&#x6001;&#x53D8;&#x66F4;&#x65F6;</li>
+<li>&#x8DE8;&#x96C6;&#x7FA4; PipelineRun &#x72B6;&#x6001;&#x540C;&#x6B65;&#x5B8C;&#x6210;&#x65F6;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x4F4D;&#x7F6E;&#xFF1A;</strong></p>
+<ul>
+<li><code>controllers/pipelinerun_controller.go</code>: <ul>
+<li>PipelineRun &#x6267;&#x884C;&#x5B8C;&#x6210;&#x65F6;&#xFF08;<code>run</code> &#x51FD;&#x6570;&#x4E2D;&#xFF09;</li>
+<li>PipelineRun &#x72B6;&#x6001;&#x53D8;&#x66F4;&#x65F6;&#xFF08;Reconcile &#x4E2D;&#xFF09;</li>
+<li>&#x8DE8;&#x96C6;&#x7FA4; PipelineRun &#x72B6;&#x6001;&#x540C;&#x6B65;&#x5B8C;&#x6210;&#x65F6;&#xFF08;goroutine &#x4E2D;&#xFF09;</li>
+</ul>
+</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;pipelineRef&quot;: &quot;string&quot;,
+  &quot;desc&quot;: &quot;string&quot;,
+  &quot;variables&quot;: {
+    &quot;key&quot;: &quot;value&quot;
+  },
+  &quot;runStatus&quot;: &quot;string&quot;,
+  &quot;startTime&quot;: &quot;string&quot;,
+  &quot;pipelineRunStatus&quot;: [
+    {
+      &quot;taskName&quot;: &quot;string&quot;,
+      &quot;taskRef&quot;: &quot;string&quot;,
+      &quot;taskRunStatus&quot;: {
+        &quot;runStatus&quot;: &quot;string&quot;,
+        &quot;taskRunNodeStatus&quot;: []
+      }
+    }
+  ]
+}
+</code></pre>
+<hr>
+<h3 id="6-kubernetes-&#x4E8B;&#x4EF6;">6. Kubernetes &#x4E8B;&#x4EF6;</h3>
+<p><strong>&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<p>&#x5BF9;&#x4E8E;&#x547D;&#x540D;&#x7A7A;&#x95F4;&#x8D44;&#x6E90;&#xFF1A;</p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.{resourceKind}s.{resourceName}.events
+</code></pre><p>&#x5BF9;&#x4E8E;&#x8282;&#x70B9;&#xFF08;Node&#xFF09;&#x8D44;&#x6E90;&#xFF08;&#x7279;&#x6B8A;&#x683C;&#x5F0F;&#xFF0C;&#x65E0; namespaces&#xFF09;&#xFF1A;</p>
+<pre><code>ops.clusters.{cluster}.nodes.{nodeName}.events
+</code></pre><p><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;&#xFF1A;</strong></p>
+<ul>
+<li>Kubernetes &#x539F;&#x751F;&#x4E8B;&#x4EF6;&#xFF08;events.k8s.io/v1&#xFF09;&#x7684;&#x521B;&#x5EFA;&#x3001;&#x66F4;&#x65B0;&#x3001;&#x5220;&#x9664;&#x65F6;</li>
+<li>&#x4EC5;&#x53D1;&#x5E03;&#x6700;&#x8FD1; 2 &#x5206;&#x949F;&#x5185;&#x7684;&#x4E8B;&#x4EF6;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x4F4D;&#x7F6E;&#xFF1A;</strong></p>
+<ul>
+<li><code>controllers/event_controller.go</code>: &#x76D1;&#x542C; Kubernetes Event &#x8D44;&#x6E90;</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;type&quot;: &quot;string&quot;,        // Normal, Warning &#x7B49;
+  &quot;reason&quot;: &quot;string&quot;,      // &#x4E8B;&#x4EF6;&#x539F;&#x56E0;
+  &quot;eventTime&quot;: &quot;string&quot;,   // ISO 8601 &#x683C;&#x5F0F;
+  &quot;from&quot;: &quot;string&quot;,        // &#x4E8B;&#x4EF6;&#x6765;&#x6E90;&#xFF08;Manager&#xFF09;
+  &quot;message&quot;: &quot;string&quot;      // &#x4E8B;&#x4EF6;&#x6D88;&#x606F;
+}
+</code></pre>
+<p><strong>&#x793A;&#x4F8B;&#x4E3B;&#x9898;&#xFF1A;</strong></p>
+<p>&#x547D;&#x540D;&#x7A7A;&#x95F4;&#x8D44;&#x6E90;&#xFF1A;</p>
+<pre><code>ops.clusters.mycluster.namespaces.ops-system.pods.my-pod.events
+ops.clusters.mycluster.namespaces.ops-system.deployments.my-deployment.events
+</code></pre><p>&#x8282;&#x70B9;&#x8D44;&#x6E90;&#xFF08;&#x7279;&#x6B8A;&#x683C;&#x5F0F;&#xFF09;&#xFF1A;</p>
+<pre><code>ops.clusters.mycluster.nodes.mynode.events
+</code></pre><hr>
+<h3 id="7-&#x901A;&#x77E5;&#x4E8B;&#x4EF6;">7. &#x901A;&#x77E5;&#x4E8B;&#x4EF6;</h3>
+<p><strong>&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<pre><code>ops.notifications.providers.{provider}.channels.{channel}.severities.{severity}
+</code></pre><p>&#x5176;&#x4E2D;&#xFF1A;</p>
+<ul>
+<li><code>{provider}</code>: &#x901A;&#x77E5;&#x63D0;&#x4F9B;&#x5546;&#x6216;&#x7CFB;&#x7EDF;&#x540D;&#x79F0;&#xFF08;&#x5982; <code>ksyun</code>, <code>ai</code> &#x7B49;&#xFF09;</li>
+<li><code>{channel}</code>: &#x901A;&#x77E5;&#x6E20;&#x9053;&#x7C7B;&#x578B;&#xFF08;&#x5982; <code>webhook</code>, <code>email</code>, <code>sms</code> &#x7B49;&#xFF09;</li>
+<li><code>{severity}</code>: &#x4E25;&#x91CD;&#x7A0B;&#x5EA6;&#x7EA7;&#x522B;&#xFF08;&#x5982; <code>info</code>, <code>warning</code>, <code>error</code>, <code>critical</code> &#x7B49;&#xFF09;</li>
+</ul>
+<p><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;&#xFF1A;</strong></p>
+<ul>
+<li>&#x901A;&#x77E5;&#x7CFB;&#x7EDF;&#x53D1;&#x9001;&#x901A;&#x77E5;&#x65F6;&#x53D1;&#x5E03;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x4F4D;&#x7F6E;&#xFF1A;</strong></p>
+<ul>
+<li>&#x901A;&#x8FC7; API &#x63A5;&#x53E3; <code>/api/v1/namespaces/{namespace}/events/{event}</code> &#x53D1;&#x5E03;</li>
+<li>&#x5982;&#x679C;&#x4E8B;&#x4EF6;&#x8DEF;&#x5F84;&#x4EE5; <code>ops.</code> &#x5F00;&#x5934;&#xFF0C;&#x5C06;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x8BE5;&#x8DEF;&#x5F84;&#x4F5C;&#x4E3A;&#x4E3B;&#x9898;&#xFF0C;&#x4E0D;&#x8FDB;&#x884C;&#x683C;&#x5F0F;&#x8F6C;&#x6362;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x65B9;&#x5F0F;&#xFF1A;</strong></p>
+<pre><code class="lang-bash">curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/ops.notifications.providers.ksyun.channels.webhook.severities.info \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -d &apos;{
+    &quot;provider&quot;: &quot;ksyun&quot;,
+    &quot;channel&quot;: &quot;webhook&quot;,
+    &quot;severity&quot;: &quot;info&quot;,
+    &quot;message&quot;: &quot;Notification message&quot;,
+    &quot;title&quot;: &quot;Notification title&quot;
+  }&apos;
+</code></pre>
+<p><strong>&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<pre><code class="lang-json">{
+  &quot;provider&quot;: &quot;string&quot;,
+  &quot;channel&quot;: &quot;string&quot;,
+  &quot;severity&quot;: &quot;string&quot;,
+  &quot;message&quot;: &quot;string&quot;,
+  &quot;title&quot;: &quot;string&quot;,
+  &quot;timestamp&quot;: &quot;string&quot;,
+  // ... &#x5176;&#x4ED6;&#x901A;&#x77E5;&#x76F8;&#x5173;&#x5B57;&#x6BB5;
+}
+</code></pre>
+<p><strong>&#x793A;&#x4F8B;&#x4E3B;&#x9898;&#xFF1A;</strong></p>
+<pre><code>ops.notifications.providers.ksyun.channels.webhook.severities.info
+ops.notifications.providers.ksyun.channels.webhook.severities.warning
+ops.notifications.providers.ksyun.channels.webhook.severities.error
+ops.notifications.providers.ksyun.channels.email.severities.critical
+ops.notifications.providers.AI.channels.webhook.severities.info
+</code></pre><p><strong>&#x8BF4;&#x660E;&#xFF1A;</strong></p>
+<ul>
+<li>&#x901A;&#x77E5;&#x4E8B;&#x4EF6;&#x4F7F;&#x7528;&#x72EC;&#x7ACB;&#x7684;&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF0C;&#x4E0D;&#x5305;&#x542B; <code>clusters</code> &#x548C; <code>namespaces</code> &#x90E8;&#x5206;</li>
+<li>&#x7528;&#x4E8E;&#x901A;&#x77E5;&#x7CFB;&#x7EDF;&#x7684;&#x8DEF;&#x7531;&#x548C;&#x5206;&#x53D1;</li>
+<li>&#x652F;&#x6301;&#x591A;&#x4E2A;&#x63D0;&#x4F9B;&#x5546;&#x3001;&#x6E20;&#x9053;&#x548C;&#x4E25;&#x91CD;&#x7A0B;&#x5EA6;&#x7EA7;&#x522B;&#x7684;&#x7EC4;&#x5408;</li>
+<li><strong>&#x91CD;&#x8981;</strong>&#xFF1A;&#x5982;&#x679C;&#x4E8B;&#x4EF6;&#x8DEF;&#x5F84;&#x4EE5; <code>ops.</code> &#x5F00;&#x5934;&#xFF0C;API &#x4F1A;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x8BE5;&#x8DEF;&#x5F84;&#x4F5C;&#x4E3A; NATS &#x4E3B;&#x9898;&#xFF0C;&#x4E0D;&#x4F1A;&#x8FDB;&#x884C;&#x4EFB;&#x4F55;&#x683C;&#x5F0F;&#x8F6C;&#x6362;</li>
+</ul>
+<hr>
+<h3 id="8-&#x81EA;&#x5B9A;&#x4E49;&#x4E8B;&#x4EF6;&#xFF08;&#x901A;&#x8FC7;-api&#xFF09;">8. &#x81EA;&#x5B9A;&#x4E49;&#x4E8B;&#x4EF6;&#xFF08;&#x901A;&#x8FC7; API&#xFF09;</h3>
+<p><strong>&#x4E3B;&#x9898;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<p>&#x6839;&#x636E;&#x4E8B;&#x4EF6;&#x8DEF;&#x5F84;&#x7684;&#x4E0D;&#x540C;&#xFF0C;API &#x4F1A;&#x91C7;&#x7528;&#x4E0D;&#x540C;&#x7684;&#x5904;&#x7406;&#x65B9;&#x5F0F;&#xFF1A;</p>
+<ol>
+<li><p><strong>&#x4EE5; <code>ops.</code> &#x5F00;&#x5934;&#x7684;&#x4E8B;&#x4EF6;&#x8DEF;&#x5F84;</strong>&#xFF08;&#x76F4;&#x63A5;&#x6295;&#x9012;&#xFF09;&#xFF1A;</p>
+<pre><code>ops.{&#x4EFB;&#x610F;&#x8DEF;&#x5F84;}
+</code></pre><ul>
+<li>&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x8BE5;&#x8DEF;&#x5F84;&#x4F5C;&#x4E3A; NATS &#x4E3B;&#x9898;&#xFF0C;&#x4E0D;&#x8FDB;&#x884C;&#x4EFB;&#x4F55;&#x683C;&#x5F0F;&#x8F6C;&#x6362;</li>
+<li>&#x9002;&#x7528;&#x4E8E;&#x901A;&#x77E5;&#x4E8B;&#x4EF6;&#x7B49;&#x72EC;&#x7ACB;&#x683C;&#x5F0F;&#x7684;&#x4E8B;&#x4EF6;</li>
+</ul>
+</li>
+<li><p><strong>&#x4EE5; <code>nodes.</code> &#x5F00;&#x5934;&#x7684;&#x4E8B;&#x4EF6;&#x8DEF;&#x5F84;</strong>&#xFF08;&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#xFF09;&#xFF1A;</p>
+<pre><code>ops.clusters.{cluster}.nodes.{nodeName}.{observation}
+</code></pre><ul>
+<li>&#x8F6C;&#x6362;&#x4E3A;&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x683C;&#x5F0F;&#xFF0C;&#x4E0D;&#x5305;&#x542B; <code>namespaces</code> &#x90E8;&#x5206;</li>
+</ul>
+</li>
+<li><p><strong>&#x6807;&#x51C6;&#x683C;&#x5F0F;</strong>&#xFF08;&#x5176;&#x4ED6;&#x8DEF;&#x5F84;&#xFF09;&#xFF1A;</p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.{eventName}
+</code></pre><ul>
+<li>&#x81EA;&#x52A8;&#x6DFB;&#x52A0;&#x96C6;&#x7FA4;&#x548C;&#x547D;&#x540D;&#x7A7A;&#x95F4;&#x524D;&#x7F00;</li>
+</ul>
+</li>
+</ol>
+<p><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;&#xFF1A;</strong></p>
+<ul>
+<li>&#x901A;&#x8FC7; API &#x63A5;&#x53E3; <code>/api/v1/namespaces/{namespace}/events/{event}</code> &#x624B;&#x52A8;&#x53D1;&#x5E03;</li>
+</ul>
+<p><strong>&#x53D1;&#x5E03;&#x4F4D;&#x7F6E;&#xFF1A;</strong></p>
+<ul>
+<li><code>pkg/server/api.go</code>: <code>CreateEvent</code> &#x51FD;&#x6570;</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<ul>
+<li>&#x7531;&#x8C03;&#x7528;&#x65B9;&#x81EA;&#x5B9A;&#x4E49;&#xFF0C;&#x53EF;&#x4EE5;&#x662F;&#x4EFB;&#x610F; JSON &#x5BF9;&#x8C61;</li>
+</ul>
+<p><strong>&#x4F7F;&#x7528;&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<p>&#x6807;&#x51C6;&#x683C;&#x5F0F;&#x4E8B;&#x4EF6;&#xFF1A;</p>
+<pre><code class="lang-bash">curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/my-custom-event \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -d &apos;{
+    &quot;message&quot;: &quot;Custom event data&quot;,
+    &quot;level&quot;: &quot;info&quot;
+  }&apos;
+</code></pre>
+<p>&#x76F4;&#x63A5;&#x6295;&#x9012;&#x683C;&#x5F0F;&#xFF08;&#x4EE5; <code>ops.</code> &#x5F00;&#x5934;&#xFF09;&#xFF1A;</p>
+<pre><code class="lang-bash">curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/ops.notifications.providers.ksyun.channels.webhook.severities.info \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -d &apos;{
+    &quot;provider&quot;: &quot;ksyun&quot;,
+    &quot;channel&quot;: &quot;webhook&quot;,
+    &quot;severity&quot;: &quot;info&quot;,
+    &quot;message&quot;: &quot;Notification message&quot;
+  }&apos;
+</code></pre>
+<p>&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x683C;&#x5F0F;&#xFF1A;</p>
+<pre><code class="lang-bash">curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/nodes.mynode.findings \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -d &apos;{
+    &quot;message&quot;: &quot;Node finding&quot;,
+    &quot;status&quot;: &quot;normal&quot;
+  }&apos;
+</code></pre>
+<hr>
+<h2 id="&#x4E8B;&#x4EF6;&#x8BA2;&#x9605;&#x793A;&#x4F8B;">&#x4E8B;&#x4EF6;&#x8BA2;&#x9605;&#x793A;&#x4F8B;</h2>
+<h3 id="&#x8BA2;&#x9605;&#x6240;&#x6709;&#x4E8B;&#x4EF6;">&#x8BA2;&#x9605;&#x6240;&#x6709;&#x4E8B;&#x4EF6;</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.&gt;&quot;
+</code></pre>
+<h3 id="&#x8BA2;&#x9605;&#x7279;&#x5B9A;&#x547D;&#x540D;&#x7A7A;&#x95F4;&#x7684;&#x4E8B;&#x4EF6;">&#x8BA2;&#x9605;&#x7279;&#x5B9A;&#x547D;&#x540D;&#x7A7A;&#x95F4;&#x7684;&#x4E8B;&#x4EF6;</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.ops-system.&gt;&quot;
+</code></pre>
+<h3 id="&#x8BA2;&#x9605;-host-&#x72B6;&#x6001;&#x4E8B;&#x4EF6;">&#x8BA2;&#x9605; Host &#x72B6;&#x6001;&#x4E8B;&#x4EF6;</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.*.hosts.*.status&quot;
+</code></pre>
+<h3 id="&#x8BA2;&#x9605;-taskrun-&#x72B6;&#x6001;&#x4E8B;&#x4EF6;">&#x8BA2;&#x9605; TaskRun &#x72B6;&#x6001;&#x4E8B;&#x4EF6;</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.*.taskruns.*.status&quot;
+</code></pre>
+<h3 id="&#x8BA2;&#x9605;-pipelinerun-&#x72B6;&#x6001;&#x4E8B;&#x4EF6;">&#x8BA2;&#x9605; PipelineRun &#x72B6;&#x6001;&#x4E8B;&#x4EF6;</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.*.pipelineruns.*.status&quot;
+</code></pre>
+<h3 id="&#x8BA2;&#x9605;-kubernetes-&#x4E8B;&#x4EF6;">&#x8BA2;&#x9605; Kubernetes &#x4E8B;&#x4EF6;</h3>
+<pre><code class="lang-bash"># &#x8BA2;&#x9605;&#x6240;&#x6709;&#x547D;&#x540D;&#x7A7A;&#x95F4;&#x8D44;&#x6E90;&#x7684; Kubernetes &#x4E8B;&#x4EF6;
+nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.*.*.events&quot;
+
+# &#x8BA2;&#x9605;&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#xFF08;&#x7279;&#x6B8A;&#x683C;&#x5F0F;&#xFF09;
+nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.nodes.*.events&quot;
+</code></pre>
+<h3 id="&#x8BA2;&#x9605;&#x901A;&#x77E5;&#x4E8B;&#x4EF6;">&#x8BA2;&#x9605;&#x901A;&#x77E5;&#x4E8B;&#x4EF6;</h3>
+<pre><code class="lang-bash"># &#x8BA2;&#x9605;&#x6240;&#x6709;&#x901A;&#x77E5;&#x4E8B;&#x4EF6;
+nats --user=app --password=${apppassword} sub &quot;ops.notifications.&gt;&quot;
+
+# &#x8BA2;&#x9605;&#x7279;&#x5B9A;&#x63D0;&#x4F9B;&#x5546;&#x7684;&#x901A;&#x77E5;&#x4E8B;&#x4EF6;
+nats --user=app --password=${apppassword} sub &quot;ops.notifications.providers.ksyun.&gt;&quot;
+
+# &#x8BA2;&#x9605;&#x7279;&#x5B9A;&#x6E20;&#x9053;&#x7684;&#x901A;&#x77E5;&#x4E8B;&#x4EF6;
+nats --user=app --password=${apppassword} sub &quot;ops.notifications.providers.*.channels.webhook.&gt;&quot;
+
+# &#x8BA2;&#x9605;&#x7279;&#x5B9A;&#x4E25;&#x91CD;&#x7A0B;&#x5EA6;&#x7684;&#x901A;&#x77E5;&#x4E8B;&#x4EF6;
+nats --user=app --password=${apppassword} sub &quot;ops.notifications.providers.*.channels.*.severities.error&quot;
+</code></pre>
+<h2 id="&#x4E8B;&#x4EF6;&#x683C;&#x5F0F;&#x8BF4;&#x660E;">&#x4E8B;&#x4EF6;&#x683C;&#x5F0F;&#x8BF4;&#x660E;</h2>
+<p>&#x6240;&#x6709;&#x4E8B;&#x4EF6;&#x90FD;&#x9075;&#x5FAA; <a href="https://cloudevents.io/" target="_blank">CloudEvents</a> &#x6807;&#x51C6;&#xFF0C;&#x5305;&#x542B;&#x4EE5;&#x4E0B;&#x6807;&#x51C6;&#x5B57;&#x6BB5;&#xFF1A;</p>
+<ul>
+<li><code>id</code>: &#x4E8B;&#x4EF6;&#x552F;&#x4E00;&#x6807;&#x8BC6;&#x7B26;&#xFF08;UUID&#xFF09;</li>
+<li><code>source</code>: &#x4E8B;&#x4EF6;&#x6765;&#x6E90;&#xFF08;&#x56FA;&#x5B9A;&#x4E3A; <code>https://github.com/shaowenchen/ops</code>&#xFF09;</li>
+<li><code>type</code>: &#x4E8B;&#x4EF6;&#x7C7B;&#x578B;&#xFF08;&#x5982; <code>Host</code>, <code>Cluster</code>, <code>PipelineRun</code> &#x7B49;&#xFF09;</li>
+<li><code>specversion</code>: CloudEvents &#x89C4;&#x8303;&#x7248;&#x672C;&#xFF08;<code>1.0</code>&#xFF09;</li>
+<li><code>time</code>: &#x4E8B;&#x4EF6;&#x65F6;&#x95F4;&#x6233;&#xFF08;ISO 8601 &#x683C;&#x5F0F;&#xFF09;</li>
+<li><code>data</code>: &#x4E8B;&#x4EF6;&#x6570;&#x636E;&#xFF08;JSON &#x683C;&#x5F0F;&#xFF09;</li>
+<li><code>subject</code>: NATS &#x4E3B;&#x9898;&#xFF08;&#x81EA;&#x52A8;&#x8BBE;&#x7F6E;&#xFF09;</li>
+</ul>
+<h2 id="&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x914D;&#x7F6E;">&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x914D;&#x7F6E;</h2>
+<p>&#x4E8B;&#x4EF6;&#x7CFB;&#x7EDF;&#x4F9D;&#x8D56;&#x4EE5;&#x4E0B;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#xFF1A;</p>
+<ul>
+<li><code>EVENT_CLUSTER</code>: &#x96C6;&#x7FA4;&#x540D;&#x79F0;&#xFF0C;&#x7528;&#x4E8E;&#x6784;&#x5EFA;&#x4E8B;&#x4EF6;&#x4E3B;&#x9898;</li>
+<li><code>EVENT_ENDPOINT</code>: NATS &#x670D;&#x52A1;&#x5668;&#x5730;&#x5740;&#xFF08;&#x5982; <code>nats://nats:4222</code>&#xFF09;</li>
+</ul>
+<h2 id="&#x6CE8;&#x610F;&#x4E8B;&#x9879;">&#x6CE8;&#x610F;&#x4E8B;&#x9879;</h2>
+<ol>
+<li><strong>&#x4E8B;&#x4EF6;&#x53BB;&#x91CD;</strong>: NATS JetStream &#x652F;&#x6301;&#x6D88;&#x606F;&#x53BB;&#x91CD;&#xFF0C;&#x901A;&#x8FC7; <code>dupe-window</code> &#x914D;&#x7F6E;&#xFF08;&#x9ED8;&#x8BA4; 2 &#x5206;&#x949F;&#xFF09;</li>
+<li><strong>&#x4E8B;&#x4EF6;&#x4FDD;&#x7559;</strong>: &#x6839;&#x636E; Stream &#x914D;&#x7F6E;&#x51B3;&#x5B9A;&#x4E8B;&#x4EF6;&#x4FDD;&#x7559;&#x65F6;&#x95F4;&#xFF08;&#x9ED8;&#x8BA4; 24 &#x5C0F;&#x65F6;&#xFF09;</li>
+<li><strong>&#x4E8B;&#x4EF6;&#x987A;&#x5E8F;</strong>: &#x540C;&#x4E00;&#x4E3B;&#x9898;&#x7684;&#x4E8B;&#x4EF6;&#x6309;&#x65F6;&#x95F4;&#x987A;&#x5E8F;&#x53D1;&#x5E03;</li>
+<li><strong>&#x5F02;&#x6B65;&#x53D1;&#x5E03;</strong>: &#x5927;&#x90E8;&#x5206;&#x4E8B;&#x4EF6;&#x901A;&#x8FC7; goroutine &#x5F02;&#x6B65;&#x53D1;&#x5E03;&#xFF0C;&#x4E0D;&#x4F1A;&#x963B;&#x585E;&#x4E3B;&#x6D41;&#x7A0B;</li>
+<li><strong>&#x4E8B;&#x4EF6;&#x8FC7;&#x6EE4;</strong>: Kubernetes &#x4E8B;&#x4EF6;&#x4EC5;&#x53D1;&#x5E03;&#x6700;&#x8FD1; 2 &#x5206;&#x949F;&#x5185;&#x7684;&#x4E8B;&#x4EF6;&#xFF0C;&#x907F;&#x514D;&#x5386;&#x53F2;&#x4E8B;&#x4EF6;&#x5E72;&#x6270;</li>
+</ol>
+<h2 id="&#x76F8;&#x5173;&#x6587;&#x6863;">&#x76F8;&#x5173;&#x6587;&#x6863;</h2>
+<ul>
+<li><a href="nats.html">NATS &#x914D;&#x7F6E;&#x6587;&#x6863;</a></li>
+<li><a href="opscontroller-eventhooks.html">EventHooks &#x4F7F;&#x7528;&#x6587;&#x6863;</a></li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opscontroller-metrics.html" class="navigation navigation-prev " aria-label="Previous page: Metrics">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="opscontroller-eventhooks.html" class="navigation navigation-next " aria-label="Next page: EventHooks">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Events","level":"1.4.6","depth":2,"next":{"title":"EventHooks","level":"1.4.7","depth":2,"path":"opscontroller-eventhooks.md","ref":"opscontroller-eventhooks.md","articles":[]},"previous":{"title":"Metrics","level":"1.4.5","depth":2,"path":"opscontroller-metrics.md","ref":"opscontroller-metrics.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"zh","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"opscontroller-events.md","mtime":"2026-01-26T08:28:50.796Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"zh"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

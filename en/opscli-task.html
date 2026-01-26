@@ -1,0 +1,596 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Task · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="opscli-file.html" />
+    
+    
+    <link rel="prev" href="opscli-shell.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Task</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h3 id="opscli-task-command-guide">opscli Task Command Guide</h3>
+<h4 id="1-specify-target-hosts">1. <strong>Specify Target Hosts</strong></h4>
+<ul>
+<li><strong>Single Host</strong></li>
+</ul>
+<pre><code class="lang-bash">-i 1.1.1.1
+</code></pre>
+<p>You can specify the username and password for the host with <code>--username</code> and <code>--password</code>.</p>
+<ul>
+<li><strong>Batch Hosts</strong></li>
+</ul>
+<p>To specify multiple hosts via a file:</p>
+<pre><code class="lang-bash">-i hosts.txt
+</code></pre>
+<p>Example content of <code>hosts.txt</code>:</p>
+<pre><code class="lang-bash">1.1.1.1
+2.2.2.2
+</code></pre>
+<ul>
+<li><strong>All Nodes in a Cluster</strong></li>
+</ul>
+<pre><code class="lang-bash">-i ~/.kube/config --nodename all
+</code></pre>
+<ul>
+<li><strong>Specific Node in a Cluster</strong></li>
+</ul>
+<pre><code class="lang-bash">-i ~/.kube/config --nodename node1
+</code></pre>
+<p>Where <code>node1</code> is the node name.</p>
+<h4 id="2-update-etchosts">2. <strong>Update <code>/etc/hosts</code></strong></h4>
+<ul>
+<li><strong>On a Single Host</strong></li>
+</ul>
+<p>To remotely update the <code>/etc/hosts</code> file on host <code>1.1.1.1</code>:</p>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f ~/.ops/tasks/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i 1.1.1.1 --port 2222 --username root
+</code></pre>
+<p>To clear the <code>/etc/hosts</code> entry, add <code>--clear</code>:</p>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f ~/.ops/tasks/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i 1.1.1.1 --clear
+</code></pre>
+<ul>
+<li><strong>On All Nodes in a Cluster</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f ~/.ops/tasks/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --nodename all
+</code></pre>
+<ul>
+<li><strong>On a Specific Node in a Cluster</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f ~/.ops/tasks/set-hosts.yaml --ip 1.2.3.4 --domain test.com --i ~/.kube/config --nodename node1
+</code></pre>
+<h4 id="3-install-applications">3. <strong>Install Applications</strong></h4>
+<ul>
+<li><strong>Install Istio</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f ~/.ops/tasks/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf
+</code></pre>
+<p>The default version is <code>1.13.7</code> and the default <code>kubeconfig</code> is <code>/etc/kubernetes/admin.conf</code>.</p>
+<ul>
+<li><strong>Uninstall Istio</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f ~/.ops/tasks/app-istio.yaml --version 1.13.7 --kubeconfig /etc/kubernetes/admin.conf --action delete
+</code></pre>
+<h4 id="4-upload-files">4. <strong>Upload Files</strong></h4>
+<ul>
+<li><strong>Upload to Server</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f tasks/file-upload.yaml --fileapi https://gh-uploadapi.chenshaowen.com/api/v1/files --localfile dockerfile
+</code></pre>
+<ul>
+<li><strong>Upload to S3</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f tasks/file-upload.yaml --ak xxx --sk xxx --region beijing --endpoint ks3-cn-beijing.ksyun.com --bucket xxx --localfile dockerfile --remotefile s3://dockerfile
+</code></pre>
+<h4 id="5-download-files">5. <strong>Download Files</strong></h4>
+<ul>
+<li><strong>From Server</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f tasks/file-download.yaml --fileapi https://gh-uploadapi.chenshaowen.com/api/v1/files --aeskey &lt;AES_KEY&gt; --remotefile &lt;URL&gt; --localfile dockerfile1
+</code></pre>
+<ul>
+<li><strong>From S3</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli task -f tasks/file-download.yaml --ak xxx --sk xxx --region beijing --endpoint ks3-cn-beijing.ksyun.com --bucket xxx --localfile dockerfile2 --remotefile s3://dockerfile
+</code></pre>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opscli-shell.html" class="navigation navigation-prev " aria-label="Previous page: Shell">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="opscli-file.html" class="navigation navigation-next " aria-label="Next page: File">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Task","level":"1.2.3","depth":2,"next":{"title":"File","level":"1.2.4","depth":2,"path":"opscli-file.md","ref":"opscli-file.md","articles":[]},"previous":{"title":"Shell","level":"1.2.2","depth":2,"path":"opscli-shell.md","ref":"opscli-shell.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"en","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"opscli-task.md","mtime":"2026-01-26T08:28:50.793Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

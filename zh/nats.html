@@ -1,0 +1,733 @@
+
+<!DOCTYPE HTML>
+<html lang="zh" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Nats · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="opscontroller-eventhooks.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="輸入並搜尋" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本書使用 GitBook 釋出
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Nats</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id="nats">Nats</h2>
+<h3 id="&#x7528;&#x9014;">&#x7528;&#x9014;</h3>
+<p>Ops &#x901A;&#x8FC7; Nats &#x7EC4;&#x4EF6;&#xFF0C;&#x5BFC;&#x51FA;&#x76F8;&#x5173;&#x7684;&#x4E8B;&#x4EF6;&#xFF0C;&#x4E3B;&#x8981;&#x6709;&#x4E24;&#x7C7B;:</p>
+<ul>
+<li>CRD &#x7684;&#x72B6;&#x6001;&#xFF0C;&#x5305;&#x62EC;&#x4E3B;&#x673A;&#x3001;&#x96C6;&#x7FA4;&#x7684;&#x72B6;&#x6001;&#xFF0C;TaskRun&#x3001;PipelineRun &#x7684;&#x72B6;&#x6001;</li>
+<li>alert &#x5B9A;&#x65F6;&#x5DE1;&#x68C0;&#x4E0A;&#x62A5;&#x7684;&#x72B6;&#x6001;&#x4FE1;&#x606F;</li>
+</ul>
+<p>&#x4E0B;&#x9762;&#x63D0;&#x4F9B; Nats &#x7EC4;&#x4EF6;&#x7684;&#x5B89;&#x88C5;&#x4E0E;&#x914D;&#x7F6E;&#x3002;&#x8FD9;&#x91CC;&#x91C7;&#x7528;&#x7684;&#x662F;&#xFF0C;&#x4E00;&#x4E2A;&#x4E3B;&#x96C6;&#x7FA4;&#xFF0C;&#x82E5;&#x5E72;&#x8FB9;&#x7F18;&#x96C6;&#x7FA4;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x8FB9;&#x7F18;&#x96C6;&#x7FA4;&#x4F1A;&#x5C06;&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#x5230;&#x4E3B;&#x96C6;&#x7FA4;&#xFF0C;&#x5728;&#x4E3B;&#x96C6;&#x7FA4;&#x7EDF;&#x4E00;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x3002;</p>
+<h3 id="&#x6DFB;&#x52A0;-helm-repo">&#x6DFB;&#x52A0; Helm Repo</h3>
+<ul>
+<li>&#x6DFB;&#x52A0;&#x4ED3;&#x5E93;</li>
+</ul>
+<pre><code class="lang-bash">helm repo add nats https://nats-io.github.io/k8s/helm/charts/
+helm repo update
+</code></pre>
+<ul>
+<li>&#x67E5;&#x770B;&#x53EF;&#x914D;&#x7F6E;&#x7684;&#x5B57;&#x6BB5;</li>
+</ul>
+<pre><code class="lang-bash">helm show values nats/nats
+</code></pre>
+<h3 id="&#x90E8;&#x7F72;&#x4E3B;&#x96C6;&#x7FA4;">&#x90E8;&#x7F72;&#x4E3B;&#x96C6;&#x7FA4;</h3>
+<ul>
+<li>&#x8BBE;&#x7F6E; Nats &#x7684;&#x57FA;&#x672C;&#x4FE1;&#x606F;</li>
+</ul>
+<pre><code class="lang-bash">export adminpassword=mypassword
+export apppassword=mypassword
+</code></pre>
+<ul>
+<li>&#x751F;&#x6210; nats-values.yaml</li>
+</ul>
+<pre><code class="lang-bash">cat &lt;&lt;EOF &gt; nats-values.yaml
+config:
+  jetstream:
+    enabled: true
+    fileStore:
+      enabled: false
+      dir: /data
+    memoryStore:
+      enabled: true
+      maxSize: 1Gi
+    pvc:
+      enabled: false
+      storageClassName: my-sc
+  cluster:
+    enabled: true
+  leafnodes:
+    enabled: true
+  merge:
+    accounts:
+      SYS:
+        users:
+          - user: admin
+            password: ${adminpassword}
+      APP:
+        users:
+          - user: app
+            password: ${apppassword}
+        jetstream: true
+    system_account: SYS
+container:
+  image:
+    repository: nats
+    tag: 2.10.20-alpine
+natsBox:
+  container:
+    image:
+      repository: nats-box
+      tag: 0.14.5
+reloader:
+  enabled: true
+  image:
+    repository: natsio/nats-server-config-reloader
+    tag: 0.15.1
+EOF
+</code></pre>
+<p>&#x6570;&#x636E;&#x88AB;&#x6301;&#x4E45;&#x5316;&#x5230;&#x5185;&#x5B58;&#x4E2D;&#xFF0C;&#x5982;&#x679C;&#x9700;&#x8981;&#x5B58;&#x50A8;&#x5230;&#x78C1;&#x76D8;&#xFF0C;&#x9700;&#x8981;&#x8BBE;&#x7F6E; <code>fileStore</code>&#x3002;</p>
+<ul>
+<li>&#x5B89;&#x88C5; nats</li>
+</ul>
+<pre><code class="lang-bash">helm -n ops-system install nats nats/nats  --version 1.2.4  -f nats-values.yaml
+</code></pre>
+<pre><code class="lang-bash">helm -n ops-system uninstall nats
+</code></pre>
+<ul>
+<li>&#x66B4;&#x9732; Nats &#x670D;&#x52A1;&#x7AEF;&#x53E3;</li>
+</ul>
+<pre><code class="lang-bash">kubectl patch svc nats -p &apos;{&quot;spec&quot;:{&quot;type&quot;:&quot;NodePort&quot;,&quot;ports&quot;:[{&quot;port&quot;:4222,&quot;nodePort&quot;:32223,&quot;targetPort&quot;:&quot;nats&quot;},{&quot;port&quot;:7422,&quot;nodePort&quot;:32222,&quot;targetPort&quot;:&quot;leafnodes&quot;}]}}&apos; -n ops-system
+</code></pre>
+<ul>
+<li>&#x67E5;&#x770B;&#x8D1F;&#x8F7D;</li>
+</ul>
+<pre><code class="lang-bash">kubectl -n ops-system get pod,svc | grep nats
+
+pod/nats-0                         2/2     Running   0             15h
+pod/nats-1                         2/2     Running   0             15h
+pod/nats-2                         2/2     Running   0             15h
+pod/nats-box-6bb86df889-xcr6x      1/1     Running   0             15h
+service/nats            NodePort    10.100.109.24    &lt;none&gt;        4222:32223/TCP,7422:32222/TCP         15h
+service/nats-headless   ClusterIP   None             &lt;none&gt;        4222/TCP,7422/TCP,6222/TCP,8222/TCP   15h
+</code></pre>
+<h3 id="&#x90E8;&#x7F72;&#x8FB9;&#x7F18;&#x8282;&#x70B9;">&#x90E8;&#x7F72;&#x8FB9;&#x7F18;&#x8282;&#x70B9;</h3>
+<ul>
+<li>&#x6DFB;&#x52A0;&#x4ED3;&#x5E93;</li>
+</ul>
+<pre><code class="lang-bash">helm repo add nats https://nats-io.github.io/k8s/helm/charts/
+helm repo update
+</code></pre>
+<ul>
+<li>&#x8BBE;&#x7F6E;&#x4E3B;&#x96C6;&#x7FA4;&#x7684; nats &#x4FE1;&#x606F;</li>
+</ul>
+<pre><code class="lang-bash">export natsendpoint=x.x.x.x:32222
+</code></pre>
+<ul>
+<li>&#x8BBE;&#x7F6E; nats &#x7684; server_name</li>
+</ul>
+<pre><code class="lang-bash">export natsservername=need-to-be-unique
+</code></pre>
+<ul>
+<li>&#x751F;&#x6210; nats-values.yaml</li>
+</ul>
+<p>&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x4E0D;&#x540C;&#x96C6;&#x7FA4;&#x7684; <code>server_name</code> &#x4E0D;&#x80FD;&#x76F8;&#x540C;&#xFF0C;&#x5426;&#x5219;&#x4F1A;&#x6709;&#x91CD;&#x590D;&#x8FDE;&#x63A5;&#x7684;&#x95EE;&#x9898;&#x3002;</p>
+<pre><code class="lang-bash">cat &lt;&lt;EOF &gt; nats-values.yaml
+config:
+  leafnodes:
+    enabled: true
+    merge:
+      remotes:
+        - urls:
+          - nats://admin:${adminpassword}@${natsendpoint}
+          account: SYS
+        - urls:
+          - nats://app:${apppassword}@${natsendpoint}
+          account: APP
+  merge:
+    server_name: ${natsservername}
+    accounts:
+      SYS:
+        users:
+          - user: admin
+            password: ${adminpassword}
+      APP:
+        users:
+          - user: app
+            password: ${apppassword}
+        jetstream: true
+    system_account: SYS
+container:
+  image:
+    repository: nats
+    tag: 2.10.20-alpine
+natsBox:
+  container:
+    image:
+      repository: natsio/nats-box
+      tag: 0.14.5
+reloader:
+  enabled: true
+  image:
+    repository: natsio/nats-server-config-reloader
+    tag: 0.15.1
+EOF
+</code></pre>
+<ul>
+<li>&#x5B89;&#x88C5; nats</li>
+</ul>
+<pre><code class="lang-bash">helm install nats nats/nats  --version 1.2.4  -f nats-values.yaml -n ops-system
+</code></pre>
+<h3 id="nats-&#x5E38;&#x7528;&#x547D;&#x4EE4;">Nats &#x5E38;&#x7528;&#x547D;&#x4EE4;</h3>
+<ul>
+<li>&#x6D4B;&#x8BD5; Nats</li>
+</ul>
+<pre><code class="lang-bash">kubectl -n ops-system exec -it deployment/nats-box -- sh
+</code></pre>
+<ul>
+<li>&#x8BA2;&#x9605;&#x6D88;&#x606F;</li>
+</ul>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.&gt;&quot;
+</code></pre>
+<ul>
+<li>&#x53D1;&#x5E03;&#x6D88;&#x606F;</li>
+</ul>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} pub ops.test &quot;mymessage mycontent&quot;
+</code></pre>
+<ul>
+<li>&#x5220;&#x9664; stream</li>
+</ul>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} stream rm ops
+</code></pre>
+<ul>
+<li>&#x521B;&#x5EFA; stream &#x6301;&#x4E45;&#x5316;&#x6D88;&#x606F;</li>
+</ul>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} stream add ops --subjects &quot;ops.&gt;&quot; --ack --max-msgs=-1 --max-bytes=-1 --max-age=24h --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 1 --dupe-window=2m
+</code></pre>
+<p>&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E2D;&#xFF0C;&#x63A8;&#x8350;&#x4F7F;&#x7528; file &#x5B58;&#x50A8;&#xFF0C;&#x5E76;&#x4E14; replica &#x8BBE;&#x7F6E;&#x4E3A; 3&#x3002;</p>
+<ul>
+<li>&#x67E5;&#x770B; stream &#x4E8B;&#x4EF6;</li>
+</ul>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} stream view ops
+</code></pre>
+<ul>
+<li>&#x67E5;&#x770B; stream &#x914D;&#x7F6E;</li>
+</ul>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} stream info ops
+</code></pre>
+<ul>
+<li>&#x67E5;&#x770B;&#x96C6;&#x7FA4;&#x4FE1;&#x606F;</li>
+</ul>
+<pre><code class="lang-bash">nats --user=admin --password=${adminpassword} server report jetstream
+</code></pre>
+<p>&#x8FD9;&#x91CC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x4E3B;&#x96C6;&#x7FA4;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x8FB9;&#x7F18;&#x96C6;&#x7FA4;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x4EE5;&#x53CA;&#x8FDE;&#x63A5;&#x7684;&#x4FE1;&#x606F;&#x3002;</p>
+<ul>
+<li>&#x67E5;&#x770B; stream &#x7684; subjects</li>
+</ul>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} stream subjects ops
+</code></pre>
+<ul>
+<li>&#x538B;&#x529B;&#x6D4B;&#x8BD5;</li>
+</ul>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} bench benchsubject --pub 1 --sub 10
+</code></pre>
+<h3 id="&#x53C2;&#x8003;">&#x53C2;&#x8003;</h3>
+<ul>
+<li><a href="https://docs.nats.io/running-a-nats-service/configuration#jetstream" target="_blank">JetStream &#x914D;&#x7F6E;</a></li>
+<li><a href="https://docs.nats.io/running-a-nats-service/configuration/leafnodes/leafnode_conf" target="_blank">LeafNode &#x914D;&#x7F6E;</a></li>
+<li><a href="https://docs.nats.io/running-a-nats-service/configuration/gateways/gateway#gateway-configuration-block" target="_blank">Gateway &#x914D;&#x7F6E;</a></li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opscontroller-eventhooks.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: EventHooks">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Nats","level":"1.5","depth":1,"previous":{"title":"EventHooks","level":"1.4.7","depth":2,"path":"opscontroller-eventhooks.md","ref":"opscontroller-eventhooks.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"zh","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"nats.md","mtime":"2026-01-26T08:28:50.795Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"zh"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

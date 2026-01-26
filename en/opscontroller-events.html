@@ -1,0 +1,928 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Events · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="opscontroller-eventhooks.html" />
+    
+    
+    <link rel="prev" href="opscontroller-metrics.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Events</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="ops-event-system">Ops Event System</h1>
+<h2 id="overview">Overview</h2>
+<p>The Ops project publishes various events through NATS JetStream for monitoring, alerting, and integration. All events follow the CloudEvents standard and are routed through NATS subjects.</p>
+<h2 id="event-subject-format">Event Subject Format</h2>
+<h3 id="standard-format">Standard Format</h3>
+<p>Most event subjects follow this format:</p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.{resourceType}.{resourceName}.{observation}
+</code></pre><p>Where:</p>
+<ul>
+<li><code>{cluster}</code>: Cluster name (from environment variable <code>EVENT_CLUSTER</code>)</li>
+<li><code>{namespace}</code>: Kubernetes namespace</li>
+<li><code>{resourceType}</code>: Resource type (e.g., <code>hosts</code>, <code>clusters</code>, <code>taskruns</code>, etc.)</li>
+<li><code>{resourceName}</code>: Resource name</li>
+<li><code>{observation}</code>: Observation type, possible values and meanings:<ul>
+<li><code>status</code>: Resource status information (e.g., running status, health status, etc.)</li>
+<li><code>metrics</code>: Metrics data (e.g., CPU, memory, disk usage, etc.)</li>
+<li><code>logs</code>: Log information</li>
+<li><code>events</code>: Event information (e.g., Kubernetes events)</li>
+<li><code>traces</code>: Tracing information (e.g., distributed tracing data)</li>
+<li><code>alerts</code>: Alert information</li>
+<li><code>findings</code>: Proactively reported information and status</li>
+</ul>
+</li>
+</ul>
+<h3 id="node-event-special-format">Node Event Special Format</h3>
+<p>Node events use a special format without the <code>namespaces</code> part:</p>
+<pre><code>ops.clusters.{cluster}.nodes.{nodeName}.{observation}
+</code></pre><p><strong>Example:</strong></p>
+<pre><code>ops.clusters.mycluster.nodes.mynode.events
+</code></pre><p><strong>Note:</strong></p>
+<ul>
+<li>Nodes are cluster-level resources and do not belong to any namespace</li>
+<li>Node event subjects omit the <code>namespaces</code> part</li>
+<li>Other format rules are the same as the standard format</li>
+</ul>
+<h2 id="event-types">Event Types</h2>
+<h3 id="1-controller-setup-events">1. Controller Setup Events</h3>
+<p><strong>Subject Format:</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.controllers.{resourceType}.status
+</code></pre><p><strong>Trigger:</strong></p>
+<ul>
+<li>Published when each Controller starts, indicating the Controller is ready</li>
+</ul>
+<p><strong>Published From:</strong></p>
+<ul>
+<li><code>controllers/host_controller.go</code>: Host Controller startup</li>
+<li><code>controllers/cluster_controller.go</code>: Cluster Controller startup</li>
+<li><code>controllers/task_controller.go</code>: Task Controller startup</li>
+<li><code>controllers/taskrun_controller.go</code>: TaskRun Controller startup</li>
+<li><code>controllers/pipeline_controller.go</code>: Pipeline Controller startup</li>
+<li><code>controllers/pipelinerun_controller.go</code>: PipelineRun Controller startup</li>
+<li><code>controllers/event_controller.go</code>: Event Controller startup</li>
+<li><code>controllers/eventhooks_controller.go</code>: EventHook Controller startup</li>
+</ul>
+<p><strong>Event Data Structure:</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;kind&quot;: &quot;string&quot;  // Resource type, e.g., &quot;Hosts&quot;, &quot;Clusters&quot;, &quot;TaskRuns&quot;, etc.
+}
+</code></pre>
+<hr>
+<h3 id="2-host-status-events">2. Host Status Events</h3>
+<p><strong>Subject Format:</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.hosts.{hostName}.status
+</code></pre><p><strong>Trigger:</strong></p>
+<ul>
+<li>When Host resource status is updated (heartbeat status, disk usage, etc.)</li>
+</ul>
+<p><strong>Published From:</strong></p>
+<ul>
+<li><code>controllers/host_controller.go</code>: When Host status changes</li>
+</ul>
+<p><strong>Event Data Structure:</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;address&quot;: &quot;string&quot;,
+  &quot;port&quot;: 0,
+  &quot;username&quot;: &quot;string&quot;,
+  &quot;status&quot;: {
+    &quot;hostname&quot;: &quot;string&quot;,
+    &quot;diskUsagePercent&quot;: &quot;string&quot;,
+    &quot;heartStatus&quot;: &quot;string&quot;,
+    &quot;heartTime&quot;: &quot;string&quot;,
+    // ... other HostStatus fields
+  }
+}
+</code></pre>
+<hr>
+<h3 id="3-cluster-status-events">3. Cluster Status Events</h3>
+<p><strong>Subject Format:</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.clusters.{clusterName}.status
+</code></pre><p><strong>Trigger:</strong></p>
+<ul>
+<li>When Cluster resource status is updated (Kubernetes version, certificate expiration, heartbeat status, etc.)</li>
+</ul>
+<p><strong>Published From:</strong></p>
+<ul>
+<li><code>controllers/cluster_controller.go</code>: When Cluster status changes</li>
+</ul>
+<p><strong>Event Data Structure:</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;server&quot;: &quot;string&quot;,
+  &quot;status&quot;: {
+    &quot;version&quot;: &quot;string&quot;,
+    &quot;certNotAfterDays&quot;: 0,
+    &quot;heartStatus&quot;: &quot;string&quot;,
+    &quot;heartTime&quot;: &quot;string&quot;,
+    // ... other ClusterStatus fields
+  }
+}
+</code></pre>
+<hr>
+<h3 id="4-taskrun-status-events">4. TaskRun Status Events</h3>
+<p><strong>Subject Format:</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.taskruns.{taskRunName}.status
+</code></pre><p><strong>Trigger:</strong></p>
+<ul>
+<li>When TaskRun execution completes or status changes</li>
+</ul>
+<p><strong>Published From:</strong></p>
+<ul>
+<li><code>controllers/taskrun_controller.go</code>: <ul>
+<li>When TaskRun execution completes (in <code>run</code> function)</li>
+<li>When TaskRun status changes (in Reconcile)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Event Data Structure:</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;taskRef&quot;: &quot;string&quot;,
+  &quot;desc&quot;: &quot;string&quot;,
+  &quot;variables&quot;: {
+    &quot;key&quot;: &quot;value&quot;
+  },
+  &quot;runStatus&quot;: &quot;string&quot;,
+  &quot;startTime&quot;: &quot;string&quot;,
+  &quot;taskRunNodeStatus&quot;: [
+    {
+      &quot;nodeName&quot;: &quot;string&quot;,
+      &quot;runStatus&quot;: &quot;string&quot;,
+      &quot;taskRunStep&quot;: [
+        {
+          &quot;stepName&quot;: &quot;string&quot;,
+          &quot;stepContent&quot;: &quot;string&quot;,
+          &quot;stepOutput&quot;: &quot;string&quot;,
+          &quot;stepStatus&quot;: &quot;string&quot;
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
+<hr>
+<h3 id="5-pipelinerun-status-events">5. PipelineRun Status Events</h3>
+<p><strong>Subject Format:</strong></p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.pipelineruns.{pipelineRunName}.status
+</code></pre><p><strong>Trigger:</strong></p>
+<ul>
+<li>When PipelineRun execution completes or status changes</li>
+<li>When cross-cluster PipelineRun status synchronization completes</li>
+</ul>
+<p><strong>Published From:</strong></p>
+<ul>
+<li><code>controllers/pipelinerun_controller.go</code>: <ul>
+<li>When PipelineRun execution completes (in <code>run</code> function)</li>
+<li>When PipelineRun status changes (in Reconcile)</li>
+<li>When cross-cluster PipelineRun status synchronization completes (in goroutine)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Event Data Structure:</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;pipelineRef&quot;: &quot;string&quot;,
+  &quot;desc&quot;: &quot;string&quot;,
+  &quot;variables&quot;: {
+    &quot;key&quot;: &quot;value&quot;
+  },
+  &quot;runStatus&quot;: &quot;string&quot;,
+  &quot;startTime&quot;: &quot;string&quot;,
+  &quot;pipelineRunStatus&quot;: [
+    {
+      &quot;taskName&quot;: &quot;string&quot;,
+      &quot;taskRef&quot;: &quot;string&quot;,
+      &quot;taskRunStatus&quot;: {
+        &quot;runStatus&quot;: &quot;string&quot;,
+        &quot;taskRunNodeStatus&quot;: []
+      }
+    }
+  ]
+}
+</code></pre>
+<hr>
+<h3 id="6-kubernetes-events">6. Kubernetes Events</h3>
+<p><strong>Subject Format:</strong></p>
+<p>For namespaced resources:</p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.{resourceKind}s.{resourceName}.events
+</code></pre><p>For Node resources (special format, no namespaces):</p>
+<pre><code>ops.clusters.{cluster}.nodes.{nodeName}.events
+</code></pre><p><strong>Trigger:</strong></p>
+<ul>
+<li>When Kubernetes native events (events.k8s.io/v1) are created, updated, or deleted</li>
+<li>Only events from the last 2 minutes are published</li>
+</ul>
+<p><strong>Published From:</strong></p>
+<ul>
+<li><code>controllers/event_controller.go</code>: Watches Kubernetes Event resources</li>
+</ul>
+<p><strong>Event Data Structure:</strong></p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;string&quot;,
+  &quot;type&quot;: &quot;string&quot;,        // Normal, Warning, etc.
+  &quot;reason&quot;: &quot;string&quot;,      // Event reason
+  &quot;eventTime&quot;: &quot;string&quot;,   // ISO 8601 format
+  &quot;from&quot;: &quot;string&quot;,        // Event source (Manager)
+  &quot;message&quot;: &quot;string&quot;      // Event message
+}
+</code></pre>
+<p><strong>Example Subjects:</strong></p>
+<p>Namespaced resources:</p>
+<pre><code>ops.clusters.mycluster.namespaces.ops-system.pods.my-pod.events
+ops.clusters.mycluster.namespaces.ops-system.deployments.my-deployment.events
+</code></pre><p>Node resources (special format):</p>
+<pre><code>ops.clusters.mycluster.nodes.mynode.events
+</code></pre><hr>
+<h3 id="7-notification-events">7. Notification Events</h3>
+<p><strong>Subject Format:</strong></p>
+<pre><code>ops.notifications.providers.{provider}.channels.{channel}.severities.{severity}
+</code></pre><p>Where:</p>
+<ul>
+<li><code>{provider}</code>: Notification provider or system name (e.g., <code>ksyun</code>, <code>ai</code>, etc.)</li>
+<li><code>{channel}</code>: Notification channel type (e.g., <code>webhook</code>, <code>email</code>, <code>sms</code>, etc.)</li>
+<li><code>{severity}</code>: Severity level (e.g., <code>info</code>, <code>warning</code>, <code>error</code>, <code>critical</code>, etc.)</li>
+</ul>
+<p><strong>Trigger:</strong></p>
+<ul>
+<li>Published when the notification system sends notifications</li>
+</ul>
+<p><strong>Published From:</strong></p>
+<ul>
+<li>Published via API endpoint <code>/api/v1/namespaces/{namespace}/events/{event}</code></li>
+<li>If the event path starts with <code>ops.</code>, it will be used directly as the subject without format transformation</li>
+</ul>
+<p><strong>Publishing Method:</strong></p>
+<pre><code class="lang-bash">curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/ops.notifications.providers.ksyun.channels.webhook.severities.info \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -d &apos;{
+    &quot;provider&quot;: &quot;ksyun&quot;,
+    &quot;channel&quot;: &quot;webhook&quot;,
+    &quot;severity&quot;: &quot;info&quot;,
+    &quot;message&quot;: &quot;Notification message&quot;,
+    &quot;title&quot;: &quot;Notification title&quot;
+  }&apos;
+</code></pre>
+<p><strong>Event Data Structure:</strong></p>
+<pre><code class="lang-json">{
+  &quot;provider&quot;: &quot;string&quot;,
+  &quot;channel&quot;: &quot;string&quot;,
+  &quot;severity&quot;: &quot;string&quot;,
+  &quot;message&quot;: &quot;string&quot;,
+  &quot;title&quot;: &quot;string&quot;,
+  &quot;timestamp&quot;: &quot;string&quot;,
+  // ... other notification-related fields
+}
+</code></pre>
+<p><strong>Example Subjects:</strong></p>
+<pre><code>ops.notifications.providers.ksyun.channels.webhook.severities.info
+ops.notifications.providers.ksyun.channels.webhook.severities.warning
+ops.notifications.providers.ksyun.channels.webhook.severities.error
+ops.notifications.providers.ksyun.channels.email.severities.critical
+ops.notifications.providers.AI.channels.webhook.severities.info
+</code></pre><p><strong>Note:</strong></p>
+<ul>
+<li>Notification events use an independent subject format without <code>clusters</code> and <code>namespaces</code> parts</li>
+<li>Used for notification system routing and distribution</li>
+<li>Supports combinations of multiple providers, channels, and severity levels</li>
+<li><strong>Important</strong>: If the event path starts with <code>ops.</code>, the API will use the path directly as the NATS subject without any format transformation</li>
+</ul>
+<hr>
+<h3 id="8-custom-events-via-api">8. Custom Events (via API)</h3>
+<p><strong>Subject Format:</strong>
+The API uses different processing methods based on the event path:</p>
+<ol>
+<li><p><strong>Event path starting with <code>ops.</code></strong> (direct delivery):</p>
+<pre><code>ops.{any path}
+</code></pre><ul>
+<li>Uses the path directly as the NATS subject without any format transformation</li>
+<li>Suitable for notification events and other independent format events</li>
+</ul>
+</li>
+<li><p><strong>Event path starting with <code>nodes.</code></strong> (node events):</p>
+<pre><code>ops.clusters.{cluster}.nodes.{nodeName}.{observation}
+</code></pre><ul>
+<li>Converts to node event format without the <code>namespaces</code> part</li>
+</ul>
+</li>
+<li><p><strong>Standard format</strong> (other paths):</p>
+<pre><code>ops.clusters.{cluster}.namespaces.{namespace}.{eventName}
+</code></pre><ul>
+<li>Automatically adds cluster and namespace prefixes</li>
+</ul>
+</li>
+</ol>
+<p><strong>Trigger:</strong></p>
+<ul>
+<li>Manually published via API endpoint <code>/api/v1/namespaces/{namespace}/events/{event}</code></li>
+</ul>
+<p><strong>Published From:</strong></p>
+<ul>
+<li><code>pkg/server/api.go</code>: <code>CreateEvent</code> function</li>
+</ul>
+<p><strong>Event Data Structure:</strong></p>
+<ul>
+<li>Custom JSON object defined by the caller</li>
+</ul>
+<p><strong>Usage Examples:</strong>
+Standard format event:</p>
+<pre><code class="lang-bash">curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/my-custom-event \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -d &apos;{
+    &quot;message&quot;: &quot;Custom event data&quot;,
+    &quot;level&quot;: &quot;info&quot;
+  }&apos;
+</code></pre>
+<p>Direct delivery format (starting with <code>ops.</code>):</p>
+<pre><code class="lang-bash">curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/ops.notifications.providers.ksyun.channels.webhook.severities.info \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -d &apos;{
+    &quot;provider&quot;: &quot;ksyun&quot;,
+    &quot;channel&quot;: &quot;webhook&quot;,
+    &quot;severity&quot;: &quot;info&quot;,
+    &quot;message&quot;: &quot;Notification message&quot;
+  }&apos;
+</code></pre>
+<p>Node event format:</p>
+<pre><code class="lang-bash">curl -X POST http://localhost:80/api/v1/namespaces/ops-system/events/nodes.mynode.findings \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -d &apos;{
+    &quot;message&quot;: &quot;Node finding&quot;,
+    &quot;status&quot;: &quot;normal&quot;
+  }&apos;
+</code></pre>
+<hr>
+<h2 id="event-subscription-examples">Event Subscription Examples</h2>
+<h3 id="subscribe-to-all-events">Subscribe to All Events</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.&gt;&quot;
+</code></pre>
+<h3 id="subscribe-to-events-in-a-specific-namespace">Subscribe to Events in a Specific Namespace</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.ops-system.&gt;&quot;
+</code></pre>
+<h3 id="subscribe-to-host-status-events">Subscribe to Host Status Events</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.*.hosts.*.status&quot;
+</code></pre>
+<h3 id="subscribe-to-taskrun-status-events">Subscribe to TaskRun Status Events</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.*.taskruns.*.status&quot;
+</code></pre>
+<h3 id="subscribe-to-pipelinerun-status-events">Subscribe to PipelineRun Status Events</h3>
+<pre><code class="lang-bash">nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.*.pipelineruns.*.status&quot;
+</code></pre>
+<h3 id="subscribe-to-kubernetes-events">Subscribe to Kubernetes Events</h3>
+<pre><code class="lang-bash"># Subscribe to Kubernetes events for all namespaced resources
+nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.namespaces.*.*.events&quot;
+
+# Subscribe to node events (special format)
+nats --user=app --password=${apppassword} sub &quot;ops.clusters.*.nodes.*.events&quot;
+</code></pre>
+<h3 id="subscribe-to-notification-events">Subscribe to Notification Events</h3>
+<pre><code class="lang-bash"># Subscribe to all notification events
+nats --user=app --password=${apppassword} sub &quot;ops.notifications.&gt;&quot;
+
+# Subscribe to notifications from a specific provider
+nats --user=app --password=${apppassword} sub &quot;ops.notifications.providers.ksyun.&gt;&quot;
+
+# Subscribe to notifications from a specific channel
+nats --user=app --password=${apppassword} sub &quot;ops.notifications.providers.*.channels.webhook.&gt;&quot;
+
+# Subscribe to notifications with a specific severity level
+nats --user=app --password=${apppassword} sub &quot;ops.notifications.providers.*.channels.*.severities.error&quot;
+</code></pre>
+<h2 id="event-format">Event Format</h2>
+<p>All events follow the <a href="https://cloudevents.io/" target="_blank">CloudEvents</a> standard and include these standard fields:</p>
+<ul>
+<li><code>id</code>: Unique event identifier (UUID)</li>
+<li><code>source</code>: Event source (fixed as <code>https://github.com/shaowenchen/ops</code>)</li>
+<li><code>type</code>: Event type (e.g., <code>Host</code>, <code>Cluster</code>, <code>PipelineRun</code>, etc.)</li>
+<li><code>specversion</code>: CloudEvents specification version (<code>1.0</code>)</li>
+<li><code>time</code>: Event timestamp (ISO 8601 format)</li>
+<li><code>data</code>: Event data (JSON format)</li>
+<li><code>subject</code>: NATS subject (automatically set)</li>
+</ul>
+<h2 id="environment-variables">Environment Variables</h2>
+<p>The event system depends on the following environment variables:</p>
+<ul>
+<li><code>EVENT_CLUSTER</code>: Cluster name, used to build event subjects</li>
+<li><code>EVENT_ENDPOINT</code>: NATS server address (e.g., <code>nats://nats:4222</code>)</li>
+</ul>
+<h2 id="notes">Notes</h2>
+<ol>
+<li><strong>Event Deduplication</strong>: NATS JetStream supports message deduplication via <code>dupe-window</code> configuration (default 2 minutes)</li>
+<li><strong>Event Retention</strong>: Event retention time is determined by Stream configuration (default 24 hours)</li>
+<li><strong>Event Ordering</strong>: Events on the same subject are published in chronological order</li>
+<li><strong>Async Publishing</strong>: Most events are published asynchronously via goroutines, not blocking the main flow</li>
+<li><strong>Event Filtering</strong>: Kubernetes events only publish events from the last 2 minutes to avoid historical event interference</li>
+</ol>
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li><a href="nats.html">NATS Configuration</a></li>
+<li><a href="opscontroller-eventhooks.html">EventHooks Usage Guide</a></li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opscontroller-metrics.html" class="navigation navigation-prev " aria-label="Previous page: Metrics">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="opscontroller-eventhooks.html" class="navigation navigation-next " aria-label="Next page: EventHooks">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Events","level":"1.4.6","depth":2,"next":{"title":"EventHooks","level":"1.4.7","depth":2,"path":"opscontroller-eventhooks.md","ref":"opscontroller-eventhooks.md","articles":[]},"previous":{"title":"Metrics","level":"1.4.5","depth":2,"path":"opscontroller-metrics.md","ref":"opscontroller-metrics.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"en","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"opscontroller-events.md","mtime":"2026-01-26T08:28:50.793Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

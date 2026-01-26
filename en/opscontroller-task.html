@@ -1,0 +1,633 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Task · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="opscontroller-pipeline.html" />
+    
+    
+    <link rel="prev" href="opscontroller-cluster.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Task</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h3 id="ops-controller-manager-task-object"><strong>Ops-controller-manager Task Object</strong></h3>
+<p>The <code>Task</code> object in the Ops Controller defines the operations or tasks that need to be executed, either on specific hosts or within the Ops Controller pod. You can create and manage <code>Task</code> objects using <code>opscli</code> commands or YAML files.</p>
+<h4 id="create-task-using-opscli-command"><strong>Create Task Using <code>opscli</code> Command</strong></h4>
+<p>To create a <code>Task</code> object directly using the <code>create</code> sub-command:</p>
+<pre><code class="lang-bash">/usr/local/bin/opscli create task --name t1 --typeref host --nameref dev1 --filepath ./task/get-osstaus.yaml
+</code></pre>
+<ul>
+<li><strong><code>name</code></strong>: The name of the task (e.g., <code>t1</code>).</li>
+<li><strong><code>typeref</code></strong>: Specifies the type of resource the task will execute on (e.g., <code>host</code>).</li>
+<li><strong><code>nameref</code></strong>: Specifies the name of the host (e.g., <code>dev1</code>).</li>
+<li><strong><code>filepath</code></strong>: The path to the YAML file containing the task definition.</li>
+</ul>
+<h4 id="create-task-using-yaml-file"><strong>Create Task Using YAML File</strong></h4>
+<p>Alternatively, you can define the <code>Task</code> object in a YAML file and apply it using <code>kubectl</code>. Below is an example YAML file for a scheduled task that checks the HTTP status of a URL every minute and sends a notification if the status code is not 200.</p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: Task
+metadata:
+  name: alert-http-status-dockermirror
+  namespace: ops-system
+spec:
+  desc: alert
+  crontab: &quot;*/1 * * * *&quot;
+  variables:
+    url:
+      default: http://1.1.1.1:5000/
+    expect:
+      default: &quot;200&quot;
+    message:
+      default: ${url} http status is not ${expect}
+  steps:
+    - name: get-status
+      content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}
+    - name: notification
+      when: ${steps.get-status.output} != ${expect}
+      content: |
+        curl -X POST &apos;https://365.kdocs.cn/woa/api/v1/webhook/send?key=xxx&apos; -H &apos;content-type: application/json&apos; -d &apos;{ &quot;msgtype&quot;: &quot;text&quot;, &quot;text&quot;: { &quot;content&quot;: &quot;${message}&quot; } }&apos;
+</code></pre>
+<p>In this YAML:</p>
+<ul>
+<li><strong><code>desc</code></strong>: A description of the task (e.g., <code>alert</code>).</li>
+<li><strong><code>crontab</code></strong>: The cron schedule (e.g., <code>*/1 * * * *</code> means every minute).</li>
+<li><strong><code>variables</code></strong>: Defines task-specific variables, like <code>url</code>, <code>expect</code>, and <code>message</code>.</li>
+<li><strong><code>steps</code></strong>: Defines the individual operations or commands that should be executed:<ul>
+<li><code>get status</code>: Executes a <code>curl</code> command to get the HTTP status code. The output is automatically available as <code>${output}</code>, <code>${result}</code>, or <code>${steps.get-status.output}</code>.</li>
+<li><code>notifaction</code>: Sends a notification if the HTTP status code does not match the expected value.</li>
+</ul>
+</li>
+</ul>
+<h4 id="export-results-from-task-steps"><strong>Export Results from Task Steps</strong></h4>
+<p>Task steps can export results that can be referenced by other tasks in a Pipeline using path references like <code>tasks.{taskName}.results.{resultKey}</code>.</p>
+<p><strong>Default Output Variable:</strong></p>
+<p>Each step&apos;s output is automatically available in subsequent steps. You can reference them directly or use path syntax:</p>
+<ul>
+<li><code>${output}</code> or <code>${result}</code> - references the previous step&apos;s output (direct reference, recommended)</li>
+<li><code>${steps.{stepName}.output}</code> - references a specific step&apos;s output by name (path reference)</li>
+</ul>
+<p>Example:</p>
+<pre><code class="lang-yaml">steps:
+  - name: get-status
+    content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}
+  - name: notification
+    when: ${output} != ${expect}  # Direct reference (recommended)
+    content: echo &quot;Status is ${output}&quot;
+</code></pre>
+<p>Or using path syntax:</p>
+<pre><code class="lang-yaml">steps:
+  - name: get-status
+    content: curl -I -m 10 -o /dev/null -s -w %{http_code} ${url}
+  - name: notification
+    when: ${steps.get-status.output} != ${expect}  # Path reference
+    content: echo &quot;Status is ${steps.get-status.output}&quot;
+</code></pre>
+<p><strong>Export Results Using OPS_RESULT Marker:</strong></p>
+<p>To export specific results for use in Pipeline tasks, use the <code>OPS_RESULT:</code> marker in your step output:</p>
+<pre><code class="lang-yaml">steps:
+  - name: build-step
+    content: |
+      docker build -t myapp:v1.0.0 .
+      echo &quot;OPS_RESULT:image=registry.example.com/myapp:v1.0.0&quot;
+      echo &quot;OPS_RESULT:tag=v1.0.0&quot;
+</code></pre>
+<p>Supported formats:</p>
+<ul>
+<li><code>OPS_RESULT:key=value</code></li>
+<li><code>OPS_RESULT:key:value</code></li>
+<li><code>OPS_RESULT:{&quot;key&quot;:&quot;value&quot;}</code> (JSON format for multiple results)</li>
+</ul>
+<p><strong>Export Results Using key:value Format (Backward Compatible):</strong></p>
+<p>The last step&apos;s output in <code>key:value</code> format will be automatically exported:</p>
+<pre><code class="lang-yaml">steps:
+  - name: build-step
+    content: |
+      docker build -t myapp:v1.0.0 .
+      echo &quot;image:registry.example.com/myapp:v1.0.0&quot;
+</code></pre>
+<p>You can apply this file using:</p>
+<pre><code class="lang-bash">kubectl apply -f task.yaml
+</code></pre>
+<h4 id="view-task-object-status"><strong>View Task Object Status</strong></h4>
+<p>To view the status of a specific <code>Task</code> object, use the following command:</p>
+<pre><code class="lang-bash">kubectl get task t1 -n ops-system
+</code></pre>
+<p>To list all tasks in the <code>ops-system</code> namespace:</p>
+<pre><code class="lang-bash">kubectl get task -n ops-system
+</code></pre>
+<p>Example output:</p>
+<pre><code class="lang-bash">NAME                             CRONTAB       TYPEREF   NAMEREF   NODENAME   ALL    STARTTIME   RUNSTATUS
+alert-http-status-dockermirror   */1 * * * *   host      dev1      node1      true   2024-11-09  successed
+</code></pre>
+<p>In the output:</p>
+<ul>
+<li><strong><code>NAME</code></strong>: The name of the task.</li>
+<li><strong><code>CRONTAB</code></strong>: The cron schedule for the task.</li>
+<li><strong><code>TYPEREF</code></strong>: The type of the resource the task will run on (e.g., <code>host</code>).</li>
+<li><strong><code>NAMEREF</code></strong>: The reference name of the target resource (e.g., <code>dev1</code>).</li>
+<li><strong><code>NODENAME</code></strong>: The name of the node where the task is running.</li>
+<li><strong><code>ALL</code></strong>: Indicates whether the task runs on all nodes.</li>
+<li><strong><code>STARTTIME</code></strong>: The time the task was started.</li>
+<li><strong><code>RUNSTATUS</code></strong>: The current status of the task (e.g., <code>successed</code>).</li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opscontroller-cluster.html" class="navigation navigation-prev " aria-label="Previous page: Cluster">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="opscontroller-pipeline.html" class="navigation navigation-next " aria-label="Next page: Pipeline">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Task","level":"1.4.3","depth":2,"next":{"title":"Pipeline","level":"1.4.4","depth":2,"path":"opscontroller-pipeline.md","ref":"opscontroller-pipeline.md","articles":[]},"previous":{"title":"Cluster","level":"1.4.2","depth":2,"path":"opscontroller-cluster.md","ref":"opscontroller-cluster.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"en","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"opscontroller-task.md","mtime":"2026-01-26T08:28:50.794Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

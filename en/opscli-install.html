@@ -1,0 +1,638 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Install · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="opscli-shell.html" />
+    
+    
+    <link rel="prev" href="opscli.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Install</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h3 id="opscli-installation-guide">opscli Installation Guide</h3>
+<h4 id="1-single-machine-installation">1. <strong>Single Machine Installation</strong></h4>
+<ul>
+<li><strong>For Domestic Users (China)</strong></li>
+</ul>
+<pre><code class="lang-bash">PROXY=https://ghfast.top/
+curl -sfL $PROXY/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest PROXY=$PROXY sh -
+</code></pre>
+<ul>
+<li><strong>For International Users (Outside China)</strong></li>
+</ul>
+<pre><code class="lang-bash">curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -
+</code></pre>
+<h4 id="2-batch-installation">2. <strong>Batch Installation</strong></h4>
+<p>To install <code>opscli</code> on multiple hosts, list the IP addresses of all hosts in a <code>hosts.txt</code> file, and use the <code>opscli shell</code> command to execute the installation. The default credential is the current user&apos;s <code>~/.ssh/id_rsa</code>.</p>
+<ul>
+<li><strong>For Domestic Users (China)</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli shell --content &quot;curl -sfL https://ghproxy.chenshaowen.com/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -&quot; -i hosts.txt
+</code></pre>
+<ul>
+<li><strong>For International Users (Outside China)</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli shell --content &quot;curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest sh -&quot; -i hosts.txt
+</code></pre>
+<h4 id="3-version-upgrade">3. <strong>Version Upgrade</strong></h4>
+<ul>
+<li><strong>For Single Machine</strong></li>
+</ul>
+<pre><code class="lang-bash">sudo /usr/local/bin/opscli upgrade
+</code></pre>
+<ul>
+<li><strong>For Batch Upgrade</strong></li>
+</ul>
+<pre><code class="lang-bash">/usr/local/bin/opscli shell --content &quot;sudo /usr/local/bin/opscli upgrade&quot; -i hosts.txt
+</code></pre>
+<h4 id="4-auto-completion-setup">4. <strong>Auto-completion Setup</strong></h4>
+<ul>
+<li><strong>For bash</strong></li>
+</ul>
+<pre><code class="lang-bash">echo &apos;source &lt;(opscli completion bash)&apos; &gt;&gt;~/.bashrc
+</code></pre>
+<ul>
+<li><strong>For zsh</strong></li>
+</ul>
+<pre><code class="lang-bash">echo &apos;source &lt;(opscli completion zsh)&apos; &gt;&gt;~/.zshrc
+</code></pre>
+<h4 id="5-configuration">5. <strong>Configuration</strong></h4>
+<p><code>opscli</code> supports configuration management through the <code>config</code> command, allowing you to set and manage configuration values that are used across all CLI commands.</p>
+<p><strong>Configuration File Location</strong></p>
+<p>Configuration is stored in <code>~/.ops/opscli/config</code> (YAML format).</p>
+<p><strong>Supported Configuration Keys</strong></p>
+<ul>
+<li><strong>proxy</strong>: Proxy URL for network requests (e.g., <code>https://ghfast.top/</code>)</li>
+<li><strong>runtimeimage</strong>: Default runtime image for Kubernetes tasks (e.g., <code>ubuntu:22.04</code>)</li>
+</ul>
+<p><strong>Configuration Commands</strong></p>
+<ul>
+<li><p><strong>Set configuration</strong>: <code>opscli config set &lt;key&gt; &lt;value&gt;</code></p>
+<pre><code class="lang-bash">opscli config set proxy https://ghfast.top/
+opscli config set runtimeimage ubuntu:22.04
+</code></pre>
+</li>
+<li><p><strong>Get configuration</strong>: <code>opscli config get &lt;key&gt;</code></p>
+<pre><code class="lang-bash">opscli config get proxy
+</code></pre>
+</li>
+<li><p><strong>List all configurations</strong>: <code>opscli config list</code></p>
+<pre><code class="lang-bash">opscli config list
+# Output:
+# proxy = https://ghfast.top/
+# runtimeimage = (not set)
+</code></pre>
+</li>
+<li><p><strong>Unset configuration</strong>: <code>opscli config unset &lt;key&gt;</code></p>
+<pre><code class="lang-bash">opscli config unset proxy
+</code></pre>
+</li>
+</ul>
+<p><strong>Configuration Priority</strong></p>
+<p>Configuration values follow a priority order (highest to lowest):</p>
+<ol>
+<li><p><strong>CLI Arguments</strong> (highest priority)</p>
+<ul>
+<li>Command-line flags like <code>--proxy</code> or <code>--runtimeimage</code></li>
+<li>Example: <code>opscli task --filepath task.yaml --proxy https://cli-proxy.com</code></li>
+</ul>
+</li>
+<li><p><strong>Environment Variables</strong></p>
+<ul>
+<li><code>PROXY</code>: Proxy URL</li>
+<li><code>DEFAULT_RUNTIME_IMAGE</code>: Default runtime image</li>
+<li>Example: <code>export PROXY=https://env-proxy.com</code></li>
+</ul>
+</li>
+<li><p><strong>Configuration File</strong> (<code>~/.ops/opscli/config</code>)</p>
+<ul>
+<li>Values set via <code>opscli config set</code></li>
+<li>Example: <code>opscli config set proxy https://config-proxy.com</code></li>
+</ul>
+</li>
+<li><p><strong>Default Values</strong> (lowest priority)</p>
+<ul>
+<li>Built-in defaults</li>
+<li>Proxy: <code>https://ghproxy.chenshaowen.com/</code></li>
+<li>Runtime Image: <code>ubuntu:22.04</code></li>
+</ul>
+</li>
+</ol>
+<p><strong>Usage Examples</strong></p>
+<pre><code class="lang-bash"># Example 1: Using configuration file
+opscli config set proxy https://ghfast.top/
+opscli upgrade --manifests  # Automatically uses proxy from config
+
+# Example 2: Override with environment variable
+export PROXY=https://env-proxy.com
+opscli upgrade --manifests  # Uses environment variable
+
+# Example 3: Override with CLI argument (highest priority)
+opscli upgrade --proxy https://cli-proxy.com  # Uses CLI argument
+</code></pre>
+<h4 id="6-more-information">6. <strong>More Information</strong></h4>
+<p>To see additional usage options:</p>
+<pre><code class="lang-bash">/usr/local/bin/opscli --help
+</code></pre>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opscli.html" class="navigation navigation-prev " aria-label="Previous page: Opscli">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="opscli-shell.html" class="navigation navigation-next " aria-label="Next page: Shell">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Install","level":"1.2.1","depth":2,"next":{"title":"Shell","level":"1.2.2","depth":2,"path":"opscli-shell.md","ref":"opscli-shell.md","articles":[]},"previous":{"title":"Opscli","level":"1.2","depth":1,"path":"opscli.md","ref":"opscli.md","articles":[{"title":"Install","level":"1.2.1","depth":2,"path":"opscli-install.md","ref":"opscli-install.md","articles":[]},{"title":"Shell","level":"1.2.2","depth":2,"path":"opscli-shell.md","ref":"opscli-shell.md","articles":[]},{"title":"Task","level":"1.2.3","depth":2,"path":"opscli-task.md","ref":"opscli-task.md","articles":[]},{"title":"File","level":"1.2.4","depth":2,"path":"opscli-file.md","ref":"opscli-file.md","articles":[]},{"title":"Case","level":"1.2.5","depth":2,"path":"opscli-case.md","ref":"opscli-case.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"en","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"opscli-install.md","mtime":"2026-01-26T08:28:50.793Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

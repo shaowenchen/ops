@@ -1,0 +1,706 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Opscontroller · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="opscontroller-host.html" />
+    
+    
+    <link rel="prev" href="opsserver.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Opscontroller</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h3 id="ops-controller-manager-overview"><strong>Ops-controller-manager Overview</strong></h3>
+<p><code>ops-controller-manager</code> is a Kubernetes Operator that provides three core objects: <code>Host</code>, <code>Cluster</code>, and <code>Task</code>.</p>
+<h4 id="objects-in-ops-controller-manager"><strong>Objects in ops-controller-manager</strong></h4>
+<ul>
+<li><strong>Host</strong>: Describes a host machine, including hostname, IP address, SSH username, password, private key, etc.</li>
+<li><strong>Cluster</strong>: Describes a cluster, including details such as cluster name, number of hosts, number of pods, load, CPU, memory, etc.</li>
+<li><strong>Task</strong>: Describes a task, which can be one-time or scheduled (cron) tasks.</li>
+</ul>
+<h3 id="installation"><strong>Installation</strong></h3>
+<h4 id="prerequisites"><strong>Prerequisites</strong></h4>
+<ul>
+<li>Kubernetes 1.19+</li>
+<li>Helm 3.0+</li>
+<li>NATS server (optional but recommended for event streaming)</li>
+</ul>
+<h4 id="install-helm"><strong>Install Helm</strong></h4>
+<p>If you haven&apos;t installed Helm yet, you can install it using the following command:</p>
+<pre><code class="lang-bash">curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+</code></pre>
+<h4 id="add-helm-repository"><strong>Add Helm Repository</strong></h4>
+<p>Add the <code>ops</code> Helm repository to your Helm configuration:</p>
+<pre><code class="lang-bash">helm repo add ops https://www.chenshaowen.com/ops/charts
+helm repo update
+</code></pre>
+<h4 id="install-ops-controller-manager"><strong>Install ops-controller-manager</strong></h4>
+<p><strong>Basic Installation:</strong></p>
+<p>To install the <code>ops-controller-manager</code> using Helm with default values:</p>
+<pre><code class="lang-bash">helm install myops ops/ops --version 1.2.0 --namespace ops-system --create-namespace
+</code></pre>
+<p><strong>Installation with Custom Values:</strong></p>
+<p>You can customize the installation using <code>--set</code> flags:</p>
+<pre><code class="lang-bash">helm install myops ops/ops --version 1.2.0 \
+  --namespace ops-system \
+  --create-namespace \
+  --set controller.image.repository=&quot;shaowenchen/ops-controller-manager&quot; \
+  --set controller.image.pullPolicy=&quot;Always&quot; \
+  --set controller.image.tag=&quot;latest&quot; \
+  --set controller.env.activeNamespace=&quot;ops-system&quot; \
+  --set controller.env.defaultRuntimeImage=&quot;ubuntu:22.04&quot; \
+  --set controller.replicaCount=2 \
+  --set server.image.repository=&quot;shaowenchen/ops-server&quot; \
+  --set server.image.pullPolicy=&quot;Always&quot; \
+  --set server.image.tag=&quot;latest&quot; \
+  --set server.replicaCount=2 \
+  --set server.autoscaling.minReplicas=2 \
+  --set server.autoscaling.maxReplicas=4 \
+  --set event.cluster=&quot;mycluster&quot; \
+  --set event.endpoint=&quot;http://app:password@nats-headless.ops-system.svc:4222&quot;
+</code></pre>
+<p><strong>Installation with Values File:</strong></p>
+<p>Create a custom values file for more complex configurations:</p>
+<pre><code class="lang-yaml"># my-values.yaml
+event:
+  cluster: &quot;mycluster&quot;
+  endpoint: &quot;http://app:password@nats-headless.ops-system.svc:4222&quot;
+
+controller:
+  replicaCount: 2
+  image:
+    repository: shaowenchen/ops-controller-manager
+    pullPolicy: Always
+    tag: &quot;latest&quot;
+  env:
+    activeNamespace: &quot;ops-system&quot;
+    defaultRuntimeImage: &quot;ubuntu:22.04&quot;
+
+server:
+  replicaCount: 2
+  image:
+    repository: shaowenchen/ops-server
+    pullPolicy: Always
+    tag: &quot;latest&quot;
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 80
+
+prometheus:
+  enabled: true
+</code></pre>
+<p>Then install with the values file:</p>
+<pre><code class="lang-bash">helm install myops ops/ops --version 1.2.0 \
+  --namespace ops-system \
+  --create-namespace \
+  -f my-values.yaml
+</code></pre>
+<h4 id="verify-installation"><strong>Verify Installation</strong></h4>
+<p>After the installation, check the status of the pods to ensure everything is running:</p>
+<pre><code class="lang-bash"># Check pods
+kubectl get pods -n ops-system
+
+# Check services
+kubectl get svc -n ops-system
+
+# Check deployments
+kubectl get deployments -n ops-system
+</code></pre>
+<h4 id="upgrade-installation"><strong>Upgrade Installation</strong></h4>
+<p>To upgrade an existing installation:</p>
+<pre><code class="lang-bash">helm upgrade myops ops/ops --version 1.2.0 --namespace ops-system
+</code></pre>
+<p>Or with custom values:</p>
+<pre><code class="lang-bash">helm upgrade myops ops/ops --version 1.2.0 \
+  --namespace ops-system \
+  -f my-values.yaml
+</code></pre>
+<h4 id="uninstall-ops-controller-manager"><strong>Uninstall ops-controller-manager</strong></h4>
+<p>To uninstall the <code>ops-controller-manager</code>:</p>
+<pre><code class="lang-bash">helm uninstall myops --namespace ops-system
+</code></pre>
+<h3 id="configuration"><strong>Configuration</strong></h3>
+<h4 id="namespace-configuration"><strong>Namespace Configuration</strong></h4>
+<p>By default, <code>ops-controller-manager</code> will only process CRD resources within the <code>ops-system</code> namespace.</p>
+<p>To change this behavior, you can modify the <code>controller.env.activeNamespace</code> value in the Helm values. If left empty, it will process resources from all namespaces.</p>
+<p><strong>Using --set:</strong></p>
+<pre><code class="lang-bash">helm install myops ops/ops --version 1.2.0 \
+  --namespace ops-system \
+  --create-namespace \
+  --set controller.env.activeNamespace=&quot;&quot;
+</code></pre>
+<p><strong>Using values file:</strong></p>
+<pre><code class="lang-yaml">controller:
+  env:
+    activeNamespace: &quot;&quot; # Empty means all namespaces
+</code></pre>
+<h4 id="event-configuration"><strong>Event Configuration</strong></h4>
+<p>Configure NATS event endpoint for both controller and server:</p>
+<pre><code class="lang-yaml">controller:
+  env:
+    eventCluster: &quot;default&quot;
+    eventEndpoint: &quot;http://app:password@nats-headless.ops-system.svc:4222&quot;
+
+server:
+  env:
+    eventCluster: &quot;default&quot;
+    eventEndpoint: &quot;http://app:password@nats-headless.ops-system.svc:4222&quot;
+</code></pre>
+<h4 id="resource-configuration"><strong>Resource Configuration</strong></h4>
+<p>Configure resource limits and requests:</p>
+<pre><code class="lang-yaml">resources:
+  limits:
+    cpu: 2000m
+    memory: 4096Mi
+  requests:
+    cpu: 1000m
+    memory: 2048Mi
+</code></pre>
+<p>You can also configure separate resources for server:</p>
+<pre><code class="lang-yaml">server:
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+    requests:
+      cpu: 500m
+      memory: 1024Mi
+</code></pre>
+<h4 id="monitoring-configuration"><strong>Monitoring Configuration</strong></h4>
+<p>Enable Prometheus monitoring (creates ServiceMonitor resources):</p>
+<pre><code class="lang-yaml">prometheus:
+  enabled: true
+</code></pre>
+<h4 id="autoscaling-configuration"><strong>Autoscaling Configuration</strong></h4>
+<p>Enable Horizontal Pod Autoscaler:</p>
+<pre><code class="lang-yaml">autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+</code></pre>
+<h3 id="troubleshooting"><strong>Troubleshooting</strong></h3>
+<h4 id="check-pod-logs"><strong>Check Pod Logs</strong></h4>
+<pre><code class="lang-bash"># Controller logs
+kubectl logs -n ops-system deployment/myops-ops
+
+# Server logs
+kubectl logs -n ops-system deployment/myops-ops-server
+</code></pre>
+<h4 id="check-metrics-endpoints"><strong>Check Metrics Endpoints</strong></h4>
+<pre><code class="lang-bash"># Controller metrics
+kubectl port-forward -n ops-system svc/myops-ops-controller-metrics 8080:8080
+curl http://localhost:8080/metrics
+
+# Server metrics
+kubectl port-forward -n ops-system svc/myops-ops-server 8080:80
+curl http://localhost:8080/metrics
+</code></pre>
+<h4 id="check-servicemonitors"><strong>Check ServiceMonitors</strong></h4>
+<pre><code class="lang-bash">kubectl get servicemonitor -n ops-system
+</code></pre>
+<p>For more detailed configuration options, see the <a href="../../charts/ops/README.md">Helm Chart README</a>.</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opsserver.html" class="navigation navigation-prev " aria-label="Previous page: Opsserver">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="opscontroller-host.html" class="navigation navigation-next " aria-label="Next page: Host">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Opscontroller","level":"1.4","depth":1,"next":{"title":"Host","level":"1.4.1","depth":2,"path":"opscontroller-host.md","ref":"opscontroller-host.md","articles":[]},"previous":{"title":"Opsserver","level":"1.3","depth":1,"path":"opsserver.md","ref":"opsserver.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"en","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"opscontroller.md","mtime":"2026-01-26T08:28:50.794Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

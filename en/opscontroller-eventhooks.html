@@ -1,0 +1,887 @@
+
+<!DOCTYPE HTML>
+<html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>EventHooks · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="nats.html" />
+    
+    
+    <link rel="prev" href="opscontroller-events.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >EventHooks</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="eventhooks-usage-guide">EventHooks Usage Guide</h1>
+<h2 id="overview">Overview</h2>
+<p>EventHooks is an event notification mechanism provided by Ops that allows you to forward events to different notification channels based on keyword matching rules. It supports multiple notification types including Webhook, Collaborative Document, Event Forwarding, and Elasticsearch.</p>
+<h2 id="basic-concepts">Basic Concepts</h2>
+<h3 id="eventhooks-resource">EventHooks Resource</h3>
+<p>EventHooks is a Kubernetes CRD resource used to define event notification rules:</p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: my-eventhook
+  namespace: ops-system
+spec:
+  type: webhook              # Notification type
+  subject: ops.clusters.*.namespaces.*.pods.*.events  # Event subject to subscribe
+  url: https://example.com/webhook  # Notification target URL
+  keywords:                  # Keyword matching rules
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<h3 id="field-description">Field Description</h3>
+<ul>
+<li><strong>type</strong>: Notification type, supported values:<ul>
+<li><code>webhook</code>: HTTP Webhook notification</li>
+<li><code>xiezuo</code>: Collaborative document notification</li>
+<li><code>event</code>: Event forwarding (forward to NATS subject)</li>
+<li><code>elasticsearch</code>: Elasticsearch indexing</li>
+</ul>
+</li>
+<li><strong>subject</strong>: Event subject to subscribe, supports wildcards (e.g., <code>ops.clusters.*.namespaces.*.pods.*.events</code>)</li>
+<li><strong>url</strong>: Notification target address, different formats required for different notification types</li>
+<li><strong>keywords</strong>: Keyword matching configuration</li>
+<li><strong>options</strong>: Additional configuration options, different notification types support different options</li>
+</ul>
+<h2 id="keyword-matching">Keyword Matching</h2>
+<h3 id="match-mode-matchmode">Match Mode (matchMode)</h3>
+<ul>
+<li><strong>ANY</strong> (default): Matches if any keyword in the list is found</li>
+<li><strong>ALL</strong>: Matches only if all keywords in the list are found</li>
+</ul>
+<h3 id="match-type-matchtype">Match Type (matchType)</h3>
+<ul>
+<li><strong>CONTAINS</strong> (default): String contains matching</li>
+<li><strong>EXACT</strong>: Exact matching</li>
+<li><strong>REGEX</strong>: Regular expression matching</li>
+</ul>
+<h3 id="examples">Examples</h3>
+<h4 id="example-1-contains-matching">Example 1: Contains Matching</h4>
+<pre><code class="lang-yaml">keywords:
+  include:
+    - &quot;Error&quot;
+    - &quot;Failed&quot;
+  matchMode: ANY
+  matchType: CONTAINS
+</code></pre>
+<p>Matches events containing &quot;Error&quot; or &quot;Failed&quot;.</p>
+<h4 id="example-2-regular-expression-matching">Example 2: Regular Expression Matching</h4>
+<pre><code class="lang-yaml">keywords:
+  include:
+    - &quot;(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*&quot;
+  matchType: REGEX
+</code></pre>
+<p>Using regular expression to match:</p>
+<ul>
+<li>Must contain: any one of <code>kube</code>, <code>etcd</code>, <code>calico</code>, <code>csi</code>, or <code>fluid</code></li>
+<li>And must contain: any one of <code>BackOff</code>, <code>OOMKilled</code>, <code>Evicted</code>, etc.</li>
+</ul>
+<h4 id="example-3-exclude-matching">Example 3: Exclude Matching</h4>
+<pre><code class="lang-yaml">keywords:
+  include:
+    - &quot;Error&quot;
+  exclude:
+    - &quot;healthcheck&quot;
+    - &quot;test&quot;
+  matchType: CONTAINS
+</code></pre>
+<p>Matches events containing &quot;Error&quot; but not containing &quot;healthcheck&quot; or &quot;test&quot;.</p>
+<h2 id="notification-types">Notification Types</h2>
+<h3 id="1-webhook-notification-webhook">1. Webhook Notification (webhook)</h3>
+<p>Sends event data in JSON format to the specified HTTP Webhook URL.</p>
+<p><strong>Configuration Example:</strong></p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: webhook-notification
+  namespace: ops-system
+spec:
+  type: webhook
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: https://example.com/api/webhook
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<p><strong>Data Format Sent:</strong></p>
+<p>Readable string format of the event (contains all event field information).</p>
+<h3 id="2-collaborative-document-notification-xiezuo">2. Collaborative Document Notification (xiezuo)</h3>
+<p>Sends to collaborative document system webhook.</p>
+<p><strong>Configuration Example:</strong></p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: xiezuo-notification
+  namespace: ops-system
+spec:
+  type: xiezuo
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: https://365.kdocs.cn/woa/api/v1/webhook/send?key=xxxx
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<p><strong>Data Format:</strong></p>
+<p>If data is already in XiezuoBody format, send directly; otherwise convert to text format.</p>
+<h3 id="3-event-forwarding-event">3. Event Forwarding (event)</h3>
+<p>Forwards events to another NATS subject. Supports wildcard replacement.</p>
+<p><strong>Configuration Example:</strong></p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: event-forward
+  namespace: ops-system
+spec:
+  type: event
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  # Use wildcard * in URL, automatically replaced with corresponding values from original event subject
+  url: ops.clusters.*.namespaces.*.pods.*.alerts
+  keywords:
+    include:
+      - &quot;(?=.*(kube|etcd|calico)).*(BackOff|OOMKilled|Evicted|Error|Failed).*&quot;
+    matchType: REGEX
+</code></pre>
+<p><strong>Wildcard Replacement Example:</strong></p>
+<ul>
+<li>Original event subject: <code>ops.clusters.cluster1.namespaces.ns1.pods.pod1.events</code></li>
+<li>URL template: <code>ops.clusters.*.namespaces.*.pods.*.alerts</code></li>
+<li>Replaced: <code>ops.clusters.cluster1.namespaces.ns1.pods.pod1.alerts</code></li>
+</ul>
+<p><strong>Node Event Support:</strong></p>
+<p>Also supports node event format:</p>
+<ul>
+<li>Original event: <code>ops.clusters.cluster1.nodes.node1.events</code></li>
+<li>URL template: <code>ops.clusters.*.nodes.*.alerts</code></li>
+<li>Replaced: <code>ops.clusters.cluster1.nodes.node1.alerts</code></li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Forwarded events will have new ID and timestamp</li>
+<li>Need to set environment variable <code>EVENT_ENDPOINT</code> to specify NATS server address</li>
+</ul>
+<h3 id="4-elasticsearch-notification-elasticsearch">4. Elasticsearch Notification (elasticsearch)</h3>
+<p>Indexes event data to Elasticsearch.</p>
+<p><strong>Configuration Example:</strong></p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: elasticsearch-notification
+  namespace: ops-system
+spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200/ops-events/_doc
+  options:
+    username: elastic      # Elasticsearch username (optional)
+    password: changeme     # Elasticsearch password (optional)
+    index: ops-events      # Override index name from URL (optional)
+    id: &quot;&quot;                 # Document ID (optional, auto-generated if not specified)
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<p><strong>URL Format:</strong></p>
+<ul>
+<li><code>http://host:port/index/_doc</code> - Auto-generate document ID</li>
+<li><code>http://host:port/index/_doc/doc-id</code> - Specify document ID</li>
+<li><code>http://host:port</code> - Need to specify index in options</li>
+</ul>
+<p><strong>Date-based Index Names:</strong></p>
+<p>You can use date placeholders in the index name to create time-based indices. Supported placeholders:</p>
+<ul>
+<li><code>{date}</code> or <code>{YYYY.MM.DD}</code> -&gt; <code>2024.01.19</code></li>
+<li><code>{YYYY-MM-DD}</code> -&gt; <code>2024-01-19</code></li>
+<li><code>{YYYYMMDD}</code> -&gt; <code>20240119</code></li>
+<li><code>{YYYY.MM}</code> -&gt; <code>2024.01</code> (monthly index)</li>
+<li><code>{YYYY-MM}</code> -&gt; <code>2024-01</code> (monthly index)</li>
+<li><code>{YYYY}</code> -&gt; <code>2024</code> (yearly index)</li>
+</ul>
+<p><strong>Example with Date-based Index:</strong></p>
+<pre><code class="lang-yaml">spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200
+  options:
+    index: ops-events-{YYYY.MM.DD}  # Creates index like ops-events-2024.01.19
+    username: elastic
+    password: changeme
+</code></pre>
+<p>This will create daily indices like:</p>
+<ul>
+<li><code>ops-events-2024.01.19</code></li>
+<li><code>ops-events-2024.01.20</code></li>
+<li>etc.</li>
+</ul>
+<p><strong>Indexed Document Structure:</strong></p>
+<p>The indexed document contains only the original event data from <code>event.Data()</code>. No additional metadata or extension fields are added.</p>
+<p><strong>Example:</strong></p>
+<p>If the original event data is:</p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;cluster1&quot;,
+  &quot;namespace&quot;: &quot;ns1&quot;,
+  &quot;pod&quot;: &quot;pod1&quot;,
+  &quot;type&quot;: &quot;Warning&quot;,
+  &quot;reason&quot;: &quot;BackOff&quot;,
+  &quot;message&quot;: &quot;Event message&quot;
+}
+</code></pre>
+<p>Then the indexed document will be exactly the same:</p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;cluster1&quot;,
+  &quot;namespace&quot;: &quot;ns1&quot;,
+  &quot;pod&quot;: &quot;pod1&quot;,
+  &quot;type&quot;: &quot;Warning&quot;,
+  &quot;reason&quot;: &quot;BackOff&quot;,
+  &quot;message&quot;: &quot;Event message&quot;
+}
+</code></pre>
+<p><strong>Note:</strong> Only the original event data is indexed. No metadata fields (like <code>@timestamp</code>, <code>event_id</code>, <code>event_type</code>, etc.) or extension fields (like <code>ext_*</code>) are added to the document.</p>
+<p><strong>Supported Options:</strong></p>
+<ul>
+<li><code>username</code>: Elasticsearch username (for Basic auth)</li>
+<li><code>password</code>: Elasticsearch password (for Basic auth)</li>
+<li><code>index</code>: Override index name from URL (supports date placeholders like <code>{YYYY.MM.DD}</code>)</li>
+<li><code>id</code>: Document ID (if not specified in URL)</li>
+</ul>
+<h2 id="complete-examples">Complete Examples</h2>
+<h3 id="example-1-send-pod-error-events-to-webhook">Example 1: Send Pod Error Events to Webhook</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: pod-errors-to-webhook
+  namespace: ops-system
+spec:
+  type: webhook
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: https://alerting.example.com/webhook
+  keywords:
+    include:
+      - &quot;(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*&quot;
+    matchType: REGEX
+</code></pre>
+<h3 id="example-2-forward-events-to-alert-subject">Example 2: Forward Events to Alert Subject</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: convert-events-to-alerts
+  namespace: ops-system
+spec:
+  type: event
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: ops.clusters.*.namespaces.*.pods.*.alerts
+  keywords:
+    include:
+      - &quot;(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*&quot;
+    matchType: REGEX
+</code></pre>
+<h3 id="example-3-index-events-to-elasticsearch">Example 3: Index Events to Elasticsearch</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: events-to-elasticsearch
+  namespace: ops-system
+spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200/ops-events/_doc
+  options:
+    username: elastic
+    password: changeme
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<h3 id="example-3b-index-events-to-elasticsearch-with-date-based-indices">Example 3b: Index Events to Elasticsearch with Date-based Indices</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: events-to-elasticsearch-daily
+  namespace: ops-system
+spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200
+  options:
+    index: ops-events-{YYYY.MM.DD}  # Creates daily indices like ops-events-2024.01.19
+    username: elastic
+    password: changeme
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<h3 id="example-4-node-event-processing">Example 4: Node Event Processing</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: node-events-to-alerts
+  namespace: ops-system
+spec:
+  type: event
+  subject: ops.clusters.*.nodes.*.events
+  url: ops.clusters.*.nodes.*.alerts
+  keywords:
+    include:
+      - &quot;(?=.*(kube|etcd|calico)).*(BackOff|OOMKilled|Error|Failed).*&quot;
+    matchType: REGEX
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li><p><strong>Use Regular Expressions for Complex Matching</strong>: When matching multiple conditions, use regular expressions for more precise control.</p>
+</li>
+<li><p><strong>Use Exclude Rules Appropriately</strong>: Use <code>exclude</code> to filter out unwanted events and reduce false positives.</p>
+</li>
+<li><p><strong>Use Wildcards for Event Forwarding</strong>: In event forwarding scenarios, use wildcards to maintain event subject structure for subsequent processing.</p>
+</li>
+<li><p><strong>Elasticsearch Index Naming</strong>: Use meaningful index names, consider organizing by date or cluster name.</p>
+</li>
+<li><p><strong>Monitor EventHooks Status</strong>: Monitor EventHooks trigger status through Prometheus metrics to detect configuration issues promptly.</p>
+</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="view-eventhooks-status">View EventHooks Status</h3>
+<pre><code class="lang-bash">kubectl get eventhooks -n ops-system
+kubectl describe eventhooks &lt;name&gt; -n ops-system
+</code></pre>
+<h3 id="view-controller-logs">View Controller Logs</h3>
+<pre><code class="lang-bash">kubectl logs -n ops-system deployment/ops-controller-manager | grep eventhook
+</code></pre>
+<h3 id="check-metrics">Check Metrics</h3>
+<pre><code class="lang-bash"># View EventHooks trigger count
+curl http://localhost:8080/metrics | grep ops_controller_eventhooks_status
+</code></pre>
+<h3 id="common-issues">Common Issues</h3>
+<ol>
+<li><p><strong>Events Not Triggering</strong>:</p>
+<ul>
+<li>Check if <code>subject</code> correctly matches event subjects</li>
+<li>Check if <code>keywords</code> configuration is correct</li>
+<li>View Controller logs for errors</li>
+</ul>
+</li>
+<li><p><strong>Webhook Send Failure</strong>:</p>
+<ul>
+<li>Check if URL is accessible</li>
+<li>Check network connection</li>
+<li>View error messages in Controller logs</li>
+</ul>
+</li>
+<li><p><strong>Elasticsearch Index Failure</strong>:</p>
+<ul>
+<li>Check Elasticsearch connection</li>
+<li>Verify authentication credentials</li>
+<li>Check index permissions</li>
+</ul>
+</li>
+</ol>
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li><a href="opscontroller-events.html">Event System Documentation</a></li>
+<li><a href="opscontroller-metrics.html">Metrics Documentation</a></li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opscontroller-events.html" class="navigation navigation-prev " aria-label="Previous page: Events">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="nats.html" class="navigation navigation-next " aria-label="Next page: Nats">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"EventHooks","level":"1.4.7","depth":2,"next":{"title":"Nats","level":"1.5","depth":1,"path":"nats.md","ref":"nats.md","articles":[]},"previous":{"title":"Events","level":"1.4.6","depth":2,"path":"opscontroller-events.md","ref":"opscontroller-events.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"en","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"opscontroller-eventhooks.md","mtime":"2026-01-26T08:28:50.793Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"en"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

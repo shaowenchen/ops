@@ -1,0 +1,887 @@
+
+<!DOCTYPE HTML>
+<html lang="zh" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>EventHooks · Ops</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-code/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="nats.html" />
+    
+    
+    <link rel="prev" href="opscontroller-events.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="輸入並搜尋" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="https://www.chenshaowen.com/" target="_blank" class="custom-link">Ops</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="opscli.html">
+            
+                <a href="opscli.html">
+            
+                    
+                    Opscli
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="opscli-install.html">
+            
+                <a href="opscli-install.html">
+            
+                    
+                    Install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="opscli-shell.html">
+            
+                <a href="opscli-shell.html">
+            
+                    
+                    Shell
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="opscli-task.html">
+            
+                <a href="opscli-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="opscli-file.html">
+            
+                <a href="opscli-file.html">
+            
+                    
+                    File
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="opscli-case.html">
+            
+                <a href="opscli-case.html">
+            
+                    
+                    Case
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="opsserver.html">
+            
+                <a href="opsserver.html">
+            
+                    
+                    Opsserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="opscontroller.html">
+            
+                <a href="opscontroller.html">
+            
+                    
+                    Opscontroller
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="opscontroller-host.html">
+            
+                <a href="opscontroller-host.html">
+            
+                    
+                    Host
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="opscontroller-cluster.html">
+            
+                <a href="opscontroller-cluster.html">
+            
+                    
+                    Cluster
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="opscontroller-task.html">
+            
+                <a href="opscontroller-task.html">
+            
+                    
+                    Task
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="opscontroller-pipeline.html">
+            
+                <a href="opscontroller-pipeline.html">
+            
+                    
+                    Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="opscontroller-metrics.html">
+            
+                <a href="opscontroller-metrics.html">
+            
+                    
+                    Metrics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.6" data-path="opscontroller-events.html">
+            
+                <a href="opscontroller-events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.4.7" data-path="opscontroller-eventhooks.html">
+            
+                <a href="opscontroller-eventhooks.html">
+            
+                    
+                    EventHooks
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="nats.html">
+            
+                <a href="nats.html">
+            
+                    
+                    Nats
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本書使用 GitBook 釋出
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >EventHooks</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="eventhooks-&#x4F7F;&#x7528;&#x6307;&#x5357;">EventHooks &#x4F7F;&#x7528;&#x6307;&#x5357;</h1>
+<h2 id="&#x6982;&#x8FF0;">&#x6982;&#x8FF0;</h2>
+<p>EventHooks &#x662F; Ops &#x63D0;&#x4F9B;&#x7684;&#x4E8B;&#x4EF6;&#x901A;&#x77E5;&#x673A;&#x5236;&#xFF0C;&#x5141;&#x8BB8;&#x60A8;&#x6839;&#x636E;&#x4E8B;&#x4EF6;&#x7684;&#x5173;&#x952E;&#x8BCD;&#x5339;&#x914D;&#x89C4;&#x5219;&#xFF0C;&#x5C06;&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#x5230;&#x4E0D;&#x540C;&#x7684;&#x901A;&#x77E5;&#x6E20;&#x9053;&#x3002;&#x652F;&#x6301;&#x591A;&#x79CD;&#x901A;&#x77E5;&#x7C7B;&#x578B;&#xFF0C;&#x5305;&#x62EC; Webhook&#x3001;&#x534F;&#x4F5C;&#x6587;&#x6863;&#x3001;&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#x548C; Elasticsearch&#x3002;</p>
+<h2 id="&#x57FA;&#x672C;&#x6982;&#x5FF5;">&#x57FA;&#x672C;&#x6982;&#x5FF5;</h2>
+<h3 id="eventhooks-&#x8D44;&#x6E90;">EventHooks &#x8D44;&#x6E90;</h3>
+<p>EventHooks &#x662F;&#x4E00;&#x4E2A; Kubernetes CRD &#x8D44;&#x6E90;&#xFF0C;&#x7528;&#x4E8E;&#x5B9A;&#x4E49;&#x4E8B;&#x4EF6;&#x901A;&#x77E5;&#x89C4;&#x5219;&#xFF1A;</p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: my-eventhook
+  namespace: ops-system
+spec:
+  type: webhook              # &#x901A;&#x77E5;&#x7C7B;&#x578B;
+  subject: ops.clusters.*.namespaces.*.pods.*.events  # &#x8BA2;&#x9605;&#x7684;&#x4E8B;&#x4EF6;&#x4E3B;&#x9898;
+  url: https://example.com/webhook  # &#x901A;&#x77E5;&#x76EE;&#x6807; URL
+  keywords:                  # &#x5173;&#x952E;&#x8BCD;&#x5339;&#x914D;&#x89C4;&#x5219;
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<h3 id="&#x5B57;&#x6BB5;&#x8BF4;&#x660E;">&#x5B57;&#x6BB5;&#x8BF4;&#x660E;</h3>
+<ul>
+<li><strong>type</strong>: &#x901A;&#x77E5;&#x7C7B;&#x578B;&#xFF0C;&#x652F;&#x6301;&#x7684;&#x503C;&#xFF1A;<ul>
+<li><code>webhook</code>: HTTP Webhook &#x901A;&#x77E5;</li>
+<li><code>xiezuo</code>: &#x534F;&#x4F5C;&#x6587;&#x6863;&#x901A;&#x77E5;</li>
+<li><code>event</code>: &#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#xFF08;&#x8F6C;&#x53D1;&#x5230; NATS &#x4E3B;&#x9898;&#xFF09;</li>
+<li><code>elasticsearch</code>: Elasticsearch &#x7D22;&#x5F15;</li>
+</ul>
+</li>
+<li><strong>subject</strong>: &#x8BA2;&#x9605;&#x7684;&#x4E8B;&#x4EF6;&#x4E3B;&#x9898;&#xFF0C;&#x652F;&#x6301;&#x901A;&#x914D;&#x7B26;&#xFF08;&#x5982; <code>ops.clusters.*.namespaces.*.pods.*.events</code>&#xFF09;</li>
+<li><strong>url</strong>: &#x901A;&#x77E5;&#x76EE;&#x6807;&#x5730;&#x5740;&#xFF0C;&#x6839;&#x636E;&#x4E0D;&#x540C;&#x7684;&#x901A;&#x77E5;&#x7C7B;&#x578B;&#x6709;&#x4E0D;&#x540C;&#x7684;&#x683C;&#x5F0F;&#x8981;&#x6C42;</li>
+<li><strong>keywords</strong>: &#x5173;&#x952E;&#x8BCD;&#x5339;&#x914D;&#x914D;&#x7F6E;</li>
+<li><strong>options</strong>: &#x989D;&#x5916;&#x7684;&#x914D;&#x7F6E;&#x9009;&#x9879;&#xFF0C;&#x4E0D;&#x540C;&#x901A;&#x77E5;&#x7C7B;&#x578B;&#x652F;&#x6301;&#x4E0D;&#x540C;&#x7684;&#x9009;&#x9879;</li>
+</ul>
+<h2 id="&#x5173;&#x952E;&#x8BCD;&#x5339;&#x914D;">&#x5173;&#x952E;&#x8BCD;&#x5339;&#x914D;</h2>
+<h3 id="&#x5339;&#x914D;&#x6A21;&#x5F0F;-matchmode">&#x5339;&#x914D;&#x6A21;&#x5F0F; (matchMode)</h3>
+<ul>
+<li><strong>ANY</strong>&#xFF08;&#x9ED8;&#x8BA4;&#xFF09;: &#x53EA;&#x8981;&#x5305;&#x542B;&#x5217;&#x8868;&#x4E2D;&#x7684;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;&#x5173;&#x952E;&#x8BCD;&#x5373;&#x5339;&#x914D;</li>
+<li><strong>ALL</strong>: &#x5FC5;&#x987B;&#x5305;&#x542B;&#x5217;&#x8868;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x5173;&#x952E;&#x8BCD;&#x624D;&#x5339;&#x914D;</li>
+</ul>
+<h3 id="&#x5339;&#x914D;&#x7C7B;&#x578B;-matchtype">&#x5339;&#x914D;&#x7C7B;&#x578B; (matchType)</h3>
+<ul>
+<li><strong>CONTAINS</strong>&#xFF08;&#x9ED8;&#x8BA4;&#xFF09;: &#x5B57;&#x7B26;&#x4E32;&#x5305;&#x542B;&#x5339;&#x914D;</li>
+<li><strong>EXACT</strong>: &#x7CBE;&#x786E;&#x5339;&#x914D;</li>
+<li><strong>REGEX</strong>: &#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x5339;&#x914D;</li>
+</ul>
+<h3 id="&#x793A;&#x4F8B;">&#x793A;&#x4F8B;</h3>
+<h4 id="&#x793A;&#x4F8B;-1-&#x5305;&#x542B;&#x5339;&#x914D;">&#x793A;&#x4F8B; 1: &#x5305;&#x542B;&#x5339;&#x914D;</h4>
+<pre><code class="lang-yaml">keywords:
+  include:
+    - &quot;Error&quot;
+    - &quot;Failed&quot;
+  matchMode: ANY
+  matchType: CONTAINS
+</code></pre>
+<p>&#x5339;&#x914D;&#x5305;&#x542B; &quot;Error&quot; &#x6216; &quot;Failed&quot; &#x7684;&#x4E8B;&#x4EF6;&#x3002;</p>
+<h4 id="&#x793A;&#x4F8B;-2-&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x5339;&#x914D;">&#x793A;&#x4F8B; 2: &#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x5339;&#x914D;</h4>
+<pre><code class="lang-yaml">keywords:
+  include:
+    - &quot;(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*&quot;
+  matchType: REGEX
+</code></pre>
+<p>&#x4F7F;&#x7528;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x5339;&#x914D;&#xFF1A;</p>
+<ul>
+<li>&#x5FC5;&#x987B;&#x5305;&#x542B;&#xFF1A;<code>kube</code>&#x3001;<code>etcd</code>&#x3001;<code>calico</code>&#x3001;<code>csi</code> &#x6216; <code>fluid</code> &#x4E2D;&#x7684;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;</li>
+<li>&#x4E14;&#x5FC5;&#x987B;&#x5305;&#x542B;&#xFF1A;<code>BackOff</code>&#x3001;<code>OOMKilled</code>&#x3001;<code>Evicted</code> &#x7B49;&#x5173;&#x952E;&#x8BCD;&#x4E2D;&#x7684;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;</li>
+</ul>
+<h4 id="&#x793A;&#x4F8B;-3-&#x6392;&#x9664;&#x5339;&#x914D;">&#x793A;&#x4F8B; 3: &#x6392;&#x9664;&#x5339;&#x914D;</h4>
+<pre><code class="lang-yaml">keywords:
+  include:
+    - &quot;Error&quot;
+  exclude:
+    - &quot;healthcheck&quot;
+    - &quot;test&quot;
+  matchType: CONTAINS
+</code></pre>
+<p>&#x5339;&#x914D;&#x5305;&#x542B; &quot;Error&quot; &#x4F46;&#x4E0D;&#x5305;&#x542B; &quot;healthcheck&quot; &#x6216; &quot;test&quot; &#x7684;&#x4E8B;&#x4EF6;&#x3002;</p>
+<h2 id="&#x901A;&#x77E5;&#x7C7B;&#x578B;&#x8BE6;&#x89E3;">&#x901A;&#x77E5;&#x7C7B;&#x578B;&#x8BE6;&#x89E3;</h2>
+<h3 id="1-webhook-&#x901A;&#x77E5;-webhook">1. Webhook &#x901A;&#x77E5; (webhook)</h3>
+<p>&#x5C06;&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x4EE5; JSON &#x683C;&#x5F0F;&#x53D1;&#x9001;&#x5230;&#x6307;&#x5B9A;&#x7684; HTTP Webhook URL&#x3002;</p>
+<p><strong>&#x914D;&#x7F6E;&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: webhook-notification
+  namespace: ops-system
+spec:
+  type: webhook
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: https://example.com/api/webhook
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<p><strong>&#x53D1;&#x9001;&#x7684;&#x6570;&#x636E;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<p>&#x4E8B;&#x4EF6;&#x7684;&#x53EF;&#x8BFB;&#x5B57;&#x7B26;&#x4E32;&#x683C;&#x5F0F;&#xFF08;&#x5305;&#x542B;&#x4E8B;&#x4EF6;&#x7684;&#x6240;&#x6709;&#x5B57;&#x6BB5;&#x4FE1;&#x606F;&#xFF09;&#x3002;</p>
+<h3 id="2-&#x534F;&#x4F5C;&#x6587;&#x6863;&#x901A;&#x77E5;-xiezuo">2. &#x534F;&#x4F5C;&#x6587;&#x6863;&#x901A;&#x77E5; (xiezuo)</h3>
+<p>&#x53D1;&#x9001;&#x5230;&#x534F;&#x4F5C;&#x6587;&#x6863;&#x7CFB;&#x7EDF;&#x7684; Webhook&#x3002;</p>
+<p><strong>&#x914D;&#x7F6E;&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: xiezuo-notification
+  namespace: ops-system
+spec:
+  type: xiezuo
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: https://365.kdocs.cn/woa/api/v1/webhook/send?key=xxxx
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<p><strong>&#x6570;&#x636E;&#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<p>&#x5982;&#x679C;&#x6570;&#x636E;&#x5DF2;&#x7ECF;&#x662F; XiezuoBody &#x683C;&#x5F0F;&#xFF0C;&#x76F4;&#x63A5;&#x53D1;&#x9001;&#xFF1B;&#x5426;&#x5219;&#x8F6C;&#x6362;&#x4E3A;&#x6587;&#x672C;&#x683C;&#x5F0F;&#x53D1;&#x9001;&#x3002;</p>
+<h3 id="3-&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;-event">3. &#x4E8B;&#x4EF6;&#x8F6C;&#x53D1; (event)</h3>
+<p>&#x5C06;&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#x5230;&#x53E6;&#x4E00;&#x4E2A; NATS &#x4E3B;&#x9898;&#x3002;&#x652F;&#x6301;&#x901A;&#x914D;&#x7B26;&#x66FF;&#x6362;&#x3002;</p>
+<p><strong>&#x914D;&#x7F6E;&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: event-forward
+  namespace: ops-system
+spec:
+  type: event
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  # URL &#x4E2D;&#x4F7F;&#x7528;&#x901A;&#x914D;&#x7B26; *&#xFF0C;&#x4F1A;&#x81EA;&#x52A8;&#x66FF;&#x6362;&#x4E3A;&#x539F;&#x59CB;&#x4E8B;&#x4EF6; subject &#x4E2D;&#x5BF9;&#x5E94;&#x4F4D;&#x7F6E;&#x7684;&#x503C;
+  url: ops.clusters.*.namespaces.*.pods.*.alerts
+  keywords:
+    include:
+      - &quot;(?=.*(kube|etcd|calico)).*(BackOff|OOMKilled|Evicted|Error|Failed).*&quot;
+    matchType: REGEX
+</code></pre>
+<p><strong>&#x901A;&#x914D;&#x7B26;&#x66FF;&#x6362;&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<ul>
+<li>&#x539F;&#x59CB;&#x4E8B;&#x4EF6; subject: <code>ops.clusters.cluster1.namespaces.ns1.pods.pod1.events</code></li>
+<li>URL &#x6A21;&#x677F;: <code>ops.clusters.*.namespaces.*.pods.*.alerts</code></li>
+<li>&#x66FF;&#x6362;&#x540E;: <code>ops.clusters.cluster1.namespaces.ns1.pods.pod1.alerts</code></li>
+</ul>
+<p><strong>&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x652F;&#x6301;&#xFF1A;</strong></p>
+<p>&#x4E5F;&#x652F;&#x6301;&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x683C;&#x5F0F;&#xFF1A;</p>
+<ul>
+<li>&#x539F;&#x59CB;&#x4E8B;&#x4EF6;: <code>ops.clusters.cluster1.nodes.node1.events</code></li>
+<li>URL &#x6A21;&#x677F;: <code>ops.clusters.*.nodes.*.alerts</code></li>
+<li>&#x66FF;&#x6362;&#x540E;: <code>ops.clusters.cluster1.nodes.node1.alerts</code></li>
+</ul>
+<p><strong>&#x6CE8;&#x610F;&#x4E8B;&#x9879;&#xFF1A;</strong></p>
+<ul>
+<li>&#x8F6C;&#x53D1;&#x7684;&#x4E8B;&#x4EF6;&#x4F1A;&#x751F;&#x6210;&#x65B0;&#x7684; ID &#x548C;&#x65F6;&#x95F4;&#x6233;</li>
+<li>&#x9700;&#x8981;&#x8BBE;&#x7F6E;&#x73AF;&#x5883;&#x53D8;&#x91CF; <code>EVENT_ENDPOINT</code> &#x6307;&#x5B9A; NATS &#x670D;&#x52A1;&#x5668;&#x5730;&#x5740;</li>
+</ul>
+<h3 id="4-elasticsearch-&#x901A;&#x77E5;-elasticsearch">4. Elasticsearch &#x901A;&#x77E5; (elasticsearch)</h3>
+<p>&#x5C06;&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x7D22;&#x5F15;&#x5230; Elasticsearch&#x3002;</p>
+<p><strong>&#x914D;&#x7F6E;&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: elasticsearch-notification
+  namespace: ops-system
+spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200/ops-events/_doc
+  options:
+    username: elastic      # Elasticsearch &#x7528;&#x6237;&#x540D;&#xFF08;&#x53EF;&#x9009;&#xFF09;
+    password: changeme     # Elasticsearch &#x5BC6;&#x7801;&#xFF08;&#x53EF;&#x9009;&#xFF09;
+    index: ops-events      # &#x8986;&#x76D6; URL &#x4E2D;&#x7684;&#x7D22;&#x5F15;&#x540D;&#xFF08;&#x53EF;&#x9009;&#xFF09;
+    id: &quot;&quot;                 # &#x6587;&#x6863; ID&#xFF08;&#x53EF;&#x9009;&#xFF0C;&#x4E0D;&#x6307;&#x5B9A;&#x5219;&#x81EA;&#x52A8;&#x751F;&#x6210;&#xFF09;
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<p><strong>URL &#x683C;&#x5F0F;&#xFF1A;</strong></p>
+<ul>
+<li><code>http://host:port/index/_doc</code> - &#x81EA;&#x52A8;&#x751F;&#x6210;&#x6587;&#x6863; ID</li>
+<li><code>http://host:port/index/_doc/doc-id</code> - &#x6307;&#x5B9A;&#x6587;&#x6863; ID</li>
+<li><code>http://host:port</code> - &#x9700;&#x8981;&#x5728; options &#x4E2D;&#x6307;&#x5B9A; index</li>
+</ul>
+<p><strong>&#x57FA;&#x4E8E;&#x65E5;&#x671F;&#x7684;&#x7D22;&#x5F15;&#x547D;&#x540D;&#xFF1A;</strong></p>
+<p>&#x53EF;&#x4EE5;&#x5728;&#x7D22;&#x5F15;&#x540D;&#x4E2D;&#x4F7F;&#x7528;&#x65E5;&#x671F;&#x5360;&#x4F4D;&#x7B26;&#x6765;&#x521B;&#x5EFA;&#x57FA;&#x4E8E;&#x65F6;&#x95F4;&#x7684;&#x7D22;&#x5F15;&#x3002;&#x652F;&#x6301;&#x7684;&#x5360;&#x4F4D;&#x7B26;&#xFF1A;</p>
+<ul>
+<li><code>{date}</code> &#x6216; <code>{YYYY.MM.DD}</code> -&gt; <code>2024.01.19</code></li>
+<li><code>{YYYY-MM-DD}</code> -&gt; <code>2024-01-19</code></li>
+<li><code>{YYYYMMDD}</code> -&gt; <code>20240119</code></li>
+<li><code>{YYYY.MM}</code> -&gt; <code>2024.01</code> (&#x6708;&#x5EA6;&#x7D22;&#x5F15;)</li>
+<li><code>{YYYY-MM}</code> -&gt; <code>2024-01</code> (&#x6708;&#x5EA6;&#x7D22;&#x5F15;)</li>
+<li><code>{YYYY}</code> -&gt; <code>2024</code> (&#x5E74;&#x5EA6;&#x7D22;&#x5F15;)</li>
+</ul>
+<p><strong>&#x4F7F;&#x7528;&#x65E5;&#x671F;&#x7D22;&#x5F15;&#x7684;&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<pre><code class="lang-yaml">spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200
+  options:
+    index: ops-events-{YYYY.MM.DD}  # &#x521B;&#x5EFA;&#x7C7B;&#x4F3C; ops-events-2024.01.19 &#x7684;&#x7D22;&#x5F15;
+    username: elastic
+    password: changeme
+</code></pre>
+<p>&#x8FD9;&#x5C06;&#x521B;&#x5EFA;&#x6309;&#x65E5;&#x671F;&#x547D;&#x540D;&#x7684;&#x7D22;&#x5F15;&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;</p>
+<ul>
+<li><code>ops-events-2024.01.19</code></li>
+<li><code>ops-events-2024.01.20</code></li>
+<li>&#x7B49;&#x7B49;</li>
+</ul>
+<p><strong>&#x7D22;&#x5F15;&#x7684;&#x6587;&#x6863;&#x7ED3;&#x6784;&#xFF1A;</strong></p>
+<p>&#x7D22;&#x5F15;&#x7684;&#x6587;&#x6863;&#x53EA;&#x5305;&#x542B;&#x6765;&#x81EA; <code>event.Data()</code> &#x7684;&#x539F;&#x59CB;&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#xFF0C;&#x4E0D;&#x6DFB;&#x52A0;&#x4EFB;&#x4F55;&#x989D;&#x5916;&#x7684;&#x5143;&#x6570;&#x636E;&#x6216;&#x6269;&#x5C55;&#x5B57;&#x6BB5;&#x3002;</p>
+<p><strong>&#x793A;&#x4F8B;&#xFF1A;</strong></p>
+<p>&#x5982;&#x679C;&#x539F;&#x59CB;&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x662F;&#xFF1A;</p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;cluster1&quot;,
+  &quot;namespace&quot;: &quot;ns1&quot;,
+  &quot;pod&quot;: &quot;pod1&quot;,
+  &quot;type&quot;: &quot;Warning&quot;,
+  &quot;reason&quot;: &quot;BackOff&quot;,
+  &quot;message&quot;: &quot;&#x4E8B;&#x4EF6;&#x6D88;&#x606F;&quot;
+}
+</code></pre>
+<p>&#x90A3;&#x4E48;&#x7D22;&#x5F15;&#x7684;&#x6587;&#x6863;&#x5C06;&#x5B8C;&#x5168;&#x76F8;&#x540C;&#xFF1A;</p>
+<pre><code class="lang-json">{
+  &quot;cluster&quot;: &quot;cluster1&quot;,
+  &quot;namespace&quot;: &quot;ns1&quot;,
+  &quot;pod&quot;: &quot;pod1&quot;,
+  &quot;type&quot;: &quot;Warning&quot;,
+  &quot;reason&quot;: &quot;BackOff&quot;,
+  &quot;message&quot;: &quot;&#x4E8B;&#x4EF6;&#x6D88;&#x606F;&quot;
+}
+</code></pre>
+<p><strong>&#x6CE8;&#x610F;&#xFF1A;</strong> &#x53EA;&#x7D22;&#x5F15;&#x539F;&#x59CB;&#x4E8B;&#x4EF6;&#x6570;&#x636E;&#x3002;&#x4E0D;&#x4F1A;&#x6DFB;&#x52A0;&#x4EFB;&#x4F55;&#x5143;&#x6570;&#x636E;&#x5B57;&#x6BB5;&#xFF08;&#x5982; <code>@timestamp</code>&#x3001;<code>event_id</code>&#x3001;<code>event_type</code> &#x7B49;&#xFF09;&#x6216;&#x6269;&#x5C55;&#x5B57;&#x6BB5;&#xFF08;&#x5982; <code>ext_*</code>&#xFF09;&#x3002;</p>
+<p><strong>&#x652F;&#x6301;&#x7684;&#x9009;&#x9879;&#xFF1A;</strong></p>
+<ul>
+<li><code>username</code>: Elasticsearch &#x7528;&#x6237;&#x540D;&#xFF08;&#x7528;&#x4E8E; Basic &#x8BA4;&#x8BC1;&#xFF09;</li>
+<li><code>password</code>: Elasticsearch &#x5BC6;&#x7801;&#xFF08;&#x7528;&#x4E8E; Basic &#x8BA4;&#x8BC1;&#xFF09;</li>
+<li><code>index</code>: &#x8986;&#x76D6; URL &#x4E2D;&#x7684;&#x7D22;&#x5F15;&#x540D;&#xFF08;&#x652F;&#x6301;&#x65E5;&#x671F;&#x5360;&#x4F4D;&#x7B26;&#xFF0C;&#x5982; <code>{YYYY.MM.DD}</code>&#xFF09;</li>
+<li><code>id</code>: &#x6587;&#x6863; ID&#xFF08;&#x5982;&#x679C; URL &#x4E2D;&#x672A;&#x6307;&#x5B9A;&#xFF09;</li>
+</ul>
+<h2 id="&#x5B8C;&#x6574;&#x793A;&#x4F8B;">&#x5B8C;&#x6574;&#x793A;&#x4F8B;</h2>
+<h3 id="&#x793A;&#x4F8B;-1-&#x5C06;-pod-&#x9519;&#x8BEF;&#x4E8B;&#x4EF6;&#x53D1;&#x9001;&#x5230;-webhook">&#x793A;&#x4F8B; 1: &#x5C06; Pod &#x9519;&#x8BEF;&#x4E8B;&#x4EF6;&#x53D1;&#x9001;&#x5230; Webhook</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: pod-errors-to-webhook
+  namespace: ops-system
+spec:
+  type: webhook
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: https://alerting.example.com/webhook
+  keywords:
+    include:
+      - &quot;(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*&quot;
+    matchType: REGEX
+</code></pre>
+<h3 id="&#x793A;&#x4F8B;-2-&#x5C06;&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#x5230;&#x544A;&#x8B66;&#x4E3B;&#x9898;">&#x793A;&#x4F8B; 2: &#x5C06;&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#x5230;&#x544A;&#x8B66;&#x4E3B;&#x9898;</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: convert-events-to-alerts
+  namespace: ops-system
+spec:
+  type: event
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: ops.clusters.*.namespaces.*.pods.*.alerts
+  keywords:
+    include:
+      - &quot;(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*&quot;
+    matchType: REGEX
+</code></pre>
+<h3 id="&#x793A;&#x4F8B;-3-&#x5C06;&#x4E8B;&#x4EF6;&#x7D22;&#x5F15;&#x5230;-elasticsearch">&#x793A;&#x4F8B; 3: &#x5C06;&#x4E8B;&#x4EF6;&#x7D22;&#x5F15;&#x5230; Elasticsearch</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: events-to-elasticsearch
+  namespace: ops-system
+spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200/ops-events/_doc
+  options:
+    username: elastic
+    password: changeme
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<h3 id="&#x793A;&#x4F8B;-3b-&#x4F7F;&#x7528;&#x65E5;&#x671F;&#x7D22;&#x5F15;&#x5C06;&#x4E8B;&#x4EF6;&#x7D22;&#x5F15;&#x5230;-elasticsearch">&#x793A;&#x4F8B; 3b: &#x4F7F;&#x7528;&#x65E5;&#x671F;&#x7D22;&#x5F15;&#x5C06;&#x4E8B;&#x4EF6;&#x7D22;&#x5F15;&#x5230; Elasticsearch</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: events-to-elasticsearch-daily
+  namespace: ops-system
+spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200
+  options:
+    index: ops-events-{YYYY.MM.DD}  # &#x521B;&#x5EFA;&#x6309;&#x65E5;&#x671F;&#x547D;&#x540D;&#x7684;&#x7D22;&#x5F15;&#xFF0C;&#x5982; ops-events-2024.01.19
+    username: elastic
+    password: changeme
+  keywords:
+    include:
+      - &quot;Error&quot;
+    matchType: CONTAINS
+</code></pre>
+<h3 id="&#x793A;&#x4F8B;-4-&#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x5904;&#x7406;">&#x793A;&#x4F8B; 4: &#x8282;&#x70B9;&#x4E8B;&#x4EF6;&#x5904;&#x7406;</h3>
+<pre><code class="lang-yaml">apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  name: node-events-to-alerts
+  namespace: ops-system
+spec:
+  type: event
+  subject: ops.clusters.*.nodes.*.events
+  url: ops.clusters.*.nodes.*.alerts
+  keywords:
+    include:
+      - &quot;(?=.*(kube|etcd|calico)).*(BackOff|OOMKilled|Error|Failed).*&quot;
+    matchType: REGEX
+</code></pre>
+<h2 id="&#x6700;&#x4F73;&#x5B9E;&#x8DF5;">&#x6700;&#x4F73;&#x5B9E;&#x8DF5;</h2>
+<ol>
+<li><p><strong>&#x4F7F;&#x7528;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x8FDB;&#x884C;&#x590D;&#x6742;&#x5339;&#x914D;</strong>&#xFF1A;&#x5F53;&#x9700;&#x8981;&#x5339;&#x914D;&#x591A;&#x4E2A;&#x6761;&#x4EF6;&#x65F6;&#xFF0C;&#x4F7F;&#x7528;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x53EF;&#x4EE5;&#x66F4;&#x7CBE;&#x786E;&#x5730;&#x63A7;&#x5236;&#x5339;&#x914D;&#x89C4;&#x5219;&#x3002;</p>
+</li>
+<li><p><strong>&#x5408;&#x7406;&#x4F7F;&#x7528;&#x6392;&#x9664;&#x89C4;&#x5219;</strong>&#xFF1A;&#x4F7F;&#x7528; <code>exclude</code> &#x53EF;&#x4EE5;&#x8FC7;&#x6EE4;&#x6389;&#x4E0D;&#x9700;&#x8981;&#x7684;&#x4E8B;&#x4EF6;&#xFF0C;&#x51CF;&#x5C11;&#x8BEF;&#x62A5;&#x3002;</p>
+</li>
+<li><p><strong>&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#x4F7F;&#x7528;&#x901A;&#x914D;&#x7B26;</strong>&#xFF1A;&#x5728;&#x4E8B;&#x4EF6;&#x8F6C;&#x53D1;&#x573A;&#x666F;&#x4E2D;&#xFF0C;&#x4F7F;&#x7528;&#x901A;&#x914D;&#x7B26;&#x53EF;&#x4EE5;&#x4FDD;&#x6301;&#x4E8B;&#x4EF6;&#x7684;&#x4E3B;&#x9898;&#x7ED3;&#x6784;&#xFF0C;&#x4FBF;&#x4E8E;&#x540E;&#x7EED;&#x5904;&#x7406;&#x3002;</p>
+</li>
+<li><p><strong>Elasticsearch &#x7D22;&#x5F15;&#x547D;&#x540D;</strong>&#xFF1A;&#x5EFA;&#x8BAE;&#x4F7F;&#x7528;&#x6709;&#x610F;&#x4E49;&#x7684;&#x7D22;&#x5F15;&#x540D;&#xFF0C;&#x53EF;&#x4EE5;&#x8003;&#x8651;&#x6309;&#x65E5;&#x671F;&#x6216;&#x96C6;&#x7FA4;&#x540D;&#x79F0;&#x7EC4;&#x7EC7;&#x7D22;&#x5F15;&#x3002;</p>
+</li>
+<li><p><strong>&#x76D1;&#x63A7; EventHooks &#x72B6;&#x6001;</strong>&#xFF1A;&#x901A;&#x8FC7; Prometheus &#x6307;&#x6807;&#x76D1;&#x63A7; EventHooks &#x7684;&#x89E6;&#x53D1;&#x60C5;&#x51B5;&#xFF0C;&#x53CA;&#x65F6;&#x53D1;&#x73B0;&#x914D;&#x7F6E;&#x95EE;&#x9898;&#x3002;</p>
+</li>
+</ol>
+<h2 id="&#x6545;&#x969C;&#x6392;&#x67E5;">&#x6545;&#x969C;&#x6392;&#x67E5;</h2>
+<h3 id="&#x67E5;&#x770B;-eventhooks-&#x72B6;&#x6001;">&#x67E5;&#x770B; EventHooks &#x72B6;&#x6001;</h3>
+<pre><code class="lang-bash">kubectl get eventhooks -n ops-system
+kubectl describe eventhooks &lt;name&gt; -n ops-system
+</code></pre>
+<h3 id="&#x67E5;&#x770B;-controller-&#x65E5;&#x5FD7;">&#x67E5;&#x770B; Controller &#x65E5;&#x5FD7;</h3>
+<pre><code class="lang-bash">kubectl logs -n ops-system deployment/ops-controller-manager | grep eventhook
+</code></pre>
+<h3 id="&#x68C0;&#x67E5;&#x6307;&#x6807;">&#x68C0;&#x67E5;&#x6307;&#x6807;</h3>
+<pre><code class="lang-bash"># &#x67E5;&#x770B; EventHooks &#x89E6;&#x53D1;&#x6B21;&#x6570;
+curl http://localhost:8080/metrics | grep ops_controller_eventhooks_status
+</code></pre>
+<h3 id="&#x5E38;&#x89C1;&#x95EE;&#x9898;">&#x5E38;&#x89C1;&#x95EE;&#x9898;</h3>
+<ol>
+<li><p><strong>&#x4E8B;&#x4EF6;&#x672A;&#x89E6;&#x53D1;</strong>&#xFF1A;</p>
+<ul>
+<li>&#x68C0;&#x67E5; <code>subject</code> &#x662F;&#x5426;&#x6B63;&#x786E;&#x5339;&#x914D;&#x4E8B;&#x4EF6;&#x4E3B;&#x9898;</li>
+<li>&#x68C0;&#x67E5; <code>keywords</code> &#x914D;&#x7F6E;&#x662F;&#x5426;&#x6B63;&#x786E;</li>
+<li>&#x67E5;&#x770B; Controller &#x65E5;&#x5FD7;&#x786E;&#x8BA4;&#x662F;&#x5426;&#x6709;&#x9519;&#x8BEF;</li>
+</ul>
+</li>
+<li><p><strong>Webhook &#x53D1;&#x9001;&#x5931;&#x8D25;</strong>&#xFF1A;</p>
+<ul>
+<li>&#x68C0;&#x67E5; URL &#x662F;&#x5426;&#x53EF;&#x8BBF;&#x95EE;</li>
+<li>&#x68C0;&#x67E5;&#x7F51;&#x7EDC;&#x8FDE;&#x63A5;</li>
+<li>&#x67E5;&#x770B; Controller &#x65E5;&#x5FD7;&#x4E2D;&#x7684;&#x9519;&#x8BEF;&#x4FE1;&#x606F;</li>
+</ul>
+</li>
+<li><p><strong>Elasticsearch &#x7D22;&#x5F15;&#x5931;&#x8D25;</strong>&#xFF1A;</p>
+<ul>
+<li>&#x68C0;&#x67E5; Elasticsearch &#x8FDE;&#x63A5;</li>
+<li>&#x9A8C;&#x8BC1;&#x8BA4;&#x8BC1;&#x4FE1;&#x606F;</li>
+<li>&#x68C0;&#x67E5;&#x7D22;&#x5F15;&#x6743;&#x9650;</li>
+</ul>
+</li>
+</ol>
+<h2 id="&#x76F8;&#x5173;&#x6587;&#x6863;">&#x76F8;&#x5173;&#x6587;&#x6863;</h2>
+<ul>
+<li><a href="opscontroller-events.html">&#x4E8B;&#x4EF6;&#x7CFB;&#x7EDF;&#x6587;&#x6863;</a></li>
+<li><a href="opscontroller-metrics.html">&#x6307;&#x6807;&#x6587;&#x6863;</a></li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="opscontroller-events.html" class="navigation navigation-prev " aria-label="Previous page: Events">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="nats.html" class="navigation navigation-next " aria-label="Next page: Nats">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"EventHooks","level":"1.4.7","depth":2,"next":{"title":"Nats","level":"1.5","depth":1,"path":"nats.md","ref":"nats.md","articles":[]},"previous":{"title":"Events","level":"1.4.6","depth":2,"path":"opscontroller-events.md","ref":"opscontroller-events.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-highlight","ga","search-pro","github-buttons","code","custom-favicon"],"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"search-pro":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"code":{"copyButtons":true,"theme":"default","linenums":true},"fontsettings":{"theme":"white","family":"sans","size":2},"fontSettings":{"theme":"white","family":"serif","size":2},"favicon":"favicon.ico","github-buttons":{"buttons":[{"user":"shaowenchen","repo":"ops","type":"star","count":false,"size":"small"},{"user":"shaowenchen","width":"160","type":"follow","count":false,"size":"small"}]},"custom-favicon":{},"ga":{"configuration":"auto","token":"G-TRHEYFQGW4"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"theme":"default","keywords":"Ops,Tools,","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Ops","language":"zh","links":{"home":false,"about":false,"issues":false,"contribute":false,"sidebar":{"Ops":"https://www.chenshaowen.com/"},"tail":{"Ops":"https://www.chenshaowen.com/ops/"},"gitbook":false},"introduction":{"path":"README.md","title":"Ops"},"gitbook":"*","description":"Ops Tools"},"file":{"path":"opscontroller-eventhooks.md","mtime":"2026-01-26T08:28:50.796Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-01-26T08:29:25.988Z"},"basePath":".","book":{"language":"zh"}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-code/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
