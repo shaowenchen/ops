@@ -14,4 +14,5 @@
   - [Pipeline](opscontroller-pipeline.md)
   - [Metrics](opscontroller-metrics.md)
   - [Events](opscontroller-events.md)
+  - [EventHooks](opscontroller-eventhooks.md)
 - [Nats](nats.md)

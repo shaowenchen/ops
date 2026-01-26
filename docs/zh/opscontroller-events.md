@@ -500,5 +500,5 @@ nats --user=app --password=${apppassword} sub "ops.notifications.providers.*.cha
 ## 相关文档
 
 - [NATS 配置文档](./nats.md)
-- [EventHook 使用文档](./opscontroller.md#eventhook)
+- [EventHooks 使用文档](./opscontroller-eventhooks.md)
 

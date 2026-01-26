@@ -1,0 +1,24 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  labels:
+    app.kubernetes.io/name: eventhooks
+    app.kubernetes.io/instance: eventhooks-elasticsearch
+    app.kubernetes.io/part-of: ops
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ops
+  name: eventhooks-elasticsearch
+spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200/ops-events/_doc
+  keywords:
+    include:
+      - "(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*"
+    matchType: REGEX
+  options:
+    username: elastic      # Optional: Elasticsearch username for basic auth
+    password: changeme     # Optional: Elasticsearch password for basic auth
+    # index: ops-events    # Optional: Override index name from URL
+    # index: ops-events-{YYYY.MM.DD}  # Optional: Use date-based index (e.g., ops-events-2024.01.19)
+    # id: ""               # Optional: Document ID (auto-generated if not specified)

@@ -498,5 +498,5 @@ The event system depends on the following environment variables:
 ## Related Documentation
 
 - [NATS Configuration](./nats.md)
-- [EventHook Usage](./opscontroller.md#eventhook)
+- [EventHooks Usage Guide](./opscontroller-eventhooks.md)
 

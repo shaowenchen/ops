@@ -1,0 +1,30 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  labels:
+    app.kubernetes.io/name: eventhooks
+    app.kubernetes.io/instance: eventhooks-elasticsearch-daily
+    app.kubernetes.io/part-of: ops
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ops
+  name: eventhooks-elasticsearch-daily
+spec:
+  type: elasticsearch
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  url: http://elasticsearch:9200
+  keywords:
+    include:
+      - "(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*"
+    matchType: REGEX
+  options:
+    # 使用日期占位符创建按日期命名的索引
+    # 例如：ops-events-2024.01.19, ops-events-2024.01.20 等
+    index: ops-events-{YYYY.MM.DD}
+    username: elastic      # Optional: Elasticsearch username for basic auth
+    password: changeme     # Optional: Elasticsearch password for basic auth
+    # 其他支持的日期格式：
+    # index: ops-events-{YYYY-MM-DD}  # 2024-01-19
+    # index: ops-events-{YYYYMMDD}    # 20240119
+    # index: ops-events-{YYYY.MM}     # 2024.01 (月度索引)
+    # index: ops-events-{YYYY-MM}     # 2024-01 (月度索引)
+    # index: ops-events-{YYYY}        # 2024 (年度索引)

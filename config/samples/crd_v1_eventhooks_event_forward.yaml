@@ -1,0 +1,21 @@
+apiVersion: crd.chenshaowen.com/v1
+kind: EventHooks
+metadata:
+  labels:
+    app.kubernetes.io/name: eventhooks
+    app.kubernetes.io/instance: eventhooks-event-forward
+    app.kubernetes.io/part-of: ops
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: ops
+  name: eventhooks-event-forward
+spec:
+  type: event
+  subject: ops.clusters.*.namespaces.*.pods.*.events
+  # URL 中使用通配符 *，会自动替换为原始事件 subject 中对应位置的值
+  # 例如：原始事件 ops.clusters.cluster1.namespaces.ns1.pods.pod1.events
+  # 会被转发到：ops.clusters.cluster1.namespaces.ns1.pods.pod1.alerts
+  url: ops.clusters.*.namespaces.*.pods.*.alerts
+  keywords:
+    include:
+      - "(?=.*(kube|etcd|calico|csi|fluid)).*(BackOff|OOMKilled|Evicted|NetworkNotReady|Unhealthy|Error|Failed|ImagePullBackOff).*"
+    matchType: REGEX
