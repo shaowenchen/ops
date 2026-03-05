@@ -41,7 +41,7 @@ spec:
     - name: notification
       when: ${steps.get-status.output} != ${expect}
       content: |
-        curl -X POST 'https://365.kdocs.cn/woa/api/v1/webhook/send?key=xxx' -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${message}" } }'
+        curl -X POST 'https://xxx.com/api/v1/webhook/send?key=xxx' -H 'content-type: application/json' -d '{ "msgtype": "text", "text": { "content": "${message}" } }'
 ```
 
 In this YAML:

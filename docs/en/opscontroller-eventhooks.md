@@ -136,7 +136,7 @@ metadata:
 spec:
   type: xiezuo
   subject: ops.clusters.*.namespaces.*.pods.*.events
-  url: https://365.kdocs.cn/woa/api/v1/webhook/send?key=xxxx
+  url: https://xxx.com/api/v1/webhook/send?key=xxxx
   keywords:
     include:
       - "Error"

@@ -20,4 +20,4 @@ spec:
     # matchType: CONTAINS   # Optional, default: CONTAINS (options: CONTAINS | EXACT | REGEX)
   subject: ops.clusters.*.namespaces.ops-system.taskruns.alert-evicted-pods.reports
   type: xiezuo
-  url: https://365.kdocs.cn/woa/api/v1/webhook/send?key=xxxx
+  url: https://xxx.com/api/v1/webhook/send?key=xxxx
