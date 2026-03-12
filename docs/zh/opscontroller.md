@@ -104,7 +104,7 @@ server:
     targetCPUUtilizationPercentage: 80
 
 prometheus:
-  enabled: true
+  enabled: false
 ```
 
 然后使用 values 文件安装：
@@ -225,7 +225,18 @@ server:
 
 ### 监控配置
 
-启用 Prometheus 监控（创建 ServiceMonitor 资源）：
+Prometheus 监控默认关闭（不创建 ServiceMonitor/PodMonitor）。若集群已安装 **Prometheus Operator**，可通过以下参数开启，以便自动发现并采集 Ops 的指标：
+
+**使用 --set：**
+
+```bash
+helm install myops ops/ops --version 1.2.0 \
+  --namespace ops-system \
+  --create-namespace \
+  --set prometheus.enabled=true
+```
+
+**使用 values 文件：**
 
 ```yaml
 prometheus:

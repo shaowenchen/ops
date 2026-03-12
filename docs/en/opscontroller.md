@@ -100,7 +100,7 @@ server:
     targetCPUUtilizationPercentage: 80
 
 prometheus:
-  enabled: true
+  enabled: false
 ```
 
 Then install with the values file:
@@ -221,7 +221,18 @@ server:
 
 #### **Monitoring Configuration**
 
-Enable Prometheus monitoring (creates ServiceMonitor resources):
+Prometheus monitoring is **disabled by default** (no ServiceMonitor/PodMonitor resources are created). If your cluster has **Prometheus Operator** installed, you can enable it so that Ops metrics are discovered and scraped automatically:
+
+**Using --set:**
+
+```bash
+helm install myops ops/ops --version 1.2.0 \
+  --namespace ops-system \
+  --create-namespace \
+  --set prometheus.enabled=true
+```
+
+**Using a values file:**
 
 ```yaml
 prometheus:

@@ -95,7 +95,7 @@ resources:
     cpu: 500m
     memory: 512Mi
 prometheus:
-  enabled: true
+  enabled: false
 EOF
 
 helm install myops ops/ops --version 1.2.0 \
@@ -137,7 +137,7 @@ The following table lists the configurable parameters and their default values:
 | `service.type` | Kubernetes service type | `ClusterIP` |
 | `service.port` | Service port | `80` |
 | `ingress.enabled` | Enable ingress | `false` |
-| `prometheus.enabled` | Enable Prometheus monitoring | `true` |
+| `prometheus.enabled` | Enable Prometheus monitoring (set to `true` when Prometheus Operator is installed) | `false` |
 
 ## Components
 
@@ -160,7 +160,7 @@ The server provides HTTP API and web interface for managing Ops resources.
 
 ## Monitoring
 
-When `prometheus.enabled` is set to `true`, the chart creates:
+When `prometheus.enabled` is set to `true` (e.g. when Prometheus Operator is installed in the cluster), the chart creates:
 - ServiceMonitor resources for Prometheus Operator
 - Metrics services exposing `/metrics` endpoints
 

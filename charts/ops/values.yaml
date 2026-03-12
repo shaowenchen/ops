@@ -74,8 +74,7 @@ serviceAccount:
 podAnnotations: {}
 
 # Pod security context
-podSecurityContext:
-  {}
+podSecurityContext: {}
   # fsGroup: 2000
 
 # Container security context
@@ -94,8 +93,7 @@ service:
 ingress:
   enabled: false
   className: ""
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
@@ -136,6 +134,4 @@ affinity: {}
 
 # Prometheus monitoring configuration
 prometheus:
-  enabled: true
-
-
+  enabled: false
