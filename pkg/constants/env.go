@@ -15,6 +15,8 @@ const (
 	EnvEventEndpointKey            = "EVENT_ENDPOINT"
 	EnvEventQueryTimeoutKey        = "EVENT_QUERY_TIMEOUT"
 	EnvEventListSubjectsTimeoutKey = "EVENT_LIST_SUBJECTS_TIMEOUT"
+	// EnvEventhookKeywordLogKey: set to true/1/yes/on to enable EventHooks keyword match judgment Info logs (controller). Default: off.
+	EnvEventhookKeywordLogKey = "EVENTHOOK_KEYWORD_LOG"
 )
 
 // just for controller
@@ -25,6 +27,18 @@ func GetEnvActiveNamespace() string {
 
 func GetEnvDebug() bool {
 	return strings.ToLower(os.Getenv(EnvDebugKey)) == "true"
+}
+
+// GetEnvEventhookKeywordLog returns whether EventHooks keyword matching should emit Info logs.
+// Default is false. Set EVENTHOOK_KEYWORD_LOG to true, 1, yes, or on to enable.
+func GetEnvEventhookKeywordLog() bool {
+	v := strings.ToLower(strings.TrimSpace(os.Getenv(EnvEventhookKeywordLogKey)))
+	switch v {
+	case "true", "1", "yes", "on":
+		return true
+	default:
+		return false
+	}
 }
 
 func GetEnvEventCluster() string {

@@ -228,6 +228,7 @@ func (r *EventHooksReconciler) checkEventAndHandle(logger *opslog.Logger, ctx co
 
 // matchKeywords checks if the event matches the keywords configuration
 func (r *EventHooksReconciler) matchKeywords(eventStrings string, keywords *opsv1.KeywordsConfig, logger *opslog.Logger, eventhookName, eventID string) bool {
+	logKeywordJudgment := opsconstants.GetEnvEventhookKeywordLog()
 	// Default values
 	matchMode := opsconstants.MatchModeANY
 	matchType := opsconstants.MatchTypeCONTAINS
@@ -242,7 +243,9 @@ func (r *EventHooksReconciler) matchKeywords(eventStrings string, keywords *opsv
 	if len(keywords.Exclude) > 0 {
 		for _, excludeKeyword := range keywords.Exclude {
 			if r.matchKeyword(eventStrings, excludeKeyword, matchType) {
-				logger.Info.Println(fmt.Sprintf("event %s excluded by keyword %s for eventhook %s", eventID, excludeKeyword, eventhookName))
+				if logKeywordJudgment {
+					logger.Info.Println(fmt.Sprintf("event %s excluded by keyword %s for eventhook %s", eventID, excludeKeyword, eventhookName))
+				}
 				return false
 			}
 		}
@@ -258,7 +261,9 @@ func (r *EventHooksReconciler) matchKeywords(eventStrings string, keywords *opsv
 	for _, includeKeyword := range keywords.Include {
 		if r.matchKeyword(eventStrings, includeKeyword, matchType) {
 			matchedCount++
-			logger.Info.Println(fmt.Sprintf("event %s matched keyword %s for eventhook %s", eventID, includeKeyword, eventhookName))
+			if logKeywordJudgment {
+				logger.Info.Println(fmt.Sprintf("event %s matched keyword %s for eventhook %s", eventID, includeKeyword, eventhookName))
+			}
 			if matchMode == opsconstants.MatchModeANY {
 				// For ANY mode, one match is enough
 				return true
