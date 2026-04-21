@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/spf13/cobra"
@@ -115,6 +116,40 @@ func init() {
 	ConfigCmd.AddCommand(getCmd)
 	ConfigCmd.AddCommand(listCmd)
 	ConfigCmd.AddCommand(unsetCmd)
+
+	setCmd.ValidArgsFunction = completeConfigKeyOrValue
+	getCmd.ValidArgsFunction = completeConfigKeyOnly
+	unsetCmd.ValidArgsFunction = completeConfigKeyOnly
+}
+
+// completeConfigKeyOnly completes the first positional argument (config key).
+func completeConfigKeyOnly(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	if len(args) > 0 {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+	return completeAllowedKeys(toComplete), cobra.ShellCompDirectiveNoFileComp
+}
+
+// completeConfigKeyOrValue completes key for the first arg; allows free-form value for the second.
+func completeConfigKeyOrValue(_ *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	switch len(args) {
+	case 0:
+		return completeAllowedKeys(toComplete), cobra.ShellCompDirectiveNoFileComp
+	case 1:
+		return nil, cobra.ShellCompDirectiveDefault
+	default:
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+}
+
+func completeAllowedKeys(toComplete string) []string {
+	var out []string
+	for _, k := range AllowedConfigKeysOrder {
+		if strings.HasPrefix(k, toComplete) {
+			out = append(out, k)
+		}
+	}
+	return out
 }
 
 func loadConfig() (map[string]string, error) {

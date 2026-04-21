@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/shaowenchen/ops/cmd/cli/config"
+	"github.com/shaowenchen/ops/cmd/cli/internal/complete"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -105,4 +106,11 @@ func init() {
 	ShellCmd.Flags().IntVar(&hostOpt.Port, "port", 22, "")
 
 	ShellCmd.Flags().StringArrayVarP(&mounts, "mount", "m", []string{}, "mount host path to container (format: hostPath:mountPath, can be specified multiple times)")
+
+	_ = ShellCmd.RegisterFlagCompletionFunc("mode", func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return complete.Static([]string{constants.ModeHost, constants.ModeContainer}, toComplete)
+	})
+	_ = ShellCmd.MarkFlagFilename("content")
+	_ = ShellCmd.MarkFlagFilename("inventory")
+	_ = ShellCmd.MarkFlagFilename("privatekeypath")
 }

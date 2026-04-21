@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/shaowenchen/ops/cmd/cli/config"
+	"github.com/shaowenchen/ops/cmd/cli/internal/complete"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -114,4 +115,12 @@ func init() {
 	FileCmd.Flags().StringVarP(&fileOpt.Namespace, "opsnamespace", "", constants.OpsNamespace, "ops work namespace")
 
 	FileCmd.Flags().StringArrayVarP(&mounts, "mount", "m", []string{}, "mount host path to container (format: hostPath:mountPath, can be specified multiple times)")
+
+	_ = FileCmd.RegisterFlagCompletionFunc("direction", func(_ *cobra.Command, _ []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return complete.Static([]string{"upload", "download"}, toComplete)
+	})
+	_ = FileCmd.MarkFlagFilename("localfile")
+	_ = FileCmd.MarkFlagFilename("remotefile")
+	_ = FileCmd.MarkFlagFilename("inventory")
+	_ = FileCmd.MarkFlagFilename("privatekeypath")
 }

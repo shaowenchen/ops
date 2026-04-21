@@ -65,4 +65,7 @@ func init() {
 	clusterCmd.MarkFlagRequired("name")
 	clusterCmd.Flags().StringVarP(&cClusterOpt.Kubeconfig, "kubeconfig", "", constants.GetCurrentUserKubeConfigPath(), "")
 	clusterCmd.Flags().BoolVarP(&cClusterOpt.Clear, "clear", "", false, "")
+
+	_ = clusterCmd.MarkFlagFilename("kubeconfig")
+	_ = clusterCmd.MarkFlagFilename("inventory")
 }

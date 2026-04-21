@@ -82,4 +82,8 @@ func init() {
 	hostCmd.Flags().StringVarP(&hInventory, "inventory", "i", "", "")
 	hostCmd.MarkFlagRequired("inventory")
 	hostCmd.Flags().IntVar(&hHostOpt.Port, "port", 22, "")
+
+	_ = hostCmd.MarkFlagFilename("kubeconfig")
+	_ = hostCmd.MarkFlagFilename("inventory")
+	_ = hostCmd.MarkFlagFilename("privatekeypath")
 }

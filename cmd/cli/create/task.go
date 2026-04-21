@@ -4,6 +4,7 @@ import (
 	"context"
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
+	"github.com/shaowenchen/ops/cmd/cli/internal/complete"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
@@ -72,4 +73,7 @@ func init() {
 	taskCmd.Flags().StringVarP(&tTaskOpt.FilePath, "inventory", "i", "", "")
 	taskCmd.MarkFlagRequired("inventory")
 	taskCmd.Flags().StringVarP(&tTaskOpt.Proxy, "proxy", "", constants.DefaultProxy, "")
+
+	_ = taskCmd.MarkFlagFilename("kuebconfig")
+	_ = taskCmd.RegisterFlagCompletionFunc("inventory", complete.FlagOpsTaskYAMLBasenames)
 }

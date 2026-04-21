@@ -8,6 +8,7 @@ import (
 
 	opsv1 "github.com/shaowenchen/ops/api/v1"
 	"github.com/shaowenchen/ops/cmd/cli/config"
+	"github.com/shaowenchen/ops/cmd/cli/internal/complete"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
@@ -27,6 +28,7 @@ var TaskCmd = &cobra.Command{
 	Use:                "task",
 	Short:              "command about task",
 	DisableFlagParsing: true,
+	ValidArgsFunction:  complete.TaskRunValidArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		taskOpt = parseArgs(args)
 		logger := log.NewLogger().SetVerbose("debug").SetStd().SetFile().Build()
@@ -222,21 +224,20 @@ func getArgName(arg string) string {
 }
 
 func init() {
-	TaskCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "")
+	TaskCmd.Flags().StringVarP(&inventory, "inventory", "i", "", "inventory file (hosts list or kubeconfig)")
 
-	TaskCmd.Flags().StringVarP(&taskOpt.FilePath, "filepath", "", "", "")
-	TaskCmd.MarkFlagRequired("filepath")
+	TaskCmd.Flags().StringVarP(&taskOpt.FilePath, "filepath", "f", "", "task YAML (basename under ~/.ops/tasks or path)")
 
-	TaskCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "")
+	TaskCmd.Flags().StringVarP(&kubeOpt.NodeName, "nodename", "", "", "target Kubernetes node name")
 	TaskCmd.Flags().StringVarP(&kubeOpt.Namespace, "opsnamespace", "", constants.OpsNamespace, "ops work namespace")
 
 	// Load runtimeimage with priority: ENV > Config > Default (CLI args handled in parseArgs)
 	runtimeImage := config.GetValueWithPriority("", constants.EnvDefaultRuntimeImage, "runtimeimage", constants.DefaultRuntimeImage)
 	TaskCmd.Flags().StringVarP(&kubeOpt.RuntimeImage, "runtimeimage", "", runtimeImage, "runtime image")
 
-	TaskCmd.Flags().IntVarP(&hostOpt.Port, "port", "", 22, "")
-	TaskCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
-	TaskCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")
-	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKey, "privatekey", "", "", "")
-	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "")
+	TaskCmd.Flags().IntVarP(&hostOpt.Port, "port", "", 22, "SSH port for host inventory")
+	TaskCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "SSH username for host inventory")
+	TaskCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "SSH password for host inventory")
+	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKey, "privatekey", "", "", "base64 private key (prefer --privatekeypath)")
+	TaskCmd.Flags().StringVarP(&hostOpt.PrivateKeyPath, "privatekeypath", "", constants.GetCurrentUserPrivateKeyPath(), "SSH private key file")
 }
