@@ -7,8 +7,11 @@ if ! [ -x "$(command -v curl)" ]; then
 fi
 
 if [ -z "$PROXY" ]; then
-  PROXY="https://ghproxy.chenshaowen.com/"
+  PROXY="https://ghproxy.chenshaowen.com"
 fi
+while [ "${PROXY%/}" != "$PROXY" ]; do
+  PROXY="${PROXY%/}"
+done
 
 echo "Using Proxy: $PROXY"
 
@@ -19,7 +22,7 @@ http_code=$(curl --connect-timeout 2 -s -o temp.out -w '%{http_code}' https://gi
 rm -rf temp.out || true
 
 if [ $http_code -ne 302 ]; then
-  DOWNLOAD_URL="${PROXY}${DOWNLOAD_URL}"
+  DOWNLOAD_URL="${PROXY}/${DOWNLOAD_URL}"
 fi
 
 OPSTEMPDIR=$(mktemp -d)

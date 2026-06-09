@@ -128,21 +128,26 @@ func ShellAcceleratorCount() string {
 func GetAvailableUrl(url string, proxy string) string {
 	proxy = formatProxy(proxy)
 	if proxy != "" {
-		return proxy + url
+		return joinProxyURL(proxy, url)
 	}
 	httpClient := http.Client{
 		Timeout: 3 * time.Second,
 	}
 	_, err := httpClient.Get(url)
 	if err != nil {
-		url = proxy + url
+		url = joinProxyURL(proxy, url)
 	}
 	return url
 }
 
 func formatProxy(proxy string) string {
-	if !strings.HasSuffix(proxy, "/") {
-		proxy = proxy + "/"
+	return strings.TrimRight(strings.TrimSpace(proxy), "/")
+}
+
+func joinProxyURL(proxy, url string) string {
+	proxy = formatProxy(proxy)
+	if proxy == "" {
+		return url
 	}
-	return proxy
+	return proxy + "/" + url
 }

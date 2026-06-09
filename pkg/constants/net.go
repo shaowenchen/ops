@@ -1,3 +1,3 @@
 package constants
 
-const DefaultProxy = "https://ghproxy.chenshaowen.com/"
+const DefaultProxy = "https://ghproxy.chenshaowen.com"

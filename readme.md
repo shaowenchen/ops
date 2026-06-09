@@ -13,8 +13,8 @@ curl -sfL https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VER
 else Poor network connections to GitHub
 
 ```bash
-PROXY=https://ghfast.top/
-curl -sfL $PROXY/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest PROXY=$PROXY sh -
+PROXY=https://ghfast.top
+curl -sfL "${PROXY%/}/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh" | VERSION=latest PROXY="${PROXY%/}" sh -
 ```
 
 ### install Ops Controller

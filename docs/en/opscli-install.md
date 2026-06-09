@@ -5,8 +5,8 @@
 - **For Domestic Users (China)**
 
 ```bash
-PROXY=https://ghfast.top/
-curl -sfL $PROXY/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh | VERSION=latest PROXY=$PROXY sh -
+PROXY=https://ghfast.top
+curl -sfL "${PROXY%/}/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh" | VERSION=latest PROXY="${PROXY%/}" sh -
 ```
 
 - **For International Users (Outside China)**
@@ -69,14 +69,14 @@ Configuration is stored in `~/.ops/opscli/config` (YAML format).
 
 **Supported Configuration Keys**
 
-- **proxy**: Proxy URL for network requests (e.g., `https://ghfast.top/`)
+- **proxy**: Proxy URL for network requests (e.g., `https://ghfast.top`)
 - **runtimeimage**: Default runtime image for Kubernetes tasks (e.g., `ubuntu:22.04`)
 
 **Configuration Commands**
 
 - **Set configuration**: `opscli config set <key> <value>`
   ```bash
-  opscli config set proxy https://ghfast.top/
+  opscli config set proxy https://ghfast.top
   opscli config set runtimeimage ubuntu:22.04
   ```
 
@@ -89,7 +89,7 @@ Configuration is stored in `~/.ops/opscli/config` (YAML format).
   ```bash
   opscli config list
   # Output:
-  # proxy = https://ghfast.top/
+  # proxy = https://ghfast.top
   # runtimeimage = (not set)
   ```
 
@@ -117,14 +117,14 @@ Configuration values follow a priority order (highest to lowest):
 
 4. **Default Values** (lowest priority)
    - Built-in defaults
-   - Proxy: `https://ghproxy.chenshaowen.com/`
+   - Proxy: `https://ghproxy.chenshaowen.com`
    - Runtime Image: `ubuntu:22.04`
 
 **Usage Examples**
 
 ```bash
 # Example 1: Using configuration file
-opscli config set proxy https://ghfast.top/
+opscli config set proxy https://ghfast.top
 opscli upgrade --manifests  # Automatically uses proxy from config
 
 # Example 2: Override with environment variable

@@ -46,7 +46,6 @@ var TaskCmd = &cobra.Command{
 			logger.Error.Println(err)
 			return
 		}
-		taskOpt.Variables["nodename"] = kubeOpt.NodeName
 		for _, task := range tasks {
 			if inventoryType == constants.InventoryTypeHosts && !task.NeedKubeExecution() {
 				HostTask(context.Background(), logger, task, taskOpt, hostOpt, availableInventory)
@@ -66,9 +65,11 @@ func HostTask(ctx context.Context, logger *log.Logger, t opsv1.Task, taskOpt opt
 			logger.Error.Println(err)
 			continue
 		}
-		newTaskOpt := taskOpt
-		newTaskOpt.Variables["host"] = h.GetHostname()
-		newTaskOpt.Variables["proxy"] = taskOpt.Proxy
+		newTaskOpt := withDefaultVariables(taskOpt, map[string]string{
+			"host":     h.GetHostname(),
+			"nodename": kubeOpt.NodeName,
+			"proxy":    taskOpt.Proxy,
+		})
 		err = opstask.RunTaskOnHost(ctx, logger, &t, &tr, hc, newTaskOpt)
 		if err != nil {
 			logger.Error.Println(err)
@@ -102,20 +103,19 @@ func KubeTask(ctx context.Context, logger *log.Logger, t opsv1.Task, taskOpt opt
 		if t.Spec.RuntimeImage != "" {
 			newKubeOpt.RuntimeImage = t.Spec.RuntimeImage
 		}
-		for k, v := range t.Spec.Variables {
-			if _, ok := taskOpt.Variables[k]; !ok {
-				taskOpt.Variables[k] = v.GetValue()
-			}
-		}
-		taskOpt.Variables["host"] = node.GetName()
-		taskOpt.Variables["proxy"] = taskOpt.Proxy
+		newTaskOpt := withDefaultVariables(taskOpt, map[string]string{
+			"host":     node.GetName(),
+			"nodename": kubeOpt.NodeName,
+			"proxy":    taskOpt.Proxy,
+		})
 
 		// Convert Task mounts to MountConfig with variable rendering
 		mountConfigs := make([]option.MountConfig, 0)
 		// Prepare variables for mount rendering
-		mountVars := make(map[string]string)
-		for k, v := range taskOpt.Variables {
-			mountVars[k] = v
+		mountVars, err := opstask.GetRealVariables(&t, newTaskOpt)
+		if err != nil {
+			logger.Error.Println(err)
+			continue
 		}
 		for _, taskMount := range t.Spec.Mounts {
 			// Render variables in mount fields
@@ -149,7 +149,7 @@ func KubeTask(ctx context.Context, logger *log.Logger, t opsv1.Task, taskOpt opt
 		}
 
 		tr := opsv1.NewTaskRun(&t)
-		err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, taskOpt, newKubeOpt)
+		err = opstask.RunTaskOnKube(logger, &t, &tr, kc, &node, newTaskOpt, newKubeOpt)
 		if err != nil {
 			logger.Error.Println(err)
 		}
@@ -179,8 +179,10 @@ func parseArgs(args []string) (taskOption option.TaskOption) {
 			} else if fieldName == "proxy" {
 				// CLI argument has highest priority, set it directly
 				taskOption.Proxy = fieldValue
+				taskOption.Variables["proxy"] = fieldValue
 			} else if fieldName == "nodename" {
 				kubeOpt.NodeName = fieldValue
+				taskOption.Variables["nodename"] = fieldValue
 			} else if fieldName == "opsnamespace" {
 				kubeOpt.Namespace = fieldValue
 			} else if fieldName == "runtimeimage" {
@@ -221,6 +223,29 @@ func getArgName(arg string) string {
 		return arg[1:]
 	}
 	return ""
+}
+
+func withDefaultVariables(taskOpt option.TaskOption, defaults map[string]string) option.TaskOption {
+	taskOpt.Variables = cloneStringMap(taskOpt.Variables)
+	taskOpt.DefaultVariables = cloneStringMap(taskOpt.DefaultVariables)
+	if taskOpt.DefaultVariables == nil {
+		taskOpt.DefaultVariables = make(map[string]string)
+	}
+	for k, v := range defaults {
+		taskOpt.DefaultVariables[k] = v
+	}
+	return taskOpt
+}
+
+func cloneStringMap(src map[string]string) map[string]string {
+	if src == nil {
+		return nil
+	}
+	dst := make(map[string]string, len(src))
+	for k, v := range src {
+		dst[k] = v
+	}
+	return dst
 }
 
 func init() {

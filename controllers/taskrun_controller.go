@@ -362,22 +362,24 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 		tr.Spec.Variables = make(map[string]string)
 	}
 	vars := tr.Spec.Variables
-	vars["TASK"] = t.Name
-	vars["TASKRUN"] = tr.Name
-	vars["HOSTNAME"] = h.GetHostname()
-	vars["NAMESPACE"] = tr.Namespace
+	defaultVars := map[string]string{
+		"TASK":      t.Name,
+		"TASKRUN":   tr.Name,
+		"HOSTNAME":  h.GetHostname(),
+		"NAMESPACE": tr.Namespace,
+	}
 	opsserverEndpoint := r.getOpsServerEndpoint(logger, t.Namespace)
 	if opsserverEndpoint != "" {
-		vars["OPSSERVER_ENDPOINT"] = opsserverEndpoint
+		defaultVars["OPSSERVER_ENDPOINT"] = opsserverEndpoint
 		logger.Debug.Printf("injected OPSSERVER_ENDPOINT: %s", opsserverEndpoint)
 	} else {
 		logger.Info.Println("failed to get OPSSERVER_ENDPOINT, variable not set")
 	}
-	vars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
+	defaultVars["EVENT_CLUSTER"] = opsconstants.GetEnvEventCluster()
 
 	// insert host labels
 	for k, v := range h.ObjectMeta.Labels {
-		vars[k] = v
+		defaultVars[k] = v
 	}
 
 	// filled host
@@ -394,7 +396,8 @@ func (r *TaskRunReconciler) runTaskOnHost(logger *opslog.Logger, ctx context.Con
 		return err
 	}
 	err = opstask.RunTaskOnHost(ctx, logger, t, tr, hc, opsoption.TaskOption{
-		Variables: vars,
+		Variables:        vars,
+		DefaultVariables: defaultVars,
 	})
 	return err
 }
@@ -487,20 +490,23 @@ func (r *TaskRunReconciler) runTaskOnKube(logger *opslog.Logger, ctx context.Con
 			tr.Spec.Variables = make(map[string]string)
 		}
 		vars := tr.Spec.Variables
-		vars["HOSTNAME"] = node.Name
-		vars["NAMESPACE"] = tr.Namespace
+		defaultVars := map[string]string{
+			"HOSTNAME":  node.Name,
+			"NAMESPACE": tr.Namespace,
+			"TASK":      t.Name,
+			"TASKRUN":   tr.Name,
+		}
 		opsserverEndpoint := r.getOpsServerEndpoint(logger, t.Namespace)
 		if opsserverEndpoint != "" {
-			vars["OPSSERVER_ENDPOINT"] = opsserverEndpoint
+			defaultVars["OPSSERVER_ENDPOINT"] = opsserverEndpoint
 			logger.Debug.Printf("injected OPSSERVER_ENDPOINT: %s", opsserverEndpoint)
 		} else {
 			logger.Info.Println("failed to get OPSSERVER_ENDPOINT, variable not set")
 		}
-		vars["TASK"] = t.Name
-		vars["TASKRUN"] = tr.Name
 		opstask.RunTaskOnKube(logger, t, tr, kc, &node,
 			opsoption.TaskOption{
-				Variables: vars,
+				Variables:        vars,
+				DefaultVariables: defaultVars,
 			}, kubeOpt)
 	}
 	return

@@ -44,10 +44,6 @@ func (obj *TaskRun) MergeVariables(t *Task) {
 		obj.Spec.Variables = make(map[string]string)
 	}
 	for k, v := range t.Spec.Variables {
-		if v.Value != "" {
-			obj.Spec.Variables[k] = v.Value
-			continue
-		}
 		if _, ok := obj.Spec.Variables[k]; !ok {
 			obj.Spec.Variables[k] = v.GetValue()
 			continue

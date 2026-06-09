@@ -55,7 +55,7 @@ func RunTaskOnHost(ctx context.Context, logger *opslog.Logger, t *opsv1.Task, tr
 			logger.Error.Println(err)
 		}
 		stepFunc := GetHostStepFunc(s)
-		stepStatus, stepOutput, stepErr := stepFunc(t, hc, s, taskOpt)
+		stepStatus, stepOutput, stepErr := stepFunc(t, hc, s, taskOpt, allVars)
 		stepStatus = GetValidStatusError(stepStatus, stepErr)
 		tr.Status.AddOutputStep(hc.Host.Name, s.Name, s.Content, stepOutput, stepStatus)
 		// Store step output for path references
@@ -155,13 +155,13 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 				Direction:  s.Direction,
 				LocalFile:  s.LocalFile,
 				RemoteFile: s.RemoteFile,
-				Api:        taskOpt.Variables["api"],
-				AesKey:     taskOpt.Variables["aeskey"],
-				AK:         taskOpt.Variables["ak"],
-				SK:         taskOpt.Variables["sk"],
-				Region:     taskOpt.Variables["region"],
-				Endpoint:   taskOpt.Variables["endpoint"],
-				Bucket:     taskOpt.Variables["bucket"],
+				Api:        allVars["api"],
+				AesKey:     allVars["aeskey"],
+				AK:         allVars["ak"],
+				SK:         allVars["sk"],
+				Region:     allVars["region"],
+				Endpoint:   allVars["endpoint"],
+				Bucket:     allVars["bucket"],
 				KubeOption: kubeOpt,
 			}
 			if s.RuntimeImage != "" {
@@ -193,31 +193,31 @@ func RunTaskOnKube(logger *opslog.Logger, t *opsv1.Task, tr *opsv1.TaskRun, kc *
 	return err
 }
 
-func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption) (status string, output string, err error) {
+func GetHostStepFunc(step opsv1.Step) func(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, to option.TaskOption, vars map[string]string) (status string, output string, err error) {
 	if len(step.Content) > 0 {
 		return runStepShellOnHost
 	}
 	return runStepFileOnHost
 }
 
-func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption) (status, stdout string, err error) {
+func runStepShellOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, option option.TaskOption, vars map[string]string) (status, stdout string, err error) {
 	stdout, err = c.Shell(context.TODO(), option.Sudo, step.Content)
 	return
 }
 
-func runStepFileOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, taskOpt option.TaskOption) (status, output string, err error) {
+func runStepFileOnHost(t *opsv1.Task, c *host.HostConnection, step opsv1.Step, taskOpt option.TaskOption, vars map[string]string) (status, output string, err error) {
 	fileOpt := option.FileOption{
 		Sudo:       taskOpt.Sudo,
 		Direction:  step.Direction,
 		LocalFile:  step.LocalFile,
 		RemoteFile: step.RemoteFile,
-		Api:        taskOpt.Variables["api"],
-		AesKey:     taskOpt.Variables["aeskey"],
-		Region:     taskOpt.Variables["region"],
-		Endpoint:   taskOpt.Variables["endpoint"],
-		Bucket:     taskOpt.Variables["bucket"],
-		AK:         taskOpt.Variables["ak"],
-		SK:         taskOpt.Variables["sk"],
+		Api:        vars["api"],
+		AesKey:     vars["aeskey"],
+		Region:     vars["region"],
+		Endpoint:   vars["endpoint"],
+		Bucket:     vars["bucket"],
+		AK:         vars["ak"],
+		SK:         vars["sk"],
 	}
 	output, err = c.File(context.Background(), fileOpt)
 	return
@@ -262,6 +262,10 @@ func runStepShellOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConne
 }
 
 func runStepFileOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnection, node *corev1.Node, step opsv1.Step, taskOpt option.TaskOption, kubeOpt option.KubeOption) (status, output string, err error) {
+	allVars, err := GetRealVariables(t, taskOpt)
+	if err != nil {
+		return status, output, err
+	}
 	// Use step-level runtimeImage if specified, otherwise use kubeOpt.RuntimeImage
 	stepKubeOpt := kubeOpt
 	if step.RuntimeImage != "" {
@@ -272,13 +276,13 @@ func runStepFileOnKube(logger *opslog.Logger, t *opsv1.Task, kc *kube.KubeConnec
 		Direction:  step.Direction,
 		LocalFile:  step.LocalFile,
 		RemoteFile: step.RemoteFile,
-		Api:        taskOpt.Variables["api"],
-		AesKey:     taskOpt.Variables["aeskey"],
-		AK:         taskOpt.Variables["ak"],
-		SK:         taskOpt.Variables["sk"],
-		Region:     taskOpt.Variables["region"],
-		Endpoint:   taskOpt.Variables["endpoint"],
-		Bucket:     taskOpt.Variables["bucket"],
+		Api:        allVars["api"],
+		AesKey:     allVars["aeskey"],
+		AK:         allVars["ak"],
+		SK:         allVars["sk"],
+		Region:     allVars["region"],
+		Endpoint:   allVars["endpoint"],
+		Bucket:     allVars["bucket"],
 		KubeOption: stepKubeOpt,
 	}
 	output, err = kc.FileNode(

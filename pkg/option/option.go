@@ -69,11 +69,12 @@ func (k *KubeOption) IsAnyWorker() bool {
 }
 
 type TaskOption struct {
-	Sudo      bool
-	FilePath  string
-	Proxy     string
-	Variables map[string]string
-	Clear     bool
+	Sudo             bool
+	FilePath         string
+	Proxy            string
+	Variables        map[string]string
+	DefaultVariables map[string]string
+	Clear            bool
 }
 
 type ShellOption struct {
