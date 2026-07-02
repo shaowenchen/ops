@@ -218,10 +218,27 @@ nats --user=app --password=${apppassword} stream rm ops
 - Create stream:
 
 ```bash
-nats --user=app --password=${apppassword} stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=24h --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 1 --dupe-window=2m
+nats --user=app --password=${apppassword} stream add ops \
+  --subjects "ops.>" \
+  --ack \
+  --max-msgs=-1 \
+  --max-bytes=10GB \
+  --max-age=24h \
+  --storage memory \
+  --retention limits \
+  --max-msg-size=-1 \
+  --discard=old \
+  --replicas 3 \
+  --dupe-window=2m
 ```
 
-For production environments, it is recommended to use file storage and set replicas to 3.
+For higher performance, choose `memory` for storage; otherwise, choose `file`. In production environments, set `--replicas` to 3. Deploying NATS with a 5-replica StatefulSet and rolling updates ensures high availability.
+
+- Scale stream:
+
+```bash
+nats --user=app --password=${apppassword} stream update ops --max-bytes=40GB
+```
 
 - View stream events:
 

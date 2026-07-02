@@ -213,13 +213,30 @@ nats --user=app --password=${apppassword} pub ops.test "mymessage mycontent"
 nats --user=app --password=${apppassword} stream rm ops
 ```
 
-- 创建 stream 持久化消息
+- 创建 stream
 
 ```bash
-nats --user=app --password=${apppassword} stream add ops --subjects "ops.>" --ack --max-msgs=-1 --max-bytes=-1 --max-age=24h --storage file --retention limits --max-msg-size=-1 --discard=old --replicas 1 --dupe-window=2m
+nats --user=app --password=${apppassword} stream add ops \
+  --subjects "ops.>" \
+  --ack \
+  --max-msgs=-1 \
+  --max-bytes=10GB \
+  --max-age=24h \
+  --storage memory \
+  --retention limits \
+  --max-msg-size=-1 \
+  --discard=old \
+  --replicas 3 \
+  --dupe-window=2m
 ```
 
-生产环境中，推荐使用 file 存储，并且 replica 设置为 3。
+如果想要更高性能，storage 选 memory，否则选 file。在生产环节，将 `--replicas` 设置为 3，采用 StatusfulSet 的方式部署 Nats 5 副本滚动更新基本也能保证高可用。
+
+- 扩容 stream
+
+```bash
+nats --user=app --password=${apppassword} stream update ops --max-bytes=40GB
+```
 
 - 查看 stream 事件
 
