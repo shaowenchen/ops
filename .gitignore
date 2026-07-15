@@ -32,3 +32,10 @@ web/node_modules
 web/dist
 web/yarn.lock
 web/vite.config.js
+
+# GoReleaser local build artifacts
+goreleaser
+ops-manifests/
+completions/
+manpages/
+LICENSE.md
