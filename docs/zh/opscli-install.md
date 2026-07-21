@@ -7,7 +7,7 @@
 国内使用:
 
 ```bash
-PROXY=https://ghfast.top
+PROXY=https://gh-proxy.com
 curl -sfL "${PROXY%/}/https://raw.githubusercontent.com/shaowenchen/ops/main/getcli.sh" | VERSION=latest PROXY="${PROXY%/}" sh -
 ```
 
@@ -71,14 +71,14 @@ echo 'source <(opscli completion zsh)' >>~/.zshrc
 
 **支持的配置项**
 
-- **proxy**: 网络请求的代理 URL（例如：`https://ghfast.top`）
+- **proxy**: 网络请求的代理 URL（例如：`https://gh-proxy.com`）
 - **runtimeimage**: Kubernetes 任务的默认运行时镜像（例如：`ubuntu:22.04`）
 
 **配置命令**
 
 - **设置配置**: `opscli config set <key> <value>`
   ```bash
-  opscli config set proxy https://ghfast.top
+  opscli config set proxy https://gh-proxy.com
   opscli config set runtimeimage ubuntu:22.04
   ```
 
@@ -91,7 +91,7 @@ echo 'source <(opscli completion zsh)' >>~/.zshrc
   ```bash
   opscli config list
   # 输出：
-  # proxy = https://ghfast.top
+  # proxy = https://gh-proxy.com
   # runtimeimage = (not set)
   ```
 
@@ -126,7 +126,7 @@ echo 'source <(opscli completion zsh)' >>~/.zshrc
 
 ```bash
 # 示例 1: 使用配置文件
-opscli config set proxy https://ghfast.top
+opscli config set proxy https://gh-proxy.com
 opscli upgrade --manifests  # 自动使用配置文件中的 proxy
 
 # 示例 2: 使用环境变量覆盖
