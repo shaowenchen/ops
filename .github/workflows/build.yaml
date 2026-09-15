@@ -54,6 +54,12 @@ jobs:
             docker.io/shaowenchen/${{ matrix.project }}:${{ matrix.tag }}
             docker.io/shaowenchen/${{ matrix.project }}:${{ steps.meta.outputs.short_sha }}
           file: ${{ matrix.dockerfile }}
+          # Attestation manifests carry a buildkit empty descriptor
+          # (application/vnd.oci.empty.v1+json) that the aliyun ACR mirror
+          # rejects, so the "Push to aliyun" step below fails when they are
+          # present. The images themselves are unaffected.
+          provenance: false
+          sbom: false
       - name: Push ${{ matrix.project }} to aliyun
         run: |
           for tag in "${{ matrix.tag }}" "${{ steps.meta.outputs.short_sha }}"; do
