@@ -125,8 +125,6 @@ func (c *HostConnection) File(ctx context.Context, fileOpt opsoption.FileOption)
 	switch fileOpt.GetStorageType() {
 	case opsconstants.RemoteStorageTypeS3:
 		return c.fileS3(ctx, fileOpt)
-	case opsconstants.RemoteStorageTypeServer:
-		return c.filseServer(ctx, fileOpt)
 	default:
 		err = errors.New("invalid storage type")
 	}
@@ -144,27 +142,6 @@ func (c *HostConnection) fileS3(ctx context.Context, fileOpt opsoption.FileOptio
 		cmd = opsutils.ShellOpscliDownS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.AK, fileOpt.SK, fileOpt.LocalFile, fileOpt.RemoteFile)
 	} else if fileOpt.IsDownloadDirection() {
 		cmd = opsutils.ShellOpscliUploadS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket, fileOpt.AK, fileOpt.SK, fileOpt.LocalFile, fileOpt.RemoteFile)
-	}
-	if cmd != "" {
-		_, err = c.execScript(ctx, fileOpt.Sudo, cmd)
-		return
-	} else {
-		errors.New("invalid direction")
-	}
-	return
-}
-
-func (c *HostConnection) filseServer(ctx context.Context, fileOpt opsoption.FileOption) (output string, err error) {
-	if c.Host.Spec.Address == opsconstants.LocalHostIP {
-		// use func to
-		return opsstorage.ServerFile(fileOpt)
-	}
-	// use opscli to transfer file
-	cmd := ""
-	if fileOpt.IsUploadDirection() {
-		cmd = opsutils.ShellOpscliDownServer(fileOpt.Api, fileOpt.AesKey, fileOpt.LocalFile, fileOpt.RemoteFile)
-	} else if fileOpt.IsDownloadDirection() {
-		cmd = opsutils.ShellOpscliUploadServer(fileOpt.Api, fileOpt.AesKey, fileOpt.LocalFile, fileOpt.RemoteFile)
 	}
 	if cmd != "" {
 		_, err = c.execScript(ctx, fileOpt.Sudo, cmd)

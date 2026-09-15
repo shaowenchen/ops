@@ -91,8 +91,6 @@ type FileOption struct {
 	StorageImage string
 	Direction    string
 	Sudo         bool
-	AesKey       string
-	Api          string
 	Region       string
 	Endpoint     string
 	Bucket       string
@@ -105,9 +103,7 @@ func (f *FileOption) GetStorageType() string {
 		return f.StorageType
 	}
 	remoteSplit := strings.Split(f.RemoteFile, "://")
-	if len(f.Api) != 0 {
-		f.StorageType = opsconstants.RemoteStorageTypeServer
-	} else if remoteSplit[0] == "s3" {
+	if remoteSplit[0] == "s3" {
 		f.StorageType = opsconstants.RemoteStorageTypeS3
 		f.RemoteFile = remoteSplit[1]
 	} else if len(remoteSplit) == 2 {

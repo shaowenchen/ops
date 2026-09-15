@@ -3,14 +3,12 @@ package file
 import (
 	"context"
 
-	"github.com/shaowenchen/ops/cmd/cli/config"
 	"github.com/shaowenchen/ops/cmd/cli/internal/complete"
 	"github.com/shaowenchen/ops/pkg/constants"
 	"github.com/shaowenchen/ops/pkg/host"
 	"github.com/shaowenchen/ops/pkg/kube"
 	"github.com/shaowenchen/ops/pkg/log"
 	"github.com/shaowenchen/ops/pkg/option"
-	"github.com/shaowenchen/ops/pkg/storage"
 	"github.com/shaowenchen/ops/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -31,9 +29,6 @@ var FileCmd = &cobra.Command{
 		hostOpt.PrivateKey = utils.EncodingStringToBase64(privateKey)
 		ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultShellTimeoutDuration)
 		defer cancel()
-
-		// Get fileapi value with priority: CLI > ENV > Config > Default (empty)
-		fileOpt.Api = config.GetValueWithPriority(fileOpt.Api, "FILE_API", "fileapi", "")
 
 		inventoryType, availableInventory := utils.GetInventoryType(inventory, fileOpt.NodeName)
 
@@ -94,15 +89,12 @@ func init() {
 	FileCmd.Flags().StringVarP(&fileOpt.LocalFile, "localfile", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.RemoteFile, "remotefile", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.Direction, "direction", "d", "", "")
-	FileCmd.Flags().StringVarP(&fileOpt.AesKey, "aeskey", "", storage.UnSetFlag, "if you want to encrypt or decrypt file, please provide a aes key")
 
 	FileCmd.Flags().StringVarP(&fileOpt.Region, "region", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.Endpoint, "endpoint", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.Bucket, "bucket", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.AK, "ak", "", "", "")
 	FileCmd.Flags().StringVarP(&fileOpt.SK, "sk", "", "", "")
-
-	FileCmd.Flags().StringVarP(&fileOpt.Api, "fileapi", "", "", "")
 
 	FileCmd.Flags().StringVarP(&hostOpt.Username, "username", "", constants.GetCurrentUser(), "")
 	FileCmd.Flags().StringVarP(&hostOpt.Password, "password", "", "", "")

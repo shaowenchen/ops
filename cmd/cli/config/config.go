@@ -14,14 +14,12 @@ import (
 var AllowedConfigKeys = map[string]bool{
 	"runtimeimage": true,
 	"proxy":        true,
-	"fileapi":      true,
 }
 
 // AllowedConfigKeysOrder defines the order of configuration keys for display
 var AllowedConfigKeysOrder = []string{
 	"proxy",
 	"runtimeimage",
-	"fileapi",
 }
 
 var ConfigCmd = &cobra.Command{
@@ -33,13 +31,13 @@ var ConfigCmd = &cobra.Command{
 var setCmd = &cobra.Command{
 	Use:   "set <key> <value>",
 	Short: "set a configuration value",
-	Long:  `Set a configuration value. Allowed keys: runtimeimage, proxy, fileapi. Example: opscli config set proxy https://proxy.example.com`,
+	Long:  `Set a configuration value. Allowed keys: runtimeimage, proxy. Example: opscli config set proxy https://proxy.example.com`,
 	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		value := args[1]
 		if !isAllowedKey(key) {
-			fmt.Fprintf(os.Stderr, "Error: Invalid configuration key '%s'. Allowed keys are: runtimeimage, proxy, fileapi\n", key)
+			fmt.Fprintf(os.Stderr, "Error: Invalid configuration key '%s'. Allowed keys are: runtimeimage, proxy\n", key)
 			os.Exit(1)
 		}
 		if err := setConfig(key, value); err != nil {
@@ -95,12 +93,12 @@ var listCmd = &cobra.Command{
 var unsetCmd = &cobra.Command{
 	Use:   "unset <key>",
 	Short: "unset a configuration value",
-	Long:  `Unset a configuration value. Allowed keys: runtimeimage, proxy, fileapi. Example: opscli config unset proxy`,
+	Long:  `Unset a configuration value. Allowed keys: runtimeimage, proxy. Example: opscli config unset proxy`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		if !isAllowedKey(key) {
-			fmt.Fprintf(os.Stderr, "Error: Invalid configuration key '%s'. Allowed keys are: runtimeimage, proxy, fileapi\n", key)
+			fmt.Fprintf(os.Stderr, "Error: Invalid configuration key '%s'. Allowed keys are: runtimeimage, proxy\n", key)
 			os.Exit(1)
 		}
 		if err := unsetConfig(key); err != nil {

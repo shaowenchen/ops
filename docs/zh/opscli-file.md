@@ -30,41 +30,6 @@ unset ak
 unset sk
 ```
 
-### 主机 - 本地与 API Server 互传文件
-
-> 提供本地加解密，与服务器端进行文件传输
-
-- 上传
-
-```bash
-/usr/local/bin/opscli file --direction upload --fileapi https://gh-upload.chenshaowen.com/api/v1/files --localfile ./tmp.log
-
-Please use the following command to download the file:
-opscli file --fileapi https://gh-upload.chenshaowen.com/api/v1/files --direction download --remotefile https://download_url_link.com.aes
-```
-
-这里的 fileapi 提供上传服务，aeskey 为空字符串时自动生成一个随机秘钥，如果不设置 aeskey 默认为 unset 将不会进行文件加密。
-
-- 下载
-
-```bash
-/usr/local/bin/opscli file --fileapi https://gh-upload.chenshaowen.com/api/v1/files --aeskey xxx --direction download --remotefile https://download_url_link.com.aes
-```
-
-### 集群 - 本地与 API Server 互传文件
-
-- 上传
-
-```bash
-/usr/local/bin/opscli file -i ~/.kube/config --nodename node1 --direction upload --fileapi https://gh-upload.chenshaowen.com/api/v1/files --aeskey "" --localfile /root/tmp.log --runtimeimage shaowenchen/ops-cli
-```
-
-- 下载
-
-```bash
-/usr/local/bin/opscli file -i ~/.kube/config --nodename xxx --direction download --fileapi https://gh-upload.chenshaowen.com/api/v1/files --aeskey xxx --localfile /root/tmp1.log --remotefile https://gh-uploadapi.chenshaowen.com/uploadbases/cdn0/raw/1721621949-tmp.log.aes --runtimeimage shaowenchen/ops-cli
-```
-
 ### 集群 - 本地与对象存储互传文件
 
 - 上传

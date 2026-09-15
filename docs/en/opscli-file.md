@@ -1,6 +1,6 @@
 ### opscli file Command Usage
 
-The `opscli file` command is used for transferring files between the local host, object storage, API servers, and clusters. Below are the details for various use cases.
+The `opscli file` command is used for transferring files between the local host, object storage, and clusters. Below are the details for various use cases.
 
 #### 1. **Host - Local and Object Storage File Transfer**
 
@@ -45,39 +45,7 @@ unset ak
 unset sk
 ```
 
-#### 2. **Host - Local and API Server File Transfer**
-
-> This option provides encryption/decryption for file transfers with the API server.
-
-- **Upload to API Server**
-
-```bash
-/usr/local/bin/opscli file --direction upload --fileapi https://gh-upload.chenshaowen.com/api/v1/files --localfile ./tmp.log
-```
-
-If `aeskey` is `""`, a random encryption key is generated automatically. If not set, the file is uploaded without encryption.
-
-- **Download from API Server**
-
-```bash
-/usr/local/bin/opscli file --fileapi https://gh-upload.chenshaowen.com/api/v1/files --aeskey xxx --direction download --remotefile https://download_url_link.com.aes
-```
-
-#### 3. **Cluster - Local and API Server File Transfer**
-
-- **Upload to Cluster's API Server**
-
-```bash
-/usr/local/bin/opscli file -i ~/.kube/config --nodename node1 --direction upload --fileapi https://gh-upload.chenshaowen.com/api/v1/files --aeskey "" --localfile /root/tmp.log --runtimeimage shaowenchen/ops-cli
-```
-
-- **Download from Cluster's API Server**
-
-```bash
-/usr/local/bin/opscli file -i ~/.kube/config --nodename xxx --direction download --fileapi https://gh-upload.chenshaowen.com/api/v1/files --aeskey xxx --localfile /root/tmp1.log --remotefile https://gh-uploadapi.chenshaowen.com/uploadbases/cdn0/raw/1721621949-tmp.log.aes --runtimeimage shaowenchen/ops-cli
-```
-
-#### 4. **Cluster - Local and Object Storage File Transfer**
+#### 2. **Cluster - Local and Object Storage File Transfer**
 
 - **Upload to Object Storage from Cluster**
 
@@ -91,7 +59,7 @@ If `aeskey` is `""`, a random encryption key is generated automatically. If not 
 /usr/local/bin/opscli file -i ~/.kube/config --nodename xxx --direction download --ak xxx --sk xxx --region beijing --endpoint ks3-cn-beijing.ksyun.com --bucket multimodal --localfile /root/tmp2.log --remotefile s3://logs/tmp.log --runtimeimage shaowenchen/ops-cli
 ```
 
-#### 5. **Cluster - Copy Image File to Local**
+#### 3. **Cluster - Copy Image File to Local**
 
 To copy an image file from the cluster to the local machine:
 
@@ -101,7 +69,7 @@ To copy an image file from the cluster to the local machine:
 
 This command helps copy the executable or file from a container/image inside the cluster to the local machine.
 
-#### 6. **Mount Host Paths to Container**
+#### 4. **Mount Host Paths to Container**
 
 The `--mount` flag allows you to mount host paths into the container when transferring files. This is useful for accessing host files or directories from within the container.
 

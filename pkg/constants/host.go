@@ -21,9 +21,8 @@ const (
 )
 
 const (
-	RemoteStorageTypeS3     = "s3"
-	RemoteStorageTypeImage  = "image"
-	RemoteStorageTypeServer = "server"
+	RemoteStorageTypeS3    = "s3"
+	RemoteStorageTypeImage = "image"
 )
 
 func GetOsInfo() string {

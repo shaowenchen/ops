@@ -165,12 +165,6 @@ func RunFileOnNode(client *kubernetes.Clientset, node *v1.Node, namespacedName t
 			cmd = utils.ShellOpscliUploadS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket,
 				fileOpt.AK, fileOpt.SK, hostLocalfile, fileOpt.RemoteFile)
 		}
-	case constants.RemoteStorageTypeServer:
-		if fileOpt.IsDownloadDirection() {
-			cmd = utils.ShellOpscliDownServer(fileOpt.Api, fileOpt.AesKey, hostLocalfile, fileOpt.RemoteFile)
-		} else if fileOpt.IsUploadDirection() {
-			cmd = utils.ShellOpscliUploadServer(fileOpt.Api, fileOpt.AesKey, hostLocalfile, fileOpt.RemoteFile)
-		}
 	case constants.RemoteStorageTypeImage:
 		if fileOpt.IsDownloadDirection() {
 			cmd = fmt.Sprintf("cp -rbf %s %s", fileOpt.RemoteFile, hostLocalfile)
@@ -401,12 +395,6 @@ func buildStepContainer(stepConfig StepContainerConfig, defaultImage string, vol
 				} else if fileOpt.IsUploadDirection() {
 					cmd = utils.ShellOpscliUploadS3(fileOpt.Region, fileOpt.Endpoint, fileOpt.Bucket,
 						fileOpt.AK, fileOpt.SK, hostLocalfile, fileOpt.RemoteFile)
-				}
-			case constants.RemoteStorageTypeServer:
-				if fileOpt.IsDownloadDirection() {
-					cmd = utils.ShellOpscliDownServer(fileOpt.Api, fileOpt.AesKey, hostLocalfile, fileOpt.RemoteFile)
-				} else if fileOpt.IsUploadDirection() {
-					cmd = utils.ShellOpscliUploadServer(fileOpt.Api, fileOpt.AesKey, hostLocalfile, fileOpt.RemoteFile)
 				}
 			case constants.RemoteStorageTypeImage:
 				if fileOpt.IsDownloadDirection() {
